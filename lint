@@ -1,0 +1,10 @@
+#!/bin/env zsh
+
+dir=$(pwd)
+
+cd "${dir}/sy-progressive-plugin"
+pnpm run lint
+
+cd "${dir}/sy-tomato-plugin"
+pnpm run lint
+

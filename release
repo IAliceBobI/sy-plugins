@@ -1,6 +1,13 @@
 #!/bin/env zsh
+set -xe
 
-projDir="${0:a:h}"
+cd ${0:a:h}
+
+if [[ -z "${1}" ]]; then
+    exit
+fi
+
+projDir=${0:a:h}/sy-${1}-plugin
 projName="${projDir:t}"
 deployDir="${projDir:h}/deploy-repos/${projName}"
 cd ${projDir}

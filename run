@@ -1,9 +1,14 @@
 #!/bin/env zsh
+set -xe
 
-currDir=$(pwd)
+cd ${0:a:h}
 
-projDir=${0:a:h}
-projName=${0:a:h:t}
+if [[ -z "${1}" ]]; then
+    exit
+fi
+
+projDir=${0:a:h}/sy-${1}-plugin
+projName=${projDir:t}
 
 rm -rf "${SYPLUGINDIR}/${projName}"
 cd ${SYPLUGINDIR}
@@ -13,5 +18,4 @@ cd ${projDir}
 pnpm run lint
 pnpm run dev
 
-cd ${currDir}
 

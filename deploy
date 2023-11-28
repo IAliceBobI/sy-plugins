@@ -1,19 +1,22 @@
 #!/bin/env zsh
+set -xe
 
-currDir=$(pwd)
+cd ${0:a:h}
 
-projDir=${0:a:h}
-projName=${0:a:h:t}
+if [[ -z "${1}" ]]; then
+    exit
+fi
+
+projDir=${0:a:h}/sy-${1}-plugin
+projName=${projDir:t}
 
 targetDir="${SYPLUGINDIR}/${projName}"
 
 cd ${projDir}
-pnpm run lint
 pnpm build
 
 rm -rf ${targetDir}
 mkdir -p ${targetDir}
 cp -r ${projDir}/dist/* ${targetDir}
 
-cd ${currDir}
 
