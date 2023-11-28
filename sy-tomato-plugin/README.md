@@ -1,4 +1,6 @@
-[中文](https://github.com/IAliceBobI/sy-tomato-plugin/blob/main/README_zh_CN.md)
+[SRC/源码](https://github.com/IAliceBobI/sy-plugins/tree/main/sy-tomato-plugin)
+
+[中文](https://github.com/IAliceBobI/sy-plugins/blob/main/sy-tomato-plugin/README_zh_CN.md)
 
 # Tomato Toolbox
 

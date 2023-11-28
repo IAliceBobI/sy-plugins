@@ -1,8 +1,10 @@
-[English](https://github.com/IAliceBobI/sy-tomato-plugin/blob/main/README.md)
+[SRC/源码](https://github.com/IAliceBobI/sy-plugins/tree/main/sy-tomato-plugin)
+
+[English](https://github.com/IAliceBobI/sy-plugins/blob/main/sy-tomato-plugin/README.md)
 
 # 番茄工具箱
 
-> [我猜下面的图九成九是裂开了😢，看这里吧！](https://gitee.com/TokenzQdBN/sy-tomato-plugin/blob/main/README_zh_CN.md)
+> [我猜下面的图九成九是裂开了😢，看这里吧！](https://gitee.com/TokenzQdBN/sy-plugins/blob/main/sy-tomato-plugin/README_zh_CN.md)
 
 ## 番茄钟
 

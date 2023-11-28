@@ -1,9 +1,8 @@
 #!/bin/env zsh
 
-
 projDir="${0:a:h}"
-deployDir="${projDir:h}/deploy-repos/sy-progressive-plugin"
 projName="${projDir:t}"
+deployDir="${projDir:h}/deploy-repos/${projName}"
 cd ${projDir}
 
 current_version=$(jq -r '.version' plugin.json)
