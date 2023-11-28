@@ -1,4 +1,4 @@
-[SRC/源码](https://github.com/IAliceBobI/workspace/tree/main/sy-progressive-plugin)
+[SRC/源码](https://github.com/IAliceBobI/sy-plugins/tree/main/sy-progressive-plugin)
 
 [中文](https://github.com/IAliceBobI/sy-progressive-plugin/blob/main/README_zh_CN.md)
 

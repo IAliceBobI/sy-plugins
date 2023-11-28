@@ -1,1 +1,1 @@
-# workspace
+# sy plugins

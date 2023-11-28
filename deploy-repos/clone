@@ -1,0 +1,5 @@
+#!/bin/env zsh
+rm -rf "./sy-*"
+git clone git@github.com:IAliceBobI/sy-tomato-plugin.git
+git clone git@github.com:IAliceBobI/sy-progressive-plugin.git
+
