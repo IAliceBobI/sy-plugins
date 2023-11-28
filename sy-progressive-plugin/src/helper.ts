@@ -154,7 +154,7 @@ export function tempContent(content: string) {
     return content + `\n{: ${constants.MarkKey}="${constants.TEMP_CONTENT}"}`;
 }
 
-export function getDocMemo(bookID: string, point: number) {
+export function getDocIalMark(bookID: string, point: number) {
     return `${constants.TEMP_CONTENT}#${bookID},${point}`;
 }
 

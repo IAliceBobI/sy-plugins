@@ -326,7 +326,7 @@ class Progressive {
             dir = dir + "/" + content;
             const docID = await siyuan.createDocWithMd(boxID, dir, "");
             const attr = {};
-            attr[constants.MarkKey] = help.getDocMemo(bookID, point)
+            attr[constants.MarkKey] = help.getDocIalMark(bookID, point)
             await siyuan.setBlockAttrs(docID, attr);
             return docID;
         }
@@ -334,7 +334,7 @@ class Progressive {
     }
 
     private async findDoc(bookID: string, point: number) {
-        const row = await siyuan.sqlOne(`select id, path, box from blocks where type='d' and ial like '%${help.getDocMemo(bookID, point)}%'`);
+        const row = await siyuan.sqlOne(`select id, path, box from blocks where type='d' and ial like '%${help.getDocIalMark(bookID, point)}%'`);
         if (row?.id && row?.path) {
             const [dirStr, file] = utils.dir(row["path"]);
             const dir = await siyuan.readDir(`/data/${row["box"]}${dirStr}`);
@@ -469,7 +469,7 @@ class Progressive {
     private async cleanNote(noteID: string) {
         const blocks = await siyuan.getChildBlocks(noteID) ?? [];
         for (const child of blocks) {
-            const row = await siyuan.sqlOne(`select memo, ial, markdown from blocks where id="${child.id}"`);
+            const row = await siyuan.sqlOne(`select ial, markdown from blocks where id="${child.id}"`);
             const ial: string = row?.ial ?? "";
             const markdown: string = row?.markdown ?? "";
             if (ial.includes(constants.TEMP_CONTENT)) {
