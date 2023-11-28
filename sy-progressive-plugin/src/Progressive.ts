@@ -306,9 +306,9 @@ class Progressive {
     }
 
     private async isPiece(id: string) {
-        const row = await siyuan.sqlOne(`select memo from blocks where id="${id}"`);
-        const memo: string = row?.memo ?? "";
-        return memo.startsWith(constants.TEMP_CONTENT);
+        const row = await siyuan.sqlOne(`select ial from blocks where id="${id}"`);
+        const ial: string = row?.ial ?? "";
+        return ial.includes(constants.TEMP_CONTENT);
     }
 
     private async createNote(boxID: string, bookID: string, piece: string[], point: number) {
@@ -325,14 +325,16 @@ class Progressive {
         if (dir) {
             dir = dir + "/" + content;
             const docID = await siyuan.createDocWithMd(boxID, dir, "");
-            await siyuan.setBlockAttrs(docID, { memo: help.getDocMemo(bookID, point) });
+            const attr = {};
+            attr[constants.MarkKey] = help.getDocMemo(bookID, point)
+            await siyuan.setBlockAttrs(docID, attr);
             return docID;
         }
         return "";
     }
 
     private async findDoc(bookID: string, point: number) {
-        const row = await siyuan.sqlOne(`select id, path, box from blocks where type='d' and memo='${help.getDocMemo(bookID, point)}'`);
+        const row = await siyuan.sqlOne(`select id, path, box from blocks where type='d' and ial like '%${help.getDocMemo(bookID, point)}%'`);
         if (row?.id && row?.path) {
             const [dirStr, file] = utils.dir(row["path"]);
             const dir = await siyuan.readDir(`/data/${row["box"]}${dirStr}`);
@@ -468,10 +470,9 @@ class Progressive {
         const blocks = await siyuan.getChildBlocks(noteID) ?? [];
         for (const child of blocks) {
             const row = await siyuan.sqlOne(`select memo, ial, markdown from blocks where id="${child.id}"`);
-            const memo: string = row?.memo ?? "";
             const ial: string = row?.ial ?? "";
             const markdown: string = row?.markdown ?? "";
-            if (memo === constants.TEMP_CONTENT) {
+            if (ial.includes(constants.TEMP_CONTENT)) {
                 await siyuan.deleteBlock(child.id);
             } else if (ial.includes(constants.RefIDKey)) {
                 for (const attr of ial.split(" ")) {

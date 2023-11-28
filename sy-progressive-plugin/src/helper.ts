@@ -151,7 +151,7 @@ export function bookCacheKey(bookID: string) {
 }
 
 export function tempContent(content: string) {
-    return content + `\n{: memo="${constants.TEMP_CONTENT}"}`;
+    return content + `\n{: ${constants.MarkKey}="${constants.TEMP_CONTENT}"}`;
 }
 
 export function getDocMemo(bookID: string, point: number) {

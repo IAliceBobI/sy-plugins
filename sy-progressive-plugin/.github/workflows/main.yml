@@ -6,6 +6,7 @@ on:
       - "v*"
 env:
   PROJ_PATH: sy-progressive-plugin
+  DEPS_PATH: sy-tomato-plugin
 
 jobs:
   build:
@@ -46,6 +47,9 @@ jobs:
       - name: Install dependencies
         run: |
           cd $PROJ_PATH
+          pnpm install
+          cd ..
+          cd $DEPS_PATH
           pnpm install
 
       - name: Build for production
