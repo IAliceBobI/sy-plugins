@@ -1,0 +1,16 @@
+#!/bin/env zsh
+
+currDir=$(pwd)
+
+projDir=${0:a:h}
+projName=${0:a:h:t}
+
+rm -rf "${SYPLUGINDIR}/${projName}"
+cd ${SYPLUGINDIR}
+ln -s "${projDir}/dev" "${projName}"
+
+cd ${projDir}
+pnpm run dev
+
+cd ${currDir}
+

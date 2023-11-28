@@ -1,0 +1,18 @@
+#!/bin/env zsh
+
+currDir=$(pwd)
+
+projDir=${0:a:h}
+projName=${0:a:h:t}
+
+targetDir="${SYPLUGINDIR}/${projName}"
+
+cd ${projDir}
+pnpm build
+
+rm -rf ${targetDir}
+mkdir -p ${targetDir}
+cp -r ${projDir}/dist/* ${targetDir}
+
+cd ${currDir}
+
