@@ -8,6 +8,7 @@ projName=${0:a:h:t}
 targetDir="${SYPLUGINDIR}/${projName}"
 
 cd ${projDir}
+pnpm run lint
 pnpm build
 
 rm -rf ${targetDir}

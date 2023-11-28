@@ -10,6 +10,7 @@ cd ${SYPLUGINDIR}
 ln -s "${projDir}/dev" "${projName}"
 
 cd ${projDir}
+pnpm run lint
 pnpm run dev
 
 cd ${currDir}
