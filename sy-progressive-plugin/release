@@ -7,7 +7,7 @@ cd ${projDir}
 current_version=$(jq -r '.version' plugin.json)
 IFS='.' read -r major minor patch <<< "$current_version"
 ((patch++))
-new_version=v"$major.$minor.$patch"
+new_version="v${major}.${minor}.${patch}"
 plugins_new_version="${new_version}-${projName}"
 sed -i "s/\"version\": \"$current_version\"/\"version\": \"$new_version\"/" plugin.json
 git add -A
