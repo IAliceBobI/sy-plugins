@@ -398,11 +398,11 @@ export const siyuan = {
         }
         return [theUpperestListID, theMD];
     },
-    async checkAllBlocks(blocks: any[]) {
-        for (const childs of chunks(blocks, 50)) {
+    async checkAllBlocks(ids: string[]) {
+        for (const idChunk of chunks(ids, 50)) {
             const tasks = [];
-            for (const child of childs) {
-                tasks.push(siyuan.checkBlockExist(child["id"]));
+            for (const id of idChunk) {
+                tasks.push(siyuan.checkBlockExist(id));
             }
             const rets = await Promise.all(tasks);
             for (const ret of rets) {
@@ -430,6 +430,7 @@ export const siyuan = {
             }
             if (child["id"] === endPoint["id"]) break;
         }
+        if (!await siyuan.checkAllBlocks(toDel)) return "";
         await siyuan.safeDeleteBlocks(toDel);
         return doc1;
     },
@@ -454,6 +455,7 @@ export const siyuan = {
                 ids.push(child["id"]);
             }
         }
+        if (!await siyuan.checkAllBlocks(ids)) return ["", ""];
         ids.reverse();
         const lute = NewLute();
         for (const id of ids) {
