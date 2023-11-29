@@ -386,6 +386,13 @@ export const siyuan = {
         }
         return [theUpperestListID, theMD];
     },
+    async checkAllBlocks(blocks: any[]) {
+        for (const child of blocks) {
+            if (!await siyuan.checkBlockExist(child['id']))
+                return false;
+        }
+        return true;
+    },
     async deleteBlocks() {
         const startPoint = await siyuan.sqlOne("select id,root_id from blocks where content='aacc1'");
         const endPoint = await siyuan.sqlOne("select id,root_id from blocks where content='aacc2'");
@@ -395,14 +402,16 @@ export const siyuan = {
         }
         let doDelete = false;
         const blocks = await siyuan.getChildBlocks(doc1);
-        for (const child of blocks) {
-            if (child["id"] === startPoint["id"]) {
-                doDelete = true;
+        if (await siyuan.checkAllBlocks(blocks)) {
+            for (const child of blocks) {
+                if (child["id"] === startPoint["id"]) {
+                    doDelete = true;
+                }
+                if (doDelete) {
+                    await siyuan.deleteBlock(child["id"]);
+                }
+                if (child["id"] === endPoint["id"]) break;
             }
-            if (doDelete) {
-                await siyuan.deleteBlock(child["id"]);
-            }
-            if (child["id"] === endPoint["id"]) break;
         }
         return doc1;
     },
@@ -429,24 +438,26 @@ export const siyuan = {
         }
         ids.reverse();
         const lute = NewLute();
-        for (const id of ids) {
-            if (copy) {
-                const { dom } = await siyuan.getBlockDOM(id);
-                let md = lute.BlockDOM2Md(dom);
-                const list = md.trim().split("\n");
-                if (list[list.length - 1].trim().startsWith("{: ")) {
-                    list.pop();
+        if (await siyuan.checkAllBlocks(blocks)) {
+            for (const id of ids) {
+                if (copy) {
+                    const { dom } = await siyuan.getBlockDOM(id);
+                    let md = lute.BlockDOM2Md(dom);
+                    const list = md.trim().split("\n");
+                    if (list[list.length - 1].trim().startsWith("{: ")) {
+                        list.pop();
+                    }
+                    md = list.join("\n");
+                    await siyuan.insertBlockAfter(md, insertPoint["id"]);
+                } else {
+                    await siyuan.moveBlockAfter(id, insertPoint["id"]);
                 }
-                md = list.join("\n");
-                await siyuan.insertBlockAfter(md, insertPoint["id"]);
-            } else {
-                await siyuan.moveBlockAfter(id, insertPoint["id"]);
             }
+            await siyuan.deleteBlock(startPoint["id"]);
+            await siyuan.deleteBlock(endPoint["id"]);
+            await siyuan.deleteBlock(insertPoint["id"]);
+            return [startDocID, insertPoint["root_id"]];
         }
-        await siyuan.deleteBlock(startPoint["id"]);
-        await siyuan.deleteBlock(endPoint["id"]);
-        await siyuan.deleteBlock(insertPoint["id"]);
-        return [startDocID, insertPoint["root_id"]];
     },
     async getBlockKramdownWithoutID(id: string, newAttrs: string[] = [], prefix?: string, suffix?: string,) {
         const { kramdown } = await siyuan.getBlockKramdown(id);
