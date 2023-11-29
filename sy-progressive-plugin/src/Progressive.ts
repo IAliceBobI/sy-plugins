@@ -473,7 +473,7 @@ class Progressive {
             const ial: string = row?.ial ?? "";
             const markdown: string = row?.markdown ?? "";
             if (ial.includes(constants.TEMP_CONTENT)) {
-                await siyuan.deleteBlock(child.id);
+                await siyuan.safeDeleteBlock(child.id);
             } else if (ial.includes(constants.RefIDKey)) {
                 for (const attr of ial.split(" ")) {
                     if (attr.includes(constants.RefIDKey)) {
@@ -482,7 +482,7 @@ class Progressive {
                         const oriMarkdown = origin?.markdown ?? "";
                         const markdownWithoutStar = markdown.replace(`((${originalID} "*"))`, "");
                         if (this.rmBadThings(oriMarkdown) == this.rmBadThings(markdownWithoutStar)) {
-                            await siyuan.deleteBlock(child.id);
+                            await siyuan.safeDeleteBlock(child.id);
                         } else {
                             const attrs: { [key: string]: string } = {};
                             attrs[constants.RefIDKey] = "";

@@ -272,9 +272,21 @@ export const siyuan = {
         return siyuan.call("api/block/getBlocksWordCount", { ids });
     },
     async clearAll(docID: string) {
-        for (const child of await siyuan.getChildBlocks(docID)) {
-            await siyuan.deleteBlock(child["id"]);
+        const blocks = await siyuan.getChildBlocks(docID);
+        siyuan.safeDeleteBlocks(blocks.map((b: any) => b['id']))
+    },
+    async safeDeleteBlocks(ids: string[]) {
+        for (const idlist of chunks(ids, 100)) {
+            const tasks = []
+            for (const id of idlist) {
+                tasks.push(siyuan.safeDeleteBlock(id))
+            }
+            await Promise.all(tasks);
         }
+    },
+    async safeDeleteBlock(id: string) {
+        if (await siyuan.checkBlockExist(id))
+            return siyuan.call("/api/block/deleteBlock", { id });
     },
     async deleteBlock(id: string) {
         return siyuan.call("/api/block/deleteBlock", { id });
