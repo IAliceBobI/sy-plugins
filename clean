@@ -4,7 +4,9 @@ dir=$(pwd)
 
 cd "${dir}/sy-progressive-plugin"
 rm -rf dev dist .eslintcache package.zip
+pnpm i
 
 cd "${dir}/sy-tomato-plugin"
 rm -rf dev dist .eslintcache package.zip
+pnpm i
 

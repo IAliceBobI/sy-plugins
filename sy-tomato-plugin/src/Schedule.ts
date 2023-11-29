@@ -1,7 +1,7 @@
 import { Dialog, Plugin, Protyle, } from "siyuan";
 import { siyuan, newID, timeUtil } from "./utils";
 import "./index.scss";
-import { events } from "./Events";
+import ScheduleDialog from "@/Schedule.svelte";
 
 const STORAGE_SCHEDULE = "schedule.json";
 
@@ -40,66 +40,22 @@ class Schedule {
     }
 
     private async showScheduleDialog(blockID?: string) {
-        const inputID = newID();
-        const btnScheduleID = newID();
-        const btnAddADayID = newID();
-        let idMsg = this.plugin.i18n.clickOneBlockFirst;
-        if (!blockID) blockID = events.lastBlockID;
-        if (blockID) {
-            idMsg = blockID;
-        }
+        const id = newID();
         const dialog = new Dialog({
             title: "⏰ " + this.plugin.i18n.setDateTitle,
-            content: `<div class="b3-dialog__content">
-    <div class="schedule-style__id">${idMsg}</div>
-    <div class="fn__hr"></div>
-    <input type="text" id="${inputID}" class="schedule-style__input-field" />
-    <button id="${btnAddADayID}" class="schedule-style__button">${this.plugin.i18n.btnAddADay}</button>
-    <button id="${btnScheduleID}" class="schedule-style__button">${this.plugin.i18n.setDate}</button><br>
-    <div class="fn__hr"></div>
-    <div id="protyle" style="height: 380px;"></div>
-    </div>`,
+            content: `<div id="${id}"></div>`,
             width: "600px",
             height: "540px",
         });
-
-        new Protyle(this.plugin.app, dialog.element.querySelector("#protyle"), {
-            blockId: blockID,
-        });
-
-        if (!blockID) {
-            return;
-        }
-
-        const inputField = document.getElementById(inputID) as HTMLInputElement;
-        inputField.value = await siyuan.currentTime(10);
-
-        const btnSchedule = document.getElementById(btnScheduleID) as HTMLButtonElement;
-        btnSchedule.addEventListener("click", async () => {
-            const timestr = inputField.value.trim();
-            if (timeUtil.checkTimeFormat(timestr)) {
-                const tidiedStr = timeUtil.makesureDateTimeFormat(timestr);
-                if (tidiedStr) {
-                    this.addSchedule(blockID, tidiedStr);
-                    dialog.destroy();
-                    return;
-                }
+        new ScheduleDialog({
+            target: dialog.element.querySelector("#" + id),
+            props: {
+                plugin: this.plugin,
+                blockID,
+                app: this.plugin.app,
+                dialog,
+                schedule: this,
             }
-            inputField.value = await siyuan.currentTime(30);
-        });
-
-        const btnAddADay = document.getElementById(btnAddADayID) as HTMLButtonElement;
-        btnAddADay.addEventListener("click", async () => {
-            const timestr = inputField.value.trim();
-            if (timeUtil.checkTimeFormat(timestr)) {
-                const tidiedStr = timeUtil.makesureDateTimeFormat(timestr);
-                if (tidiedStr) {
-                    const newTime = new Date(new Date(tidiedStr).getTime() + 1000 * 60 * 60 * 24);
-                    inputField.value = timeUtil.dateFormat(newTime);
-                    return;
-                }
-            }
-            inputField.value = await siyuan.currentTime(30);
         });
     }
 
@@ -115,7 +71,7 @@ class Schedule {
         }
     }
 
-    private async addSchedule(blockID: string, datetime: string) {
+    async addSchedule(blockID: string, datetime: string) {
         if (!blockID) return;
         const data = this.plugin.data[STORAGE_SCHEDULE] ?? {};
         data[blockID] = datetime;
