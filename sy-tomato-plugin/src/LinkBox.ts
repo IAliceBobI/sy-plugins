@@ -42,7 +42,7 @@ class LinkBox {
                 md = md.replace(lnk, st);
             }
         }
-        await siyuan.updateBlock(blockID, md);
+        await siyuan.safeUpdateBlock(blockID, md);
     }
 
     private async addLink(blockID: string) {
@@ -71,7 +71,7 @@ class LinkBox {
                     const lastLine = parts[parts.length - 2];
                     parts[parts.length - 2] = lastLine + backLink;
                 }
-                await siyuan.updateBlock(link, parts.join("\n"));
+                await siyuan.safeUpdateBlock(link, parts.join("\n"));
             }
         }
         await siyuan.pushMsg(`已经插入${ids.length}个链接。`);

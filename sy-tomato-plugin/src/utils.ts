@@ -273,13 +273,13 @@ export const siyuan = {
     },
     async clearAll(docID: string) {
         const blocks = await siyuan.getChildBlocks(docID);
-        siyuan.safeDeleteBlocks(blocks.map((b: any) => b['id']))
+        siyuan.safeDeleteBlocks(blocks.map((b: any) => b["id"]));
     },
     async safeDeleteBlocks(ids: string[]) {
-        for (const idlist of chunks(ids, 100)) {
-            const tasks = []
+        for (const idlist of chunks(ids, 50)) {
+            const tasks = [];
             for (const id of idlist) {
-                tasks.push(siyuan.safeDeleteBlock(id))
+                tasks.push(siyuan.safeDeleteBlock(id));
             }
             await Promise.all(tasks);
         }
@@ -288,20 +288,20 @@ export const siyuan = {
         if (await siyuan.checkBlockExist(id))
             return siyuan.call("/api/block/deleteBlock", { id });
     },
-    async deleteBlock(id: string) {
-        return siyuan.call("/api/block/deleteBlock", { id });
+    async safeMoveBlockToParent(id: string, parentID: string) {
+        if (await siyuan.checkBlockExist(id))
+            return siyuan.call("/api/block/moveBlock", { id, parentID });
     },
-    async moveBlockToParent(id: string, parentID: string) {
-        return siyuan.call("/api/block/moveBlock", { id, parentID });
-    },
-    async moveBlockAfter(id: string, previousID: string) {
-        return siyuan.call("/api/block/moveBlock", { id, previousID });
+    async safeMoveBlockAfter(id: string, previousID: string) {
+        if (await siyuan.checkBlockExist(id))
+            return siyuan.call("/api/block/moveBlock", { id, previousID });
     },
     async getBlockKramdown(id: string) {
         return siyuan.call("/api/block/getBlockKramdown", { id });
     },
-    async updateBlock(id: string, data: string, dataType = "markdown") {
-        return siyuan.call("/api/block/updateBlock", { id, data, dataType });
+    async safeUpdateBlock(id: string, data: string, dataType = "markdown") {
+        if (await siyuan.checkBlockExist(id))
+            return siyuan.call("/api/block/updateBlock", { id, data, dataType });
     },
     async getBlockMarkdownAndContent(id: string) {
         const row: { [key: string]: string } = await siyuan.sqlOne(`select markdown, content from blocks where id="${id}"`);
@@ -399,9 +399,15 @@ export const siyuan = {
         return [theUpperestListID, theMD];
     },
     async checkAllBlocks(blocks: any[]) {
-        for (const child of blocks) {
-            if (!await siyuan.checkBlockExist(child["id"]))
-                return false;
+        for (const childs of chunks(blocks, 50)) {
+            const tasks = [];
+            for (const child of childs) {
+                tasks.push(siyuan.checkBlockExist(child["id"]));
+            }
+            const rets = await Promise.all(tasks);
+            for (const ret of rets) {
+                if (!ret) return false;
+            }
         }
         return true;
     },
@@ -414,17 +420,17 @@ export const siyuan = {
         }
         let doDelete = false;
         const blocks = await siyuan.getChildBlocks(doc1);
-        if (await siyuan.checkAllBlocks(blocks)) {
-            for (const child of blocks) {
-                if (child["id"] === startPoint["id"]) {
-                    doDelete = true;
-                }
-                if (doDelete) {
-                    await siyuan.deleteBlock(child["id"]);
-                }
-                if (child["id"] === endPoint["id"]) break;
+        const toDel = [];
+        for (const child of blocks) {
+            if (child["id"] === startPoint["id"]) {
+                doDelete = true;
             }
+            if (doDelete) {
+                toDel.push(child["id"]);
+            }
+            if (child["id"] === endPoint["id"]) break;
         }
+        await siyuan.safeDeleteBlocks(toDel);
         return doc1;
     },
     async moveBlocks(copy = false) {
@@ -450,26 +456,24 @@ export const siyuan = {
         }
         ids.reverse();
         const lute = NewLute();
-        if (await siyuan.checkAllBlocks(blocks)) {
-            for (const id of ids) {
-                if (copy) {
-                    const { dom } = await siyuan.getBlockDOM(id);
-                    let md = lute.BlockDOM2Md(dom);
-                    const list = md.trim().split("\n");
-                    if (list[list.length - 1].trim().startsWith("{: ")) {
-                        list.pop();
-                    }
-                    md = list.join("\n");
-                    await siyuan.insertBlockAfter(md, insertPoint["id"]);
-                } else {
-                    await siyuan.moveBlockAfter(id, insertPoint["id"]);
+        for (const id of ids) {
+            if (copy) {
+                const { dom } = await siyuan.getBlockDOM(id);
+                let md = lute.BlockDOM2Md(dom);
+                const list = md.trim().split("\n");
+                if (list[list.length - 1].trim().startsWith("{: ")) {
+                    list.pop();
                 }
+                md = list.join("\n");
+                await siyuan.insertBlockAfter(md, insertPoint["id"]);
+            } else {
+                await siyuan.safeMoveBlockAfter(id, insertPoint["id"]);
             }
-            await siyuan.deleteBlock(startPoint["id"]);
-            await siyuan.deleteBlock(endPoint["id"]);
-            await siyuan.deleteBlock(insertPoint["id"]);
-            return [startDocID, insertPoint["root_id"]];
         }
+        await siyuan.safeDeleteBlock(startPoint["id"]);
+        await siyuan.safeDeleteBlock(endPoint["id"]);
+        await siyuan.safeDeleteBlock(insertPoint["id"]);
+        return [startDocID, insertPoint["root_id"]];
     },
     async getBlockKramdownWithoutID(id: string, newAttrs: string[] = [], prefix?: string, suffix?: string,) {
         const { kramdown } = await siyuan.getBlockKramdown(id);

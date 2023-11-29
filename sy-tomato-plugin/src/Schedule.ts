@@ -67,7 +67,7 @@ class Schedule {
             // check time tag
             parts[lastIdx] = parts[lastIdx].replace(/#⏰\/[\d-]+\/[\d:]+#/, "");
             parts[lastIdx] += `#⏰/${datetime.split(" ").join("/")}#`;
-            await siyuan.updateBlock(blockID, parts.join("\n"));
+            await siyuan.safeUpdateBlock(blockID, parts.join("\n"));
         }
     }
 
