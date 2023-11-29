@@ -51,6 +51,7 @@ class CpBox {
     }
 
     private async deleteBlocks() {
+        await siyuan.pushMsg("批量删除：正在检查数据……");
         const docID = await siyuan.deleteBlocks();
         if (docID) {
             openTab({
@@ -64,6 +65,7 @@ class CpBox {
     }
 
     private async moveBlocks(ops: boolean) {
+        await siyuan.pushMsg("批量复制/移动：正在检查数据……");
         const [doc1, doc2] = await siyuan.moveBlocks(ops);
         if (doc1) {
             openTab({
