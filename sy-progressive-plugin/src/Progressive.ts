@@ -326,7 +326,7 @@ class Progressive {
             dir = dir + "/" + content;
             const docID = await siyuan.createDocWithMd(boxID, dir, "");
             const attr = {};
-            attr[constants.MarkKey] = help.getDocIalMark(bookID, point)
+            attr[constants.MarkKey] = help.getDocIalMark(bookID, point);
             await siyuan.setBlockAttrs(docID, attr);
             return docID;
         }
