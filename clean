@@ -1,0 +1,10 @@
+#!/bin/env zsh
+
+dir=$(pwd)
+
+cd "${dir}/sy-progressive-plugin"
+rm -rf dev dist .eslintcache package.zip
+
+cd "${dir}/sy-tomato-plugin"
+rm -rf dev dist .eslintcache package.zip
+
