@@ -388,7 +388,7 @@ export const siyuan = {
     },
     async checkAllBlocks(blocks: any[]) {
         for (const child of blocks) {
-            if (!await siyuan.checkBlockExist(child['id']))
+            if (!await siyuan.checkBlockExist(child["id"]))
                 return false;
         }
         return true;
