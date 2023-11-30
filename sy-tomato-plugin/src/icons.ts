@@ -1,6 +1,13 @@
 export const ICONS = `
-<symbol id="iconLink" viewBox="0 0 32 32"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
-<path d="M18.293 22.293l-1.414-1.414L22.586 16H8v-2h14.586l-5.707-5.707 1.414-1.414L26.414 15l-7.121 7.121zM6 6h20v20H6z"/>
+<symbol id="iconLink2" viewBox="0 0 32 32"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<circle cx="10" cy="16" r="8" fill="blue" />
+<circle cx="22" cy="16" r="8" fill="red" />
+<a xlink:href="https://example.com">
+  <circle cx="10" cy="16" r="8" fill-opacity="0" />
+</a>
+<a xlink:href="https://example.com">
+  <circle cx="22" cy="16" r="8" fill-opacity="0" />
+</a>
 </svg></symbol>
 
 <symbol id="iconContents" viewBox="0 0 32 32"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">

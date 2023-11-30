@@ -1,9 +1,11 @@
-import { Plugin } from "siyuan";
-import { siyuan } from "./utils";
+import { Plugin, adaptHotkey } from "siyuan";
+import { newID, siyuan } from "./utils";
 import "./index.scss";
 import { events } from "./Events";
+import BackLinkView from "./BackLink.svelte";
 
 const BackLinkBoxLock = "BackLinkBoxLock";
+const DOCK_TYPE = "dock_tab";
 
 class BackLinkBox {
     private plugin: Plugin;
@@ -22,6 +24,24 @@ class BackLinkBox {
                     }
                 });
             },
+        });
+        this.plugin.addDock({
+            config: {
+                position: "RightBottom",
+                size: { width: 320, height: 0 },
+                icon: "iconLink2",
+                title: "极简反链",
+            },
+            data: {},
+            type: DOCK_TYPE,
+            init() {
+                new BackLinkView({
+                    target:  this.element,
+                    props: {
+                        backlinkBox: this,
+                    }
+                });
+            }
         });
     }
 

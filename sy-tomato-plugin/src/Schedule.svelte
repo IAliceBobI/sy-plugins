@@ -58,7 +58,7 @@
     }
 </script>
 
-// https://learn.svelte.dev/tutorial/if-blocks
+<!-- https://learn.svelte.dev/tutorial/if-blocks -->
 <div class="b3-dialog__content">
     <div class="schedule-style__id">{idMsg}</div>
     <div class="fn__hr"></div>
