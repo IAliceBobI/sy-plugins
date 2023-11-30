@@ -50,14 +50,14 @@
             const bdocs = await siyuan.getBacklinkDoc(docID, d.id);
             for (const doc of bdocs.backlinks) {
                 for (const p of doc?.blockPaths ?? []) {
-                    if (p.type == "NodeDocument") continue;
-                    const { content } = await siyuan.getBlockMarkdownAndContent(
-                        p.id,
-                    );
-                    backlinks = [
-                        ...backlinks,
-                        { id: p.id, content: content.slice(0, 16) },
-                    ];
+                    if (p.type == "NodeParagraph") {
+                        const { content } =
+                            await siyuan.getBlockMarkdownAndContent(p.id);
+                        backlinks = [
+                            ...backlinks,
+                            { id: p.id, content: content.slice(0, 16) },
+                        ];
+                    }
                 }
             }
         }
@@ -65,9 +65,10 @@
             const bmdocs = await siyuan.getBackmentionDoc(docID, d.id);
             for (const doc of bmdocs.backmentions) {
                 for (const p of doc?.blockPaths ?? []) {
-                    if (p.type == "NodeDocument") continue;
-                    const content = keepContext(p.name, title, 10);
-                    mentionlinks = [...mentionlinks, { id: p.id, content }];
+                    if (p.type == "NodeParagraph") {
+                        const content = keepContext(p.name, title, 10);
+                        mentionlinks = [...mentionlinks, { id: p.id, content }];
+                    }
                 }
             }
         }
@@ -89,6 +90,7 @@
     }
     function keepContext(text: string, keyword: string, count: number): string {
         let parts = text.split(keyword);
+        if (parts.length == 1) return text;
         {
             const newParts = [];
             newParts.push(parts[0]);
