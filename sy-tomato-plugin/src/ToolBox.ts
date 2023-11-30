@@ -1,5 +1,5 @@
 import { Plugin, openTab } from "siyuan";
-import { siyuan, sleep, findBookOpennedFirst } from "./utils";
+import { siyuan, sleep } from "./utils";
 import "./index.scss";
 import { events } from "./Events";
 
@@ -88,23 +88,11 @@ class ToolBox {
         });
     }
 
-    private async setNotebookID() {
-        const localCfg = await siyuan.getFile("/data/storage/local.json");
-        events.boxID = localCfg["local-dailynoteid"] ?? "";
-        events.boxID = findBookOpennedFirst(events.boxID, await siyuan.lsNotebooks(false));
-        try {
-            await siyuan.getNotebookConf(events.boxID);
-        } catch (e) {
-            await siyuan.openNotebook(events.boxID);
-            await sleep(3000);
-        }
-    }
-
-    private async insertContents(docID: string) {
-        const resp = await siyuan.listDocsByPath(events.boxID, "/", 256);
+    private async insertContents(boxID: string, docID: string) {
+        const resp = await siyuan.listDocsByPath(boxID, "/", 256);
         resp.files.reverse();
         for (const file of resp.files) {
-            const fromWhere = `from blocks where path like '${file.path.replace(/\.sy$/, "")}%' and box='${events.boxID}' and ial like '%bookmark=%'`;
+            const fromWhere = `from blocks where path like '${file.path.replace(/\.sy$/, "")}%' and box='${boxID}' and ial like '%bookmark=%'`;
             const rows = await siyuan.sql(`select id ${fromWhere} limit 1`);
             if (rows.length > 0) {
                 const sqlStr = `select * ${fromWhere} order by updated desc`;
@@ -122,17 +110,28 @@ class ToolBox {
             }
         });
     }
+
     private async showContents() {
-        if (!events.boxID) {
-            await this.setNotebookID();
+        let boxID = events.boxID;
+        if (!boxID) {
+            const localCfg = await siyuan.getFile("/data/storage/local.json");
+            boxID = localCfg["local-dailynoteid"] ?? "";
         }
-        const cfg = await siyuan.getNotebookConf(events.boxID);
-        const sqlStr = `select id from blocks where box='${events.boxID}' and ial like '%bookmark=%' limit 1`;
+        if (!boxID) {
+            await siyuan.pushMsg("请先打开笔记本");
+            return;
+        }
+        const cfg = await siyuan.getNotebookConf(boxID);
+        if (cfg.conf.closed) {
+            await siyuan.pushMsg("请先打开笔记本");
+            return;
+        }
+        const sqlStr = `select id from blocks where box='${boxID}' and ial like '%bookmark=%' limit 1`;
         const rows = await siyuan.sql(sqlStr);
         if (rows.length > 0) {
-            const docID = await siyuan.createDocWithMdIfNotExists(events.boxID, "/📚" + cfg.name, "");
+            const docID = await siyuan.createDocWithMdIfNotExists(boxID, "/📚" + cfg.name, "");
             await siyuan.clearAll(docID);
-            await this.insertContents(docID);
+            await this.insertContents(boxID, docID);
             openTab({
                 app: this.plugin.app,
                 doc: { id: docID },
@@ -142,7 +141,6 @@ class ToolBox {
                 siyuan.pushMsg(cfg.name + this.plugin.i18n.thereIsNoBookmark);
             } catch (e) {
                 console.log(e);
-                events.boxID = "";
             }
         }
     }
