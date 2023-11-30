@@ -54,7 +54,10 @@
                     const { content } = await siyuan.getBlockMarkdownAndContent(
                         p.id,
                     );
-                    backlinks = [...backlinks, { id: p.id, content }];
+                    backlinks = [
+                        ...backlinks,
+                        { id: p.id, content: content.slice(0, 16) },
+                    ];
                 }
             }
         }
@@ -63,7 +66,7 @@
             for (const doc of bmdocs.backmentions) {
                 for (const p of doc?.blockPaths ?? []) {
                     if (p.type == "NodeDocument") continue;
-                    const content = keepContext(p.name, title, 8);
+                    const content = keepContext(p.name, title, 10);
                     mentionlinks = [...mentionlinks, { id: p.id, content }];
                 }
             }
