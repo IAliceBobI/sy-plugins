@@ -38,18 +38,6 @@ class Events {
         this._protyle = value;
     }
 
-    private _docID: string;
-    public get docID(): string {
-        const arr: string[] = (this._protyle as any)?.path?.split("/")?.pop()?.split(".")?.slice(0) ?? [];
-        if (arr.length > 0) {
-            this._docID = arr[0];
-        }
-        return this._docID;
-    }
-    private set docID(value: string) {
-        this._docID = value;
-    }
-
     private _isMobile: boolean;
     public get isMobile(): boolean {
         return this._isMobile;
@@ -66,7 +54,7 @@ class Events {
         this._protyleListeners.set(name, cb);
     }
 
-    private invokeCB(eventType: string, detail: any) {
+    private invokeCB(eventType: string, detail: Protyle) {
         for (const cb of this._protyleListeners.values()) {
             cb(eventType, detail);
         }
@@ -80,30 +68,30 @@ class Events {
         this.plugin.eventBus.on(EventType.click_editorcontent, ({ detail }: any) => {
             this.lastBlockID = detail?.event?.srcElement?.parentElement?.getAttribute("data-node-id") ?? this.lastBlockID;
             this.boxID = detail?.protyle?.notebookId ?? this.boxID;
-            this.protyle = detail?.protyle;
+            this.protyle = detail;
         });
         this.plugin.eventBus.on(EventType.open_menu_doctree, ({ detail }: any) => {
             this.boxID = detail?.protyle?.notebookId ?? this.boxID;
-            this.protyle = detail?.protyle;
+            this.protyle = detail;
         });
         this.plugin.eventBus.on(EventType.loaded_protyle_static, ({ detail }: any) => {
             this.boxID = detail?.protyle?.notebookId ?? this.boxID;
-            this.protyle = detail?.protyle;
+            this.protyle = detail;
             this.invokeCB(EventType.loaded_protyle_static, detail);
         });
         this.plugin.eventBus.on(EventType.loaded_protyle_dynamic, ({ detail }: any) => {
             this.boxID = detail?.protyle?.notebookId ?? this.boxID;
-            this.protyle = detail?.protyle;
+            this.protyle = detail;
             this.invokeCB(EventType.loaded_protyle_dynamic, detail);
         });
         this.plugin.eventBus.on(EventType.switch_protyle, ({ detail }: any) => {
             this.boxID = detail?.protyle?.notebookId ?? this.boxID;
-            this.protyle = detail?.protyle;
+            this.protyle = detail;
             this.invokeCB(EventType.switch_protyle, detail);
         });
         this.plugin.eventBus.on(EventType.destroy_protyle, ({ detail }: any) => {
             this.boxID = detail?.protyle?.notebookId ?? this.boxID;
-            this.protyle = detail?.protyle;
+            this.protyle = detail;
             this.invokeCB(EventType.destroy_protyle, detail);
         });
     }

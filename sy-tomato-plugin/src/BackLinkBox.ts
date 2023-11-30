@@ -18,6 +18,7 @@ class BackLinkBox {
                 this.data.svelte = new BackLinkView({
                     target: this.element,
                     props: {
+                        plugin,
                     }
                 });
             }
