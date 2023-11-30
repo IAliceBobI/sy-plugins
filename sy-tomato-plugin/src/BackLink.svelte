@@ -1,42 +1,24 @@
 <script lang="ts">
-    import { App, Plugin, Protyle, Dialog, adaptHotkey } from "siyuan";
-    import { onDestroy, onMount } from "svelte";
-    import { siyuan, timeUtil } from "./utils";
-    import { events } from "./Events";
+    import { adaptHotkey } from "siyuan";
+    import { onMount } from "svelte";
+    import { siyuan } from "./utils";
+    import { events, EventType } from "./Events";
 
-    export let plugin: Plugin;
-
-    let datetimeStr: string = "init...";
-    let docID: string = "init...";
+    let backlinks: { id: string; content: string }[] = [];
 
     onMount(async () => {
-        datetimeStr = await siyuan.currentTime();
         events.addListener("BackLinkBox", onPortyleChange);
     });
 
-    onDestroy(() => {
-        // protyle.destroy();
-    });
-
-    async function onPortyleChange(eventType: string, protyle: Protyle) {
-        
-        // console.log(`protyle?.protyle?.block?.rootID: ${protyle?.protyle?.block?.rootID}`)
-        // console.log(`protyle?.protyle?.id: ${protyle?.protyle?.id}`)
-        // console.log(`protyle?.protyle?.block: ${protyle?.protyle?.block}`)
-        console.log(eventType, protyle);
+    async function onPortyleChange(eventType: string, detail: any) {
+        if (eventType == EventType.switch_protyle) {
+            const docID = detail?.protyle?.block.rootID ?? "";
+            if (docID) await getBackLinks(docID);
+        }
     }
 
-    async function getBackLinks() {
-        const blockID = events.lastBlockID;
-        // const lute = NewLute();
-        const row = await siyuan.sqlOne(
-            `select root_id from blocks where id="${blockID}"`,
-        );
-        const docID = row?.root_id ?? "";
-        if (!docID) {
-            console.log("blockID, docID", blockID, docID);
-            return;
-        }
+    async function getBackLinks(docID: string) {
+        backlinks = [];
         const bls = await siyuan.getBacklink2(docID);
         for (const d of bls.backlinks) {
             const bdocs = await siyuan.getBacklinkDoc(docID, d.id);
@@ -45,7 +27,7 @@
                     if (p.type == "NodeParagraph") {
                         const { content } =
                             await siyuan.getBlockMarkdownAndContent(p.id);
-                        console.log(p.id, content);
+                        backlinks = [...backlinks, { id: p.id, content }];
                     }
                 }
             }
@@ -79,7 +61,24 @@
         >
     </div>
     <div class="fn__flex-1 plugin-sample__custom-dock">
-        {datetimeStr}<br />
-        {docID}
+        反链
+        <div class="fn__hr"></div>
+        {#each backlinks as link}
+            <a href="siyuan://blocks/{link.id}"
+                ><span class="id">{link.content}</span></a
+            >
+            <div class="fn__hr"></div>
+        {/each}
+        <div class="fn__hr"></div>
+        提及
     </div>
 </div>
+
+<style>
+    .id {
+        background: #e3d8d8;
+        border-radius: 4px;
+        padding: 2px 8px;
+        font-size: x-large;
+    }
+</style>
