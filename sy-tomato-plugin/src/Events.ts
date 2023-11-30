@@ -10,40 +10,33 @@ export enum EventType {
 }
 
 class Events {
-    private _lastBlockID: string;
-    public get lastBlockID(): string {
-        const blockID = getCursorBlock();
-        if (blockID) {
-            this._lastBlockID = blockID;
-        }
-        return this._lastBlockID;
+    private _title: string;
+    public get title(): string {
+        return this._title;
     }
-    private set lastBlockID(value: string) {
-        this._lastBlockID = value;
+
+    private _docID: string;
+    public get docID(): string {
+        return this._docID;
+    }
+
+    public get lastBlockID(): string {
+        return getCursorBlock();
     }
 
     private _boxID: string;
     public get boxID(): string {
         return this._boxID;
     }
-    public set boxID(value: string) {
-        this._boxID = value;
-    }
 
     private _protyle: Protyle;
     public get protyle(): Protyle {
         return this._protyle;
     }
-    private set protyle(value: Protyle) {
-        this._protyle = value;
-    }
 
     private _isMobile: boolean;
     public get isMobile(): boolean {
         return this._isMobile;
-    }
-    private set isMobile(value: boolean) {
-        this._isMobile = value;
     }
 
     private plugin: Plugin;
@@ -55,6 +48,10 @@ class Events {
     }
 
     private invokeCB(eventType: string, detail: Protyle) {
+        this._protyle = detail;
+        this._boxID = this.protyle?.protyle?.notebookId ?? "";
+        this._title = this.protyle?.protyle?.title?.editElement?.textContent?.trim() ?? "";
+        this._docID = this.protyle?.protyle?.block.rootID ?? "";
         for (const cb of this._protyleListeners.values()) {
             cb(eventType, detail);
         }
@@ -63,35 +60,26 @@ class Events {
     onload(plugin: Plugin) {
         this.plugin = plugin;
         const frontEnd = getFrontend();
-        this.isMobile = frontEnd === "mobile" || frontEnd === "browser-mobile";
-
-        this.plugin.eventBus.on(EventType.click_editorcontent, ({ detail }: any) => {
-            this.lastBlockID = detail?.event?.srcElement?.parentElement?.getAttribute("data-node-id") ?? this.lastBlockID;
-            this.boxID = detail?.protyle?.notebookId ?? this.boxID;
-            this.protyle = detail;
-        });
-        this.plugin.eventBus.on(EventType.open_menu_doctree, ({ detail }: any) => {
-            this.boxID = detail?.protyle?.notebookId ?? this.boxID;
-            this.protyle = detail;
-        });
+        this._isMobile = frontEnd === "mobile" || frontEnd === "browser-mobile";
+        // this.plugin.eventBus.on(EventType.click_editorcontent, ({ detail }: any) => {
+        //     this.lastBlockID = detail?.event?.srcElement?.parentElement?.getAttribute("data-node-id") ?? this.lastBlockID;
+        //     this.boxID = detail?.protyle?.notebookId ?? this.boxID;
+        //     this.protyle = detail;
+        // });
+        // this.plugin.eventBus.on(EventType.open_menu_doctree, ({ detail }: any) => {
+        //     this.boxID = detail?.protyle?.notebookId ?? this.boxID;
+        //     this.protyle = detail;
+        // });
         this.plugin.eventBus.on(EventType.loaded_protyle_static, ({ detail }: any) => {
-            this.boxID = detail?.protyle?.notebookId ?? this.boxID;
-            this.protyle = detail;
             this.invokeCB(EventType.loaded_protyle_static, detail);
         });
         this.plugin.eventBus.on(EventType.loaded_protyle_dynamic, ({ detail }: any) => {
-            this.boxID = detail?.protyle?.notebookId ?? this.boxID;
-            this.protyle = detail;
             this.invokeCB(EventType.loaded_protyle_dynamic, detail);
         });
         this.plugin.eventBus.on(EventType.switch_protyle, ({ detail }: any) => {
-            this.boxID = detail?.protyle?.notebookId ?? this.boxID;
-            this.protyle = detail;
             this.invokeCB(EventType.switch_protyle, detail);
         });
         this.plugin.eventBus.on(EventType.destroy_protyle, ({ detail }: any) => {
-            this.boxID = detail?.protyle?.notebookId ?? this.boxID;
-            this.protyle = detail;
             this.invokeCB(EventType.destroy_protyle, detail);
         });
     }
