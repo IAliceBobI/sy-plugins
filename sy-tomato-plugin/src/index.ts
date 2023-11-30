@@ -5,6 +5,7 @@ import { linkBox } from "./LinkBox";
 import { schedule } from "./Schedule";
 import { toolBox } from "./ToolBox";
 import { cpBox } from "./CpBox";
+import { backLinkBox } from "./BackLinkBox";
 import { events } from "./Events";
 import { STORAGE_SETTINGS } from "./constants";
 
@@ -18,6 +19,7 @@ export default class ThePlugin extends Plugin {
         toolBox.onload(this);
         linkBox.onload(this);
         cpBox.onload(this);
+        backLinkBox.onload(this);
     }
 
     onLayoutReady() {

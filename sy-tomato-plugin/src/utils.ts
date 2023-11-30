@@ -5,7 +5,7 @@ export function extractLinks(txt: string) {
     const RefRegex = /\(\(([0-9\-a-z]{22}) (("[^"]*?")|('[^']*?'))\)\)/g;
     const ids: string[] = [];
     const links: string[] = [];
-    let match;
+    let match: any;
     do {
         match = RefRegex.exec(txt) ?? [];
         const id = match[1] ?? "";
@@ -229,22 +229,7 @@ export const siyuan = {
             }]
         });
     },
-    async getNotebookConf(notebookID: string) {
-        // {
-        //     "box": "20231109134354-obnhgjv",
-        //     "conf": {
-        //         "name": "33",
-        //         "sort": 0,
-        //         "icon": "",
-        //         "closed": false,
-        //         "refCreateSavePath": "",
-        //         "docCreateSavePath": "",
-        //         "dailyNoteSavePath": "/daily note/{{now | date \"2006/01\"}}/{{now | date \"2006-01-02\"}}",
-        //         "dailyNoteTemplatePath": "",
-        //         "sortMode": 15
-        //     },
-        //     "name": "33"
-        // }
+    async getNotebookConf(notebookID: string): Promise<GetNotebookConf> {
         return siyuan.call("/api/notebook/getNotebookConf", { "notebook": notebookID });
     },
     async getDocIDByBlockID(id: string): Promise<string> {
@@ -303,51 +288,29 @@ export const siyuan = {
         if (await siyuan.checkBlockExist(id))
             return siyuan.call("/api/block/updateBlock", { id, data, dataType });
     },
-    async getBlockMarkdownAndContent(id: string) {
+    async getBlockMarkdownAndContent(id: string): Promise<GetBlockMarkdownAndContent> {
         const row: { [key: string]: string } = await siyuan.sqlOne(`select markdown, content from blocks where id="${id}"`);
         return { markdown: row?.markdown ?? "", content: row?.content ?? "" };
     },
     async listDocsByPath(notebookID: string, notReadablePath: string, sort = 15) {
-        // {
-        //     "box": "20220705180858-r5dh51g",
-        //     "files": [
-        //         {
-        //             "path": "/20231109151158-92arxkh.sy",
-        //             "name": "📚C.sy",
-        //             "icon": "",
-        //             "name1": "",
-        //             "alias": "",
-        //             "memo": "",
-        //             "bookmark": "",
-        //             "id": "20231109151158-92arxkh",
-        //             "count": 0,
-        //             "size": 809,
-        //             "hSize": "809 B",
-        //             "mtime": 1699515172,
-        //             "ctime": 1699513918,
-        //             "hMtime": "刚刚",
-        //             "hCtime": "2023-11-09 15:11:58",
-        //             "sort": 0,
-        //             "subFileCount": 0,
-        //             "hidden": false,
-        //             "newFlashcardCount": 0,
-        //             "dueFlashcardCount": 0,
-        //             "flashcardCount": 0
-        //     ],
-        //     "path": "/"
-        // }
         return siyuan.call("/api/filetree/listDocsByPath", { notebook: notebookID, path: notReadablePath, sort });
     },
+    async getBackmentionDoc(defID: string, refTreeID: string, keyword: string = ""): Promise<GetBackmentionDoc> {
+        return siyuan.call("/api/ref/getBackmentionDoc", { defID, refTreeID, keyword });
+    },
+    async getBacklinkDoc(defID: string, refTreeID: string, keyword: string = ""): Promise<GetBacklinkDoc> {
+        return siyuan.call("/api/ref/getBacklinkDoc", { defID, refTreeID, keyword });
+    },
+    async getBacklink2(id: string, keyword: string = "", mentionKeyword: string = "", mentionSort: string = "3"): Promise<GetBacklink2> {
+        return siyuan.call("/api/ref/getBacklink2", { id, k: keyword, mk: mentionKeyword, mSort: mentionSort });
+    },
     async insertBlockAfter(data: string, previousID: string, dataType = "markdown") {
-        // dataType [markdown, kramdown]
         return siyuan.call("/api/block/insertBlock", { data, dataType, previousID });
     },
     async insertBlockBefore(data: string, nextID: string, dataType = "markdown") {
-        // dataType [markdown, kramdown]
         return siyuan.call("/api/block/insertBlock", { data, dataType, nextID });
     },
     async insertBlockAsChildOf(data: string, parentID: string, dataType = "markdown") {
-        // dataType [markdown, kramdown]
         return siyuan.call("/api/block/insertBlock", { data, dataType, parentID });
     },
     async removeBookmarks(docID: string, keepBlockID: string) {

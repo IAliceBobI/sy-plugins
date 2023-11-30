@@ -1,4 +1,4 @@
-import { Plugin, getFrontend } from "siyuan";
+import { Plugin, getFrontend, Protyle } from "siyuan";
 
 class Events {
     private _lastBlockID: string;
@@ -21,17 +21,17 @@ class Events {
         this._boxID = value;
     }
 
-    private _protyle: any;
-    public get protyle(): any {
+    private _protyle: Protyle;
+    public get protyle(): Protyle {
         return this._protyle;
     }
-    private set protyle(value: any) {
+    private set protyle(value: Protyle) {
         this._protyle = value;
     }
 
     private _docID: string;
     public get docID(): string {
-        const arr: string[] = this._protyle?.path?.split("/")?.pop()?.split(".")?.slice(0) ?? [];
+        const arr: string[] = (this._protyle as any)?.path?.split("/")?.pop()?.split(".")?.slice(0) ?? [];
         if (arr.length > 0) {
             this._docID = arr[0];
         }
