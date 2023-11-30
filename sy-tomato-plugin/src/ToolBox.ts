@@ -2,18 +2,14 @@ import { Plugin, openTab } from "siyuan";
 import { siyuan, sleep, findBookOpennedFirst } from "./utils";
 import "./index.scss";
 import { events } from "./Events";
-import * as utils from "./utils";
 
 const CreateDocLock = "CreateDocLock";
 const AddReadingPointLock = "AddReadingPointLock";
 
 class ToolBox {
-    private static readonly GLOBAL_THIS: Record<string, any> = globalThis;
     private plugin: Plugin;
 
     onload(plugin: Plugin) {
-        ToolBox.GLOBAL_THIS["toolBox_zZmqus5PtYRi"] = this;
-        ToolBox.GLOBAL_THIS["toolBoxUtils_zZmqus5PtYRi"] = utils;
         this.plugin = plugin;
         this.plugin.addCommand({
             langKey: "addFlashCard",
