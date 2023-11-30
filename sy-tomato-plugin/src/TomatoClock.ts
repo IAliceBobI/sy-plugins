@@ -42,7 +42,7 @@ class TomatoClock {
                 this.timeoutID = setTimeout(() => {
                     this.showTimeoutDialog(minute);
                     this.lastDelayMin = 0;
-                }, minute * 60 * 1000);
+                }, minute * 60 * 1000) as unknown as number;
             }
         });
         this.plugin.addStatusBar({

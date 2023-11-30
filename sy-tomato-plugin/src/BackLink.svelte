@@ -9,7 +9,7 @@
     const BackLinkBoxSvelteLock = "BackLinkBoxSvelteLock";
     let backlinks: { id: string; content: string }[] = [];
     let mentionlinks: { id: string; content: string }[] = [];
-    let title: string;
+    let title: string = "";
 
     onMount(async () => {
         events.addListener("BackLinkBox", onPortyleChange);
@@ -33,6 +33,9 @@
                         if (docID && title) {
                             await getBackLinks(docID);
                         }
+                    } else if (eventType == EventType.destroy_protyle) {
+                        backlinks = mentionlinks = [];
+                        title = "";
                     }
                 }
             },
