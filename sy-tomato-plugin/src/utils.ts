@@ -508,35 +508,30 @@ export const siyuan = {
     }
 };
 
-let cacheTime = 2 * 60 * 1000;
-
 export const siyuanCache = {
-    setCacheTime: (t: number) => {
-        cacheTime = t;
-    },
-    getDocNameByBlockID: createCache(cacheTime, siyuan.getDocNameByBlockID),
-    getBlockMarkdownAndContent: createCache(cacheTime, siyuan.getBlockMarkdownAndContent),
-    getBacklinkDoc: createCache(cacheTime, siyuan.getBacklinkDoc),
-    getBacklink2: createCache(cacheTime, siyuan.getBacklink2),
-    getBackmentionDoc: createCache(cacheTime, siyuan.getBackmentionDoc),
+    getDocNameByBlockID: createCache(siyuan.getDocNameByBlockID),
+    getBlockMarkdownAndContent: createCache(siyuan.getBlockMarkdownAndContent),
+    getBacklinkDoc: createCache(siyuan.getBacklinkDoc),
+    getBacklink2: createCache(siyuan.getBacklink2),
+    getBackmentionDoc: createCache(siyuan.getBackmentionDoc),
 };
 
-export function createCache<T extends Func>(expirationTime: number, originalFunction: T): T {
+export function createCache<T extends Func>(originalFunction: T): (...args: [number, ...Parameters<T>]) => ReturnType<T> {
     const cache = new Map<string, { value: ReturnType<T>; timestamp: number }>();
-    return function cachedFunction(...args: Parameters<T>): ReturnType<T> {
+    return function cachedFunction(cacheTime: number, ...args: Parameters<T>): ReturnType<T> {
         const key = JSON.stringify(args);
         if (cache.has(key)) {
             const { value, timestamp } = cache.get(key);
             const currentTime = Date.now();
 
-            if (currentTime - timestamp <= expirationTime) {
+            if (currentTime - timestamp <= cacheTime) {
                 return value;
             }
         }
         const result = originalFunction(...args);
         cache.set(key, { value: result, timestamp: Date.now() });
         return result;
-    } as T;
+    };
 }
 
 function padStart(input: string, targetLength: number, padString: string): string {
@@ -576,7 +571,44 @@ export const TypeAbbrMap: Record<BlockNodeType, string> = {
     "NodeLinkDest": "link_dest",
     "NodeTextMark": "textmark",
 };
+export function splitByMiddle(str: string): [string, string] {
+    const middleIndex = Math.floor(str.length / 2);
+    const part1 = str.substring(0, middleIndex);
+    const part2 = str.substring(middleIndex);
+    return [part1, part2];
+}
+export function keepContext(text: string, keyword: string, count: number): string {
+    let parts = text.split(keyword);
+    if (parts.length == 1) return text;
+    {
+        const newParts = [];
+        newParts.push(parts[0]);
+        for (let i = 1; i < parts.length - 1; i++) {
+            newParts.push(...splitByMiddle(parts[i]));
+        }
+        newParts.push(parts[parts.length - 1]);
+        parts = newParts;
+    }
 
+    for (let i = 0; i < parts.length; i++) {
+        const len = parts[i].length;
+        if (i % 2 == 0) {
+            const start = Math.max(len - count, 0);
+            if (start > 0) {
+                parts[i] = ".." + parts[i].slice(start, len) + keyword;
+            } else {
+                parts[i] = parts[i].slice(start, len) + keyword;
+            }
+        } else {
+            if (count < len) {
+                parts[i] = parts[i].slice(0, count) + "..";
+            } else {
+                parts[i] = parts[i].slice(0, count);
+            }
+        }
+    }
+    return parts.join("");
+}
 /* {
     "alias": "",
     "box": "20220705180858-r5dh51g",

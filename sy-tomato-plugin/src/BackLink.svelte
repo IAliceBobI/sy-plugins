@@ -54,18 +54,28 @@
         mentionlinks = [];
         const dedup: Set<string> = new Set();
 
-        const bls = await siyuanCache.getBacklink2(docID);
+        const bls = await siyuanCache.getBacklink2(30 * 1000, docID);
         for (const d of bls.backlinks) {
-            const bdocs = await siyuanCache.getBacklinkDoc(docID, d.id);
+            const bdocs = await siyuanCache.getBacklinkDoc(
+                60 * 1000,
+                docID,
+                d.id,
+            );
             for (const doc of bdocs.backlinks) {
                 for (const p of doc?.blockPaths ?? []) {
                     if (thisEventID != lastEventID) return;
                     if (p.type == "NodeDocument") {
                         continue;
                     }
-                    const docName = await siyuanCache.getDocNameByBlockID(p.id);
+                    const docName = await siyuanCache.getDocNameByBlockID(
+                        5 * 60 * 1000,
+                        p.id,
+                    );
                     const { content } =
-                        await siyuanCache.getBlockMarkdownAndContent(p.id);
+                        await siyuanCache.getBlockMarkdownAndContent(
+                            5 * 60 * 1000,
+                            p.id,
+                        );
 
                     if (shouldMove(dedup, p.name, docName)) {
                         backlinks = [
@@ -81,14 +91,18 @@
             }
         }
         for (const d of bls.backmentions) {
-            const bmdocs = await siyuanCache.getBackmentionDoc(docID, d.id);
+            const bmdocs = await siyuanCache.getBackmentionDoc(
+                60 * 1000,
+                docID,
+                d.id,
+            );
             for (const doc of bmdocs.backmentions) {
                 const marks: string[] = findMarks(doc.dom);
                 for (const p of doc?.blockPaths ?? []) {
                     if (thisEventID != lastEventID) return;
                     if (p.type == "NodeParagraph") {
-                        // const content = keepContext(p.name, title, 10);
                         const docName = await siyuanCache.getDocNameByBlockID(
+                            5 * 60 * 1000,
                             p.id,
                         );
                         if (shouldMove(dedup, p.name, docName)) {
@@ -131,44 +145,6 @@
         });
         return all;
     }
-    // function splitByMiddle(str: string): [string, string] {
-    //     const middleIndex = Math.floor(str.length / 2);
-    //     const part1 = str.substring(0, middleIndex);
-    //     const part2 = str.substring(middleIndex);
-    //     return [part1, part2];
-    // }
-    // function keepContext(text: string, keyword: string, count: number): string {
-    //     let parts = text.split(keyword);
-    //     if (parts.length == 1) return text;
-    //     {
-    //         const newParts = [];
-    //         newParts.push(parts[0]);
-    //         for (let i = 1; i < parts.length - 1; i++) {
-    //             newParts.push(...splitByMiddle(parts[i]));
-    //         }
-    //         newParts.push(parts[parts.length - 1]);
-    //         parts = newParts;
-    //     }
-
-    //     for (let i = 0; i < parts.length; i++) {
-    //         const len = parts[i].length;
-    //         if (i % 2 == 0) {
-    //             const start = Math.max(len - count, 0);
-    //             if (start > 0) {
-    //                 parts[i] = ".." + parts[i].slice(start, len) + keyword;
-    //             } else {
-    //                 parts[i] = parts[i].slice(start, len) + keyword;
-    //             }
-    //         } else {
-    //             if (count < len) {
-    //                 parts[i] = parts[i].slice(0, count) + "..";
-    //             } else {
-    //                 parts[i] = parts[i].slice(0, count);
-    //             }
-    //         }
-    //     }
-    //     return parts.join("");
-    // }
 </script>
 
 <!-- https://learn.svelte.dev/tutorial/if-blocks -->
