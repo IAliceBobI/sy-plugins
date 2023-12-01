@@ -1,4 +1,4 @@
-import { Plugin } from "siyuan";
+import { Plugin, Setting } from "siyuan";
 import { ICONS } from "./icons";
 import { tomatoClock } from "./TomatoClock";
 import { linkBox } from "./LinkBox";
@@ -10,26 +10,50 @@ import { cardBox } from "./CardBox";
 import { events } from "./Events";
 import { STORAGE_SETTINGS } from "./constants";
 
-
 export default class ThePlugin extends Plugin {
-    onload() {
+    private settingCfg: { [key: string]: boolean };
+    async onload() {
         this.addIcons(ICONS);
         events.onload(this);
-        tomatoClock.onload(this);
-        schedule.onload(this);
-        readingPointBox.onload(this);
-        linkBox.onload(this);
-        cpBox.onload(this);
-        backLinkBox.onload(this);
-        cardBox.onload(this);
+        this.settingCfg = await this.loadData(STORAGE_SETTINGS);
+        if (!this.settingCfg) this.settingCfg = {};
+        if (this.settingCfg.tomatoClockCheckbox ?? true) tomatoClock.onload(this);
+        if (this.settingCfg.scheduleCheckbox ?? true) schedule.onload(this);
+        if (this.settingCfg.readingPointBoxCheckbox ?? true) readingPointBox.onload(this);
+        if (this.settingCfg.cardBoxCheckbox ?? false) cardBox.onload(this);
+        if (this.settingCfg.cpBoxCheckbox ?? false) cpBox.onload(this);
+        if (this.settingCfg.linkBoxCheckbox ?? false) linkBox.onload(this);
+        if (this.settingCfg.backLinkBoxCheckbox ?? false) backLinkBox.onload(this);
+
+        this.setting = new Setting({
+            confirmCallback: () => {
+                this.saveData(STORAGE_SETTINGS, this.settingCfg);
+                window.location.reload();
+            }
+        });
+
+        this.addSettingItem("tomatoClockCheckbox", "状态栏番茄钟", true);
+        this.addSettingItem("scheduleCheckbox", "内容提醒", true);
+        this.addSettingItem("readingPointBoxCheckbox", "阅读点", true);
+        this.addSettingItem("cardBoxCheckbox", "闪卡工具", false);
+        this.addSettingItem("cpBoxCheckbox", "长内容工具", false);
+        this.addSettingItem("linkBoxCheckbox", "双向互链", false);
+        this.addSettingItem("backLinkBoxCheckbox", "极简反链", false);
     }
 
-    onLayoutReady() {
-        this.loadData(STORAGE_SETTINGS);
-        schedule.onLayoutReady();
-    }
-
-    onunload() {
-        console.log("unload tomato plugin");
+    private addSettingItem(key: string, title: string, defaultValue: boolean) {
+        const checkbox = document.createElement("input") as HTMLInputElement;
+        checkbox.type = 'checkbox';
+        checkbox.addEventListener("change", () => {
+            this.settingCfg[key] = checkbox.checked
+        })
+        this.setting.addItem({
+            title: title,
+            createActionElement: () => {
+                checkbox.className = "b3-switch fn__flex-center";
+                checkbox.checked = this.settingCfg[key] ?? defaultValue;
+                return checkbox;
+            },
+        });
     }
 }

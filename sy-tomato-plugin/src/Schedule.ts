@@ -10,6 +10,9 @@ class Schedule {
 
     onload(plugin: Plugin) {
         this.plugin = plugin;
+        this.plugin.loadData(STORAGE_SCHEDULE).then(() => {
+            this.loopSchedule();
+        });
         this.plugin.data[STORAGE_SCHEDULE] = {};
         this.plugin.addCommand({
             langKey: "schedule",
@@ -33,10 +36,8 @@ class Schedule {
         });
     }
 
-    onLayoutReady() {
-        this.plugin.loadData(STORAGE_SCHEDULE).then(() => {
-            this.loopSchedule();
-        });
+    async onLayoutReady() {
+
     }
 
     private async showScheduleDialog(blockID?: string) {
