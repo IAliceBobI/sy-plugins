@@ -292,6 +292,12 @@ export const siyuan = {
         const row: { [key: string]: string } = await siyuan.sqlOne(`select markdown, content from blocks where id="${id}"`);
         return { markdown: row?.markdown ?? "", content: row?.content ?? "" };
     },
+    async getHeadingChildrenIDs(id: string) {
+        return siyuan.call("/api/block/getHeadingChildrenIDs", { id });
+    },
+    async getHeadingChildrenDOM(id: string) {
+        return siyuan.call("/api/block/getHeadingChildrenDOM", { id });
+    },
     async listDocsByPath(notebookID: string, notReadablePath: string, sort = 15) {
         return siyuan.call("/api/filetree/listDocsByPath", { notebook: notebookID, path: notReadablePath, sort });
     },
