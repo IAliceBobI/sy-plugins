@@ -530,7 +530,7 @@ export function createCache(expirationTime: number, originalFunction: Func): Fun
                 return value;
             }
         }
-        const result = originalFunction.apply(null, args);
+        const result = originalFunction(...args);
         cache.set(key, { value: result, timestamp: Date.now() });
         return result;
     };
