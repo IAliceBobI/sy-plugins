@@ -12,36 +12,34 @@
     let backlinks: LinkType[] = [];
     let mentionlinks: LinkType[] = [];
     let title: string = "";
+    let eventID = 0;
 
     onMount(async () => {
         events.addListener("BackLinkBox", onPortyleChange);
     });
 
     async function onPortyleChange(eventType: string, detail: Protyle) {
-        navigator.locks.request(
-            BackLinkBoxSvelteLock,
-            { ifAvailable: true },
-            async (lock) => {
-                if (lock) {
-                    if (
-                        eventType == EventType.switch_protyle ||
-                        eventType == EventType.loaded_protyle_dynamic ||
-                        eventType == EventType.loaded_protyle_static
-                    ) {
-                        title =
-                            detail?.protyle?.title?.editElement?.textContent?.trim() ??
-                            "";
-                        const docID = detail?.protyle?.block.rootID ?? "";
-                        if (docID && title) {
-                            await getBackLinks(docID);
-                        }
-                    } else if (eventType == EventType.destroy_protyle) {
-                        backlinks = mentionlinks = [];
-                        title = "";
+        eventID++;
+        navigator.locks.request(BackLinkBoxSvelteLock, async (lock) => {
+            if (lock) {
+                if (
+                    eventType == EventType.switch_protyle ||
+                    eventType == EventType.loaded_protyle_dynamic ||
+                    eventType == EventType.loaded_protyle_static
+                ) {
+                    title =
+                        detail?.protyle?.title?.editElement?.textContent?.trim() ??
+                        "";
+                    const docID = detail?.protyle?.block.rootID ?? "";
+                    if (docID && title) {
+                        await getBackLinks(docID, eventID);
                     }
+                } else if (eventType == EventType.destroy_protyle) {
+                    backlinks = mentionlinks = [];
+                    title = "";
                 }
-            },
-        );
+            }
+        });
     }
     async function getDocNameByBlockID(blockID: string) {
         let row = await siyuan.sqlOne(
@@ -56,7 +54,7 @@
         return docName;
     }
 
-    async function getBackLinks(docID: string) {
+    async function getBackLinks(docID: string, thisEventID: number) {
         backlinks = [];
         mentionlinks = [];
         const bls = await siyuan.getBacklink2(docID);
@@ -64,6 +62,7 @@
             const bdocs = await siyuan.getBacklinkDoc(docID, d.id);
             for (const doc of bdocs.backlinks) {
                 for (const p of doc?.blockPaths ?? []) {
+                    if (thisEventID != eventID) return;
                     if (p.type == "NodeDocument") {
                         continue;
                     }
@@ -87,6 +86,7 @@
             const bmdocs = await siyuan.getBackmentionDoc(docID, d.id);
             for (const doc of bmdocs.backmentions) {
                 for (const p of doc?.blockPaths ?? []) {
+                    if (thisEventID != eventID) return;
                     if (p.type == "NodeParagraph") {
                         const content = keepContext(p.name, title, 10);
                         const docName = await getDocNameByBlockID(p.id);
@@ -156,7 +156,7 @@
     <div class="block__icons">
         <div class="block__logo">
             <svg><use xlink:href="#iconEmoji"></use></svg>
-            极简反链
+            《{title}》
         </div>
         <span class="fn__flex-1 fn__space"></span>
         <span

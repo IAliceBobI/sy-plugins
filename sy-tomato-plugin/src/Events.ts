@@ -61,15 +61,12 @@ class Events {
         this.plugin = plugin;
         const frontEnd = getFrontend();
         this._isMobile = frontEnd === "mobile" || frontEnd === "browser-mobile";
-        // this.plugin.eventBus.on(EventType.click_editorcontent, ({ detail }: any) => {
-        //     this.lastBlockID = detail?.event?.srcElement?.parentElement?.getAttribute("data-node-id") ?? this.lastBlockID;
-        //     this.boxID = detail?.protyle?.notebookId ?? this.boxID;
-        //     this.protyle = detail;
-        // });
-        // this.plugin.eventBus.on(EventType.open_menu_doctree, ({ detail }: any) => {
-        //     this.boxID = detail?.protyle?.notebookId ?? this.boxID;
-        //     this.protyle = detail;
-        // });
+        this.plugin.eventBus.on(EventType.click_editorcontent, ({ detail }: any) => {
+            this.invokeCB(EventType.loaded_protyle_static, detail);
+        });
+        this.plugin.eventBus.on(EventType.open_menu_doctree, ({ detail }: any) => {
+            this.invokeCB(EventType.loaded_protyle_static, detail);
+        });
         this.plugin.eventBus.on(EventType.loaded_protyle_static, ({ detail }: any) => {
             this.invokeCB(EventType.loaded_protyle_static, detail);
         });
