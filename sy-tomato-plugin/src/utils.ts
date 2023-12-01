@@ -494,7 +494,47 @@ export const siyuan = {
         }
         return invalidCardIDs;
     },
+    async getDocNameByBlockID(blockID: string) {
+        let row = await siyuan.sqlOne(
+            `select root_id from blocks where id="${blockID}"`,
+        );
+        if (row["root_id"]) {
+            row = await siyuan.sqlOne(
+                `select content from blocks where id="${row["root_id"]}"`,
+            );
+        }
+        const docName = row["content"] ?? "";
+        return docName;
+    }
 };
+
+const CACHE_TIME = 60 * 1000;
+
+export const siyuanCache = {
+    getDocNameByBlockID: createCache(CACHE_TIME, siyuan.getDocNameByBlockID),
+    getBlockMarkdownAndContent: createCache(CACHE_TIME, siyuan.getBlockMarkdownAndContent),
+    getBacklinkDoc: createCache(CACHE_TIME, siyuan.getBacklinkDoc),
+    getBacklink2: createCache(CACHE_TIME, siyuan.getBacklink2),
+    getBackmentionDoc: createCache(CACHE_TIME, siyuan.getBackmentionDoc),
+};
+
+export function createCache(expirationTime: number, originalFunction: Func): Func {
+    const cache = new Map<string, { value: any; timestamp: number }>();
+    return function cachedFunction(...args: any[]): any {
+        const key = JSON.stringify(args);
+        if (cache.has(key)) {
+            const { value, timestamp } = cache.get(key);
+            const currentTime = Date.now();
+
+            if (currentTime - timestamp <= expirationTime) {
+                return value;
+            }
+        }
+        const result = originalFunction.apply(null, args);
+        cache.set(key, { value: result, timestamp: Date.now() });
+        return result;
+    };
+}
 
 function padStart(input: string, targetLength: number, padString: string): string {
     const inputLength = input.length;

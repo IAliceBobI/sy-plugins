@@ -1,7 +1,7 @@
 <script lang="ts">
     import { adaptHotkey, openTab, Plugin, Protyle } from "siyuan";
     import { onMount } from "svelte";
-    import { siyuan } from "./utils";
+    import { siyuanCache } from "./utils";
     import { events, EventType } from "./Events";
 
     export let plugin: Plugin;
@@ -41,35 +41,22 @@
             }
         });
     }
-    async function getDocNameByBlockID(blockID: string) {
-        let row = await siyuan.sqlOne(
-            `select root_id from blocks where id="${blockID}"`,
-        );
-        if (row["root_id"]) {
-            row = await siyuan.sqlOne(
-                `select content from blocks where id="${row["root_id"]}"`,
-            );
-        }
-        const docName = row["content"] ?? "";
-        return docName;
-    }
 
     async function getBackLinks(docID: string, thisEventID: number) {
         backlinks = [];
         mentionlinks = [];
-        const bls = await siyuan.getBacklink2(docID);
+        const bls = await siyuanCache.getBacklink2(docID);
         for (const d of bls.backlinks) {
-            const bdocs = await siyuan.getBacklinkDoc(docID, d.id);
+            const bdocs = await siyuanCache.getBacklinkDoc(docID, d.id);
             for (const doc of bdocs.backlinks) {
                 for (const p of doc?.blockPaths ?? []) {
                     if (thisEventID != eventID) return;
                     if (p.type == "NodeDocument") {
                         continue;
                     }
-                    const docName = await getDocNameByBlockID(p.id);
-                    const { content } = await siyuan.getBlockMarkdownAndContent(
-                        p.id,
-                    );
+                    const docName = await siyuanCache.getDocNameByBlockID(p.id);
+                    const { content } =
+                        await siyuanCache.getBlockMarkdownAndContent(p.id);
                     backlinks = [
                         ...backlinks,
                         {
@@ -83,13 +70,15 @@
         }
         const dedup: Set<string> = new Set();
         for (const d of bls.backmentions) {
-            const bmdocs = await siyuan.getBackmentionDoc(docID, d.id);
+            const bmdocs = await siyuanCache.getBackmentionDoc(docID, d.id);
             for (const doc of bmdocs.backmentions) {
                 for (const p of doc?.blockPaths ?? []) {
                     if (thisEventID != eventID) return;
                     if (p.type == "NodeParagraph") {
                         const content = keepContext(p.name, title, 10);
-                        const docName = await getDocNameByBlockID(p.id);
+                        const docName = await siyuanCache.getDocNameByBlockID(
+                            p.id,
+                        );
                         const key = `${p.name}#${docName}`;
                         if (dedup.has(key)) continue;
                         dedup.add(key);
