@@ -176,9 +176,9 @@ export function tryRmIDAddLink(mds: string[], lnkID: string) {
                 parts.pop();
             }
         }
-        if (!parts[0].endsWith(" \"*\"))") && i == 0) {
-            parts[0] = parts[0] + `((${lnkID} "*"))`;
-        }
+        // if (!parts[0].endsWith(" \"*\"))") && i == 0) {
+        //     parts[0] = parts[0] + `((${lnkID} "*"))`;
+        // }
         mds[i] = parts.join("\n");
     }
     return mds;
