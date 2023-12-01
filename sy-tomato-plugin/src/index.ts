@@ -21,7 +21,7 @@ export default class ThePlugin extends Plugin {
         linkBox.onload(this);
         cpBox.onload(this);
         backLinkBox.onload(this);
-        // cardBox.onload(this);
+        cardBox.onload(this);
     }
 
     onLayoutReady() {
