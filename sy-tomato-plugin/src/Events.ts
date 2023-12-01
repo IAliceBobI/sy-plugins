@@ -7,6 +7,23 @@ export enum EventType {
     loaded_protyle_dynamic = "loaded-protyle-dynamic",
     switch_protyle = "switch-protyle",
     destroy_protyle = "destroy-protyle",
+    ws_main = "ws-main",
+    click_blockicon = "click-blockicon",
+    click_pdf = "click-pdf",
+    click_editortitleicon = "click-editortitleicon",
+    open_noneditableblock = "open-noneditableblock",
+    open_menu_blockref = "open-menu-blockref",
+    open_menu_fileannotationref = "open-menu-fileannotationref",
+    open_menu_tag = "open-menu-tag",
+    open_menu_link = "open-menu-link",
+    open_menu_image = "open-menu-image",
+    open_menu_av = "open-menu-av",
+    open_menu_content = "open-menu-content",
+    open_menu_breadcrumbmore = "open-menu-breadcrumbmore",
+    input_search = "input-search",
+    paste = "paste",
+    open_siyuan_url_plugin = "open-siyuan-url-plugin",
+    open_siyuan_url_block = "open-siyuan-url-block"
 }
 
 class Events {
@@ -61,6 +78,9 @@ class Events {
         this.plugin = plugin;
         const frontEnd = getFrontend();
         this._isMobile = frontEnd === "mobile" || frontEnd === "browser-mobile";
+        this.plugin.eventBus.on(EventType.open_menu_content, ({ detail }: any) => {
+            this.invokeCB(EventType.open_menu_content, detail);
+        });
         this.plugin.eventBus.on(EventType.click_editorcontent, ({ detail }: any) => {
             this.invokeCB(EventType.loaded_protyle_static, detail);
         });

@@ -12,14 +12,15 @@
     let backlinks: LinkType[] = [];
     let mentionlinks: LinkType[] = [];
     let title: string = "";
-    let eventID = 0;
+    let lastEventID = 0;
+    let lastDocID = "";
 
     onMount(async () => {
         events.addListener("BackLinkBox", onPortyleChange);
     });
 
     async function onPortyleChange(eventType: string, detail: Protyle) {
-        eventID++;
+        lastEventID++;
         navigator.locks.request(BackLinkBoxSvelteLock, async (lock) => {
             if (lock) {
                 if (
@@ -31,8 +32,9 @@
                         detail?.protyle?.title?.editElement?.textContent?.trim() ??
                         "";
                     const docID = detail?.protyle?.block.rootID ?? "";
+                    if (lastDocID == docID) return;
                     if (docID && title) {
-                        await getBackLinks(docID, eventID);
+                        await getBackLinks(docID, lastEventID);
                     }
                 } else if (eventType == EventType.destroy_protyle) {
                     backlinks = mentionlinks = [];
@@ -50,7 +52,7 @@
             const bdocs = await siyuanCache.getBacklinkDoc(docID, d.id);
             for (const doc of bdocs.backlinks) {
                 for (const p of doc?.blockPaths ?? []) {
-                    if (thisEventID != eventID) return;
+                    if (thisEventID != lastEventID) return; // unfinished
                     if (p.type == "NodeDocument") {
                         continue;
                     }
@@ -73,7 +75,7 @@
             const bmdocs = await siyuanCache.getBackmentionDoc(docID, d.id);
             for (const doc of bmdocs.backmentions) {
                 for (const p of doc?.blockPaths ?? []) {
-                    if (thisEventID != eventID) return;
+                    if (thisEventID != lastEventID) return; // unfinished
                     if (p.type == "NodeParagraph") {
                         const content = keepContext(p.name, title, 10);
                         const docName = await siyuanCache.getDocNameByBlockID(
@@ -90,6 +92,8 @@
                 }
             }
         }
+        // finished
+        lastDocID = docID;
     }
     function openAtab(id: string) {
         openTab({
