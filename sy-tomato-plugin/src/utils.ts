@@ -508,14 +508,17 @@ export const siyuan = {
     }
 };
 
-const CACHE_TIME = 60 * 1000;
+let cacheTime = 2 * 60 * 1000;
 
 export const siyuanCache = {
-    getDocNameByBlockID: createCache(CACHE_TIME, siyuan.getDocNameByBlockID),
-    getBlockMarkdownAndContent: createCache(CACHE_TIME, siyuan.getBlockMarkdownAndContent),
-    getBacklinkDoc: createCache(CACHE_TIME, siyuan.getBacklinkDoc),
-    getBacklink2: createCache(CACHE_TIME, siyuan.getBacklink2),
-    getBackmentionDoc: createCache(CACHE_TIME, siyuan.getBackmentionDoc),
+    setCacheTime: (t: number) => {
+        cacheTime = t;
+    },
+    getDocNameByBlockID: createCache(cacheTime, siyuan.getDocNameByBlockID),
+    getBlockMarkdownAndContent: createCache(cacheTime, siyuan.getBlockMarkdownAndContent),
+    getBacklinkDoc: createCache(cacheTime, siyuan.getBacklinkDoc),
+    getBacklink2: createCache(cacheTime, siyuan.getBacklink2),
+    getBackmentionDoc: createCache(cacheTime, siyuan.getBackmentionDoc),
 };
 
 export function createCache(expirationTime: number, originalFunction: Func): Func {
