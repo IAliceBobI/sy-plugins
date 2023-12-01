@@ -13,7 +13,6 @@
     let mentionlinks: LinkType[] = [];
     let title: string = "";
     let lastEventID = 0;
-    let lastDocID = "";
 
     onMount(async () => {
         events.addListener("BackLinkBox", onPortyleChange);
@@ -32,7 +31,6 @@
                         detail?.protyle?.title?.editElement?.textContent?.trim() ??
                         "";
                     const docID = detail?.protyle?.block.rootID ?? "";
-                    if (lastDocID == docID) return;
                     if (docID && title) {
                         await getBackLinks(docID, lastEventID);
                     }
@@ -52,7 +50,7 @@
             const bdocs = await siyuanCache.getBacklinkDoc(docID, d.id);
             for (const doc of bdocs.backlinks) {
                 for (const p of doc?.blockPaths ?? []) {
-                    if (thisEventID != lastEventID) return; // unfinished
+                    if (thisEventID != lastEventID) return;
                     if (p.type == "NodeDocument") {
                         continue;
                     }
@@ -75,7 +73,7 @@
             const bmdocs = await siyuanCache.getBackmentionDoc(docID, d.id);
             for (const doc of bmdocs.backmentions) {
                 for (const p of doc?.blockPaths ?? []) {
-                    if (thisEventID != lastEventID) return; // unfinished
+                    if (thisEventID != lastEventID) return;
                     if (p.type == "NodeParagraph") {
                         const content = keepContext(p.name, title, 10);
                         const docName = await siyuanCache.getDocNameByBlockID(
@@ -92,8 +90,6 @@
                 }
             }
         }
-        // finished
-        lastDocID = docID;
     }
     function openAtab(id: string) {
         openTab({
