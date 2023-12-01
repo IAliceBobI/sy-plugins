@@ -6,6 +6,7 @@ import { schedule } from "./Schedule";
 import { toolBox } from "./ToolBox";
 import { cpBox } from "./CpBox";
 import { backLinkBox } from "./BackLinkBox";
+import { cardBox } from "./CardBox";
 import { events } from "./Events";
 import { STORAGE_SETTINGS } from "./constants";
 
@@ -20,6 +21,7 @@ export default class ThePlugin extends Plugin {
         linkBox.onload(this);
         cpBox.onload(this);
         backLinkBox.onload(this);
+        cardBox.onload(this);
     }
 
     onLayoutReady() {

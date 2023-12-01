@@ -68,7 +68,7 @@ interface BlockPath {
 
 type BacklinkType = "backlink"
 type BlockNodeSubType = "h1" | "h2" | "h3" | "h4" | "h5" | "h6"
-type BlockNodeType = "NodeParagraph" | "NodeHeading" | "NodeDocument"
+type BlockNodeType = "NodeParagraph" | "NodeHeading" | "NodeDocument" | "NodeTable" | "NodeList" | "NodeListItem" | "NodeCodeBlock" | "NodeMathBlock" | "NodeBlockquote" | "NodeSuperBlock" | "NodeHTMLBlock" | "NodeBlockQueryEmbed" | "NodeAttributeView" | "NodeKramdownBlockIAL" | "NodeIFrame" | "NodeWidget" | "NodeThematicBreak" | "NodeVideo" | "NodeAudio" | "NodeText" | "NodeImage" | "NodeLinkText" | "NodeLinkDest" | "NodeTextMark";
 
 interface GetBlockMarkdownAndContent {
     markdown:string,

@@ -6,9 +6,11 @@
 
     export let plugin: Plugin;
 
+    type LinkType = { id: string; content: string; docName: string };
+
     const BackLinkBoxSvelteLock = "BackLinkBoxSvelteLock";
-    let backlinks: { id: string; content: string }[] = [];
-    let mentionlinks: { id: string; content: string }[] = [];
+    let backlinks: LinkType[] = [];
+    let mentionlinks: LinkType[] = [];
     let title: string = "";
 
     onMount(async () => {
@@ -41,6 +43,18 @@
             },
         );
     }
+    async function getDocNameByBlockID(blockID: string) {
+        let row = await siyuan.sqlOne(
+            `select root_id from blocks where id="${blockID}"`,
+        );
+        if (row["root_id"]) {
+            row = await siyuan.sqlOne(
+                `select content from blocks where id="${row["root_id"]}"`,
+            );
+        }
+        const docName = row["content"] ?? "";
+        return docName;
+    }
 
     async function getBackLinks(docID: string) {
         backlinks = [];
@@ -50,24 +64,39 @@
             const bdocs = await siyuan.getBacklinkDoc(docID, d.id);
             for (const doc of bdocs.backlinks) {
                 for (const p of doc?.blockPaths ?? []) {
-                    if (p.type == "NodeParagraph") {
-                        const { content } =
-                            await siyuan.getBlockMarkdownAndContent(p.id);
-                        backlinks = [
-                            ...backlinks,
-                            { id: p.id, content: content.slice(0, 16) },
-                        ];
+                    if (p.type == "NodeDocument") {
+                        continue;
                     }
+                    const docName = await getDocNameByBlockID(p.id);
+                    const { content } = await siyuan.getBlockMarkdownAndContent(
+                        p.id,
+                    );
+                    backlinks = [
+                        ...backlinks,
+                        {
+                            id: p.id,
+                            content: content.slice(0, 16),
+                            docName,
+                        },
+                    ];
                 }
             }
         }
+        const dedup: Set<string> = new Set();
         for (const d of bls.backmentions) {
             const bmdocs = await siyuan.getBackmentionDoc(docID, d.id);
             for (const doc of bmdocs.backmentions) {
                 for (const p of doc?.blockPaths ?? []) {
                     if (p.type == "NodeParagraph") {
                         const content = keepContext(p.name, title, 10);
-                        mentionlinks = [...mentionlinks, { id: p.id, content }];
+                        const docName = await getDocNameByBlockID(p.id);
+                        const key = `${p.name}#${docName}`;
+                        if (dedup.has(key)) continue;
+                        dedup.add(key);
+                        mentionlinks = [
+                            ...mentionlinks,
+                            { id: p.id, content, docName },
+                        ];
                     }
                 }
             }
@@ -143,12 +172,16 @@
         {#each backlinks as link}
             <button on:click={() => openAtab(link.id)}>🔗</button>
             <a href="siyuan://blocks/{link.id}"
-                ><span class="reftext">{link.content}</span></a
+                ><span class="reftext"
+                    >{link.content} 《{link.docName}》{link.id.split(
+                        "-",
+                    )[1]}</span
+                ></a
             >
             <div class="fn__hr"></div>
         {/each}
         <div class="fn__hr"></div>
-        {mentionlinks.length}提及：{title}
+        {mentionlinks.length}提及：《{title}》中内容
         <div class="fn__hr"></div>
         {#each mentionlinks as link}
             <button on:click={() => openAtab(link.id)}>🔗</button>
@@ -162,6 +195,7 @@
                     {:else}
                         {link.content}
                     {/if}
+                    《{link.docName}》
                 </span>
             </a>
             <div class="fn__hr"></div>

@@ -506,6 +506,34 @@ function padStart(input: string, targetLength: number, padString: string): strin
     return padding + input;
 }
 
+export const TypeAbbrMap: Record<BlockNodeType, string> = {
+    // Block-level elements
+    "NodeDocument": "d",
+    "NodeHeading": "h",
+    "NodeList": "l",
+    "NodeListItem": "i",
+    "NodeCodeBlock": "c",
+    "NodeMathBlock": "m",
+    "NodeTable": "t",
+    "NodeBlockquote": "b",
+    "NodeSuperBlock": "s",
+    "NodeParagraph": "p",
+    "NodeHTMLBlock": "html",
+    "NodeBlockQueryEmbed": "query_embed",
+    "NodeAttributeView": "av",
+    "NodeKramdownBlockIAL": "ial",
+    "NodeIFrame": "iframe",
+    "NodeWidget": "widget",
+    "NodeThematicBreak": "tb",
+    "NodeVideo": "video",
+    "NodeAudio": "audio",
+    "NodeText": "text",
+    "NodeImage": "img",
+    "NodeLinkText": "link_text",
+    "NodeLinkDest": "link_dest",
+    "NodeTextMark": "textmark",
+};
+
 /* {
     "alias": "",
     "box": "20220705180858-r5dh51g",
