@@ -6,7 +6,7 @@ import { events } from "./Events";
 const CreateDocLock = "CreateDocLock";
 const AddReadingPointLock = "AddReadingPointLock";
 
-class ToolBox {
+class ReadingPointBox {
     private plugin: Plugin;
 
     onload(plugin: Plugin) {
@@ -30,18 +30,6 @@ class ToolBox {
                     }
                 },
             });
-        });
-        this.plugin.addCommand({
-            langKey: "removeBrokenCards",
-            hotkey: "",
-            globalCallback: async () => {
-                const ids = await siyuan.removeBrokenCards();
-                if (ids.length) {
-                    siyuan.pushMsg(`${this.plugin.i18n.removedBrokenCards}${ids}`);
-                } else {
-                    siyuan.pushMsg(this.plugin.i18n.thereIsNoInvalidCards);
-                }
-            },
         });
         this.plugin.addCommand({
             langKey: "showBookmarks",
@@ -150,4 +138,4 @@ class ToolBox {
     }
 }
 
-export const toolBox = new ToolBox();
+export const readingPointBox = new ReadingPointBox();

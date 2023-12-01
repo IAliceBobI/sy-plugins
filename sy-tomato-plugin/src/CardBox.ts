@@ -9,6 +9,18 @@ class CardBox {
     onload(plugin: Plugin) {
         this.plugin = plugin;
         this.plugin.addCommand({
+            langKey: "removeBrokenCards",
+            hotkey: "",
+            globalCallback: async () => {
+                const ids = await siyuan.removeBrokenCards();
+                if (ids.length) {
+                    siyuan.pushMsg(`${this.plugin.i18n.removedBrokenCards}${ids}`);
+                } else {
+                    siyuan.pushMsg(this.plugin.i18n.thereIsNoInvalidCards);
+                }
+            },
+        });
+        this.plugin.addCommand({
             langKey: "addFlashCard",
             hotkey: "⌘1",
             globalCallback: async () => {

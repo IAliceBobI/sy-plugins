@@ -3,7 +3,7 @@ import { ICONS } from "./icons";
 import { tomatoClock } from "./TomatoClock";
 import { linkBox } from "./LinkBox";
 import { schedule } from "./Schedule";
-import { toolBox } from "./ToolBox";
+import { readingPointBox } from "./ReadingPointBox";
 import { cpBox } from "./CpBox";
 import { backLinkBox } from "./BackLinkBox";
 import { cardBox } from "./CardBox";
@@ -17,7 +17,7 @@ export default class ThePlugin extends Plugin {
         events.onload(this);
         tomatoClock.onload(this);
         schedule.onload(this);
-        toolBox.onload(this);
+        readingPointBox.onload(this);
         linkBox.onload(this);
         cpBox.onload(this);
         backLinkBox.onload(this);
