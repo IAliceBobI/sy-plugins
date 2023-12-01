@@ -521,9 +521,9 @@ export const siyuanCache = {
     getBackmentionDoc: createCache(cacheTime, siyuan.getBackmentionDoc),
 };
 
-export function createCache(expirationTime: number, originalFunction: Func): Func {
-    const cache = new Map<string, { value: any; timestamp: number }>();
-    return function cachedFunction(...args: any[]): any {
+export function createCache<T extends Func>(expirationTime: number, originalFunction: T): T {
+    const cache = new Map<string, { value: ReturnType<T>; timestamp: number }>();
+    return function cachedFunction(...args: Parameters<T>): ReturnType<T> {
         const key = JSON.stringify(args);
         if (cache.has(key)) {
             const { value, timestamp } = cache.get(key);
@@ -536,7 +536,7 @@ export function createCache(expirationTime: number, originalFunction: Func): Fun
         const result = originalFunction(...args);
         cache.set(key, { value: result, timestamp: Date.now() });
         return result;
-    };
+    } as T;
 }
 
 function padStart(input: string, targetLength: number, padString: string): string {

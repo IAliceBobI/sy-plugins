@@ -83,14 +83,22 @@
         for (const d of bls.backmentions) {
             const bmdocs = await siyuanCache.getBackmentionDoc(docID, d.id);
             for (const doc of bmdocs.backmentions) {
+                const marks: string[] = findMarks(doc.dom);
                 for (const p of doc?.blockPaths ?? []) {
                     if (thisEventID != lastEventID) return;
                     if (p.type == "NodeParagraph") {
-                        const content = keepContext(p.name, title, 10);
+                        // const content = keepContext(p.name, title, 10);
                         const docName = await siyuanCache.getDocNameByBlockID(
                             p.id,
                         );
                         if (shouldMove(dedup, p.name, docName)) {
+                            let content: string = p.name;
+                            marks.forEach((mark) => {
+                                content = content.replace(
+                                    new RegExp(escape(mark), "g"),
+                                    `<span style="background-color:var(--b3-protyle-inline-mark-background)">${mark}</span>`,
+                                );
+                            });
                             mentionlinks = [
                                 ...mentionlinks,
                                 { id: p.id, content, docName },
@@ -101,6 +109,9 @@
             }
         }
     }
+    function escape(s: string) {
+        return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    }
     function openAtab(id: string) {
         openTab({
             app: plugin.app,
@@ -110,44 +121,54 @@
             },
         });
     }
-    function splitByMiddle(str: string): [string, string] {
-        const middleIndex = Math.floor(str.length / 2);
-        const part1 = str.substring(0, middleIndex);
-        const part2 = str.substring(middleIndex);
-        return [part1, part2];
+    function findMarks(dom: string) {
+        const all = [];
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(dom, "text/html");
+        const spans = doc.querySelectorAll('span[data-type="search-mark"]');
+        spans.forEach((span) => {
+            all.push(span.innerHTML.trim());
+        });
+        return all;
     }
-    function keepContext(text: string, keyword: string, count: number): string {
-        let parts = text.split(keyword);
-        if (parts.length == 1) return text;
-        {
-            const newParts = [];
-            newParts.push(parts[0]);
-            for (let i = 1; i < parts.length - 1; i++) {
-                newParts.push(...splitByMiddle(parts[i]));
-            }
-            newParts.push(parts[parts.length - 1]);
-            parts = newParts;
-        }
+    // function splitByMiddle(str: string): [string, string] {
+    //     const middleIndex = Math.floor(str.length / 2);
+    //     const part1 = str.substring(0, middleIndex);
+    //     const part2 = str.substring(middleIndex);
+    //     return [part1, part2];
+    // }
+    // function keepContext(text: string, keyword: string, count: number): string {
+    //     let parts = text.split(keyword);
+    //     if (parts.length == 1) return text;
+    //     {
+    //         const newParts = [];
+    //         newParts.push(parts[0]);
+    //         for (let i = 1; i < parts.length - 1; i++) {
+    //             newParts.push(...splitByMiddle(parts[i]));
+    //         }
+    //         newParts.push(parts[parts.length - 1]);
+    //         parts = newParts;
+    //     }
 
-        for (let i = 0; i < parts.length; i++) {
-            const len = parts[i].length;
-            if (i % 2 == 0) {
-                const start = Math.max(len - count, 0);
-                if (start > 0) {
-                    parts[i] = ".." + parts[i].slice(start, len) + keyword;
-                } else {
-                    parts[i] = parts[i].slice(start, len) + keyword;
-                }
-            } else {
-                if (count < len) {
-                    parts[i] = parts[i].slice(0, count) + "..";
-                } else {
-                    parts[i] = parts[i].slice(0, count);
-                }
-            }
-        }
-        return parts.join("");
-    }
+    //     for (let i = 0; i < parts.length; i++) {
+    //         const len = parts[i].length;
+    //         if (i % 2 == 0) {
+    //             const start = Math.max(len - count, 0);
+    //             if (start > 0) {
+    //                 parts[i] = ".." + parts[i].slice(start, len) + keyword;
+    //             } else {
+    //                 parts[i] = parts[i].slice(start, len) + keyword;
+    //             }
+    //         } else {
+    //             if (count < len) {
+    //                 parts[i] = parts[i].slice(0, count) + "..";
+    //             } else {
+    //                 parts[i] = parts[i].slice(0, count);
+    //             }
+    //         }
+    //     }
+    //     return parts.join("");
+    // }
 </script>
 
 <!-- https://learn.svelte.dev/tutorial/if-blocks -->
@@ -188,14 +209,9 @@
             >
             <a href="siyuan://blocks/{link.id}">
                 <span class="reftext">
-                    {#if title}
-                        {@html link.content.replace(
-                            new RegExp(title, "g"),
-                            `<strong>${title}</strong>`,
-                        )}
-                    {:else}
-                        {link.content}
-                    {/if}
+                    {@html link.content}
+                </span>
+                <span class="reftext-small">
                     《{link.docName}》
                 </span>
             </a>
@@ -209,7 +225,7 @@
         background: var(--b3-theme-surface);
         border-radius: 4px;
         padding: 2px 8px;
-        font-size: xx-small;
+        font-size: small;
     }
     .reftext {
         background: var(--b3-theme-surface);
