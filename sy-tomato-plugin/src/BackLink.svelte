@@ -42,9 +42,18 @@
         });
     }
 
+    function shouldMove(dedup: Set<string>, content: string, docName: string) {
+        const key = `${content.trim()}#${docName.trim()}`;
+        if (dedup.has(key)) return false;
+        dedup.add(key);
+        return true;
+    }
+
     async function getBackLinks(docID: string, thisEventID: number) {
         backlinks = [];
         mentionlinks = [];
+        const dedup: Set<string> = new Set();
+
         const bls = await siyuanCache.getBacklink2(docID);
         for (const d of bls.backlinks) {
             const bdocs = await siyuanCache.getBacklinkDoc(docID, d.id);
@@ -57,18 +66,20 @@
                     const docName = await siyuanCache.getDocNameByBlockID(p.id);
                     const { content } =
                         await siyuanCache.getBlockMarkdownAndContent(p.id);
-                    backlinks = [
-                        ...backlinks,
-                        {
-                            id: p.id,
-                            content: content.slice(0, 16),
-                            docName,
-                        },
-                    ];
+
+                    if (shouldMove(dedup, p.name, docName)) {
+                        backlinks = [
+                            ...backlinks,
+                            {
+                                id: p.id,
+                                content: content.slice(0, 16),
+                                docName,
+                            },
+                        ];
+                    }
                 }
             }
         }
-        const dedup: Set<string> = new Set();
         for (const d of bls.backmentions) {
             const bmdocs = await siyuanCache.getBackmentionDoc(docID, d.id);
             for (const doc of bmdocs.backmentions) {
@@ -79,13 +90,12 @@
                         const docName = await siyuanCache.getDocNameByBlockID(
                             p.id,
                         );
-                        const key = `${p.name}#${docName}`;
-                        if (dedup.has(key)) continue;
-                        dedup.add(key);
-                        mentionlinks = [
-                            ...mentionlinks,
-                            { id: p.id, content, docName },
-                        ];
+                        if (shouldMove(dedup, p.name, docName)) {
+                            mentionlinks = [
+                                ...mentionlinks,
+                                { id: p.id, content, docName },
+                            ];
+                        }
                     }
                 }
             }
@@ -166,7 +176,6 @@
             <a href="siyuan://blocks/{link.id}"
                 ><span class="reftext">{link.content} 《{link.docName}》</span>
             </a>
-            <span class="reftext-small">{link.id.split("-")[1]}</span>
             <div class="fn__hr"></div>
         {/each}
         <div class="fn__hr"></div>
