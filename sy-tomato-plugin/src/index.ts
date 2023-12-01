@@ -43,10 +43,10 @@ export default class ThePlugin extends Plugin {
 
     private addSettingItem(key: string, title: string, defaultValue: boolean) {
         const checkbox = document.createElement("input") as HTMLInputElement;
-        checkbox.type = 'checkbox';
+        checkbox.type = "checkbox";
         checkbox.addEventListener("change", () => {
-            this.settingCfg[key] = checkbox.checked
-        })
+            this.settingCfg[key] = checkbox.checked;
+        });
         this.setting.addItem({
             title: title,
             createActionElement: () => {

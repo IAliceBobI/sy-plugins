@@ -159,21 +159,24 @@
         {backlinks.length}反链
         <div class="fn__hr"></div>
         {#each backlinks as link}
-            <button on:click={() => openAtab(link.id)}>🔗</button>
-            <a href="siyuan://blocks/{link.id}"
-                ><span class="reftext"
-                    >{link.content} 《{link.docName}》{link.id.split(
-                        "-",
-                    )[1]}</span
-                ></a
+            <button
+                class="b3-button b3-button--text"
+                on:click={() => openAtab(link.id)}>🔗</button
             >
+            <a href="siyuan://blocks/{link.id}"
+                ><span class="reftext">{link.content} 《{link.docName}》</span>
+            </a>
+            <span class="reftext-small">{link.id.split("-")[1]}</span>
             <div class="fn__hr"></div>
         {/each}
         <div class="fn__hr"></div>
         {mentionlinks.length}提及：《{title}》中内容
         <div class="fn__hr"></div>
         {#each mentionlinks as link}
-            <button on:click={() => openAtab(link.id)}>🔗</button>
+            <button
+                class="b3-button b3-button--text"
+                on:click={() => openAtab(link.id)}>🔗</button
+            >
             <a href="siyuan://blocks/{link.id}">
                 <span class="reftext">
                     {#if title}
@@ -193,8 +196,14 @@
 </div>
 
 <style>
+    .reftext-small {
+        background: var(--b3-theme-surface);
+        border-radius: 4px;
+        padding: 2px 8px;
+        font-size: xx-small;
+    }
     .reftext {
-        background: #e3d8d8;
+        background: var(--b3-theme-surface);
         border-radius: 4px;
         padding: 2px 8px;
         font-size: large;
