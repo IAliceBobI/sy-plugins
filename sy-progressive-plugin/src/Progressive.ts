@@ -505,7 +505,7 @@ class Progressive {
         for (const id of piece.slice().reverse()) {
             const { dom } = await siyuan.getBlockDOM(id);
             let md = lute.BlockDOM2Md(dom);
-            md = help.tryRmIDAddLinkOne(md, id);
+            md = help.tryRmIDAddLinkOne(md/*, id */);
             md = `${md}\n{: ${constants.RefIDKey}="${id}"}`;
             await siyuan.insertBlockAsChildOf(md, noteID);
         }
