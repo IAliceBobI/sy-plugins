@@ -22,9 +22,9 @@ git add -A
 git commit -m "auto"
 git tag v${plugins_new_version}
 git push origin v${plugins_new_version}
-git push origin
+git push origin main
 git push -f gitee v${plugins_new_version}
-git push -f gitee
+git push -f gitee main
 
 rsync -ru \
     .github \
@@ -40,6 +40,6 @@ git add -A
 git commit -m "auto"
 git tag v${new_version}
 git push -f origin v${new_version}
-git push -f origin
+git push -f origin main
 
 cd ${projDir}
