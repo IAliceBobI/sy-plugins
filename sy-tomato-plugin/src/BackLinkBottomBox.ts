@@ -8,6 +8,13 @@ class BackLinkBottomBox {
 
     onload(plugin: Plugin) {
         this.plugin = plugin;
+        this.plugin.addCommand({
+            langKey: "addFlashCard",
+            hotkey: "",
+            editorCallback: async (protyle) => {
+
+            },
+        });
         this.plugin.eventBus.on("open-menu-content", async ({ detail }) => {
             const menu = detail.menu;
             menu.addItem({

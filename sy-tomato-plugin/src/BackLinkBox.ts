@@ -1,5 +1,5 @@
 import { Plugin } from "siyuan";
-import BackLinkView from "./BackLink.svelte";
+import BackLinkView from "./BackLinkBox.svelte";
 
 const DOCK_TYPE = "dock_tab";
 
