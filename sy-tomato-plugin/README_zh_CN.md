@@ -25,6 +25,10 @@
 
 ![](./assets/tomatoTimeup.png)
 
+## 底部反链区
+
+加入类似 `logseq` 的底部反链区。并对列表/大纲块，做了处理。
+
 ## 极简反链
 
 ![Alt text](assets/backlink.png)
@@ -194,6 +198,10 @@ QQ群: 263961482
 [或者到官方论坛提交问题](https://ld246.com/tag/siyuan)
 
 # 更新日志
+
+## 2023-12-03
+
+* 加入仿 `logseq` 的底部反链区。
 
 ## 2023-12-02
 
