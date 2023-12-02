@@ -1,8 +1,8 @@
 import { Plugin } from "siyuan";
-import * as constants from "./constants";
-import { siyuan } from "../../sy-tomato-plugin/src/utils";
-import * as utils from "../../sy-tomato-plugin/src/utils";
-import { events } from "../../sy-tomato-plugin/src/Events";
+import { siyuan } from "../../sy-tomato-plugin/src/libs/utils";
+import * as utils from "../../sy-tomato-plugin/src/libs/utils";
+import { events } from "../../sy-tomato-plugin/src/libs/Events";
+import * as gconst from "../../sy-tomato-plugin/src/libs/gconst";
 import * as helper from "./helper";
 
 enum CardType {
@@ -58,9 +58,9 @@ class FlashBox {
     }
 
     private async makeCard(protyle: any, t: CardType) {
-        const { lastSelectedID, firstSelectedID, markdowns } = this.cloneSelectedLineMarkdowns(protyle);
+        const { lastSelectedID, markdowns } = this.cloneSelectedLineMarkdowns(protyle);
         if (lastSelectedID) {
-            const { cardID, markdown } = this.createList(markdowns, firstSelectedID, t);
+            const { cardID, markdown } = this.createList(markdowns, t);
             await siyuan.insertBlockAfter("", lastSelectedID);
             await utils.sleep(200);
             await siyuan.insertBlockAfter(markdown, lastSelectedID);
@@ -77,8 +77,8 @@ class FlashBox {
         }
     }
 
-    private createList(markdowns: string[], firstSelectedID: string, cardType: CardType) {
-        markdowns = helper.tryRmIDAddLink(markdowns, firstSelectedID);
+    private createList(markdowns: string[], cardType: CardType) {
+        markdowns = helper.tryRmIDAddLink(markdowns);
         const tmp = [];
         for (const m of markdowns) {
             tmp.push("* " + m);
@@ -100,13 +100,13 @@ class FlashBox {
         let lastSelectedID = "";
         let firstSelectedID = "";
         for (const div of multiLine) {
-            if (div.classList.contains(constants.PROTYLE_WYSIWYG_SELECT)) {
-                const id = div.getAttribute(constants.DATA_NODE_ID);
+            if (div.classList.contains(gconst.PROTYLE_WYSIWYG_SELECT)) {
+                const id = div.getAttribute(gconst.DATA_NODE_ID);
                 if (id) {
                     lastSelectedID = id;
                     if (!firstSelectedID) firstSelectedID = id;
                 }
-                div.classList.remove(constants.PROTYLE_WYSIWYG_SELECT);
+                div.classList.remove(gconst.PROTYLE_WYSIWYG_SELECT);
                 const elem = div.cloneNode(true) as HTMLDivElement;
                 markdowns.push(lute.BlockDOM2Md(elem.innerHTML));
             }
@@ -117,23 +117,23 @@ class FlashBox {
     private getBlockDOM(dom: Element): { dom: Element, blockID: string } {
         if (!dom) return {} as any;
         if (dom?.tagName?.toLocaleLowerCase() == "body") return {} as any;
-        const blockID: string = dom.getAttribute(constants.DATA_NODE_ID) ?? "";
+        const blockID: string = dom.getAttribute(gconst.DATA_NODE_ID) ?? "";
         if (!blockID) return this.getBlockDOM(dom.parentElement);
         return { dom, blockID };
     }
 
     private async blankSpaceCard(blockID: string, selected: string, range: Range, protyle: any, cardType: CardType) {
         const lute = utils.NewLute();
-        let md;
+        let md = "";
         if (selected) {
             const { dom } = this.getBlockDOM(range.endContainer.parentElement);
             if (!dom) return;
             protyle.toolbar.setInlineMark(protyle, "mark", "range");
-            md = helper.tryRmIDAddLinkOne(lute.BlockDOM2Md(dom.outerHTML), blockID);
+            md = helper.tryRmIDAddLinkOne(lute.BlockDOM2Md(dom.outerHTML));
             protyle.toolbar.setInlineMark(protyle, "mark", "range");
         } else {
             const { dom } = await siyuan.getBlockDOM(blockID);
-            md = helper.tryRmIDAddLinkOne(lute.BlockDOM2Md(dom), blockID);
+            md = helper.tryRmIDAddLinkOne(lute.BlockDOM2Md(dom));
         }
         const cardID = utils.NewNodeID();
         const list = [];

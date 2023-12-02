@@ -28,6 +28,7 @@
   "ignore": "🚫",
   "Repiece": "重新分片",
   "DeleteAndNext": "🗑 ➡",
+  "DeleteAndBack": "⬅ 🗑",
   "Delete": "删除",
   "Reading": "阅读",
   "FailToNewDoc": "新建文件失败，请稍后再试试……",

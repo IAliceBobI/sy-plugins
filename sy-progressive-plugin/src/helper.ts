@@ -1,5 +1,5 @@
-import { siyuan } from "../../sy-tomato-plugin/src/utils";
-import * as utils from "../../sy-tomato-plugin/src/utils";
+import { siyuan } from "../../sy-tomato-plugin/src/libs/utils";
+import * as utils from "../../sy-tomato-plugin/src/libs/utils";
 import * as constants from "./constants";
 import { Plugin, openTab } from "siyuan";
 
@@ -28,6 +28,7 @@ export enum HtmlCBType {
     DelDocCard = 10,
     deleteAndExit = 11,
     openFlashcardTab = 12,
+    deleteAndBack = 13,
 }
 
 export class Storage {
@@ -162,13 +163,13 @@ function styleColor(bgcolor: string, color: string) {
     return `<style>button{display: inline-block; padding: 10px 20px; background-color: ${bgcolor}; color: ${color}; text-align: center; text-decoration: none; font-size: 16px; border: none; border-radius: 4px; cursor: pointer;}button.large { padding: 12px 24px; font-size: 24px; }button.small { padding: 8px 16px; font-size: 14px; }</style>`;
 }
 
-export function tryRmIDAddLinkOne(md: string/*, lnkID: string */) {
+export function tryRmIDAddLinkOne(md: string, lnkID: string = "") {
     let list = [md];
-    list = tryRmIDAddLink(list, /*lnkID*/);
+    list = tryRmIDAddLink(list, lnkID);
     return list[0];
 }
 
-export function tryRmIDAddLink(mds: string[]/*, lnkID: string */) {
+export function tryRmIDAddLink(mds: string[], lnkID: string = "") {
     for (let i = 0; i < mds.length; i++) {
         const parts = mds[i].trim().split("\n");
         if (parts.length >= 2) {
@@ -176,9 +177,9 @@ export function tryRmIDAddLink(mds: string[]/*, lnkID: string */) {
                 parts.pop();
             }
         }
-        // if (!parts[0].endsWith(" \"*\"))") && i == 0) {
-        //     parts[0] = parts[0] + `((${lnkID} "*"))`;
-        // }
+        if (lnkID && !parts[0].endsWith(" \"*\"))") && i == 0) {
+            parts[0] = parts[0] + `((${lnkID} "*"))`;
+        }
         mds[i] = parts.join("\n");
     }
     return mds;
@@ -266,6 +267,21 @@ export class Helper {
             <script>
                 function ${btnID}() {
                     globalThis.progressive_zZmqus5PtYRi.progressive.htmlBlockReadNextPeice("${bookID}","${noteID}",${HtmlCBType.deleteAndExit},${point})
+                }
+            </script>
+        </div>`;
+    }
+
+    btnDeleteBack(bookID: string, noteID: string, point: number) {
+        const btnID = utils.newID().slice(0, constants.IDLen);
+        return `<div>
+            ${styleColor("var(--b3-card-error-background)", "var(--b3-card-error-color)")}
+            <div>
+                <button title="${this.plugin.i18n.tipSkip}" onclick="${btnID}()" id="btn${btnID}">${this.plugin.i18n.DeleteAndBack}</button>
+            </div>
+            <script>
+                function ${btnID}() {
+                    globalThis.progressive_zZmqus5PtYRi.progressive.htmlBlockReadNextPeice("${bookID}","${noteID}",${HtmlCBType.deleteAndBack},${point})
                 }
             </script>
         </div>`;
@@ -387,6 +403,8 @@ ${this.btnNext(bookID, noteID, point)}
 ${this.btnFullfilContent(bookID, noteID, point)}
 
 ${this.btnCleanUnchanged(bookID, noteID, point)}
+
+${this.btnDeleteBack(bookID, noteID, point)}
 
 ${this.btnDeleteNext(bookID, noteID, point)}
 

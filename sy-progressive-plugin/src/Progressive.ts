@@ -1,9 +1,9 @@
 import { Dialog, Menu, Plugin, openTab, confirm } from "siyuan";
 import "./index.scss";
-import { events } from "../../sy-tomato-plugin/src/Events";
-import { siyuan, timeUtil } from "../../sy-tomato-plugin/src/utils";
+import { events } from "../../sy-tomato-plugin/src/libs/Events";
+import { siyuan, timeUtil } from "../../sy-tomato-plugin/src/libs/utils";
 import { HtmlCBType } from "./helper";
-import * as utils from "../../sy-tomato-plugin/src/utils";
+import * as utils from "../../sy-tomato-plugin/src/libs/utils";
 import * as help from "./helper";
 import * as constants from "./constants";
 
@@ -420,6 +420,12 @@ class Progressive {
                 await siyuan.removeRiffCards([noteID]);
                 await siyuan.removeDocByID(noteID);
                 break;
+            case HtmlCBType.deleteAndBack:
+                await siyuan.removeRiffCards([noteID]);
+                await this.storage.gotoBlock(bookID, point - 1);
+                await this.startToLearn(bookID);
+                await siyuan.removeDocByID(noteID);
+                break;
             case HtmlCBType.deleteAndNext:
                 await siyuan.removeRiffCards([noteID]);
                 await this.storage.gotoBlock(bookID, point + 1);
@@ -505,7 +511,7 @@ class Progressive {
         for (const id of piece.slice().reverse()) {
             const { dom } = await siyuan.getBlockDOM(id);
             let md = lute.BlockDOM2Md(dom);
-            md = help.tryRmIDAddLinkOne(md/*, id */);
+            md = help.tryRmIDAddLinkOne(md, id);
             md = `${md}\n{: ${constants.RefIDKey}="${id}"}`;
             await siyuan.insertBlockAsChildOf(md, noteID);
         }
