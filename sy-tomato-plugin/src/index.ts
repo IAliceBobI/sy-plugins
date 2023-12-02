@@ -7,7 +7,7 @@ import { readingPointBox } from "./ReadingPointBox";
 import { cpBox } from "./CpBox";
 import { backLinkBox } from "./BackLinkBox";
 import { cardBox } from "./CardBox";
-import { events } from "./Events";
+import { events } from "@/libs/Events";
 import { STORAGE_SETTINGS } from "./constants";
 
 export default class ThePlugin extends Plugin {

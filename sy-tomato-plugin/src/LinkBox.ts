@@ -1,8 +1,8 @@
 import { Lute, Plugin } from "siyuan";
-import { events } from "./Events";
-import * as constants from "./constants";
-import { siyuan } from "./utils";
-import * as utils from "./utils";
+import { events } from "@/libs/Events";
+import * as gconst from "@/libs/gconst";
+import { siyuan } from "@/libs/utils";
+import * as utils from "@/libs/utils";
 
 class LinkBox {
     private plugin: Plugin;
@@ -81,9 +81,9 @@ class LinkBox {
         const multiLine = protyle?.element?.getElementsByTagName("div") as HTMLDivElement[] ?? [];
         const ids = [];
         for (const div of multiLine) {
-            if (div.classList.contains(constants.PROTYLE_WYSIWYG_SELECT)) {
-                const id = div.getAttribute(constants.DATA_NODE_ID);
-                div.classList.remove(constants.PROTYLE_WYSIWYG_SELECT);
+            if (div.classList.contains(gconst.PROTYLE_WYSIWYG_SELECT)) {
+                const id = div.getAttribute(gconst.DATA_NODE_ID);
+                div.classList.remove(gconst.PROTYLE_WYSIWYG_SELECT);
                 ids.push(id);
             }
         }

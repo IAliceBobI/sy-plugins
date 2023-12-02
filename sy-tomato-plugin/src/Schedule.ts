@@ -1,5 +1,5 @@
 import { Dialog, Plugin, Protyle, } from "siyuan";
-import { siyuan, newID, timeUtil } from "./utils";
+import { siyuan, newID, timeUtil } from "@/libs/utils";
 import "./index.scss";
 import ScheduleDialog from "@/Schedule.svelte";
 

@@ -1,7 +1,7 @@
 import { Plugin } from "siyuan";
-import { siyuan, sleep } from "./utils";
+import { siyuan, sleep } from "@/libs/utils";
 import "./index.scss";
-import { events } from "./Events";
+import { events } from "@/libs/Events";
 
 class CardBox {
     private plugin: Plugin;

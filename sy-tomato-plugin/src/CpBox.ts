@@ -1,5 +1,5 @@
 import { Plugin, openTab } from "siyuan";
-import { siyuan, sleep } from "./utils";
+import { siyuan, sleep } from "@/libs/utils";
 import "./index.scss";
 
 const LongContentOpsLock = "LongContentOpsLock";

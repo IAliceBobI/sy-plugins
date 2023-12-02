@@ -1,8 +1,8 @@
 <script lang="ts">
     import { App, Plugin, Protyle, Dialog } from "siyuan";
     import { onDestroy, onMount } from "svelte";
-    import { siyuan, timeUtil } from "./utils";
-    import { events } from "./Events";
+    import { siyuan, timeUtil } from "@/libs/utils";
+    import { events } from "@/libs/Events";
 
     export let app: App;
     export let plugin: Plugin;

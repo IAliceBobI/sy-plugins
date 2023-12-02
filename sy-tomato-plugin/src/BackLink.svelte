@@ -1,8 +1,8 @@
 <script lang="ts">
     import { adaptHotkey, openTab, Plugin, Protyle } from "siyuan";
     import { onMount } from "svelte";
-    import { siyuanCache } from "./utils";
-    import { events, EventType } from "./Events";
+    import { siyuanCache } from "@/libs/utils";
+    import { events, EventType } from "@/libs/Events";
 
     export let plugin: Plugin;
 
