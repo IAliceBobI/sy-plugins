@@ -2,6 +2,7 @@ import { Plugin } from "siyuan";
 import { siyuan } from "./libs/utils";
 import { DATA_NODE_ID, DATA_TYPE } from "./libs/gconst";
 import { TOMATOBACKLINKKEY } from "./constants";
+import { events } from "./libs/Events";
 
 class BackLinkBottomBox {
     private plugin: Plugin;
@@ -9,34 +10,37 @@ class BackLinkBottomBox {
     onload(plugin: Plugin) {
         this.plugin = plugin;
         this.plugin.addCommand({
-            langKey: "addFlashCard",
+            langKey: "bottombacklink",
             hotkey: "",
-            editorCallback: async (protyle) => {
-
+            callback: async () => {
+                await this.doTheWork(events.docID);
             },
         });
         this.plugin.eventBus.on("open-menu-content", async ({ detail }) => {
             const menu = detail.menu;
             menu.addItem({
-                label: "刷新底部反链",
+                label: this.plugin.i18n.bottombacklink.split("#")[0],
                 icon: "iconLink",
                 click: async () => {
                     const docID = detail?.protyle?.block.rootID ?? "";
-                    if (docID) {
-                        const lastID = await this.getLastBlockID(docID);
-                        await this.rmbacklink(docID);
-                        await this.getBackLinks(docID, lastID);
-                    }
+                    await this.doTheWork(docID);
                 },
             });
         });
     }
 
+    private async doTheWork(docID: string) {
+        if (docID) {
+            const lastID = await this.getLastBlockID(docID);
+            await this.rmbacklink(docID);
+            await this.getBackLinks(docID, lastID);
+        }
+    }
+
     async rmbacklink(docID: string) {
-        const rows = await siyuan.sql(`select id from blocks where ial like '%${TOMATOBACKLINKKEY}%' and root_id="${docID}"`)
-        console.log(rows)
+        const rows = await siyuan.sql(`select id from blocks where ial like '%${TOMATOBACKLINKKEY}%' and root_id="${docID}"`);
         for (const row of rows) {
-            await siyuan.safeDeleteBlock(row['id'])
+            await siyuan.safeDeleteBlock(row["id"]);
         }
     }
 
@@ -44,13 +48,13 @@ class BackLinkBottomBox {
         const idtypes = await siyuan.getChildBlocks(docID);
         idtypes.reverse();
         for (const idtype of idtypes) {
-            const row = await siyuan.sqlOne(`select ial from blocks where id="${idtype.id}"`)
+            const row = await siyuan.sqlOne(`select ial from blocks where id="${idtype.id}"`);
             const ial: string = row?.ial ?? "";
             if (!ial.includes(TOMATOBACKLINKKEY)) {
-                return idtype.id
+                return idtype.id;
             }
         }
-        return ''
+        return "";
     }
 
     async getBackLinks(docID: string, lastID: string) {
@@ -75,7 +79,7 @@ class BackLinkBottomBox {
         div.innerHTML = bkPath.dom;
         let blockID = div.firstElementChild.getAttribute(DATA_NODE_ID);
         const data_type = div.firstElementChild.getAttribute(DATA_TYPE);
-        if (data_type == 'NodeListItem') {
+        if (data_type == "NodeListItem") {
             const [listID] = await siyuan.findListType(blockID);
             if (listID) {
                 blockID = listID;
