@@ -74,3 +74,8 @@ interface GetBlockMarkdownAndContent {
     markdown:string,
     content:string,
 }
+
+interface GetChildBlocks {
+    id:   string;
+    type: string;
+}

@@ -240,8 +240,7 @@ export const siyuan = {
         const row = await siyuan.sqlOne(`select * from blocks where id='${id}'`);
         return row ?? {};
     },
-    async getChildBlocks(id: string) {
-        // return {id, type}
+    async getChildBlocks(id: string): Promise<GetChildBlocks[]> {
         return siyuan.call("/api/block/getChildBlocks", { id });
     },
     async getIDsByHPath(hpath: string, notebookID: string) {
