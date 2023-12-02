@@ -21,8 +21,8 @@ interface Conf {
 }
 
 interface GetBacklink2 {
-    backlinks: Backlink[];
-    backmentions: Backlink[];
+    backlinks: Backlink2[];
+    backmentions: Backlink2[];
     box: string;
     k: string;
     linkRefsCount: number;
@@ -30,7 +30,7 @@ interface GetBacklink2 {
     mk: string;
 }
 
-interface Backlink {
+interface Backlink2 {
     id: string;
     box: string;
     name: string;

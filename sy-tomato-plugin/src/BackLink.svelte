@@ -82,7 +82,7 @@
                             ...backlinks,
                             {
                                 id: p.id,
-                                content: content.slice(0, 16),
+                                content,
                                 docName,
                             },
                         ];
