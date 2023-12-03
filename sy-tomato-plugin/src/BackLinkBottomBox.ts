@@ -70,8 +70,8 @@ class BackLinkBottomBox {
             let shouldInsertSplit = false;
             for (const memtion of backlink2.backmentions.slice(0, 2).reverse()) {
                 const memtionDoc = await siyuan.getBackmentionDoc(docID, memtion.id);
-                for (const bkPath of memtionDoc.backmentions) {
-                    shouldInsertSplit = await this.embedDom(docID, bkPath, lastID, lute,  allRefs);
+                for (const memtionsInDoc of memtionDoc.backmentions) {
+                    shouldInsertSplit = await this.embedDom(docID, memtionsInDoc, lastID, lute,  allRefs);
                 }
             }
             if (shouldInsertSplit) await this.insertMd("---", lastID);
@@ -80,8 +80,8 @@ class BackLinkBottomBox {
             let shouldInsertSplit = false;
             for (const backlink of backlink2.backlinks.reverse()) {
                 const backlinkDoc = await siyuan.getBacklinkDoc(docID, backlink.id);
-                for (const bkPath of backlinkDoc.backlinks.reverse()) {
-                    shouldInsertSplit = await this.embedDom(docID, bkPath, lastID, lute,  allRefs);
+                for (const backlinksInDoc of backlinkDoc.backlinks.reverse()) {
+                    shouldInsertSplit = await this.embedDom(docID, backlinksInDoc, lastID, lute,  allRefs);
                 }
             }
             if (shouldInsertSplit) await this.insertMd("---", lastID);
@@ -129,10 +129,10 @@ class BackLinkBottomBox {
         }
     }
 
-    private async embedDom(docID: string, bkPath: Backlink, lastID: string, lute: Lute,   allRefs: RefCollector) {
-        if (!bkPath) return;
+    private async embedDom(docID: string, linksInDoc: Backlink, lastID: string, lute: Lute,   allRefs: RefCollector) {
+        if (!linksInDoc) return;
         const div = document.createElement("div") as HTMLDivElement;
-        div.innerHTML = bkPath.dom;
+        div.innerHTML = linksInDoc.dom;
         if (div.firstElementChild.getAttribute(TOMATOBACKLINKKEY)) {
             return;
         }
@@ -151,7 +151,6 @@ class BackLinkBottomBox {
                 div.firstElementChild.setAttribute(TOMATOBACKLINKKEY, "1");
                 const md = lute.BlockDOM2Md(div.innerHTML);
                 await this.insertMd(md, lastID);
-                await this.insertMd(`{{select * from blocks where id="${blockID}"}}`, lastID);
                 return true;
             }
         }
