@@ -67,7 +67,7 @@ class BackLinkBottomBox {
             }
         }
         await this.insertMd("---", lastID);
-        for (const backlink of backlink2.backlinks) {
+        for (const backlink of backlink2.backlinks.reverse()) {
             const backlinkDoc = await siyuan.getBacklinkDoc(docID, backlink.id);
             for (const bkPath of backlinkDoc.backlinks.reverse()) {
                 await this.embedDom(bkPath, lastID, lute);
