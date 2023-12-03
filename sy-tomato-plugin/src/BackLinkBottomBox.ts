@@ -104,7 +104,7 @@ class BackLinkBottomBox {
         if (allRefs.size > 0) {
             const lnks = [...allRefs.values()].map(i => i.lnk);
             lnks.splice(0, 0, this.btnRefresh(docID, isEmb));
-            for (const piece of chunks(lnks, 4)) {
+            for (const piece of chunks(lnks, 4).reverse()) {
                 let md = "{{{col\n\n";
                 md += piece.join("\n\n");
                 md += "\n\n}}}";
