@@ -8,8 +8,10 @@ type RefCollector = Map<string, { lnk: string, count: number }>;
 
 class BackLinkBottomBox {
     private plugin: Plugin;
+    private static readonly GLOBAL_THIS: Record<string, any> = globalThis;
 
     onload(plugin: Plugin) {
+        BackLinkBottomBox.GLOBAL_THIS["tomato_zZmqus5PtYRi"] = this;
         this.plugin = plugin;
         this.plugin.addCommand({
             langKey: "bottombacklink",
@@ -46,11 +48,11 @@ class BackLinkBottomBox {
         });
     }
 
-    private async doTheWork(docID: string, isEmb = false) {
+    async doTheWork(docID: string, isEmb = false) {
         if (docID) {
+            await siyuan.pushMsg("正在刷新底部反链区");
             const lastID = await this.getLastBlockID(docID);
             await this.rmbacklink(docID);
-            await siyuan.pushMsg("正在刷新底部反链区");
             await this.getBackLinks(docID, lastID, isEmb);
         }
     }
@@ -101,6 +103,7 @@ class BackLinkBottomBox {
         }
         if (allRefs.size > 0) {
             const lnks = [...allRefs.values()].map(i => i.lnk);
+            lnks.splice(0, 0, this.btnRefresh(docID, isEmb));
             for (const piece of chunks(lnks, 4)) {
                 let md = "{{{col\n\n";
                 md += piece.join("\n\n");
@@ -111,16 +114,16 @@ class BackLinkBottomBox {
         }
     }
 
-    btnRefresh(bookID: string, noteID: string, point: number) {
-        const btnNextID = newID().slice(0, IDLen);
+    btnRefresh(docID: string, isEmb: boolean) {
+        const btnID = newID().slice(0, IDLen);
         return `<div>
             ${styleColor("var(--b3-card-success-background)", "var(--b3-card-success-color)")}
             <div>
-                <button title="${this.plugin.i18n.tipNext}" onclick="${btnNextID}()" id="btn${btnNextID}">${this.plugin.i18n.nextPiece}</button>
+                <button title="😋是的，就是刷新底部反链区！" onclick="${btnID}()" id="btn${btnID}">🔄</button>
             </div>
             <script>
-                function ${btnNextID}() {
-                    globalThis.progressive_zZmqus5PtYRi.progressive.htmlBlockReadNextPeice("${bookID}","${noteID}",${HtmlCBType.next},${point})
+                function ${btnID}() {
+                    globalThis.tomato_zZmqus5PtYRi.doTheWork("${docID}",${isEmb})
                 }
             </script>
         </div>`;
