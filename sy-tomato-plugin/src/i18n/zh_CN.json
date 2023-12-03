@@ -32,5 +32,6 @@
   "wait4finish": "请等待上个操作完成！",
   "bilink": "双向互链",
   "backlink": "反链backlink",
-  "bottombacklink": "刷新底部反链#bottombacklink"
+  "bottombacklink": "刷新底部反链#bottombacklink",
+  "bottombacklinkEmb": "刷新底部反链（嵌入块）#bottombacklinkEmbeded"
 }

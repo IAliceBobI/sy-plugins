@@ -16,6 +16,13 @@ class BackLinkBottomBox {
                 await this.doTheWork(events.docID);
             },
         });
+        this.plugin.addCommand({
+            langKey: "bottombacklinkEmb",
+            hotkey: "",
+            callback: async () => {
+                await this.doTheWork(events.docID, true);
+            },
+        });
         this.plugin.eventBus.on("open-menu-content", async ({ detail }) => {
             const menu = detail.menu;
             menu.addItem({
@@ -26,15 +33,23 @@ class BackLinkBottomBox {
                     await this.doTheWork(docID);
                 },
             });
+            menu.addItem({
+                label: this.plugin.i18n.bottombacklinkEmb.split("#")[0],
+                icon: "iconLink",
+                click: async () => {
+                    const docID = detail?.protyle?.block.rootID ?? "";
+                    await this.doTheWork(docID, true);
+                },
+            });
         });
     }
 
-    private async doTheWork(docID: string) {
+    private async doTheWork(docID: string, isEmb = false) {
         if (docID) {
             const lastID = await this.getLastBlockID(docID);
             await this.rmbacklink(docID);
             await siyuan.pushMsg("正在刷新底部反链区");
-            await this.getBackLinks(docID, lastID);
+            await this.getBackLinks(docID, lastID, isEmb);
         }
     }
 
@@ -58,7 +73,7 @@ class BackLinkBottomBox {
         return "";
     }
 
-    async getBackLinks(docID: string, lastID: string) {
+    async getBackLinks(docID: string, lastID: string, isEmb = false) {
         const lute = NewLute();
         const backlink2 = await siyuan.getBacklink2(docID);
         {
@@ -66,7 +81,7 @@ class BackLinkBottomBox {
             for (const memtion of backlink2.backmentions.reverse()) {
                 const memtionDoc = await siyuan.getBackmentionDoc(docID, memtion.id);
                 for (const bkPath of memtionDoc.backmentions) {
-                    shouldInsertSplit = await this.embedDom(bkPath, lastID, lute);
+                    shouldInsertSplit = await this.embedDom(bkPath, lastID, lute, isEmb);
                 }
             }
             if (shouldInsertSplit) await this.insertMd("---", lastID);
@@ -76,14 +91,14 @@ class BackLinkBottomBox {
             for (const backlink of backlink2.backlinks.reverse()) {
                 const backlinkDoc = await siyuan.getBacklinkDoc(docID, backlink.id);
                 for (const bkPath of backlinkDoc.backlinks.reverse()) {
-                    shouldInsertSplit = await this.embedDom(bkPath, lastID, lute);
+                    shouldInsertSplit = await this.embedDom(bkPath, lastID, lute, isEmb);
                 }
             }
             if (shouldInsertSplit) await this.insertMd("---", lastID);
         }
     }
 
-    private async embedDom(bkPath: Backlink, lastID: string, lute: Lute) {
+    private async embedDom(bkPath: Backlink, lastID: string, lute: Lute, isEmb = false) {
         if (!bkPath) return;
         const div = document.createElement("div") as HTMLDivElement;
         div.innerHTML = bkPath.dom;
@@ -104,15 +119,23 @@ class BackLinkBottomBox {
                 div.firstElementChild.setAttribute(TOMATOBACKLINKKEY, "1");
                 const md = lute.BlockDOM2Md(div.innerHTML);
                 await this.insertMd(md, lastID);
-                await this.insertPath(bkPath, lastID);
+                if (isEmb) {
+                    await this.insertMd(`{{select * from blocks where id="${blockID}"}}`, lastID);
+                } else {
+                    await this.insertPath(bkPath, lastID);
+                }
                 return true;
             }
         }
-        this.removeDataNodeIdRecursively(div);
-        div.firstElementChild.setAttribute(TOMATOBACKLINKKEY, "1");
-        const md = lute.BlockDOM2Md(div.innerHTML);
-        await this.insertMd(md, lastID);
-        await this.insertPath(bkPath, lastID);
+        if (isEmb) {
+            await this.insertMd(`{{select * from blocks where id="${blockID}"}}`, lastID);
+        } else {
+            this.removeDataNodeIdRecursively(div);
+            div.firstElementChild.setAttribute(TOMATOBACKLINKKEY, "1");
+            const md = lute.BlockDOM2Md(div.innerHTML);
+            await this.insertMd(md, lastID);
+            await this.insertPath(bkPath, lastID);
+        }
         return true;
     }
 
