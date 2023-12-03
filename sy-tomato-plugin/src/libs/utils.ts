@@ -121,12 +121,6 @@ export const siyuan = {
         return response.data + secs * 1000;
     },
     async readDir(path: string) {
-        // [      {
-        //         "isDir": false,
-        //         "isSymlink": false,
-        //         "name": "20231119160703-oelb6pi.sy",
-        //         "updated": 1700381318
-        //     }  ]
         return siyuan.call("/api/file/readDir", { path });
     },
     async getFile(path: string) {
@@ -608,26 +602,3 @@ export function keepContext(text: string, keyword: string, count: number): strin
     }
     return parts.join("");
 }
-/* {
-    "alias": "",
-    "box": "20220705180858-r5dh51g",
-    "content": "",
-    "created": "20231115194509",
-    "fcontent": "",
-    "hash": "19c377a",
-    "hpath": "/daily note/test",
-    "ial": "{: id=\"20231115194509-d03yn0d\" updated=\"20231116004755\"}",
-    "id": "20231115194509-d03yn0d",
-    "length": 0,
-    "markdown": "---",
-    "memo": "",
-    "name": "",
-    "parent_id": "20231102203317-gj54aex",
-    "path": "/20220705180902-2x8ujrh/20231102203317-gj54aex.sy",
-    "root_id": "20231102203317-gj54aex",
-    "sort": 100,
-    "subtype": "",
-    "tag": "",
-    "type": "tb",
-    "updated": "20231116004755"
-} */
