@@ -171,7 +171,7 @@ class Progressive {
 
         const statisticDiv = dialog.element.querySelector("#" + statisticDivID) as HTMLDivElement;
         statisticDiv.innerHTML = "统计中……";
-        let contentBlocks: help.WordCountType[] = await siyuan.getChildBlocks(bookID);
+        let contentBlocks: help.WordCountType[] = await siyuan.getChildBlocks(bookID) as unknown as help.WordCountType[];
         const { wordCount } = await siyuan.getBlocksWordCount([bookID]);
         let headCount = 0;
         for (const block of contentBlocks) {

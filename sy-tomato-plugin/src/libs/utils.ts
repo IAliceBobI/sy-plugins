@@ -294,6 +294,9 @@ export const siyuan = {
     async listDocsByPath(notebookID: string, notReadablePath: string, sort = 15) {
         return siyuan.call("/api/filetree/listDocsByPath", { notebook: notebookID, path: notReadablePath, sort });
     },
+    async getRefIDs(id: string) {
+        return siyuan.call("/api/block/getRefIDs", { id });
+    },
     async getBackmentionDoc(defID: string, refTreeID: string, keyword: string = ""): Promise<GetBackmentionDoc> {
         return siyuan.call("/api/ref/getBackmentionDoc", { defID, refTreeID, keyword });
     },

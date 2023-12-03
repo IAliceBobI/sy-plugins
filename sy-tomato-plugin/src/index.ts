@@ -10,10 +10,15 @@ import { backLinkBottomBox } from "./BackLinkBottomBox";
 import { cardBox } from "./CardBox";
 import { events } from "@/libs/Events";
 import { STORAGE_SETTINGS } from "./constants";
+import { siyuan } from "@/libs/utils";
 
 export default class ThePlugin extends Plugin {
+    private static readonly GLOBAL_THIS: Record<string, any> = globalThis;
+
     private settingCfg: { [key: string]: boolean };
+
     async onload() {
+        ThePlugin.GLOBAL_THIS["siyuan_zZmqus5PtYRi"] = siyuan;
         this.addIcons(ICONS);
         events.onload(this);
         this.settingCfg = await this.loadData(STORAGE_SETTINGS);
