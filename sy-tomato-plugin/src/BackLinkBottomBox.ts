@@ -20,13 +20,6 @@ class BackLinkBottomBox {
                 await this.doTheWork(events.docID);
             },
         });
-        this.plugin.addCommand({
-            langKey: "bottombacklinkEmb",
-            hotkey: "",
-            callback: async () => {
-                await this.doTheWork(events.docID, true);
-            },
-        });
         this.plugin.eventBus.on("open-menu-content", async ({ detail }) => {
             const menu = detail.menu;
             menu.addItem({
@@ -37,23 +30,15 @@ class BackLinkBottomBox {
                     await this.doTheWork(docID);
                 },
             });
-            menu.addItem({
-                label: this.plugin.i18n.bottombacklinkEmb.split("#")[0],
-                icon: "iconLink",
-                click: async () => {
-                    const docID = detail?.protyle?.block.rootID ?? "";
-                    await this.doTheWork(docID, true);
-                },
-            });
         });
     }
 
-    async doTheWork(docID: string, isEmb = false) {
+    async doTheWork(docID: string) {
         if (docID) {
             await siyuan.pushMsg("正在刷新底部反链区");
             const lastID = await this.getLastBlockID(docID);
             await this.rmbacklink(docID);
-            await this.getBackLinks(docID, lastID, isEmb);
+            await this.getBackLinks(docID, lastID);
         }
     }
 
@@ -77,16 +62,16 @@ class BackLinkBottomBox {
         return "";
     }
 
-    async getBackLinks(docID: string, lastID: string, isEmb = false) {
+    async getBackLinks(docID: string, lastID: string) {
         const lute = NewLute();
         const allRefs: RefCollector = new Map();
         const backlink2 = await siyuan.getBacklink2(docID);
         {
             let shouldInsertSplit = false;
-            for (const memtion of backlink2.backmentions.reverse()) {
+            for (const memtion of backlink2.backmentions.slice(0, 2).reverse()) {
                 const memtionDoc = await siyuan.getBackmentionDoc(docID, memtion.id);
                 for (const bkPath of memtionDoc.backmentions) {
-                    shouldInsertSplit = await this.embedDom(docID, bkPath, lastID, lute, isEmb, allRefs);
+                    shouldInsertSplit = await this.embedDom(docID, bkPath, lastID, lute,  allRefs);
                 }
             }
             if (shouldInsertSplit) await this.insertMd("---", lastID);
@@ -96,14 +81,14 @@ class BackLinkBottomBox {
             for (const backlink of backlink2.backlinks.reverse()) {
                 const backlinkDoc = await siyuan.getBacklinkDoc(docID, backlink.id);
                 for (const bkPath of backlinkDoc.backlinks.reverse()) {
-                    shouldInsertSplit = await this.embedDom(docID, bkPath, lastID, lute, isEmb, allRefs);
+                    shouldInsertSplit = await this.embedDom(docID, bkPath, lastID, lute,  allRefs);
                 }
             }
             if (shouldInsertSplit) await this.insertMd("---", lastID);
         }
         if (allRefs.size > 0) {
             const lnks = [...allRefs.values()].map(i => i.lnk);
-            lnks.splice(0, 0, this.btnRefresh(docID, isEmb));
+            lnks.splice(0, 0, this.btnRefresh(docID));
             for (const piece of chunks(lnks, 4).reverse()) {
                 let md = "{{{col\n\n";
                 md += piece.join("\n\n");
@@ -114,7 +99,7 @@ class BackLinkBottomBox {
         }
     }
 
-    btnRefresh(docID: string, isEmb: boolean) {
+    btnRefresh(docID: string,  ) {
         const btnID = newID().slice(0, IDLen);
         return `<div>
             ${styleColor("var(--b3-card-success-background)", "var(--b3-card-success-color)")}
@@ -123,7 +108,7 @@ class BackLinkBottomBox {
             </div>
             <script>
                 function ${btnID}() {
-                    globalThis.tomato_zZmqus5PtYRi.doTheWork("${docID}",${isEmb})
+                    globalThis.tomato_zZmqus5PtYRi.doTheWork("${docID}" )
                 }
             </script>
         </div>`;
@@ -144,7 +129,7 @@ class BackLinkBottomBox {
         }
     }
 
-    private async embedDom(docID: string, bkPath: Backlink, lastID: string, lute: Lute, isEmb: boolean, allRefs: RefCollector) {
+    private async embedDom(docID: string, bkPath: Backlink, lastID: string, lute: Lute,   allRefs: RefCollector) {
         if (!bkPath) return;
         const div = document.createElement("div") as HTMLDivElement;
         div.innerHTML = bkPath.dom;
@@ -166,37 +151,13 @@ class BackLinkBottomBox {
                 div.firstElementChild.setAttribute(TOMATOBACKLINKKEY, "1");
                 const md = lute.BlockDOM2Md(div.innerHTML);
                 await this.insertMd(md, lastID);
-                if (isEmb) {
-                    await this.insertMd(`{{select * from blocks where id="${blockID}"}}`, lastID);
-                } else {
-                    await this.insertPath(bkPath, lastID);
-                }
+                await this.insertMd(`{{select * from blocks where id="${blockID}"}}`, lastID);
                 return true;
             }
         }
         this.scanAllRef(docID, allRefs, div);
-        if (isEmb) {
-            await this.insertMd(`{{select * from blocks where id="${blockID}"}}`, lastID);
-        } else {
-            this.removeDataNodeIdRecursively(div);
-            div.firstElementChild.setAttribute(TOMATOBACKLINKKEY, "1");
-            const md = lute.BlockDOM2Md(div.innerHTML);
-            await this.insertMd(md, lastID);
-            await this.insertPath(bkPath, lastID);
-        }
+        await this.insertMd(`{{select * from blocks where id="${blockID}"}}`, lastID);
         return true;
-    }
-
-    private async insertPath(bkPath: Backlink, lastID: string) {
-        const refList = [];
-        for (const refs of bkPath.blockPaths) {
-            if (refs.type == "NodeHeading" || refs.type == "NodeDocument") {
-                refList.push(`((${refs.id} "[${refs.name}]"))`);
-            } else {
-                refList.push(`((${refs.id} "[${refs.name.slice(0, 10)}...]"))`);
-            }
-        }
-        await this.insertMd(refList.join(" -> "), lastID);
     }
 
     private keepPath2Root(div: HTMLDivElement) {
@@ -237,3 +198,14 @@ class BackLinkBottomBox {
 
 export const backLinkBottomBox = new BackLinkBottomBox();
 
+// private async insertPath(bkPath: Backlink, lastID: string) {
+//     const refList = [];
+//     for (const refs of bkPath.blockPaths) {
+//         if (refs.type == "NodeHeading" || refs.type == "NodeDocument") {
+//             refList.push(`((${refs.id} "[${refs.name}]"))`);
+//         } else {
+//             refList.push(`((${refs.id} "[${refs.name.slice(0, 10)}...]"))`);
+//         }
+//     }
+//     await this.insertMd(refList.join(" -> "), lastID);
+// }
