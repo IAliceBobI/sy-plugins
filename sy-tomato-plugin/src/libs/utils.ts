@@ -342,6 +342,9 @@ export const siyuan = {
     async removeRiffCards(blockIDs: Array<string>, deckID = "") {
         return siyuan.call("/api/riff/removeRiffCards", { deckID, blockIDs });
     },
+    async updateEmbedBlock(id: string, content: string) {
+        return siyuan.call("/api/search/updateEmbedBlock", { id, content });
+    },
     async findListType(thisID: string) {
         let theUpperestListID = "";
         let theMD = "";
@@ -543,33 +546,6 @@ function padStart(input: string, targetLength: number, padString: string): strin
     return padding + input;
 }
 
-export const TypeAbbrMap: Record<BlockNodeType, string> = {
-    // Block-level elements
-    "NodeDocument": "d",
-    "NodeHeading": "h",
-    "NodeList": "l",
-    "NodeListItem": "i",
-    "NodeCodeBlock": "c",
-    "NodeMathBlock": "m",
-    "NodeTable": "t",
-    "NodeBlockquote": "b",
-    "NodeSuperBlock": "s",
-    "NodeParagraph": "p",
-    "NodeHTMLBlock": "html",
-    "NodeBlockQueryEmbed": "query_embed",
-    "NodeAttributeView": "av",
-    "NodeKramdownBlockIAL": "ial",
-    "NodeIFrame": "iframe",
-    "NodeWidget": "widget",
-    "NodeThematicBreak": "tb",
-    "NodeVideo": "video",
-    "NodeAudio": "audio",
-    "NodeText": "text",
-    "NodeImage": "img",
-    "NodeLinkText": "link_text",
-    "NodeLinkDest": "link_dest",
-    "NodeTextMark": "textmark",
-};
 export function splitByMiddle(str: string): [string, string] {
     const middleIndex = Math.floor(str.length / 2);
     const part1 = str.substring(0, middleIndex);
@@ -608,3 +584,31 @@ export function keepContext(text: string, keyword: string, count: number): strin
     }
     return parts.join("");
 }
+
+// export const TypeAbbrMap: Record<BlockNodeType, string> = {
+//     // Block-level elements
+//     "NodeDocument": "d",
+//     "NodeHeading": "h",
+//     "NodeList": "l",
+//     "NodeListItem": "i",
+//     "NodeCodeBlock": "c",
+//     "NodeMathBlock": "m",
+//     "NodeTable": "t",
+//     "NodeBlockquote": "b",
+//     "NodeSuperBlock": "s",
+//     "NodeParagraph": "p",
+//     "NodeHTMLBlock": "html",
+//     "NodeBlockQueryEmbed": "query_embed",
+//     "NodeAttributeView": "av",
+//     "NodeKramdownBlockIAL": "ial",
+//     "NodeIFrame": "iframe",
+//     "NodeWidget": "widget",
+//     "NodeThematicBreak": "tb",
+//     "NodeVideo": "video",
+//     "NodeAudio": "audio",
+//     "NodeText": "text",
+//     "NodeImage": "img",
+//     "NodeLinkText": "link_text",
+//     "NodeLinkDest": "link_dest",
+//     "NodeTextMark": "textmark",
+// };
