@@ -1,6 +1,6 @@
 import { Lute, Plugin } from "siyuan";
-import { NewLute, chunks, siyuan } from "./libs/utils";
-import { DATA_ID, DATA_NODE_ID, DATA_TYPE } from "./libs/gconst";
+import { NewLute, chunks, newID, siyuan, styleColor } from "./libs/utils";
+import { DATA_ID, DATA_NODE_ID, DATA_TYPE, IDLen } from "./libs/gconst";
 import { TOMATOBACKLINKKEY } from "./constants";
 import { events } from "./libs/Events";
 
@@ -109,6 +109,21 @@ class BackLinkBottomBox {
             }
             await this.insertMd("---", lastID);
         }
+    }
+
+    btnRefresh(bookID: string, noteID: string, point: number) {
+        const btnNextID = newID().slice(0, IDLen);
+        return `<div>
+            ${styleColor("var(--b3-card-success-background)", "var(--b3-card-success-color)")}
+            <div>
+                <button title="${this.plugin.i18n.tipNext}" onclick="${btnNextID}()" id="btn${btnNextID}">${this.plugin.i18n.nextPiece}</button>
+            </div>
+            <script>
+                function ${btnNextID}() {
+                    globalThis.progressive_zZmqus5PtYRi.progressive.htmlBlockReadNextPeice("${bookID}","${noteID}",${HtmlCBType.next},${point})
+                }
+            </script>
+        </div>`;
     }
 
     private scanAllRef(docID: string, allRefs: RefCollector, div: HTMLDivElement) {

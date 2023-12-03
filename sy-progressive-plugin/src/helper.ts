@@ -1,4 +1,5 @@
-import { siyuan } from "../../sy-tomato-plugin/src/libs/utils";
+import { IDLen } from "../../sy-tomato-plugin/src/libs/gconst";
+import { siyuan, styleColor } from "../../sy-tomato-plugin/src/libs/utils";
 import * as utils from "../../sy-tomato-plugin/src/libs/utils";
 import * as constants from "./constants";
 import { Plugin, openTab } from "siyuan";
@@ -159,10 +160,6 @@ export function getDocIalMark(bookID: string, point: number) {
     return `${constants.TEMP_CONTENT}#${bookID},${point}`;
 }
 
-function styleColor(bgcolor: string, color: string) {
-    return `<style>button{display: inline-block; padding: 10px 20px; background-color: ${bgcolor}; color: ${color}; text-align: center; text-decoration: none; font-size: 16px; border: none; border-radius: 4px; cursor: pointer;}button.large { padding: 12px 24px; font-size: 24px; }button.small { padding: 8px 16px; font-size: 14px; }</style>`;
-}
-
 export function tryRmIDAddLinkOne(md: string, lnkID: string = "") {
     let list = [md];
     list = tryRmIDAddLink(list, lnkID);
@@ -198,7 +195,7 @@ export class Helper {
     }
 
     btnFullfilContent(bookID: string, noteID: string, point: number) {
-        const btnFullfilContentID = utils.newID().slice(0, constants.IDLen);
+        const btnFullfilContentID = utils.newID().slice(0, IDLen);
         return `<div>
             ${styleColor("var(--b3-card-info-background)", "var(--b3-card-info-color)")}
             <div>
@@ -213,7 +210,7 @@ export class Helper {
     }
 
     btnCleanUnchanged(bookID: string, noteID: string, point: number) {
-        const btnCleanUnchangedID = utils.newID().slice(0, constants.IDLen);
+        const btnCleanUnchangedID = utils.newID().slice(0, IDLen);
         return `<div>
             ${styleColor("var(--b3-card-info-background)", "var(--b3-card-info-color)")}
             <div>
@@ -228,7 +225,7 @@ export class Helper {
     }
 
     btnPrevious(bookID: string, noteID: string, point: number) {
-        const btnPreviousID = utils.newID().slice(0, constants.IDLen);
+        const btnPreviousID = utils.newID().slice(0, IDLen);
         return `<div>
             ${styleColor("var(--b3-card-success-background)", "var(--b3-card-success-color)")}
             <div>
@@ -243,7 +240,7 @@ export class Helper {
     }
 
     btnNext(bookID: string, noteID: string, point: number) {
-        const btnNextID = utils.newID().slice(0, constants.IDLen);
+        const btnNextID = utils.newID().slice(0, IDLen);
         return `<div>
             ${styleColor("var(--b3-card-success-background)", "var(--b3-card-success-color)")}
             <div>
@@ -258,7 +255,7 @@ export class Helper {
     }
 
     btnDeleteExit(bookID: string, noteID: string, point: number) {
-        const btnID = utils.newID().slice(0, constants.IDLen);
+        const btnID = utils.newID().slice(0, IDLen);
         return `<div>
             ${styleColor("var(--b3-card-error-background)", "var(--b3-card-error-color)")}
             <div>
@@ -273,7 +270,7 @@ export class Helper {
     }
 
     btnDeleteBack(bookID: string, noteID: string, point: number) {
-        const btnID = utils.newID().slice(0, constants.IDLen);
+        const btnID = utils.newID().slice(0, IDLen);
         return `<div>
             ${styleColor("var(--b3-card-error-background)", "var(--b3-card-error-color)")}
             <div>
@@ -288,7 +285,7 @@ export class Helper {
     }
 
     btnDeleteNext(bookID: string, noteID: string, point: number) {
-        const btnID = utils.newID().slice(0, constants.IDLen);
+        const btnID = utils.newID().slice(0, IDLen);
         return `<div>
             ${styleColor("var(--b3-card-error-background)", "var(--b3-card-error-color)")}
             <div>
@@ -303,7 +300,7 @@ export class Helper {
     }
 
     btnSaveCard(bookID: string, noteID: string, point: number) {
-        const btnSaveCardID = utils.newID().slice(0, constants.IDLen);
+        const btnSaveCardID = utils.newID().slice(0, IDLen);
         return `<div>
             ${styleColor("var(--b3-card-warning-background)", "var(--b3-card-warning-color)")}
             <div>
@@ -318,7 +315,7 @@ export class Helper {
     }
 
     btnDelCard(bookID: string, noteID: string, point: number) {
-        const btnSaveCardID = utils.newID().slice(0, constants.IDLen);
+        const btnSaveCardID = utils.newID().slice(0, IDLen);
         return `<div>
             ${styleColor("var(--b3-card-warning-background)", "var(--b3-card-warning-color)")}
             <div>
@@ -333,7 +330,7 @@ export class Helper {
     }
 
     btnStop(bookID: string, noteID: string, point: number) {
-        const btnStopID = utils.newID().slice(0, constants.IDLen);
+        const btnStopID = utils.newID().slice(0, IDLen);
         return `<div>
             ${styleColor("var(--b3-font-background6)", "#000000")}
             <div>
@@ -348,7 +345,7 @@ export class Helper {
     }
 
     btnNextBook(bookID: string, noteID: string, point: number) {
-        const btnNextBookID = utils.newID().slice(0, constants.IDLen);
+        const btnNextBookID = utils.newID().slice(0, IDLen);
         return `<div>
             ${styleColor("var(--b3-font-background6)", "#000000")}
             <div>
@@ -363,7 +360,7 @@ export class Helper {
     }
 
     btnIgnoreBook(bookID: string, noteID: string, point: number) {
-        const btnIgnoreBookID = utils.newID().slice(0, constants.IDLen);
+        const btnIgnoreBookID = utils.newID().slice(0, IDLen);
         return `<div>
             ${styleColor("var(--b3-font-background5)", "#000000")}
             <div>
@@ -378,7 +375,7 @@ export class Helper {
     }
 
     btnOpenFlashcardTab(bookID: string, noteID: string, point: number) {
-        const btnID = utils.newID().slice(0, constants.IDLen);
+        const btnID = utils.newID().slice(0, IDLen);
         return `<div>
             ${styleColor("var(--b3-font-background11)", "#000000")}
             <div>
@@ -603,7 +600,7 @@ function setBtnsSetStyle() {
         const button = protyle?.shadowRoot?.querySelector("button");
         if (button) {
             const id = button.id ?? "";
-            if (id.length === constants.IDLen + 3 && id.startsWith("btnID")) {
+            if (id.length === IDLen + 3 && id.startsWith("btnID")) {
                 // Add the styles to the button
                 button.style.display = "inline-block";
                 button.style.padding = "10px 20px";
