@@ -105,9 +105,10 @@ class BackLinkBottomBox {
         if (div.firstElementChild.getAttribute(TOMATOBACKLINKKEY)) {
             return;
         }
+        console.log(div.innerHTML)
         await this.insertMd("---", lastID);
         const blockID = div.firstElementChild.getAttribute(DATA_NODE_ID);
-        const data_type = div.firstElementChild.getAttribute(DATA_TYPE);
+        const data_type: BlockNodeType = div.firstElementChild.getAttribute(DATA_TYPE) as BlockNodeType;
         if (data_type == "NodeListItem") {
             const [listID] = await siyuan.findListType(blockID);
             if (listID && listID != blockID) {
@@ -126,6 +127,8 @@ class BackLinkBottomBox {
                 }
                 return true;
             }
+        } else if (data_type == "block-ref") {
+
         }
         if (isEmb) {
             await this.insertMd(`{{select * from blocks where id="${blockID}"}}`, lastID);

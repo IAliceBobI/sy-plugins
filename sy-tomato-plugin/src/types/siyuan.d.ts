@@ -68,38 +68,38 @@ interface BlockPath {
 
 type BacklinkType = "backlink"
 type BlockNodeSubType = "h1" | "h2" | "h3" | "h4" | "h5" | "h6"
-type BlockNodeType = "NodeParagraph" | "NodeHeading" | "NodeDocument" | "NodeTable" | "NodeList" | "NodeListItem" | "NodeCodeBlock" | "NodeMathBlock" | "NodeBlockquote" | "NodeSuperBlock" | "NodeHTMLBlock" | "NodeBlockQueryEmbed" | "NodeAttributeView" | "NodeKramdownBlockIAL" | "NodeIFrame" | "NodeWidget" | "NodeThematicBreak" | "NodeVideo" | "NodeAudio" | "NodeText" | "NodeImage" | "NodeLinkText" | "NodeLinkDest" | "NodeTextMark";
+type BlockNodeType = "block-ref" | "NodeParagraph" | "NodeHeading" | "NodeDocument" | "NodeTable" | "NodeList" | "NodeListItem" | "NodeCodeBlock" | "NodeMathBlock" | "NodeBlockquote" | "NodeSuperBlock" | "NodeHTMLBlock" | "NodeBlockQueryEmbed" | "NodeAttributeView" | "NodeKramdownBlockIAL" | "NodeIFrame" | "NodeWidget" | "NodeThematicBreak" | "NodeVideo" | "NodeAudio" | "NodeText" | "NodeImage" | "NodeLinkText" | "NodeLinkDest" | "NodeTextMark";
 
 interface GetBlockMarkdownAndContent {
-    markdown:string,
-    content:string,
+    markdown: string,
+    content: string,
 }
 
 interface GetChildBlocks {
-    id:   string;
+    id: string;
     type: string;
 }
 
 interface Block {
-    alias:     string;
-    box:       string;
-    content:   string;
-    created:   string;
-    fcontent:  string;
-    hash:      string;
-    hpath:     string;
-    ial:       string;
-    id:        string;
-    length:    number;
-    markdown:  string;
-    memo:      string;
-    name:      string;
+    alias: string;
+    box: string;
+    content: string;
+    created: string;
+    fcontent: string;
+    hash: string;
+    hpath: string;
+    ial: string;
+    id: string;
+    length: number;
+    markdown: string;
+    memo: string;
+    name: string;
     parent_id: string;
-    path:      string;
-    root_id:   string;
-    sort:      number;
-    subtype:   string;
-    tag:       string;
-    type:      string;
-    updated:   string;
+    path: string;
+    root_id: string;
+    sort: number;
+    subtype: string;
+    tag: string;
+    type: string;
+    updated: string;
 }
