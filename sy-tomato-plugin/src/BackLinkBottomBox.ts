@@ -4,6 +4,8 @@ import { DATA_ID, DATA_NODE_ID, DATA_TYPE } from "./libs/gconst";
 import { TOMATOBACKLINKKEY } from "./constants";
 import { events } from "./libs/Events";
 
+type RefCollector = Map<string, { lnk: string, count: number }>;
+
 class BackLinkBottomBox {
     private plugin: Plugin;
 
@@ -75,7 +77,7 @@ class BackLinkBottomBox {
 
     async getBackLinks(docID: string, lastID: string, isEmb = false) {
         const lute = NewLute();
-        const allRefs: Map<string, string> = new Map();
+        const allRefs: RefCollector = new Map();
         const backlink2 = await siyuan.getBacklink2(docID);
         {
             let shouldInsertSplit = false;
@@ -99,22 +101,29 @@ class BackLinkBottomBox {
         }
         if (allRefs.size > 0) {
             let md = "{{{col\n\n";
-            md += [...allRefs.values()].join("\n\n");
+            md += [...allRefs.values()].map(i => i.lnk).join("\n\n");
             md += "\n\n}}}";
             await this.insertMd(md, lastID);
             await this.insertMd("---", lastID);
         }
     }
 
-    private scanAllRef(docID: string, allRefs: Map<string, string>, div: HTMLDivElement) {
+    private scanAllRef(docID: string, allRefs: RefCollector, div: HTMLDivElement) {
         for (const element of div.querySelectorAll(`[${DATA_TYPE}="block-ref"]`)) {
             const id = element.getAttribute(DATA_ID);
             const txt = element.textContent;
-            if (txt != "*" && id != docID) allRefs.set(id, `((${id} "[[${txt}]]"))`);
+            if (txt != "*" && id != docID) {
+                const key = id + txt;
+                const c = (allRefs.get(key)?.count ?? 0) + 1;
+                allRefs.set(key, {
+                    count: c,
+                    lnk: `((${id} "[[${txt}]]${c}"))`,
+                });
+            }
         }
     }
 
-    private async embedDom(docID: string, bkPath: Backlink, lastID: string, lute: Lute, isEmb: boolean, allRefs: Map<string, string>) {
+    private async embedDom(docID: string, bkPath: Backlink, lastID: string, lute: Lute, isEmb: boolean, allRefs: RefCollector) {
         if (!bkPath) return;
         const div = document.createElement("div") as HTMLDivElement;
         div.innerHTML = bkPath.dom;
