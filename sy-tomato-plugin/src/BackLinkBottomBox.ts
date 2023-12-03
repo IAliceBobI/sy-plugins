@@ -1,6 +1,6 @@
 import { Lute, Plugin } from "siyuan";
 import { NewLute, siyuan } from "./libs/utils";
-import { DATA_NODE_ID, DATA_TYPE } from "./libs/gconst";
+import { DATA_ID, DATA_NODE_ID, DATA_TYPE } from "./libs/gconst";
 import { TOMATOBACKLINKKEY } from "./constants";
 import { events } from "./libs/Events";
 
@@ -75,13 +75,14 @@ class BackLinkBottomBox {
 
     async getBackLinks(docID: string, lastID: string, isEmb = false) {
         const lute = NewLute();
+        const allRefs: Map<string, string> = new Map();
         const backlink2 = await siyuan.getBacklink2(docID);
         {
             let shouldInsertSplit = false;
             for (const memtion of backlink2.backmentions.reverse()) {
                 const memtionDoc = await siyuan.getBackmentionDoc(docID, memtion.id);
                 for (const bkPath of memtionDoc.backmentions) {
-                    shouldInsertSplit = await this.embedDom(bkPath, lastID, lute, isEmb);
+                    shouldInsertSplit = await this.embedDom(docID, bkPath, lastID, lute, isEmb, allRefs);
                 }
             }
             if (shouldInsertSplit) await this.insertMd("---", lastID);
@@ -91,21 +92,35 @@ class BackLinkBottomBox {
             for (const backlink of backlink2.backlinks.reverse()) {
                 const backlinkDoc = await siyuan.getBacklinkDoc(docID, backlink.id);
                 for (const bkPath of backlinkDoc.backlinks.reverse()) {
-                    shouldInsertSplit = await this.embedDom(bkPath, lastID, lute, isEmb);
+                    shouldInsertSplit = await this.embedDom(docID, bkPath, lastID, lute, isEmb, allRefs);
                 }
             }
             if (shouldInsertSplit) await this.insertMd("---", lastID);
         }
+        if (allRefs.size > 0) {
+            let md = "{{{col\n\n";
+            md += [...allRefs.values()].join("\n\n");
+            md += "\n\n}}}";
+            await this.insertMd(md, lastID);
+            await this.insertMd("---", lastID);
+        }
     }
 
-    private async embedDom(bkPath: Backlink, lastID: string, lute: Lute, isEmb = false) {
+    private scanAllRef(docID: string, allRefs: Map<string, string>, div: HTMLDivElement) {
+        for (const element of div.querySelectorAll(`[${DATA_TYPE}="block-ref"]`)) {
+            const id = element.getAttribute(DATA_ID);
+            const txt = element.textContent;
+            if (txt != "*" && id != docID) allRefs.set(id, `((${id} "[[${txt}]]"))`);
+        }
+    }
+
+    private async embedDom(docID: string, bkPath: Backlink, lastID: string, lute: Lute, isEmb: boolean, allRefs: Map<string, string>) {
         if (!bkPath) return;
         const div = document.createElement("div") as HTMLDivElement;
         div.innerHTML = bkPath.dom;
         if (div.firstElementChild.getAttribute(TOMATOBACKLINKKEY)) {
             return;
         }
-        console.log(div.innerHTML)
         await this.insertMd("---", lastID);
         const blockID = div.firstElementChild.getAttribute(DATA_NODE_ID);
         const data_type: BlockNodeType = div.firstElementChild.getAttribute(DATA_TYPE) as BlockNodeType;
@@ -114,6 +129,7 @@ class BackLinkBottomBox {
             if (listID && listID != blockID) {
                 const { dom } = await siyuan.getBlockDOM(listID);
                 div.innerHTML = dom;
+                this.scanAllRef(docID, allRefs, div);
                 const startDiv = div.querySelector(`[data-node-id="${blockID}"]`) as HTMLDivElement;
                 this.keepPath2Root(startDiv);
                 this.removeDataNodeIdRecursively(div);
@@ -127,9 +143,8 @@ class BackLinkBottomBox {
                 }
                 return true;
             }
-        } else if (data_type == "block-ref") {
-
         }
+        this.scanAllRef(docID, allRefs, div);
         if (isEmb) {
             await this.insertMd(`{{select * from blocks where id="${blockID}"}}`, lastID);
         } else {
