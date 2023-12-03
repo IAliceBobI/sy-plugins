@@ -1,5 +1,5 @@
 import { Lute, Plugin } from "siyuan";
-import { NewLute, siyuan } from "./libs/utils";
+import { NewLute, chunks, siyuan } from "./libs/utils";
 import { DATA_ID, DATA_NODE_ID, DATA_TYPE } from "./libs/gconst";
 import { TOMATOBACKLINKKEY } from "./constants";
 import { events } from "./libs/Events";
@@ -100,10 +100,13 @@ class BackLinkBottomBox {
             if (shouldInsertSplit) await this.insertMd("---", lastID);
         }
         if (allRefs.size > 0) {
-            let md = "{{{col\n\n";
-            md += [...allRefs.values()].map(i => i.lnk).join("\n\n");
-            md += "\n\n}}}";
-            await this.insertMd(md, lastID);
+            const lnks = [...allRefs.values()].map(i => i.lnk);
+            for (const piece of chunks(lnks, 4)) {
+                let md = "{{{col\n\n";
+                md += piece.join("\n\n");
+                md += "\n\n}}}";
+                await this.insertMd(md, lastID);
+            }
             await this.insertMd("---", lastID);
         }
     }
