@@ -78,11 +78,13 @@ class BackLinkBottomBox {
 
     private async embedDom(bkPath: Backlink, lastID: string, lute: Lute) {
         if (!bkPath) return;
-
-        await this.insertMd("---", lastID);
         const div = document.createElement("div") as HTMLDivElement;
         div.innerHTML = bkPath.dom;
-        let blockID = div.firstElementChild.getAttribute(DATA_NODE_ID);
+        if (div.firstElementChild.getAttribute(TOMATOBACKLINKKEY)) {
+            return;
+        }
+        await this.insertMd("---", lastID);
+        const blockID = div.firstElementChild.getAttribute(DATA_NODE_ID);
         const data_type = div.firstElementChild.getAttribute(DATA_TYPE);
         if (data_type == "NodeListItem") {
             const [listID] = await siyuan.findListType(blockID);
@@ -91,15 +93,15 @@ class BackLinkBottomBox {
                 div.innerHTML = dom;
                 const startDiv = div.querySelector(`[data-node-id="${blockID}"]`) as HTMLDivElement;
                 this.keepPath2Root(startDiv);
-                this.removeDataNodeIdRecursively(div)
+                this.removeDataNodeIdRecursively(div);
                 div.firstElementChild.setAttribute(TOMATOBACKLINKKEY, "1");
-                const md = lute.BlockDOM2Md(div.innerHTML)
+                const md = lute.BlockDOM2Md(div.innerHTML);
                 await this.insertMd(md, lastID);
                 await this.insertPath(bkPath, lastID);
                 return;
             }
         }
-        this.removeDataNodeIdRecursively(div)
+        this.removeDataNodeIdRecursively(div);
         div.firstElementChild.setAttribute(TOMATOBACKLINKKEY, "1");
         const md = lute.BlockDOM2Md(div.innerHTML);
         await this.insertMd(md, lastID);
@@ -115,7 +117,7 @@ class BackLinkBottomBox {
                 refList.push(`((${refs.id} "[${refs.name.slice(0, 10)}...]"))`);
             }
         }
-        await this.insertMd(refList.join(" -> "), lastID)
+        await this.insertMd(refList.join(" -> "), lastID);
     }
 
     private keepPath2Root(div: HTMLDivElement) {
@@ -123,7 +125,7 @@ class BackLinkBottomBox {
         for (const child of div.parentElement?.childNodes ?? []) {
             if (child.nodeType === 1) {
                 const subDiv = child as HTMLElement;
-                const id = subDiv.getAttribute(DATA_NODE_ID)
+                const id = subDiv.getAttribute(DATA_NODE_ID);
                 if (id == div.getAttribute(DATA_NODE_ID)) continue;
                 for (const cls of subDiv.classList) {
                     if (cls.startsWith("protyle-")) continue;
