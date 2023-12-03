@@ -33,6 +33,7 @@ class BackLinkBottomBox {
         if (docID) {
             const lastID = await this.getLastBlockID(docID);
             await this.rmbacklink(docID);
+            await siyuan.pushMsg("正在刷新底部反链区");
             await this.getBackLinks(docID, lastID);
         }
     }
@@ -60,20 +61,26 @@ class BackLinkBottomBox {
     async getBackLinks(docID: string, lastID: string) {
         const lute = NewLute();
         const backlink2 = await siyuan.getBacklink2(docID);
-        for (const memtion of backlink2.backmentions.reverse()) {
-            const memtionDoc = await siyuan.getBackmentionDoc(docID, memtion.id);
-            for (const bkPath of memtionDoc.backmentions) {
-                await this.embedDom(bkPath, lastID, lute);
+        {
+            let shouldInsertSplit = false;
+            for (const memtion of backlink2.backmentions.reverse()) {
+                const memtionDoc = await siyuan.getBackmentionDoc(docID, memtion.id);
+                for (const bkPath of memtionDoc.backmentions) {
+                    shouldInsertSplit = await this.embedDom(bkPath, lastID, lute);
+                }
             }
+            if (shouldInsertSplit) await this.insertMd("---", lastID);
         }
-        await this.insertMd("---", lastID);
-        for (const backlink of backlink2.backlinks.reverse()) {
-            const backlinkDoc = await siyuan.getBacklinkDoc(docID, backlink.id);
-            for (const bkPath of backlinkDoc.backlinks.reverse()) {
-                await this.embedDom(bkPath, lastID, lute);
+        {
+            let shouldInsertSplit = false;
+            for (const backlink of backlink2.backlinks.reverse()) {
+                const backlinkDoc = await siyuan.getBacklinkDoc(docID, backlink.id);
+                for (const bkPath of backlinkDoc.backlinks.reverse()) {
+                    shouldInsertSplit = await this.embedDom(bkPath, lastID, lute);
+                }
             }
+            if (shouldInsertSplit) await this.insertMd("---", lastID);
         }
-        await this.insertMd("---", lastID);
     }
 
     private async embedDom(bkPath: Backlink, lastID: string, lute: Lute) {
@@ -98,7 +105,7 @@ class BackLinkBottomBox {
                 const md = lute.BlockDOM2Md(div.innerHTML);
                 await this.insertMd(md, lastID);
                 await this.insertPath(bkPath, lastID);
-                return;
+                return true;
             }
         }
         this.removeDataNodeIdRecursively(div);
@@ -106,6 +113,7 @@ class BackLinkBottomBox {
         const md = lute.BlockDOM2Md(div.innerHTML);
         await this.insertMd(md, lastID);
         await this.insertPath(bkPath, lastID);
+        return true;
     }
 
     private async insertPath(bkPath: Backlink, lastID: string) {
