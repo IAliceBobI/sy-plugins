@@ -70,7 +70,6 @@ class BKMaker {
             }
         }
         const div = document.createElement("div");
-        this.setReadonly(div);
         const allLnks = [...allRefs.values()];
         const spaces = "&nbsp;".repeat(10);
         div.innerHTML = spaces + allLnks.map(i => i.lnk).join(spaces);
@@ -83,8 +82,19 @@ class BKMaker {
         this.setReadonly(button);
         div.insertAdjacentElement("afterbegin", button);
 
+        this.container.onclick = (ev) => {
+            const selection = document.getSelection();
+            if (selection.toString().length <= 0) return;
+            ev.stopPropagation()
+        }
+
+        if (this.top) {
+            this.protyle.contentElement.scrollTop = this.top;
+        }
+
         this.container.insertAdjacentElement("beforebegin", div);
         this.container.insertAdjacentElement("beforebegin", this.hr());
+        this.setReadonly(div);
     }
 
     private async fillContent(backlinksInDoc: Backlink, allRefs: RefCollector) {
