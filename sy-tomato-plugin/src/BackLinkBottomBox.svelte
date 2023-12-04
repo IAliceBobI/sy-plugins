@@ -1,49 +1,53 @@
 <script lang="ts">
     import { onMount } from "svelte";
 
-    export let data: RefCollector[];
+    export let data: linkItem[];
 
     let searchQuery = "";
-    let searchResults = [];
+    let searchResults: linkItem[] = [];
 
-    onMount(async () => {});
+    onMount(async () => {
+        searchResults = data.slice();
+    });
 
     const search = () => {
-        // Perform search logic based on the searchQuery
-        // Update the searchResults array with the filtered results
-        // You can use JavaScript array methods like filter() or find() to filter the data based on the searchQuery
+        searchResults = data.slice();
+        const find = [];
+        for (const i of searchResults) {
+            if (i.text.includes(searchQuery)) {
+                find.push(i);
+            }
+        }
+        searchResults = find;
     };
 </script>
 
 <!-- https://learn.svelte.dev/tutorial/if-blocks -->
 <div class="fn__flex-1 fn__flex-column">
-    <input type="text" bind:value={searchQuery} placeholder="Search..." />
-    <button on:click={search}>Search</button>
-
-    {#if searchResults.length > 0}
-        <ul>
-            {#each searchResults as result}
-                <li>{result.text}</li>
-            {/each}
-        </ul>
-    {:else}
-        <p>No results found.</p>
-    {/if}
+    <input type="text" bind:value={searchQuery} on:input={search} />
+    {#each searchResults as item}
+        <a href="siyuan://blocks/{item.id}">{@html item.lnk}</a>
+    {/each}
 </div>
 
 <style>
-    .reftext-small {
-        background: var(--b3-theme-surface);
-        color: var(--b3-theme-on-surface);
+    input[type="text"] {
+        padding: 8px;
+        border: 1px solid #ccc;
         border-radius: 4px;
-        padding: 2px 8px;
-        font-size: small;
     }
-    .reftext {
-        background: var(--b3-theme-surface);
-        color: var(--b3-theme-on-surface);
-        border-radius: 4px;
-        padding: 2px 8px;
+
+    a {
+        margin: auto;
+        display: block;
+        margin-bottom: 8px;
+        color: #333;
+        text-decoration: none;
         font-size: large;
+    }
+
+    a:hover {
+        text-decoration: underline;
+        color: #000;
     }
 </style>
