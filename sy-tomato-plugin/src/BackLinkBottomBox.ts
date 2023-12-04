@@ -69,7 +69,7 @@ class BKMaker {
             }
         }
         {
-            for (const memtion of backlink2.backmentions.slice(0, 2).reverse()) {
+            for (const memtion of backlink2.backmentions.reverse()) {
                 const memtionDoc = await siyuan.getBackmentionDoc(this.docID, memtion.id);
                 for (const memtionsInDoc of memtionDoc.backmentions) {
                     await this.fillContent(memtionsInDoc, allRefs);
