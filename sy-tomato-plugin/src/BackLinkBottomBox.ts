@@ -32,7 +32,7 @@ class BKMaker {
         this.itemID = item.getAttribute(DATA_NODE_ID);
     }
 
-    private createHr() {
+    private hr() {
         const hr = document.createElement("hr")
         return hr
     }
@@ -50,7 +50,7 @@ class BKMaker {
     private setReadonly(e: HTMLElement) {
         e.querySelectorAll('[contenteditable="true"]')?.forEach(sub => {
             sub?.setAttribute('contenteditable', 'false')
-        })
+        });
     }
 
     private async getBackLinks() {
@@ -61,60 +61,31 @@ class BKMaker {
             for (const backlink of backlink2.backlinks.reverse()) {
                 const backlinkDoc = await siyuan.getBacklinkDoc(this.docID, backlink.id);
                 for (const backlinksInDoc of backlinkDoc.backlinks.reverse()) {
-                    shouldInsertSplit = await this.fillContent(backlinksInDoc, allRefs);
+                    await this.fillContent(backlinksInDoc);
+                    shouldInsertSplit = backlinksInDoc.blockPaths.length > 0;
+
                 }
             }
             if (shouldInsertSplit) {
-                this.container.appendChild(this.createHr())
+                this.container.appendChild(this.hr())
             }
         }
         {
             for (const memtion of backlink2.backmentions.reverse()) {
                 const memtionDoc = await siyuan.getBackmentionDoc(this.docID, memtion.id);
                 for (const memtionsInDoc of memtionDoc.backmentions) {
-                    await this.fillContent(memtionsInDoc, allRefs);
+                    await this.fillContent(memtionsInDoc);
                 }
             }
         }
     }
-    private async fillContent(backlinksInDoc: Backlink, allRefs: RefCollector) {
+    private async fillContent(backlinksInDoc: Backlink) {
         const div = document.createElement("div") as HTMLDivElement;
         div.innerHTML = backlinksInDoc.dom;
         this.setReadonly(div)
-        // const data_type: BlockNodeType = div.firstElementChild.getAttribute(DATA_TYPE) as BlockNodeType;
-        // if (data_type == "NodeListItem") {
-        //     const blockID = div.firstElementChild.getAttribute(DATA_NODE_ID);
-        //     const [listID] = await siyuan.findListType(blockID);
-        //     if (listID && listID != blockID) {
-        //         // const { dom } = await siyuan.getBlockDOM(listID);
-        //         // div.innerHTML = dom;
-        //         // this.scanAllRef(docID, allRefs, div);
-        //         // const startDiv = div.querySelector(`[data-node-id="${blockID}"]`) as HTMLDivElement;
-        //         // this.keepPath2Root(startDiv);
-        //         // this.removeDataNodeIdRecursively(div);
-        //         // div.firstElementChild.setAttribute(TOMATOBACKLINKKEY, "1");
-        //         // div.setAttribute("contenteditable", "false");
-        //         // this.div = div;
-        //         // // args: fetchSyncPost,item,protyle,top
-        //         // const jsCode = `{{//!js_esc_newline_
-        //         //     async function execEmbeddedJs() {
-        //         //         const div = document.createElement("div");
-        //         //         globalThis.${TOMATO}.setInnerHTML(div);
-        //         //         item.lastElementChild.insertAdjacentElement("afterend", div.firstElementChild);
-        //         //         item.style.height = "";
-        //         //         item.querySelector(".fn__rotate")?.classList.remove("fn__rotate");
-        //         //     }
-        //         //     return execEmbeddedJs();}}`;
-        //         // await this.insertMd(jsCode.replace(new RegExp("\\n", "g"), ""), lastID);
-        //         return true;
-        //     }
-        // }
-        // this.scanAllRef(docID, allRefs, div);
-
         this.container.appendChild(this.path2div(backlinksInDoc.blockPaths))
         this.container.appendChild(div)
-        this.container.appendChild(this.createHr())
-        return true;
+        this.container.appendChild(this.hr())
     }
 
     private path2div(blockPaths: BlockPath[]) {
@@ -166,11 +137,10 @@ class BackLinkBottomBox implements IBackLinkBottomBox {
             const lastID = await this.getLastBlockID(docID);
             const jsCode = `{{//!js_esc_newline_
             async function execEmbeddedJs() {
-                const mk = new ${TOMATO}.BKMaker(protyle, item, top);
-                mk.doTheWork();
+                (new ${TOMATO}.BKMaker(protyle, item, top)).doTheWork()
             }
-            return execEmbeddedJs();}}`;
-            await this.insertMd(jsCode.replace(new RegExp("\\n", "g"), ""), lastID);
+            return execEmbeddedJs()}}`;
+            await this.insertMd(jsCode.replace(new RegExp("\\n\\s+", "g"), " "), lastID);
         }
     }
 
