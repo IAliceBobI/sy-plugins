@@ -39,6 +39,7 @@ class BKMaker {
     }
 
     private setReadonly(e: HTMLElement) {
+        e.setAttribute('contenteditable', 'false')
         e.querySelectorAll('[contenteditable="true"]')?.forEach(sub => {
             sub?.setAttribute('contenteditable', 'false')
         });
@@ -69,10 +70,23 @@ class BKMaker {
             }
         }
         const div = document.createElement("div")
-        div.innerHTML = [...allRefs.values()].map(i => i.lnk).join("&nbsp;".repeat(10));
+        this.setReadonly(div)
+        const allLnks = [...allRefs.values()];
+        const spaces = "&nbsp;".repeat(10);
+        div.innerHTML = spaces + allLnks.map(i => i.lnk).join(spaces);
+
+        const button = document.createElement("button");
+        button.textContent = "🔍";
+        button.addEventListener("click", async () => {
+            await globalThis[TOMATO].tomato.searchLinks(JSON.stringify(allLnks));
+        });
+        this.setReadonly(button)
+        div.insertAdjacentElement("afterbegin", button)
+
         this.container.insertAdjacentElement("beforebegin", div)
         this.container.insertAdjacentElement("beforebegin", this.hr())
     }
+
     private async fillContent(backlinksInDoc: Backlink, allRefs: RefCollector) {
         const div = document.createElement("div") as HTMLDivElement;
         div.innerHTML = backlinksInDoc.dom;
@@ -99,6 +113,7 @@ class BKMaker {
             }
         }
         div.innerHTML = refList.join(" ➡ ")
+        this.setReadonly(div)
         return div
     }
 
@@ -192,6 +207,28 @@ class BackLinkBottomBox {
             }
         }
         return "";
+    }
+
+    async searchLinks(data: string) {
+        console.log(data)
+        return
+        const panel = document.createElement("div");
+
+        const searchInput = document.createElement("input");
+        searchInput.type = "text";
+        panel.appendChild(searchInput);
+
+        const searchButton = document.createElement("button");
+        searchButton.textContent = "Search";
+        searchButton.addEventListener("click", () => {
+            const searchText = searchInput.value;
+            const searchResults = data.filter(item => item.name.includes(searchText));
+            console.log(searchResults); // Display search results in the console
+        });
+        panel.appendChild(searchButton);
+
+        // Add the panel to the document body
+        // document.body.appendChild(panel);
     }
 
 }
