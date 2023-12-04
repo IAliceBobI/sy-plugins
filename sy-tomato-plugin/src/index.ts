@@ -5,7 +5,6 @@ import { linkBox } from "./LinkBox";
 import { schedule } from "./Schedule";
 import { readingPointBox } from "./ReadingPointBox";
 import { cpBox } from "./CpBox";
-import { backLinkBox } from "./BackLinkBox";
 import { backLinkBottomBox } from "./BackLinkBottomBox";
 import { cardBox } from "./CardBox";
 import { events } from "@/libs/Events";
@@ -29,7 +28,6 @@ export default class ThePlugin extends Plugin {
         if (this.settingCfg.cardBoxCheckbox ?? false) cardBox.onload(this);
         if (this.settingCfg.cpBoxCheckbox ?? false) cpBox.onload(this);
         if (this.settingCfg.linkBoxCheckbox ?? false) linkBox.onload(this);
-        if (this.settingCfg.backLinkBoxCheckbox ?? false) backLinkBox.onload(this);
         if (this.settingCfg.backLinkBottomBoxCheckbox ?? true) backLinkBottomBox.onload(this);
 
         this.setting = new Setting({
@@ -45,7 +43,6 @@ export default class ThePlugin extends Plugin {
         this.addSettingItem("cardBoxCheckbox", "闪卡工具", false);
         this.addSettingItem("cpBoxCheckbox", "长内容工具", false);
         this.addSettingItem("linkBoxCheckbox", "双向互链", false);
-        this.addSettingItem("backLinkBoxCheckbox", "极简反链", false);
         this.addSettingItem("backLinkBottomBoxCheckbox", "底部反链", true);
     }
 
