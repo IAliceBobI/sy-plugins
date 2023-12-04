@@ -1,10 +1,10 @@
-import { IProtyle, Plugin } from "siyuan";
-import { siyuan } from "./libs/utils";
+import { IProtyle, Plugin, Dialog } from "siyuan";
+import { newID, siyuan } from "./libs/utils";
 import { DATA_ID, DATA_NODE_ID, DATA_TYPE } from "./libs/gconst";
 import { TOMATOBACKLINKKEY } from "./constants";
 import { events } from "./libs/Events";
+import BackLinkBottomSearchDialog from "./BackLinkBottomBox.svelte";
 
-type RefCollector = Map<string, { lnk: string, count: number }>;
 const TOMATO = "tomato_zZmqus5PtYRi"
 
 class BKMaker {
@@ -141,6 +141,8 @@ class BKMaker {
             allRefs.set(key, {
                 count: c,
                 lnk: spanStr,
+                text: txt,
+                id,
             });
         }
     }
@@ -210,27 +212,20 @@ class BackLinkBottomBox {
     }
 
     async searchLinks(data: string) {
-        console.log(data)
-        return
-        const panel = document.createElement("div");
-
-        const searchInput = document.createElement("input");
-        searchInput.type = "text";
-        panel.appendChild(searchInput);
-
-        const searchButton = document.createElement("button");
-        searchButton.textContent = "Search";
-        searchButton.addEventListener("click", () => {
-            const searchText = searchInput.value;
-            const searchResults = data.filter(item => item.name.includes(searchText));
-            console.log(searchResults); // Display search results in the console
+        const id = newID();
+        const dialog = new Dialog({
+            title: "🔍",
+            content: `<div id="${id}"></div>`,
+            width: "600px",
+            height: "540px",
         });
-        panel.appendChild(searchButton);
-
-        // Add the panel to the document body
-        // document.body.appendChild(panel);
+        new BackLinkBottomSearchDialog({
+            target: dialog.element.querySelector("#" + id),
+            props: {
+                data: JSON.parse(data),
+            }
+        });
     }
-
 }
 
 export const backLinkBottomBox = new BackLinkBottomBox();
