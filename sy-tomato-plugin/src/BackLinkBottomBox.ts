@@ -128,7 +128,7 @@ class BKMaker {
                 refList.push(`<span data-type="block-ref" data-subtype="d" data-id="${refs.id}">${refs.name.slice(0, 10)}</span>`);
             }
         }
-        div.innerHTML = refList.join(" -> ")
+        div.innerHTML = refList.join(" ➡ ")
         return div
     }
 }
