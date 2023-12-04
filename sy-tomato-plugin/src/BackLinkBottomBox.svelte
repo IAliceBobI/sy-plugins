@@ -3,13 +3,33 @@
 
     export let data: RefCollector[];
 
-    onMount(async () => {
-        console.log(data)
-    });
+    let searchQuery = "";
+    let searchResults = [];
+
+    onMount(async () => {});
+
+    const search = () => {
+        // Perform search logic based on the searchQuery
+        // Update the searchResults array with the filtered results
+        // You can use JavaScript array methods like filter() or find() to filter the data based on the searchQuery
+    };
 </script>
 
 <!-- https://learn.svelte.dev/tutorial/if-blocks -->
-<div class="fn__flex-1 fn__flex-column"></div>
+<div class="fn__flex-1 fn__flex-column">
+    <input type="text" bind:value={searchQuery} placeholder="Search..." />
+    <button on:click={search}>Search</button>
+
+    {#if searchResults.length > 0}
+        <ul>
+            {#each searchResults as result}
+                <li>{result.text}</li>
+            {/each}
+        </ul>
+    {:else}
+        <p>No results found.</p>
+    {/if}
+</div>
 
 <style>
     .reftext-small {

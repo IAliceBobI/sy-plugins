@@ -5,14 +5,14 @@ import { TOMATOBACKLINKKEY } from "./constants";
 import { events } from "./libs/Events";
 import BackLinkBottomSearchDialog from "./BackLinkBottomBox.svelte";
 
-const TOMATO = "tomato_zZmqus5PtYRi"
+const TOMATO = "tomato_zZmqus5PtYRi";
 
 class BKMaker {
-    protyle: IProtyle
-    top: number
-    itemID: string
-    item: HTMLElement
-    docID: string
+    protyle: IProtyle;
+    top: number;
+    itemID: string;
+    item: HTMLElement;
+    docID: string;
     container: HTMLDivElement;
 
     constructor(protyle: IProtyle, item: HTMLElement, top: number) {
@@ -25,23 +25,23 @@ class BKMaker {
     }
 
     private hr() {
-        return document.createElement("hr")
+        return document.createElement("hr");
     }
 
     async doTheWork() {
         if (this.docID) {
-            this.getBackLinks()
+            this.getBackLinks();
         }
-        this.setReadonly(this.container)
+        this.setReadonly(this.container);
         this.item.lastElementChild.insertAdjacentElement("afterend", this.container);
         this.item.querySelector(".fn__rotate")?.classList.remove("fn__rotate");
         this.item.style.height = "";
     }
 
     private setReadonly(e: HTMLElement) {
-        e.setAttribute('contenteditable', 'false')
+        e.setAttribute("contenteditable", "false");
         e.querySelectorAll('[contenteditable="true"]')?.forEach(sub => {
-            sub?.setAttribute('contenteditable', 'false')
+            sub?.setAttribute("contenteditable", "false");
         });
     }
 
@@ -58,7 +58,7 @@ class BKMaker {
                 }
             }
             if (shouldInsertSplit) {
-                this.container.appendChild(this.hr())
+                this.container.appendChild(this.hr());
             }
         }
         {
@@ -69,8 +69,8 @@ class BKMaker {
                 }
             }
         }
-        const div = document.createElement("div")
-        this.setReadonly(div)
+        const div = document.createElement("div");
+        this.setReadonly(div);
         const allLnks = [...allRefs.values()];
         const spaces = "&nbsp;".repeat(10);
         div.innerHTML = spaces + allLnks.map(i => i.lnk).join(spaces);
@@ -80,46 +80,46 @@ class BKMaker {
         button.addEventListener("click", async () => {
             await globalThis[TOMATO].tomato.searchLinks(JSON.stringify(allLnks));
         });
-        this.setReadonly(button)
-        div.insertAdjacentElement("afterbegin", button)
+        this.setReadonly(button);
+        div.insertAdjacentElement("afterbegin", button);
 
-        this.container.insertAdjacentElement("beforebegin", div)
-        this.container.insertAdjacentElement("beforebegin", this.hr())
+        this.container.insertAdjacentElement("beforebegin", div);
+        this.container.insertAdjacentElement("beforebegin", this.hr());
     }
 
     private async fillContent(backlinksInDoc: Backlink, allRefs: RefCollector) {
         const div = document.createElement("div") as HTMLDivElement;
         div.innerHTML = backlinksInDoc.dom;
-        this.scanAllRef(allRefs, div)
-        this.setReadonly(div)
-        this.container.appendChild(this.path2div(backlinksInDoc.blockPaths, allRefs))
-        this.container.appendChild(div)
-        this.container.appendChild(this.hr())
+        this.scanAllRef(allRefs, div);
+        this.setReadonly(div);
+        this.container.appendChild(this.path2div(backlinksInDoc.blockPaths, allRefs));
+        this.container.appendChild(div);
+        this.container.appendChild(this.hr());
     }
 
     private path2div(blockPaths: BlockPath[], allRefs: RefCollector) {
-        const div = document.createElement("div") as HTMLDivElement
+        const div = document.createElement("div") as HTMLDivElement;
         const refList = [];
         for (const refPath of blockPaths) {
             if (refPath.type == "NodeDocument") {
                 const fileName = refPath.name.split("/").pop();
                 refList.push(this.refTag(refPath.id, fileName));
-                this.addRef(fileName, refPath.id, allRefs)
+                this.addRef(fileName, refPath.id, allRefs);
             } else if (refPath.type == "NodeHeading") {
                 refList.push(this.refTag(refPath.id, refPath.name));
-                this.addRef(refPath.name, refPath.id, allRefs)
+                this.addRef(refPath.name, refPath.id, allRefs);
             } else {
                 refList.push(this.refTag(refPath.id, refPath.name, 10));
             }
         }
-        div.innerHTML = refList.join(" ➡ ")
-        this.setReadonly(div)
-        return div
+        div.innerHTML = refList.join(" ➡ ");
+        this.setReadonly(div);
+        return div;
     }
 
     private refTag(id: string, text: string, len?: number): any {
         if (len) {
-            return `<span data-type="block-ref" data-subtype="d" data-id="${id}">${text.slice(0, len)}</span>`
+            return `<span data-type="block-ref" data-subtype="d" data-id="${id}">${text.slice(0, len)}</span>`;
         } else {
             return `<span data-type="block-ref" data-subtype="d" data-id="${id}">${text}</span>`;
         }
