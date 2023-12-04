@@ -69,28 +69,33 @@ class BKMaker {
             }
         }
         const div = document.createElement("div")
-        div.innerHTML = [...allRefs.values()].map(i => i.lnk).join("&nbsp;&nbsp;");
+        div.innerHTML = [...allRefs.values()].map(i => i.lnk).join("&nbsp;".repeat(10));
         this.container.insertAdjacentElement("beforebegin", div)
         this.container.insertAdjacentElement("beforebegin", this.hr())
     }
     private async fillContent(backlinksInDoc: Backlink, allRefs: RefCollector) {
         const div = document.createElement("div") as HTMLDivElement;
         div.innerHTML = backlinksInDoc.dom;
+        this.scanAllRef(allRefs, div)
         this.setReadonly(div)
-        this.container.appendChild(this.path2div(backlinksInDoc.blockPaths))
+        this.container.appendChild(this.path2div(backlinksInDoc.blockPaths, allRefs))
         this.container.appendChild(div)
         this.container.appendChild(this.hr())
-        this.scanAllRef(allRefs, div)
     }
 
-    private path2div(blockPaths: BlockPath[]) {
+    private path2div(blockPaths: BlockPath[], allRefs: RefCollector) {
         const div = document.createElement("div") as HTMLDivElement
         const refList = [];
-        for (const refs of blockPaths) {
-            if (refs.type == "NodeHeading" || refs.type == "NodeDocument") {
-                refList.push(this.refTag(refs.id, refs.name));
+        for (const refPath of blockPaths) {
+            if (refPath.type == "NodeDocument") {
+                const fileName = refPath.name.split("/").pop();
+                refList.push(this.refTag(refPath.id, fileName));
+                this.addRef(fileName, refPath.id, allRefs)
+            } else if (refPath.type == "NodeHeading") {
+                refList.push(this.refTag(refPath.id, refPath.name));
+                this.addRef(refPath.name, refPath.id, allRefs)
             } else {
-                refList.push(this.refTag(refs.id, refs.name, 10));
+                refList.push(this.refTag(refPath.id, refPath.name, 10));
             }
         }
         div.innerHTML = refList.join(" ➡ ")
@@ -109,15 +114,19 @@ class BKMaker {
         for (const element of div.querySelectorAll(`[${DATA_TYPE}="block-ref"]`)) {
             const id = element.getAttribute(DATA_ID);
             const txt = element.textContent;
-            if (txt != "*" && id != this.docID) {
-                const key = id + txt;
-                const c = (allRefs.get(key)?.count ?? 0) + 1;
-                const spanStr = this.refTag(id, `${txt}(${c})`);
-                allRefs.set(key, {
-                    count: c,
-                    lnk: spanStr, // `<p>${spanStr}</p>`,
-                });
-            }
+            this.addRef(txt, id, allRefs);
+        }
+    }
+
+    private addRef(txt: string, id: string, allRefs: RefCollector) {
+        if (txt != "*" && id != this.docID) {
+            const key = id + txt;
+            const c = (allRefs.get(key)?.count ?? 0) + 1;
+            const spanStr = this.refTag(id, `${txt}(${c})`);
+            allRefs.set(key, {
+                count: c,
+                lnk: spanStr,
+            });
         }
     }
 }
