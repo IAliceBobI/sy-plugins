@@ -28,9 +28,9 @@ class BKMaker {
         return document.createElement("hr");
     }
 
-    async doTheWork() {
+    async doTheWork(isMention: boolean) {
         if (this.docID) {
-            this.getBackLinks();
+            this.getBackLinks(isMention);
         }
         this.setReadonly(this.container);
         this.item.lastElementChild.insertAdjacentElement("afterend", this.container);
@@ -45,27 +45,21 @@ class BKMaker {
         });
     }
 
-    private async getBackLinks() {
+    private async getBackLinks(isMention: boolean) {
         const allRefs: RefCollector = new Map();
         const backlink2 = await siyuan.getBacklink2(this.docID);
-        {
-            let shouldInsertSplit = false;
+        if (!isMention) {
             for (const backlink of backlink2.backlinks.reverse()) {
                 const backlinkDoc = await siyuan.getBacklinkDoc(this.docID, backlink.id);
                 for (const backlinksInDoc of backlinkDoc.backlinks.reverse()) {
                     await this.fillContent(backlinksInDoc, allRefs);
-                    shouldInsertSplit = backlinksInDoc.blockPaths.length > 0;
                 }
             }
-            if (shouldInsertSplit) {
-                this.container.appendChild(this.hr());
-            }
-        }
-        {
-            for (const memtion of backlink2.backmentions.reverse()) {
-                const memtionDoc = await siyuan.getBackmentionDoc(this.docID, memtion.id);
-                for (const memtionsInDoc of memtionDoc.backmentions) {
-                    await this.fillContent(memtionsInDoc, allRefs);
+        } else {
+            for (const mention of backlink2.backmentions.reverse()) {
+                const mentionDoc = await siyuan.getBackmentionDoc(this.docID, mention.id);
+                for (const mentionsInDoc of mentionDoc.backmentions) {
+                    await this.fillContent(mentionsInDoc, allRefs);
                 }
             }
         }
@@ -77,7 +71,7 @@ class BKMaker {
         const button = document.createElement("button");
         button.textContent = "🔍";
         button.addEventListener("click", async () => {
-            await globalThis[TOMATO].tomato.searchLinks(JSON.stringify(allLnks));
+            await globalThis[TOMATO].tomato.searchLinks(allLnks);
         });
         this.setReadonly(button);
         div.insertAdjacentElement("afterbegin", button);
@@ -172,6 +166,13 @@ class BackLinkBottomBox {
                 await this.doTheWork(events.docID);
             },
         });
+        this.plugin.addCommand({
+            langKey: "bottomMention",
+            hotkey: "",
+            callback: async () => {
+                await this.doTheWork(events.docID, true);
+            },
+        });
         this.plugin.eventBus.on("open-menu-content", async ({ detail }) => {
             const menu = detail.menu;
             menu.addItem({
@@ -182,16 +183,24 @@ class BackLinkBottomBox {
                     await this.doTheWork(docID);
                 },
             });
+            menu.addItem({
+                label: this.plugin.i18n.bottomMention.split("#")[0],
+                icon: "iconLink",
+                click: async () => {
+                    const docID = detail?.protyle?.block.rootID ?? "";
+                    await this.doTheWork(docID, true);
+                },
+            });
         });
     }
 
-    async doTheWork(docID: string) {
+    async doTheWork(docID: string, isMention = false) {
         if (docID) {
-            await siyuan.pushMsg("正在刷新底部反链区");
+            await siyuan.pushMsg("正在插入底部反链区……");
             const lastID = await this.getLastBlockID(docID);
             const jsCode = `{{//!js_esc_newline_
             async function execEmbeddedJs() {
-                (new ${TOMATO}.BKMaker(protyle, item, top)).doTheWork()
+                (new ${TOMATO}.BKMaker(protyle, item, top)).doTheWork(${isMention})
             }
             return execEmbeddedJs()}}`;
             await this.insertMd(jsCode.replace(new RegExp("\\n\\s+", "g"), " "), lastID);
@@ -221,7 +230,7 @@ class BackLinkBottomBox {
         return "";
     }
 
-    async searchLinks(data: string) {
+    async searchLinks(data: linkItem[]) {
         const id = newID();
         const dialog = new Dialog({
             title: "🔍",
@@ -232,7 +241,7 @@ class BackLinkBottomBox {
         new BackLinkBottomSearchDialog({
             target: dialog.element.querySelector("#" + id),
             props: {
-                data: JSON.parse(data),
+                data,
             }
         });
     }
