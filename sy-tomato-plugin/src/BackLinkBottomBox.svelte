@@ -24,30 +24,29 @@
 
 <!-- https://learn.svelte.dev/tutorial/if-blocks -->
 <div class="fn__flex-1 fn__flex-column">
-    <input type="text" bind:value={searchQuery} on:input={search} />
+    <input
+        type="text"
+        bind:value={searchQuery}
+        on:input={search}
+        class="b3-text-field"
+    />
     {#each searchResults as item}
         <a href="siyuan://blocks/{item.id}">{@html item.lnk}</a>
     {/each}
 </div>
 
 <style>
-    input[type="text"] {
-        padding: 8px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-    }
-
     a {
         margin: auto;
         display: block;
         margin-bottom: 8px;
-        color: #333;
+        color: var(--b3-protyle-inline-blockref-color);
         text-decoration: none;
         font-size: large;
     }
 
     a:hover {
         text-decoration: underline;
-        color: #000;
+        color: var(--b3-protyle-inline-fileref-color);
     }
 </style>
