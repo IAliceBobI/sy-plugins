@@ -8,7 +8,6 @@ type RefCollector = Map<string, { lnk: string, count: number }>;
 const TOMATO = "tomato_zZmqus5PtYRi"
 
 interface IBackLinkBottomBox {
-
 }
 
 class BKMaker {
@@ -22,59 +21,92 @@ class BKMaker {
     lute: Lute;
     container: HTMLDivElement;
 
-    constructor(protyle: IProtyle, item: HTMLElement, top: number, lastID: string) {
+    constructor(protyle: IProtyle, item: HTMLElement, top: number) {
         this.protyle = protyle;
         this.item = item;
         this.top = top;
         this.bottomBox = globalThis.tomato_zZmqus5PtYRi.tomato;
         this.lute = NewLute();
         this.container = document.createElement("div");
-        this.lastID = lastID;
         this.docID = protyle?.block.rootID ?? "";
         this.itemID = item.getAttribute(DATA_NODE_ID);
     }
 
     async doTheWork() {
-        this.item.querySelector(".fn__rotate")?.classList.remove("fn__rotate");
-        this.getBackLinks()
+        if (this.docID) {
+            this.getBackLinks()
+        }
+        this.setReadonly(this.container)
         this.item.lastElementChild.insertAdjacentElement("afterend", this.container);
+        this.item.querySelector(".fn__rotate")?.classList.remove("fn__rotate");
         this.item.style.height = "";
     }
 
+    private setReadonly(e: HTMLElement) {
+        e.querySelectorAll('[contenteditable="true"]')?.forEach(sub => {
+            sub?.setAttribute('contenteditable', 'false')
+        })
+    }
+
     private async getBackLinks() {
-        const docID = this.item.getAttribute(DATA_NODE_ID);
         const allRefs: RefCollector = new Map();
-        const backlink2 = await siyuan.getBacklink2(docID);
+        const backlink2 = await siyuan.getBacklink2(this.docID);
         const hr = document.createElement("hr")
-        const test = document.createElement("p")
-        test.innerHTML = "asddfasdfasdfdasasdf"
         {
             let shouldInsertSplit = false;
             for (const backlink of backlink2.backlinks.reverse()) {
-                const backlinkDoc = await siyuan.getBacklinkDoc(docID, backlink.id);
+                const backlinkDoc = await siyuan.getBacklinkDoc(this.docID, backlink.id);
                 for (const backlinksInDoc of backlinkDoc.backlinks.reverse()) {
-                    shouldInsertSplit = await this.embedDom(backlinksInDoc, allRefs);
+                    shouldInsertSplit = await this.fillContent(backlinksInDoc, allRefs);
                 }
             }
             if (shouldInsertSplit) {
                 this.container.appendChild(hr)
-                this.container.appendChild(hr)
             }
-            this.container.appendChild(test)
         }
         {
-            // let shouldInsertSplit = false;
-            // for (const memtion of backlink2.backmentions.slice(0, 2).reverse()) {
-            //     const memtionDoc = await siyuan.getBackmentionDoc(docID, memtion.id);
-            //     for (const memtionsInDoc of memtionDoc.backmentions) {
-            //         shouldInsertSplit = await this.embedDom(docID, memtionsInDoc, lastID, allRefs);
-            //     }
-            // }
-            // if (shouldInsertSplit) await this.insertMd("---", lastID);
+            for (const memtion of backlink2.backmentions.slice(0, 2).reverse()) {
+                const memtionDoc = await siyuan.getBackmentionDoc(this.docID, memtion.id);
+                for (const memtionsInDoc of memtionDoc.backmentions) {
+                    await this.fillContent(memtionsInDoc, allRefs);
+                }
+            }
         }
     }
-    private async embedDom(backlinksInDoc: Backlink, allRefs: RefCollector) {
-
+    private async fillContent(backlinksInDoc: Backlink, allRefs: RefCollector) {
+        const div = document.createElement("div") as HTMLDivElement;
+        div.innerHTML = backlinksInDoc.dom;
+        this.setReadonly(div)
+        const data_type: BlockNodeType = div.firstElementChild.getAttribute(DATA_TYPE) as BlockNodeType;
+        if (data_type == "NodeListItem") {
+            const blockID = div.firstElementChild.getAttribute(DATA_NODE_ID);
+            const [listID] = await siyuan.findListType(blockID);
+            if (listID && listID != blockID) {
+                // const { dom } = await siyuan.getBlockDOM(listID);
+                // div.innerHTML = dom;
+                // this.scanAllRef(docID, allRefs, div);
+                // const startDiv = div.querySelector(`[data-node-id="${blockID}"]`) as HTMLDivElement;
+                // this.keepPath2Root(startDiv);
+                // this.removeDataNodeIdRecursively(div);
+                // div.firstElementChild.setAttribute(TOMATOBACKLINKKEY, "1");
+                // div.setAttribute("contenteditable", "false");
+                // this.div = div;
+                // // args: fetchSyncPost,item,protyle,top
+                // const jsCode = `{{//!js_esc_newline_
+                //     async function execEmbeddedJs() {
+                //         const div = document.createElement("div");
+                //         globalThis.${TOMATO}.setInnerHTML(div);
+                //         item.lastElementChild.insertAdjacentElement("afterend", div.firstElementChild);
+                //         item.style.height = "";
+                //         item.querySelector(".fn__rotate")?.classList.remove("fn__rotate");
+                //     }
+                //     return execEmbeddedJs();}}`;
+                // await this.insertMd(jsCode.replace(new RegExp("\\n", "g"), ""), lastID);
+                return true;
+            }
+        }
+        // this.scanAllRef(docID, allRefs, div);
+        this.container.appendChild(div)
         return true;
     }
 }
@@ -110,21 +142,13 @@ class BackLinkBottomBox implements IBackLinkBottomBox {
         if (docID) {
             await siyuan.pushMsg("正在刷新底部反链区");
             const lastID = await this.getLastBlockID(docID);
-            await this.rmbacklink(docID);
             const jsCode = `{{//!js_esc_newline_
             async function execEmbeddedJs() {
-                const mk = new ${TOMATO}.BKMaker(protyle, item, top, "${lastID}");
+                const mk = new ${TOMATO}.BKMaker(protyle, item, top);
                 mk.doTheWork();
             }
             return execEmbeddedJs();}}`;
             await this.insertMd(jsCode.replace(new RegExp("\\n", "g"), ""), lastID);
-        }
-    }
-
-    async rmbacklink(docID: string) {
-        const rows = await siyuan.sql(`select id from blocks where ial like '%${TOMATOBACKLINKKEY}%' and root_id="${docID}"`);
-        for (const row of rows) {
-            await siyuan.safeDeleteBlock(row["id"]);
         }
     }
 
@@ -140,6 +164,8 @@ class BackLinkBottomBox implements IBackLinkBottomBox {
         }
         return "";
     }
+
+    //////////////////////
 
     async getBackLinks(docID: string, lastID: string) {
         const allRefs: RefCollector = new Map();
@@ -271,6 +297,12 @@ class BackLinkBottomBox implements IBackLinkBottomBox {
 
 export const backLinkBottomBox = new BackLinkBottomBox();
 
+// async rmbacklink(docID: string) {
+//     const rows = await siyuan.sql(`select id from blocks where ial like '%${TOMATOBACKLINKKEY}%' and root_id="${docID}"`);
+//     for (const row of rows) {
+//         await siyuan.safeDeleteBlock(row["id"]);
+//     }
+// }
 // private async insertPath(bkPath: Backlink, lastID: string) {
 //     const refList = [];
 //     for (const refs of bkPath.blockPaths) {
