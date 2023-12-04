@@ -11,15 +11,15 @@ interface IBackLinkBottomBox {
 }
 
 class BKMaker {
-    protyle: IProtyle
-    item: HTMLElement
-    top: number
-    lastID: string
-    docID: string
-    itemID: string
-    bottomBox: IBackLinkBottomBox
-    lute: Lute;
-    container: HTMLDivElement;
+    private protyle: IProtyle
+    private item: HTMLElement
+    private top: number
+    private lastID: string
+    private docID: string
+    private itemID: string
+    private bottomBox: IBackLinkBottomBox
+    private lute: Lute;
+    private container: HTMLDivElement;
 
     constructor(protyle: IProtyle, item: HTMLElement, top: number) {
         this.protyle = protyle;
@@ -30,6 +30,11 @@ class BKMaker {
         this.container = document.createElement("div");
         this.docID = protyle?.block.rootID ?? "";
         this.itemID = item.getAttribute(DATA_NODE_ID);
+    }
+
+    private createHr() {
+        const hr = document.createElement("hr")
+        return hr
     }
 
     async doTheWork() {
@@ -51,7 +56,6 @@ class BKMaker {
     private async getBackLinks() {
         const allRefs: RefCollector = new Map();
         const backlink2 = await siyuan.getBacklink2(this.docID);
-        const hr = document.createElement("hr")
         {
             let shouldInsertSplit = false;
             for (const backlink of backlink2.backlinks.reverse()) {
@@ -61,7 +65,7 @@ class BKMaker {
                 }
             }
             if (shouldInsertSplit) {
-                this.container.appendChild(hr)
+                this.container.appendChild(this.createHr())
             }
         }
         {
@@ -77,37 +81,55 @@ class BKMaker {
         const div = document.createElement("div") as HTMLDivElement;
         div.innerHTML = backlinksInDoc.dom;
         this.setReadonly(div)
-        const data_type: BlockNodeType = div.firstElementChild.getAttribute(DATA_TYPE) as BlockNodeType;
-        if (data_type == "NodeListItem") {
-            const blockID = div.firstElementChild.getAttribute(DATA_NODE_ID);
-            const [listID] = await siyuan.findListType(blockID);
-            if (listID && listID != blockID) {
-                // const { dom } = await siyuan.getBlockDOM(listID);
-                // div.innerHTML = dom;
-                // this.scanAllRef(docID, allRefs, div);
-                // const startDiv = div.querySelector(`[data-node-id="${blockID}"]`) as HTMLDivElement;
-                // this.keepPath2Root(startDiv);
-                // this.removeDataNodeIdRecursively(div);
-                // div.firstElementChild.setAttribute(TOMATOBACKLINKKEY, "1");
-                // div.setAttribute("contenteditable", "false");
-                // this.div = div;
-                // // args: fetchSyncPost,item,protyle,top
-                // const jsCode = `{{//!js_esc_newline_
-                //     async function execEmbeddedJs() {
-                //         const div = document.createElement("div");
-                //         globalThis.${TOMATO}.setInnerHTML(div);
-                //         item.lastElementChild.insertAdjacentElement("afterend", div.firstElementChild);
-                //         item.style.height = "";
-                //         item.querySelector(".fn__rotate")?.classList.remove("fn__rotate");
-                //     }
-                //     return execEmbeddedJs();}}`;
-                // await this.insertMd(jsCode.replace(new RegExp("\\n", "g"), ""), lastID);
-                return true;
+        // const data_type: BlockNodeType = div.firstElementChild.getAttribute(DATA_TYPE) as BlockNodeType;
+        // if (data_type == "NodeListItem") {
+        //     const blockID = div.firstElementChild.getAttribute(DATA_NODE_ID);
+        //     const [listID] = await siyuan.findListType(blockID);
+        //     if (listID && listID != blockID) {
+        //         // const { dom } = await siyuan.getBlockDOM(listID);
+        //         // div.innerHTML = dom;
+        //         // this.scanAllRef(docID, allRefs, div);
+        //         // const startDiv = div.querySelector(`[data-node-id="${blockID}"]`) as HTMLDivElement;
+        //         // this.keepPath2Root(startDiv);
+        //         // this.removeDataNodeIdRecursively(div);
+        //         // div.firstElementChild.setAttribute(TOMATOBACKLINKKEY, "1");
+        //         // div.setAttribute("contenteditable", "false");
+        //         // this.div = div;
+        //         // // args: fetchSyncPost,item,protyle,top
+        //         // const jsCode = `{{//!js_esc_newline_
+        //         //     async function execEmbeddedJs() {
+        //         //         const div = document.createElement("div");
+        //         //         globalThis.${TOMATO}.setInnerHTML(div);
+        //         //         item.lastElementChild.insertAdjacentElement("afterend", div.firstElementChild);
+        //         //         item.style.height = "";
+        //         //         item.querySelector(".fn__rotate")?.classList.remove("fn__rotate");
+        //         //     }
+        //         //     return execEmbeddedJs();}}`;
+        //         // await this.insertMd(jsCode.replace(new RegExp("\\n", "g"), ""), lastID);
+        //         return true;
+        //     }
+        // }
+        // this.scanAllRef(docID, allRefs, div);
+
+        this.container.appendChild(this.path2div(backlinksInDoc.blockPaths))
+        this.container.appendChild(div)
+        this.container.appendChild(this.createHr())
+        return true;
+    }
+
+    private path2div(blockPaths: BlockPath[]) {
+        const div = document.createElement("div") as HTMLDivElement
+        const refList = [];
+        for (const refs of blockPaths) {
+
+            if (refs.type == "NodeHeading" || refs.type == "NodeDocument") {
+                refList.push(`<span data-type="block-ref" data-subtype="d" data-id="${refs.id}">${refs.name}</span>`);
+            } else {
+                refList.push(`<span data-type="block-ref" data-subtype="d" data-id="${refs.id}">${refs.name.slice(0, 10)}</span>`);
             }
         }
-        // this.scanAllRef(docID, allRefs, div);
-        this.container.appendChild(div)
-        return true;
+        div.innerHTML = refList.join(" -> ")
+        return div
     }
 }
 
@@ -302,17 +324,6 @@ export const backLinkBottomBox = new BackLinkBottomBox();
 //     for (const row of rows) {
 //         await siyuan.safeDeleteBlock(row["id"]);
 //     }
-// }
-// private async insertPath(bkPath: Backlink, lastID: string) {
-//     const refList = [];
-//     for (const refs of bkPath.blockPaths) {
-//         if (refs.type == "NodeHeading" || refs.type == "NodeDocument") {
-//             refList.push(`((${refs.id} "[${refs.name}]"))`);
-//         } else {
-//             refList.push(`((${refs.id} "[${refs.name.slice(0, 10)}...]"))`);
-//         }
-//     }
-//     await this.insertMd(refList.join(" -> "), lastID);
 // }
 // btnRefresh(docID: string,) {
 //     const btnID = newID().slice(0, IDLen);
