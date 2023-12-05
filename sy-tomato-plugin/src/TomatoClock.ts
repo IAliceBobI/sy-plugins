@@ -17,7 +17,7 @@ class TomatoClock {
         this.lastDelayMin = 0;
         this.timeoutID = 0;
 
-        let clocks: string = (this.plugin as any).settingCfg[STORAGE_TOMATO_CLOCKS] ?? ["0", "5", "10", "15", "20", "25"];
+        let clocks: string = (this.plugin as any).settingCfg[STORAGE_TOMATO_CLOCKS] ?? "5,10,15,25";
         const washed = [0];
         for (const clock of clocks.split(/[,，]/g)) {
             const n = Number(clock.trim());
