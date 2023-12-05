@@ -2,13 +2,12 @@ import { Dialog, Plugin, Protyle, } from "siyuan";
 import { siyuan, newID, timeUtil } from "@/libs/utils";
 import "./index.scss";
 import ScheduleDialog from "@/Schedule.svelte";
-
-const STORAGE_SCHEDULE = "schedule.json";
+import { STORAGE_SCHEDULE } from "./constants";
 
 class Schedule {
     private plugin: Plugin;
 
-    onload(plugin: Plugin) {
+    async onload(plugin: Plugin) {
         this.plugin = plugin;
         this.plugin.loadData(STORAGE_SCHEDULE).then(() => {
             this.loopSchedule();

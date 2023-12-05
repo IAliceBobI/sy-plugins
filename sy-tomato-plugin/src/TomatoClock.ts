@@ -5,24 +5,32 @@ import {
 } from "siyuan";
 import "./index.scss";
 
+const STORAGE_TOMATO = "tomatoClocks.json";
+
 class TomatoClock {
     private plugin: Plugin;
     private timeoutID: number;
     private lastDelayMin: number;
 
-    onload(plugin: Plugin) {
+    async onload(plugin: Plugin) {
         this.plugin = plugin;
         this.lastDelayMin = 0;
         this.timeoutID = 0;
-        this.addTomatoClock("iconTomato0", 0);
-        this.addTomatoClock("iconTomato5", 5);
-        this.addTomatoClock("iconTomato10", 10);
-        this.addTomatoClock("iconTomato15", 15);
-        this.addTomatoClock("iconTomato20", 20);
-        this.addTomatoClock("iconTomato25", 25);
+        this.addTomatoClock(0);
+        this.addTomatoClock(5);
+        this.addTomatoClock(10);
+        this.addTomatoClock(15);
+        this.addTomatoClock(20);
+        this.addTomatoClock(25);
+        this.addTomatoClock(35);
     }
 
-    private addTomatoClock(icon: string, minute: number) {
+    private addTomatoClock(minute: number) {
+        const icon = `iconTomato${minute}`;
+        this.plugin.addIcons(`<symbol id="iconTomato${minute}" viewBox="0 0 32 32"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+        <text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" font-size="20" font-weight="bold">${minute}</text>
+        </svg></symbol>`);
+
         const name = this.plugin.i18n.name;
         let label = `${name}🍅${minute}${this.plugin.i18n.takeARestAfterMinutes}`;
         if (minute === 0) {

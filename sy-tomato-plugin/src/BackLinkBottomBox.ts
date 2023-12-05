@@ -79,8 +79,8 @@ class BKMaker {
         this.container.onclick = (ev) => {
             const selection = document.getSelection();
             if (selection.toString().length <= 0) return;
-            ev.stopPropagation()
-        }
+            ev.stopPropagation();
+        };
 
         if (this.top) {
             this.protyle.contentElement.scrollTop = this.top;

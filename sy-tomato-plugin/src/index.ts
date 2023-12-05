@@ -22,13 +22,13 @@ export default class ThePlugin extends Plugin {
         events.onload(this);
         this.settingCfg = await this.loadData(STORAGE_SETTINGS);
         if (!this.settingCfg) this.settingCfg = {};
-        if (this.settingCfg.tomatoClockCheckbox ?? true) tomatoClock.onload(this);
-        if (this.settingCfg.scheduleCheckbox ?? true) schedule.onload(this);
-        if (this.settingCfg.readingPointBoxCheckbox ?? true) readingPointBox.onload(this);
-        if (this.settingCfg.cardBoxCheckbox ?? false) cardBox.onload(this);
-        if (this.settingCfg.cpBoxCheckbox ?? false) cpBox.onload(this);
-        if (this.settingCfg.linkBoxCheckbox ?? false) linkBox.onload(this);
-        if (this.settingCfg.backLinkBottomBoxCheckbox ?? true) backLinkBottomBox.onload(this);
+        if (this.settingCfg.tomatoClockCheckbox ?? true) await tomatoClock.onload(this);
+        if (this.settingCfg.scheduleCheckbox ?? true) await schedule.onload(this);
+        if (this.settingCfg.readingPointBoxCheckbox ?? true) await readingPointBox.onload(this);
+        if (this.settingCfg.cardBoxCheckbox ?? false) await cardBox.onload(this);
+        if (this.settingCfg.cpBoxCheckbox ?? false) await cpBox.onload(this);
+        if (this.settingCfg.linkBoxCheckbox ?? false) await linkBox.onload(this);
+        if (this.settingCfg.backLinkBottomBoxCheckbox ?? true) await backLinkBottomBox.onload(this);
 
         this.setting = new Setting({
             confirmCallback: () => {
