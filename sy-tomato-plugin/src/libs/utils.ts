@@ -134,7 +134,12 @@ export const siyuan = {
             headers,
             body: JSON.stringify({ path }),
         });
-        return await data.json();
+        const txt = await data.text();
+        try {
+            return JSON.parse(txt);
+        } catch {
+            return txt;
+        }
     },
     // =================================
     async call(url: string, reqData: any) {
@@ -168,16 +173,15 @@ export const siyuan = {
         }
         return l;
     },
-    async sql(stmt: string) {
-        return siyuan.call("/api/query/sql", { stmt });
+    async sql(stmt: string): Promise<Block[]> {
+        return (await siyuan.call("/api/query/sql", { stmt })) ?? [];
     },
-    // await globalThis.progressive_zZmqus5PtYRi.siyuan.sqlOne(`select * from blocks where id='20231106015952-wjqufut'`)
-    async sqlOne(stmt: string) {
+    async sqlOne(stmt: string): Promise<Block> {
         const ret = await siyuan.sql(stmt);
         if (ret.length >= 1) {
             return ret[0];
         }
-        return {};
+        return {} as Block;
     },
     async createDocWithMdIfNotExists(notebookID: string, path_readable: string, markdown: string) {
         const row = await siyuan.sqlOne(`select id from blocks where hpath="${path_readable}" and type='d' limit 1`);
@@ -203,6 +207,9 @@ export const siyuan = {
             return siyuan.removeDoc(row["box"], row["path"]);
         }
         return {};
+    },
+    async createDailyNote(notebook: string): Promise<{ id: string }> {
+        return siyuan.call("/api/filetree/createDailyNote", { notebook });
     },
     async checkBlockExist(id: string) {
         return siyuan.call("/api/block/checkBlockExist", { id });
@@ -285,7 +292,7 @@ export const siyuan = {
             return siyuan.call("/api/block/updateBlock", { id, data, dataType });
     },
     async getBlockMarkdownAndContent(id: string): Promise<GetBlockMarkdownAndContent> {
-        const row: { [key: string]: string } = await siyuan.sqlOne(`select markdown, content from blocks where id="${id}"`);
+        const row = await siyuan.sqlOne(`select markdown, content from blocks where id="${id}"`);
         return { markdown: row?.markdown ?? "", content: row?.content ?? "" };
     },
     async getHeadingChildrenIDs(id: string) {
