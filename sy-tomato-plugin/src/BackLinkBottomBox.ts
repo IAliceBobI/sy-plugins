@@ -129,8 +129,7 @@ class BKMaker {
             if (kramdown) {
                 const { idLnks } = extractLinks(kramdown);
                 for (const idLnk of idLnks) {
-                    const txt = idLnk.txt.replace(/['"]/g, "");
-                    this.addRef(txt, idLnk.id, allRefs);
+                    this.addRef(idLnk.txt, idLnk.id, allRefs);
                 }
             }
         }

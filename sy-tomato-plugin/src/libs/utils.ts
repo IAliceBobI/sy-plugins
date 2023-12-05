@@ -16,7 +16,7 @@ export function extractLinks(txt: string) {
         if (id) {
             ids.push(id);
             links.push(match[0]);
-            idLnks.push({ id, txt: match[2] });
+            idLnks.push({ id, txt: match[2]?.replace(/['"]/g, "") ?? "" });
         }
     } while (match.length > 0);
     return { ids, links, idLnks };
