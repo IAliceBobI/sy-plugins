@@ -3,10 +3,10 @@
 dir=$(pwd)
 
 cd "${dir}/sy-progressive-plugin"
-rm -rf dev dist .eslintcache package.zip
+rm -rf dev dist .eslintcache package.zip node_modules
 pnpm i
 
 cd "${dir}/sy-tomato-plugin"
-rm -rf dev dist .eslintcache package.zip
+rm -rf dev dist .eslintcache package.zip node_modules
 pnpm i
 
