@@ -35,10 +35,6 @@ class Schedule {
         });
     }
 
-    async onLayoutReady() {
-
-    }
-
     private async showScheduleDialog(blockID?: string) {
         const id = newID();
         const dialog = new Dialog({

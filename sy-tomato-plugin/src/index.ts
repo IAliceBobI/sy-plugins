@@ -20,15 +20,6 @@ export default class ThePlugin extends Plugin {
         ThePlugin.GLOBAL_THIS["siyuan_zZmqus5PtYRi"] = siyuan;
         this.addIcons(ICONS);
         events.onload(this);
-        this.settingCfg = await this.loadData(STORAGE_SETTINGS);
-        if (!this.settingCfg) this.settingCfg = {};
-        if (this.settingCfg.tomatoClockCheckbox ?? true) await tomatoClock.onload(this);
-        if (this.settingCfg.scheduleCheckbox ?? true) await schedule.onload(this);
-        if (this.settingCfg.readingPointBoxCheckbox ?? true) await readingPointBox.onload(this);
-        if (this.settingCfg.cardBoxCheckbox ?? false) await cardBox.onload(this);
-        if (this.settingCfg.cpBoxCheckbox ?? false) await cpBox.onload(this);
-        if (this.settingCfg.linkBoxCheckbox ?? false) await linkBox.onload(this);
-        if (this.settingCfg.backLinkBottomBoxCheckbox ?? true) await backLinkBottomBox.onload(this);
 
         this.setting = new Setting({
             confirmCallback: () => {
@@ -36,6 +27,17 @@ export default class ThePlugin extends Plugin {
                 window.location.reload();
             }
         });
+
+        this.settingCfg = await this.loadData(STORAGE_SETTINGS);
+        if (!this.settingCfg) this.settingCfg = {};
+        
+        if (this.settingCfg.tomatoClockCheckbox ?? true) await tomatoClock.onload(this);
+        if (this.settingCfg.scheduleCheckbox ?? true) await schedule.onload(this);
+        if (this.settingCfg.readingPointBoxCheckbox ?? true) await readingPointBox.onload(this);
+        if (this.settingCfg.cardBoxCheckbox ?? false) await cardBox.onload(this);
+        if (this.settingCfg.cpBoxCheckbox ?? false) await cpBox.onload(this);
+        if (this.settingCfg.linkBoxCheckbox ?? false) await linkBox.onload(this);
+        if (this.settingCfg.backLinkBottomBoxCheckbox ?? true) await backLinkBottomBox.onload(this);
 
         this.addSettingItem("tomatoClockCheckbox", "状态栏番茄钟", true);
         this.addSettingItem("scheduleCheckbox", "内容提醒", true);
@@ -47,14 +49,14 @@ export default class ThePlugin extends Plugin {
     }
 
     private addSettingItem(key: string, title: string, defaultValue: boolean) {
-        const checkbox = document.createElement("input") as HTMLInputElement;
-        checkbox.type = "checkbox";
-        checkbox.addEventListener("change", () => {
-            this.settingCfg[key] = checkbox.checked;
-        });
         this.setting.addItem({
             title: title,
             createActionElement: () => {
+                const checkbox = document.createElement("input") as HTMLInputElement;
+                checkbox.type = "checkbox";
+                checkbox.addEventListener("change", () => {
+                    this.settingCfg[key] = checkbox.checked;
+                });
                 checkbox.className = "b3-switch fn__flex-center";
                 checkbox.checked = this.settingCfg[key] ?? defaultValue;
                 return checkbox;

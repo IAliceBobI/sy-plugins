@@ -156,7 +156,7 @@ class BackLinkBottomBox {
     private plugin: Plugin;
     private static readonly GLOBAL_THIS: Record<string, any> = globalThis;
 
-    onload(plugin: Plugin) {
+    async onload(plugin: Plugin) {
         BackLinkBottomBox.GLOBAL_THIS[TOMATO] = { BKMaker, "tomato": this };
         this.plugin = plugin;
         this.plugin.addCommand({

@@ -4,8 +4,8 @@ import {
     showMessage,
 } from "siyuan";
 import "./index.scss";
+import { STORAGE_TOMATO_CLOCKS } from "./constants";
 
-const STORAGE_TOMATO = "tomatoClocks.json";
 
 class TomatoClock {
     private plugin: Plugin;
@@ -16,13 +16,34 @@ class TomatoClock {
         this.plugin = plugin;
         this.lastDelayMin = 0;
         this.timeoutID = 0;
-        this.addTomatoClock(0);
-        this.addTomatoClock(5);
-        this.addTomatoClock(10);
-        this.addTomatoClock(15);
-        this.addTomatoClock(20);
-        this.addTomatoClock(25);
-        this.addTomatoClock(35);
+
+        let clocks: string = (this.plugin as any).settingCfg[STORAGE_TOMATO_CLOCKS] ?? ["0", "5", "10", "15", "20", "25"];
+        const washed = [0]
+        for (const clock of clocks.split(/[,，]/g)) {
+            const n = Number(clock.trim());
+            if (Number.isInteger(n)) {
+                if (n == 0) continue;
+                washed.push(n);
+            }
+        }
+        clocks = washed.sort((a, b) => a - b).map(i => {
+            this.addTomatoClock(i);
+            return String(i);
+        }).join(",");
+        (this.plugin as any).settingCfg[STORAGE_TOMATO_CLOCKS] = clocks;
+
+        this.plugin.setting.addItem({
+            title: "番茄钟时长(中英文逗号隔开，半角数字)",
+            createActionElement: () => {
+                const input = document.createElement("input") as HTMLInputElement;
+                input.className = "input";
+                input.value = clocks;
+                input.addEventListener("input", () => {
+                    (this.plugin as any).settingCfg[STORAGE_TOMATO_CLOCKS] = input.value;
+                });
+                return input;
+            },
+        });
     }
 
     private addTomatoClock(minute: number) {
