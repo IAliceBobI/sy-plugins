@@ -14,7 +14,7 @@ class BKMaker {
     item: HTMLElement;
     docID: string;
     container: HTMLDivElement;
-    lute: Lute
+    lute: Lute;
 
     constructor(protyle: IProtyle, item: HTMLElement, top: number) {
         this.protyle = protyle;
@@ -124,10 +124,10 @@ class BKMaker {
 
             let { kramdown } = await siyuan.getBlockKramdown(refPath.id);
             if (refPath.type == "NodeListItem" && kramdown) {
-                kramdown = kramdown.split("\n")[0]
+                kramdown = kramdown.split("\n")[0];
             }
             if (kramdown) {
-                const { idLnks } = extractLinks(kramdown)
+                const { idLnks } = extractLinks(kramdown);
                 for (const idLnk of idLnks) {
                     const txt = idLnk.txt.replace(/['"]/g, "");
                     this.addRef(txt, idLnk.id, allRefs);
@@ -142,7 +142,7 @@ class BKMaker {
     private refTag(id: string, text: string, len?: number): any {
         if (len) {
             let sliced = text.slice(0, len);
-            if (sliced.length != text.length) sliced += "……"
+            if (sliced.length != text.length) sliced += "……";
             return `<span data-type="block-ref" data-subtype="d" data-id="${id}">${sliced}</span>`;
         } else {
             return `<span data-type="block-ref" data-subtype="d" data-id="${id}">${text}</span>`;
