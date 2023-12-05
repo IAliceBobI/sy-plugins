@@ -8,6 +8,7 @@ export function extractLinks(txt: string) {
     const RefRegex = /\(\(([0-9\-a-z]{22}) (("[^"]*?")|('[^']*?'))\)\)/g;
     const ids: string[] = [];
     const links: string[] = [];
+    const idLnks: { id: string, txt: string }[] = [];
     let match: any;
     do {
         match = RefRegex.exec(txt) ?? [];
@@ -15,9 +16,10 @@ export function extractLinks(txt: string) {
         if (id) {
             ids.push(id);
             links.push(match[0]);
+            idLnks.push({ id, txt: match[2] })
         }
     } while (match.length > 0);
-    return { ids, links };
+    return { ids, links, idLnks };
 }
 
 export function sleep(ms: number): Promise<void> {
@@ -214,8 +216,7 @@ export const siyuan = {
     async checkBlockExist(id: string) {
         return siyuan.call("/api/block/checkBlockExist", { id });
     },
-    async getBlockDOM(id: string) {
-        // {dom, id}
+    async getBlockDOM(id: string): Promise<{ dom: string, id: string }> {
         return siyuan.call("/api/block/getBlockDOM", { id });
     },
     async setBlockAttrs(id: string, attrs: any) {
@@ -284,7 +285,7 @@ export const siyuan = {
         if (await siyuan.checkBlockExist(id))
             return siyuan.call("/api/block/moveBlock", { id, previousID });
     },
-    async getBlockKramdown(id: string) {
+    async getBlockKramdown(id: string): Promise<{ id: string, kramdown: string }> {
         return siyuan.call("/api/block/getBlockKramdown", { id });
     },
     async safeUpdateBlock(id: string, data: string, dataType = "markdown") {

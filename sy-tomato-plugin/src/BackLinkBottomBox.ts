@@ -1,5 +1,5 @@
-import { IProtyle, Plugin, Dialog } from "siyuan";
-import { newID, siyuan } from "./libs/utils";
+import { IProtyle, Plugin, Dialog, Lute } from "siyuan";
+import { NewLute, extractLinks, newID, siyuan } from "./libs/utils";
 import { DATA_ID, DATA_NODE_ID, DATA_TYPE } from "./libs/gconst";
 import { TOMATOBACKLINKKEY } from "./constants";
 import { events } from "./libs/Events";
@@ -14,6 +14,7 @@ class BKMaker {
     item: HTMLElement;
     docID: string;
     container: HTMLDivElement;
+    lute: Lute
 
     constructor(protyle: IProtyle, item: HTMLElement, top: number) {
         this.protyle = protyle;
@@ -22,6 +23,7 @@ class BKMaker {
         this.container = document.createElement("div");
         this.docID = protyle?.block.rootID ?? "";
         this.itemID = item.getAttribute(DATA_NODE_ID);
+        this.lute = NewLute();
     }
 
     private hr() {
@@ -96,24 +98,40 @@ class BKMaker {
         div.innerHTML = backlinksInDoc.dom;
         this.scanAllRef(allRefs, div);
         this.setReadonly(div);
-        this.container.appendChild(this.path2div(backlinksInDoc.blockPaths, allRefs));
+        this.container.appendChild(await this.path2div(backlinksInDoc.blockPaths, allRefs));
         this.container.appendChild(div);
         this.container.appendChild(this.hr());
     }
 
-    private path2div(blockPaths: BlockPath[], allRefs: RefCollector) {
+    private async path2div(blockPaths: BlockPath[], allRefs: RefCollector) {
         const div = document.createElement("div") as HTMLDivElement;
         const refList = [];
         for (const refPath of blockPaths) {
             if (refPath.type == "NodeDocument") {
+                if (refPath.id == this.docID) break;
                 const fileName = refPath.name.split("/").pop();
                 refList.push(this.refTag(refPath.id, fileName));
                 this.addRef(fileName, refPath.id, allRefs);
-            } else if (refPath.type == "NodeHeading") {
+                continue;
+            }
+
+            if (refPath.type == "NodeHeading") {
                 refList.push(this.refTag(refPath.id, refPath.name));
                 this.addRef(refPath.name, refPath.id, allRefs);
             } else {
-                refList.push(this.refTag(refPath.id, refPath.name, 10));
+                refList.push(this.refTag(refPath.id, refPath.name, 15));
+            }
+
+            let { kramdown } = await siyuan.getBlockKramdown(refPath.id);
+            if (refPath.type == "NodeListItem" && kramdown) {
+                kramdown = kramdown.split("\n")[0]
+            }
+            if (kramdown) {
+                const { idLnks } = extractLinks(kramdown)
+                for (const idLnk of idLnks) {
+                    const txt = idLnk.txt.replace(/['"]/g, "");
+                    this.addRef(txt, idLnk.id, allRefs);
+                }
             }
         }
         div.innerHTML = refList.join(" ➡ ");
@@ -123,7 +141,9 @@ class BKMaker {
 
     private refTag(id: string, text: string, len?: number): any {
         if (len) {
-            return `<span data-type="block-ref" data-subtype="d" data-id="${id}">${text.slice(0, len).trim()}……</span>`;
+            let sliced = text.slice(0, len);
+            if (sliced.length != text.length) sliced += "……"
+            return `<span data-type="block-ref" data-subtype="d" data-id="${id}">${sliced}</span>`;
         } else {
             return `<span data-type="block-ref" data-subtype="d" data-id="${id}">${text}</span>`;
         }
