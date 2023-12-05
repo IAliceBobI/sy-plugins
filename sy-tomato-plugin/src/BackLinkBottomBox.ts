@@ -123,7 +123,7 @@ class BKMaker {
 
     private refTag(id: string, text: string, len?: number): any {
         if (len) {
-            return `<span data-type="block-ref" data-subtype="d" data-id="${id}">${text.slice(0, len)}</span>`;
+            return `<span data-type="block-ref" data-subtype="d" data-id="${id}">${text.slice(0, len).trim()}……</span>`;
         } else {
             return `<span data-type="block-ref" data-subtype="d" data-id="${id}">${text}</span>`;
         }
