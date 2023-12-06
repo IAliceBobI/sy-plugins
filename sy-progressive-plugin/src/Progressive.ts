@@ -1,4 +1,4 @@
-import { Dialog, Menu, Plugin, openTab, confirm } from "siyuan";
+import { Dialog, Menu, Plugin, openTab, confirm, ITab } from "siyuan";
 import "./index.scss";
 import { events } from "../../sy-tomato-plugin/src/libs/Events";
 import { siyuan, timeUtil } from "../../sy-tomato-plugin/src/libs/utils";
@@ -12,12 +12,14 @@ class Progressive {
     private plugin: Plugin;
     private storage: help.Storage;
     private helper: help.Helper;
+    private openedTabs: ITab[];
 
     onload(plugin: Plugin) {
         Progressive.GLOBAL_THIS["progressive_zZmqus5PtYRi"] = { progressive: this, utils, siyuan, timeUtil, events };
         this.plugin = plugin;
         this.storage = new help.Storage(plugin);
         this.helper = new help.Helper(plugin);
+        this.openedTabs = [];
         const topBarElement = this.plugin.addTopBar({
             icon: "iconABook",
             title: this.plugin.i18n.progressiveReadingMenu,
@@ -369,7 +371,7 @@ class Progressive {
         const piece = bookIndex[point];
         noteID = await this.findDoc(bookInfo.bookID, point);
         if (noteID) {
-            openTab({ app: this.plugin.app, doc: { id: noteID } });
+            this.addAndClose(await openTab({ app: this.plugin.app, doc: { id: noteID } }));
             return;
         }
         noteID = await this.createNote(bookInfo.boxID, bookInfo.bookID, piece, point);
@@ -377,7 +379,7 @@ class Progressive {
             await this.addReadingBtns(bookID, noteID, point);
             await siyuan.insertBlockAsChildOf(help.tempContent("---"), noteID);
             await this.fullfilContent(bookInfo.bookID, piece, noteID);
-            openTab({
+            this.addAndClose(await openTab({
                 app: this.plugin.app, doc: { id: noteID },
                 afterOpen: () => {
                     if (bookInfo.autoCard == "yes") {
@@ -386,7 +388,7 @@ class Progressive {
                         }, 500);
                     }
                 }
-            });
+            }));
         } else {
             await siyuan.pushMsg(this.plugin.i18n.FailToNewDoc);
         }
@@ -408,12 +410,10 @@ class Progressive {
             case HtmlCBType.previous:
                 await this.storage.gotoBlock(bookID, point - 1);
                 await this.startToLearn(bookID);
-                // utils.closeTab(this.plugin.app, noteID);
                 break;
             case HtmlCBType.next:
                 await this.storage.gotoBlock(bookID, point + 1);
                 await this.startToLearn(bookID);
-                // utils.closeTab(this.plugin.app, noteID);
                 break;
             case HtmlCBType.deleteAndExit:
                 await siyuan.removeRiffCards([noteID]);
@@ -433,10 +433,9 @@ class Progressive {
                 break;
             case HtmlCBType.nextBook:
                 await this.startToLearn();
-                // utils.closeTab(this.plugin.app, noteID);
                 break;
             case HtmlCBType.quit:
-                // utils.closeTab(this.plugin.app, noteID);
+                this.addAndClose();
                 break;
             case HtmlCBType.AddDocCard:
                 await siyuan.addRiffCards([noteID]);
@@ -465,6 +464,13 @@ class Progressive {
             default:
                 throw "Invalid HtmlCBType " + cbType;
         }
+    }
+
+    private addAndClose(tab?: ITab) {
+        navigator.locks.request("Progressive_addAndClose", () => {
+            this.openedTabs.pop()?.close();
+            if (tab) this.openedTabs.push(tab);
+        });
     }
 
     private rmBadThings(s: string) {
