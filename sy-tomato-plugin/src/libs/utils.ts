@@ -1,6 +1,14 @@
 import { App, Constants, IOperation, Lute, fetchSyncPost, openTab } from "siyuan";
 import { v4 as uuid } from "uuid";
 
+export function getID(e: Element) {
+    const tn = e?.tagName?.toLocaleLowerCase() ?? "";
+    if (!tn) return "";
+    if (tn == "body") return "";
+    const id = e?.getAttribute("data-node-id") ?? "";
+    if (!id) return getID(e?.parentElement);
+    return id;
+}
 export async function closeTab(app: App, noteID: string) {
     const tab: any = openTab({ app, doc: { id: noteID } });
     tab.then((tab: any) => tab.close());
