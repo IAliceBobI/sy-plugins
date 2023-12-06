@@ -2,7 +2,7 @@ import { IDLen } from "../../sy-tomato-plugin/src/libs/gconst";
 import { siyuan, styleColor } from "../../sy-tomato-plugin/src/libs/utils";
 import * as utils from "../../sy-tomato-plugin/src/libs/utils";
 import * as constants from "./constants";
-import { Plugin, openTab } from "siyuan";
+import { Plugin } from "siyuan";
 
 export type WordCountType = { id: string; count: number; type: string; };
 export type BookInfo = {
@@ -187,11 +187,6 @@ export class Helper {
 
     constructor(plugin: Plugin) {
         this.plugin = plugin;
-    }
-
-    async closeTab(noteID: string) {
-        const tab: any = openTab({ app: this.plugin.app, doc: { id: noteID } });
-        tab.then((tab: any) => tab.close());
     }
 
     btnFullfilContent(bookID: string, noteID: string, point: number) {
