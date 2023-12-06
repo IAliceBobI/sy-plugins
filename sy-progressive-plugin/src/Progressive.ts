@@ -408,12 +408,12 @@ class Progressive {
             case HtmlCBType.previous:
                 await this.storage.gotoBlock(bookID, point - 1);
                 await this.startToLearn(bookID);
-                utils.closeTab(this.plugin.app, noteID);
+                // utils.closeTab(this.plugin.app, noteID);
                 break;
             case HtmlCBType.next:
                 await this.storage.gotoBlock(bookID, point + 1);
                 await this.startToLearn(bookID);
-                utils.closeTab(this.plugin.app, noteID);
+                // utils.closeTab(this.plugin.app, noteID);
                 break;
             case HtmlCBType.deleteAndExit:
                 await siyuan.removeRiffCards([noteID]);
@@ -433,10 +433,10 @@ class Progressive {
                 break;
             case HtmlCBType.nextBook:
                 await this.startToLearn();
-                utils.closeTab(this.plugin.app, noteID);
+                // utils.closeTab(this.plugin.app, noteID);
                 break;
             case HtmlCBType.quit:
-                utils.closeTab(this.plugin.app, noteID);
+                // utils.closeTab(this.plugin.app, noteID);
                 break;
             case HtmlCBType.AddDocCard:
                 await siyuan.addRiffCards([noteID]);
