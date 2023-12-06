@@ -254,7 +254,7 @@ class BackLinkBottomBox {
         const dialog = new Dialog({
             title: "🔍",
             content: `<div id="${id}"></div>`,
-            width: "600px",
+            width: events.isMobile ? "92vw" : "560px",
             height: "540px",
         });
         new BackLinkBottomSearchDialog({

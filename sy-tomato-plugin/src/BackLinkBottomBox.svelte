@@ -23,22 +23,24 @@
 </script>
 
 <!-- https://learn.svelte.dev/tutorial/if-blocks -->
-<div class="fn__flex-1 fn__flex-column">
-    <input
-        type="text"
-        bind:value={searchQuery}
-        on:input={search}
-        class="b3-text-field"
-    />
+<div>
+    <div class="fn__flex-1 fn__flex-column">
+        <input
+            type="text"
+            bind:value={searchQuery}
+            on:input={search}
+            class="b3-text-field"
+        />
+    </div>
     {#each searchResults as item}
         <a href="siyuan://blocks/{item.id}">{@html item.lnk}</a>
+        {@html "&nbsp;".repeat(10)}
     {/each}
 </div>
 
 <style>
     a {
         margin: auto;
-        display: block;
         margin-bottom: 8px;
         color: var(--b3-protyle-inline-blockref-color);
         text-decoration: none;

@@ -166,7 +166,6 @@ class Progressive {
                 <div class="fn__hr"></div>
             </div>`,
             width: events.isMobile ? "92vw" : "560px",
-            height: "640px",
         });
 
         const statisticDiv = dialog.element.querySelector("#" + statisticDivID) as HTMLDivElement;

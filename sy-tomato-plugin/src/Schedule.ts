@@ -3,6 +3,7 @@ import { siyuan, newID, timeUtil } from "@/libs/utils";
 import "./index.scss";
 import ScheduleDialog from "@/Schedule.svelte";
 import { STORAGE_SCHEDULE } from "./constants";
+import { events } from "./libs/Events";
 
 class Schedule {
     private plugin: Plugin;
@@ -40,7 +41,7 @@ class Schedule {
         const dialog = new Dialog({
             title: "⏰ " + this.plugin.i18n.setDateTitle,
             content: `<div id="${id}"></div>`,
-            width: "600px",
+            width: events.isMobile ? "92vw" : "560px",
             height: "540px",
         });
         new ScheduleDialog({
@@ -83,7 +84,7 @@ class Schedule {
             const dialog = new Dialog({
                 title: `${this.plugin.i18n.remind}: ${theTime}`,
                 content: "<div id=\"protyle\" style=\"height: 480px;\"></div>",
-                width: "560px",
+                width: events.isMobile ? "92vw" : "560px",
                 height: "540px",
             });
             new Protyle(this.plugin.app, dialog.element.querySelector("#protyle"), {
