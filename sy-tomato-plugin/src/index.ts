@@ -70,5 +70,6 @@ export default class ThePlugin extends Plugin {
         readingPointBox.blockIconEvent(detail);
         schedule.blockIconEvent(detail);
         backLinkBottomBox.blockIconEvent(detail);
+        linkBox.blockIconEvent(detail);
     }
 }

@@ -1,5 +1,5 @@
 import { Lute, Plugin } from "siyuan";
-import { events } from "@/libs/Events";
+import { EventType, events } from "@/libs/Events";
 import * as gconst from "@/libs/gconst";
 import { siyuan } from "@/libs/utils";
 import * as utils from "@/libs/utils";
@@ -19,7 +19,7 @@ class LinkBox {
                     await this.addLink(id);
             },
         });
-        this.plugin.eventBus.on("open-menu-content", async ({ detail }) => {
+        this.plugin.eventBus.on(EventType.open_menu_content, async ({ detail }) => {
             const menu = detail.menu;
             menu.addItem({
                 label: this.plugin.i18n.bilink,
@@ -30,6 +30,21 @@ class LinkBox {
                     if (blockID) this.addLink(blockID);
                 },
             });
+        });
+    }
+
+    blockIconEvent(detail: any) {
+        detail.menu.addItem({
+            iconHTML: "",
+            label: this.plugin.i18n.bilink,
+            click: () => {
+                for (const element of detail.blockElements) {
+                    const blockID = utils.getID(element);
+                    if (blockID) {
+                        this.addLink(blockID);
+                    }
+                }
+            }
         });
     }
 
