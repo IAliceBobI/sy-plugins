@@ -217,6 +217,24 @@ class BackLinkBottomBox {
         });
     }
 
+    blockIconEvent(detail: any) {
+        const docID = detail?.protyle?.block?.rootID ?? "";
+        detail.menu.addItem({
+            iconHTML: "",
+            label: this.plugin.i18n.bottombacklink.split("#")[0],
+            click: async () => {
+                await this.doTheWork(docID);
+            }
+        });
+        detail.menu.addItem({
+            iconHTML: "",
+            label: this.plugin.i18n.bottomMention.split("#")[0],
+            click: async () => {
+                await this.doTheWork(docID, true);
+            }
+        });
+    }
+
     async doTheWork(docID: string, isMention = false) {
         if (docID) {
             await siyuan.pushMsg("正在插入底部反链区……");
