@@ -34,10 +34,7 @@
                     if (docID && title) {
                         await getBackLinks(docID, lastEventID);
                     }
-                } else if (eventType == EventType.destroy_protyle) {
-                    backlinks = mentionlinks = [];
-                    title = "";
-                }
+                } 
             }
         });
     }

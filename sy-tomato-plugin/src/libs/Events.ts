@@ -97,9 +97,6 @@ class Events {
         this.plugin.eventBus.on(EventType.switch_protyle, ({ detail }: any) => {
             this.invokeCB(EventType.switch_protyle, detail);
         });
-        this.plugin.eventBus.on(EventType.destroy_protyle, ({ detail }: any) => {
-            this.invokeCB(EventType.destroy_protyle, detail);
-        });
     }
 }
 
