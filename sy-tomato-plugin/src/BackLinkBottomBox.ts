@@ -227,6 +227,11 @@ class BackLinkBottomBox {
             }
             return execEmbeddedJs()}}`;
             await this.insertMd(jsCode.replace(new RegExp("\\n\\s+", "g"), " "), lastID);
+            if (isMention) {
+                await this.insertMd("# 提及", lastID);
+            } else {
+                await this.insertMd("# 反链", lastID);
+            }
         }
     }
 
