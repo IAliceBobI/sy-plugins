@@ -105,21 +105,21 @@ class BKMaker {
 
     private async path2div(blockPaths: BlockPath[], allRefs: RefCollector) {
         const div = document.createElement("div") as HTMLDivElement;
-        const refList = [];
+        const refPathList = [];
         for (const refPath of blockPaths) {
             if (refPath.type == "NodeDocument") {
                 if (refPath.id == this.docID) break;
                 const fileName = refPath.name.split("/").pop();
-                refList.push(this.refTag(refPath.id, fileName));
+                refPathList.push(this.refTag(refPath.id, fileName, 0));
                 this.addRef(fileName, refPath.id, allRefs);
                 continue;
             }
 
             if (refPath.type == "NodeHeading") {
-                refList.push(this.refTag(refPath.id, refPath.name));
+                refPathList.push(this.refTag(refPath.id, refPath.name, 0));
                 this.addRef(refPath.name, refPath.id, allRefs);
             } else {
-                refList.push(this.refTag(refPath.id, refPath.name, 15));
+                refPathList.push(this.refTag(refPath.id, refPath.name, 0, 15));
             }
 
             let { kramdown } = await siyuan.getBlockKramdown(refPath.id);
@@ -133,18 +133,22 @@ class BKMaker {
                 }
             }
         }
-        div.innerHTML = refList.join(" ➡ ");
+        div.innerHTML = refPathList.join(" ➡ ");
         this.setReadonly(div);
         return div;
     }
 
-    private refTag(id: string, text: string, len?: number): any {
+    private refTag(id: string, text: string, count: number, len?: number): any {
+        let countTag = "";
+        if (count > 0) {
+            countTag = `<span class="tomato-style__code">${count}</span>`;
+        }
         if (len) {
             let sliced = text.slice(0, len);
             if (sliced.length != text.length) sliced += "……";
-            return `<span data-type="block-ref" data-subtype="d" data-id="${id}">${sliced}</span>`;
+            return `<span data-type="block-ref" data-subtype="d" data-id="${id}">${sliced}</span>` + countTag;
         } else {
-            return `<span data-type="block-ref" data-subtype="d" data-id="${id}">${text}</span>`;
+            return `<span data-type="block-ref" data-subtype="d" data-id="${id}">${text}</span>` + countTag;
         }
     }
 
@@ -160,7 +164,7 @@ class BKMaker {
         if (txt != "*" && id != this.docID) {
             const key = id + txt;
             const c = (allRefs.get(key)?.count ?? 0) + 1;
-            const spanStr = this.refTag(id, `${txt}(${c})`);
+            const spanStr = this.refTag(id, txt, c);
             allRefs.set(key, {
                 count: c,
                 lnk: spanStr,

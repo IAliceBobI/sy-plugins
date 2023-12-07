@@ -10,6 +10,16 @@
     text-align: center;
     font-size: 40px;
   }
+
+  &__code {
+    background-color: var(--b3-protyle-code-linenumber-hl);
+    color: var(--b3-font-color5);
+    font-size: small;
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-family: "Courier New", monospace;
+    vertical-align: top;
+  }
 }
 
 .schedule-style {
@@ -23,8 +33,8 @@
   &__button {
     display: inline-block;
     padding: 10px 20px;
-    background-color: #4CAF50;
-    color: white;
+    background-color: var(--b3-font-background4);
+    color: var(--b3-font-color5);
     text-align: center;
     text-decoration: none;
     font-size: 16px;
@@ -34,11 +44,11 @@
   }
 
   &__button:hover {
-    background-color: #45a049;
+    background-color: var(--b3-font-background3);
   }
 
   &__button:active {
-    background-color: #3e8e41;
+    background-color: var(--b3-font-background3);
   }
 
   &__button.large {
@@ -53,18 +63,14 @@
 
   &__input-field {
     padding: 10px;
-    border: 1px solid #ccc;
+    border: 1px solid var(--b3-protyle-search-border-color);
     border-radius: 4px;
     font-size: larger;
     width: 300px;
   }
 
-  &__input-field::placeholder {
-    color: #999;
-  }
-
   &__input-field:focus {
-    border-color: #4CAF50;
+    border-color: var(--b3-protyle-search-current-background);
     box-shadow: 0 0 5px rgba(76, 175, 80, 0.3);
   }
 }
