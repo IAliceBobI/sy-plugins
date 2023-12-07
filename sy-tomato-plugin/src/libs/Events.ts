@@ -66,10 +66,12 @@ class Events {
     }
 
     private invokeCB(eventType: string, detail: Protyle) {
-        this._protyle = detail;
-        this._boxID = this.protyle?.protyle?.notebookId ?? "";
-        this._title = this.protyle?.protyle?.title?.editElement?.textContent?.trim() ?? "";
-        this._docID = this.protyle?.protyle?.block.rootID ?? "";
+        if (eventType != EventType.destroy_protyle) {
+            this._protyle = detail;
+            this._boxID = this.protyle?.protyle?.notebookId ?? "";
+            this._title = this.protyle?.protyle?.title?.editElement?.textContent?.trim() ?? "";
+            this._docID = this.protyle?.protyle?.block.rootID ?? "";
+        }
         for (const cb of this._protyleListeners.values()) {
             cb(eventType, detail);
         }
