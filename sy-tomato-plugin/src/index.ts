@@ -7,7 +7,7 @@ import { readingPointBox } from "./ReadingPointBox";
 import { cpBox } from "./CpBox";
 import { backLinkBottomBox } from "./BackLinkBottomBox";
 import { cardBox } from "./CardBox";
-import { events } from "@/libs/Events";
+import { EventType, events } from "@/libs/Events";
 import { STORAGE_SETTINGS } from "./constants";
 import { siyuan } from "@/libs/utils";
 
@@ -15,11 +15,13 @@ export default class ThePlugin extends Plugin {
     private static readonly GLOBAL_THIS: Record<string, any> = globalThis;
 
     private settingCfg: { [key: string]: boolean };
+    private blockIconEventBindThis = this.blockIconEvent.bind(this);
 
     async onload() {
         ThePlugin.GLOBAL_THIS["siyuan_zZmqus5PtYRi"] = siyuan;
         this.addIcons(ICONS);
         events.onload(this);
+        this.eventBus.on(EventType.click_blockicon, this.blockIconEventBindThis);
 
         this.setting = new Setting({
             confirmCallback: () => {
@@ -30,7 +32,7 @@ export default class ThePlugin extends Plugin {
 
         this.settingCfg = await this.loadData(STORAGE_SETTINGS);
         if (!this.settingCfg) this.settingCfg = {};
-        
+
         if (this.settingCfg.tomatoClockCheckbox ?? true) await tomatoClock.onload(this);
         if (this.settingCfg.scheduleCheckbox ?? true) await schedule.onload(this);
         if (this.settingCfg.readingPointBoxCheckbox ?? true) await readingPointBox.onload(this);
@@ -62,5 +64,9 @@ export default class ThePlugin extends Plugin {
                 return checkbox;
             },
         });
+    }
+
+    private blockIconEvent({ detail }: any) {
+        readingPointBox.blockIconEvent(detail);
     }
 }

@@ -1,5 +1,5 @@
 import { Plugin, openTab } from "siyuan";
-import { siyuan, sleep } from "@/libs/utils";
+import { getID, siyuan, sleep } from "@/libs/utils";
 import "./index.scss";
 import { events } from "@/libs/Events";
 
@@ -44,6 +44,23 @@ class ReadingPointBox {
             position: "right",
             callback: async () => {
                 await this.showContentsWithLock();
+            }
+        });
+    }
+
+    blockIconEvent(detail: any) {
+        detail.menu.addItem({
+            iconHTML: "",
+            label: this.plugin.i18n.addBookmark,
+            click: () => {
+                console.log(detail);
+                for (const element of detail.blockElements) {
+                    const blockID = getID(element);
+                    if (blockID) {
+                        this.addReadPointLock(blockID);
+                        break;
+                    }
+                }
             }
         });
     }
