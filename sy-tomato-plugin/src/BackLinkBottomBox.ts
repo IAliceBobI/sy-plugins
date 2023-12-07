@@ -218,6 +218,7 @@ class BackLinkBottomBox {
     }
 
     blockIconEvent(detail: any) {
+        if (!this.plugin) return;
         const docID = detail?.protyle?.block?.rootID ?? "";
         detail.menu.addItem({
             iconHTML: "",

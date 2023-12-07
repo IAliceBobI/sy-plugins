@@ -49,6 +49,7 @@ class ReadingPointBox {
     }
 
     blockIconEvent(detail: any) {
+        if (!this.plugin) return;
         detail.menu.addItem({
             iconHTML: "",
             label: this.plugin.i18n.addBookmark,

@@ -71,5 +71,6 @@ export default class ThePlugin extends Plugin {
         schedule.blockIconEvent(detail);
         backLinkBottomBox.blockIconEvent(detail);
         linkBox.blockIconEvent(detail);
+        cardBox.blockIconEvent(detail);
     }
 }

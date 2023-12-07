@@ -1,5 +1,5 @@
 import { Plugin } from "siyuan";
-import { siyuan, sleep } from "@/libs/utils";
+import { getID, siyuan, sleep } from "@/libs/utils";
 import "./index.scss";
 import { events } from "@/libs/Events";
 
@@ -39,6 +39,23 @@ class CardBox {
                     }
                 },
             });
+        });
+    }
+
+    blockIconEvent(detail: any) {
+        if (!this.plugin) return;
+        detail.menu.addItem({
+            iconHTML: "",
+            label: this.plugin.i18n.addFlashCard,
+            click: () => {
+                for (const element of detail.blockElements) {
+                    const blockID = getID(element);
+                    if (blockID) {
+                        this.addFlashCard(blockID);
+                        break;
+                    }
+                }
+            }
         });
     }
 
