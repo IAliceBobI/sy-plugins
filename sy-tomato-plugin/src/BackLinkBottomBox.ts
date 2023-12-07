@@ -1,7 +1,7 @@
-import { IProtyle, Plugin, Dialog, Lute } from "siyuan";
-import { NewLute, extractLinks, newID, siyuan } from "./libs/utils";
+import { IProtyle, Plugin, Dialog, Lute, openTab } from "siyuan";
+import { NewLute, extractLinks, newID, siyuan, sleep } from "./libs/utils";
 import { DATA_ID, DATA_NODE_ID, DATA_TYPE } from "./libs/gconst";
-import { TOMATOBACKLINKKEY } from "./constants";
+import { TOMATOBACKLINKKEY, TOMATOMENTIONKEY } from "./constants";
 import { events } from "./libs/Events";
 import BackLinkBottomSearchDialog from "./BackLinkBottomBox.svelte";
 
@@ -178,6 +178,7 @@ class BKMaker {
 class BackLinkBottomBox {
     private plugin: Plugin;
     private static readonly GLOBAL_THIS: Record<string, any> = globalThis;
+    private lastDocID: string;
 
     async onload(plugin: Plugin) {
         BackLinkBottomBox.GLOBAL_THIS[TOMATO] = { BKMaker, "tomato": this };
@@ -215,6 +216,15 @@ class BackLinkBottomBox {
                 },
             });
         });
+        events.addListener("BackLinkBottomBox", (_eventType, detail) => {
+            navigator.locks.request("BackLinkBottomBoxLock", () => {
+                const docID = detail?.protyle?.block?.rootID ?? "";
+                if (this.lastDocID != docID) {
+                    this.lastDocID = docID;
+                    this.doTheWork(docID);
+                }
+            });
+        });
     }
 
     blockIconEvent(detail: any) {
@@ -236,27 +246,53 @@ class BackLinkBottomBox {
         });
     }
 
+    async hasInserted(docID: string, key: string) {
+        const row = await siyuan.sqlOne(`select ial from blocks where root_id="${docID}" 
+                and ial like "%${key}%"`);
+        const ial: string = row?.ial ?? "";
+        return ial.includes(key);
+    }
+
     async doTheWork(docID: string, isMention = false) {
         if (docID) {
-            await siyuan.pushMsg("正在插入底部反链区……");
-            const lastID = await this.getLastBlockID(docID);
-            const jsCode = `{{//!js_esc_newline_
-            async function execEmbeddedJs() {
-                (new ${TOMATO}.BKMaker(protyle, item, top)).doTheWork(${isMention})
-            }
-            return execEmbeddedJs()}}`;
-            await this.insertMd(jsCode.replace(new RegExp("\\n\\s+", "g"), " "), lastID);
             if (isMention) {
-                await this.insertMd("# 提及", lastID);
+                if (await this.hasInserted(docID, TOMATOMENTIONKEY)) return;
             } else {
-                await this.insertMd("# 反链", lastID);
+                if (await this.hasInserted(docID, TOMATOBACKLINKKEY)) return;
             }
+
+            // await siyuan.pushMsg(`正在插入底部反链(${new Date().getTime()})`, 1000);
+            const lastID = await this.getLastBlockID(docID);
+
+            openTab({
+                app: this.plugin.app, doc: {
+                    id: lastID,
+                    action: ["cb-get-focus"],
+                },
+                afterOpen: async () => {
+                    await sleep(300);
+                    const jsCode = `{{//!js_esc_newline_
+                        async function execEmbeddedJs() {
+                            (new ${TOMATO}.BKMaker(protyle, item, top)).doTheWork(${isMention})
+                        }
+                        return execEmbeddedJs()}}`.replace(new RegExp("\\n\\s+", "g"), " ");
+                    if (isMention) {
+                        await this.insertMd(jsCode, lastID, TOMATOMENTIONKEY);
+                        await this.insertMd("# 提及", lastID);
+                    } else {
+                        await this.insertMd(jsCode, lastID, TOMATOBACKLINKKEY);
+                        await this.insertMd("# 反链", lastID);
+                    }
+                }
+            });
         }
     }
 
-    private async insertMd(md: string, lastID: string) {
-        md += "\n";
-        md += `{: ${TOMATOBACKLINKKEY}="1"}`;
+    private async insertMd(md: string, lastID: string, key?: string) {
+        if (key) {
+            md += "\n";
+            md += `{: ${key}="1"}`;
+        }
         if (lastID) {
             await siyuan.insertBlockAfter(md, lastID);
         } else {
