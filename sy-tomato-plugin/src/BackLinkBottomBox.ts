@@ -260,13 +260,17 @@ class BackLinkBottomBox {
 
     async searchLinks(data: linkItem[]) {
         const id = newID();
+        let d: BackLinkBottomSearchDialog = null;
         const dialog = new Dialog({
             title: "🔍",
             content: `<div id="${id}"></div>`,
             width: events.isMobile ? "92vw" : "560px",
             height: "540px",
+            destroyCallback() {
+                if (d) d.$destroy();
+            },
         });
-        new BackLinkBottomSearchDialog({
+        d = new BackLinkBottomSearchDialog({
             target: dialog.element.querySelector("#" + id),
             props: {
                 plugin: this.plugin,

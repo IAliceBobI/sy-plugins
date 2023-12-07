@@ -1,6 +1,6 @@
 <script lang="ts">
     import { openTab, Plugin } from "siyuan";
-    import { onMount } from "svelte";
+    import { onDestroy, onMount } from "svelte";
 
     export let plugin: Plugin;
     export let data: linkItem[];
@@ -10,6 +10,10 @@
 
     onMount(async () => {
         searchResults = data.slice();
+    });
+
+    onDestroy(() => {
+        // console.log("ssss");
     });
 
     const search = () => {

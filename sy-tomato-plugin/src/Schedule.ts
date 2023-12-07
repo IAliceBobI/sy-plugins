@@ -38,13 +38,17 @@ class Schedule {
 
     private async showScheduleDialog(blockID?: string) {
         const id = newID();
+        let d: ScheduleDialog = null;
         const dialog = new Dialog({
             title: "⏰ " + this.plugin.i18n.setDateTitle,
             content: `<div id="${id}"></div>`,
             width: events.isMobile ? "92vw" : "560px",
             height: "540px",
+            destroyCallback() {
+                if (d) d.$destroy();
+            },
         });
-        new ScheduleDialog({
+        d = new ScheduleDialog({
             target: dialog.element.querySelector("#" + id),
             props: {
                 plugin: this.plugin,
