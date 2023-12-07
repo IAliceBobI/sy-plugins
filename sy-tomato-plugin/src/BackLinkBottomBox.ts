@@ -270,7 +270,7 @@ class BackLinkBottomBox {
                     action: ["cb-get-focus"],
                 },
                 afterOpen: async () => {
-                    await sleep(300);
+                    // await sleep(300);
                     const jsCode = `{{//!js_esc_newline_
                         async function execEmbeddedJs() {
                             (new ${TOMATO}.BKMaker(protyle, item, top)).doTheWork(${isMention})
