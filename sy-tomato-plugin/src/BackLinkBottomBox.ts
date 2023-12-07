@@ -146,9 +146,9 @@ class BKMaker {
         if (len) {
             let sliced = text.slice(0, len);
             if (sliced.length != text.length) sliced += "……";
-            return `<span data-type="block-ref" data-subtype="d" data-id="${id}">${sliced}</span>` + countTag;
+            return `<span data-type="block-ref" data-id="${id}">${sliced}</span>` + countTag;
         } else {
-            return `<span data-type="block-ref" data-subtype="d" data-id="${id}">${text}</span>` + countTag;
+            return `<span data-type="block-ref" data-id="${id}">${text}</span>` + countTag;
         }
     }
 
@@ -264,6 +264,7 @@ class BackLinkBottomBox {
         new BackLinkBottomSearchDialog({
             target: dialog.element.querySelector("#" + id),
             props: {
+                plugin: this.plugin,
                 data,
             }
         });

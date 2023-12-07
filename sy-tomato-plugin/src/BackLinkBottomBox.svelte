@@ -1,6 +1,8 @@
 <script lang="ts">
+    import { openTab, Plugin } from "siyuan";
     import { onMount } from "svelte";
 
+    export let plugin: Plugin;
     export let data: linkItem[];
 
     let searchQuery = "";
@@ -20,10 +22,19 @@
         }
         searchResults = find;
     };
+
+    function linkClick(id: string) {
+        openTab({
+            app: plugin.app,
+            doc: {
+                id,
+            },
+        });
+    }
 </script>
 
 <!-- https://learn.svelte.dev/tutorial/if-blocks -->
-<div>
+<div class="b3-dialog__content">
     <div class="fn__flex-1 fn__flex-column">
         <input
             type="text"
@@ -33,13 +44,18 @@
         />
     </div>
     {#each searchResults as item}
-        <a href="siyuan://blocks/{item.id}">{@html item.lnk}</a>
+        <button
+            on:click={() => {
+                linkClick(item.id);
+            }}>{@html item.lnk}</button
+        >
         {@html "&nbsp;".repeat(10)}
     {/each}
 </div>
 
 <style>
-    a {
+    button {
+        border: transparent;
         margin: auto;
         margin-bottom: 8px;
         color: var(--b3-protyle-inline-blockref-color);
@@ -47,7 +63,7 @@
         font-size: large;
     }
 
-    a:hover {
+    button:hover {
         text-decoration: underline;
         color: var(--b3-protyle-inline-fileref-color);
     }
