@@ -53,7 +53,6 @@ class ReadingPointBox {
             iconHTML: "",
             label: this.plugin.i18n.addBookmark,
             click: () => {
-                console.log(detail);
                 for (const element of detail.blockElements) {
                     const blockID = getID(element);
                     if (blockID) {

@@ -1,5 +1,5 @@
 import { Dialog, Plugin, Protyle, } from "siyuan";
-import { siyuan, newID, timeUtil } from "@/libs/utils";
+import { siyuan, newID, timeUtil, getID } from "@/libs/utils";
 import "./index.scss";
 import ScheduleDialog from "@/Schedule.svelte";
 import { STORAGE_SCHEDULE } from "./constants";
@@ -33,6 +33,22 @@ class Schedule {
                     }
                 },
             });
+        });
+    }
+
+    blockIconEvent(detail: any) {
+        detail.menu.addItem({
+            iconHTML: "",
+            label: this.plugin.i18n.schedule,
+            click: () => {
+                for (const element of detail.blockElements) {
+                    const blockID = getID(element);
+                    if (blockID) {
+                        this.showScheduleDialog(blockID);
+                        break;
+                    }
+                }
+            }
         });
     }
 
