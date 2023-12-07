@@ -33,11 +33,13 @@ class TomatoClock {
         (this.plugin as any).settingCfg[STORAGE_TOMATO_CLOCKS] = clocks;
 
         this.plugin.setting.addItem({
-            title: "番茄钟时长(中英文逗号隔开，半角数字)",
+            title: "** 番茄钟时长(中英文逗号隔开，半角数字)",
+            description: "先开启：状态栏番茄钟",
             createActionElement: () => {
                 const input = document.createElement("input") as HTMLInputElement;
                 input.className = "input";
                 input.value = clocks;
+                input.className = "b3-text-field fn__flex-center";
                 input.addEventListener("input", () => {
                     (this.plugin as any).settingCfg[STORAGE_TOMATO_CLOCKS] = input.value;
                 });

@@ -33,21 +33,26 @@ export default class ThePlugin extends Plugin {
         this.settingCfg = await this.loadData(STORAGE_SETTINGS);
         if (!this.settingCfg) this.settingCfg = {};
 
+        this.addSettingItem("tomatoClockCheckbox", "* 状态栏番茄钟", true);
         if (this.settingCfg.tomatoClockCheckbox ?? true) await tomatoClock.onload(this);
-        if (this.settingCfg.scheduleCheckbox ?? true) await schedule.onload(this);
-        if (this.settingCfg.readingPointBoxCheckbox ?? true) await readingPointBox.onload(this);
-        if (this.settingCfg.cardBoxCheckbox ?? false) await cardBox.onload(this);
-        if (this.settingCfg.cpBoxCheckbox ?? false) await cpBox.onload(this);
-        if (this.settingCfg.linkBoxCheckbox ?? false) await linkBox.onload(this);
-        if (this.settingCfg.backLinkBottomBoxCheckbox ?? true) await backLinkBottomBox.onload(this);
 
-        this.addSettingItem("tomatoClockCheckbox", "状态栏番茄钟", true);
-        this.addSettingItem("scheduleCheckbox", "内容提醒", true);
-        this.addSettingItem("readingPointBoxCheckbox", "阅读点", true);
-        this.addSettingItem("cardBoxCheckbox", "闪卡工具", false);
-        this.addSettingItem("cpBoxCheckbox", "长内容工具", false);
-        this.addSettingItem("linkBoxCheckbox", "双向互链", false);
-        this.addSettingItem("backLinkBottomBoxCheckbox", "底部反链", true);
+        this.addSettingItem("scheduleCheckbox", "* 内容提醒", true);
+        if (this.settingCfg.scheduleCheckbox ?? true) await schedule.onload(this);
+        
+        this.addSettingItem("readingPointBoxCheckbox", "* 阅读点", true);
+        if (this.settingCfg.readingPointBoxCheckbox ?? true) await readingPointBox.onload(this);
+
+        this.addSettingItem("cardBoxCheckbox", "* 闪卡工具", false);
+        if (this.settingCfg.cardBoxCheckbox ?? false) await cardBox.onload(this);
+        
+        this.addSettingItem("cpBoxCheckbox", "* 长内容工具", false);
+        if (this.settingCfg.cpBoxCheckbox ?? false) await cpBox.onload(this);
+
+        this.addSettingItem("linkBoxCheckbox", "* 双向互链", false);
+        if (this.settingCfg.linkBoxCheckbox ?? false) await linkBox.onload(this);
+
+        this.addSettingItem("backLinkBottomBoxCheckbox", "* 底部反链", true);
+        if (this.settingCfg.backLinkBottomBoxCheckbox ?? true) await backLinkBottomBox.onload(this);
     }
 
     private addSettingItem(key: string, title: string, defaultValue: boolean) {

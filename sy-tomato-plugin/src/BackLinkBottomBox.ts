@@ -1,7 +1,7 @@
 import { IProtyle, Plugin, Dialog, Lute, openTab } from "siyuan";
-import { NewLute, extractLinks, newID, siyuan, sleep } from "./libs/utils";
+import { NewLute, extractLinks, newID, siyuan } from "./libs/utils";
 import { DATA_ID, DATA_NODE_ID, DATA_TYPE } from "./libs/gconst";
-import { TOMATOBACKLINKKEY, TOMATOMENTIONKEY } from "./constants";
+import { STORAGE_AUTO_BK, TOMATOBACKLINKKEY, TOMATOMENTIONKEY } from "./constants";
 import { events } from "./libs/Events";
 import BackLinkBottomSearchDialog from "./BackLinkBottomBox.svelte";
 
@@ -216,15 +216,34 @@ class BackLinkBottomBox {
                 },
             });
         });
-        events.addListener("BackLinkBottomBox", (_eventType, detail) => {
-            navigator.locks.request("BackLinkBottomBoxLock", () => {
-                const docID = detail?.protyle?.block?.rootID ?? "";
-                if (this.lastDocID != docID) {
-                    this.lastDocID = docID;
-                    this.doTheWork(docID);
-                }
-            });
+        const auto_bk: boolean = (this.plugin as any).settingCfg[STORAGE_AUTO_BK] ?? true;
+
+        this.plugin.setting.addItem({
+            title: "** 自动添加底部反链",
+            description: "先开启：底部反链",
+            createActionElement: () => {
+                const checkbox = document.createElement("input") as HTMLInputElement;
+                checkbox.type = "checkbox";
+                checkbox.addEventListener("change", () => {
+                    (this.plugin as any).settingCfg[STORAGE_AUTO_BK] = checkbox.checked;
+                });
+                checkbox.className = "b3-switch fn__flex-center";
+                checkbox.checked = auto_bk;
+                return checkbox;
+            },
         });
+
+        if (auto_bk) {
+            events.addListener("BackLinkBottomBox", (_eventType, detail) => {
+                navigator.locks.request("BackLinkBottomBoxLock", () => {
+                    const docID = detail?.protyle?.block?.rootID ?? "";
+                    if (this.lastDocID != docID) {
+                        this.lastDocID = docID;
+                        this.doTheWork(docID);
+                    }
+                });
+            });
+        }
     }
 
     blockIconEvent(detail: any) {
