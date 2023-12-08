@@ -1,5 +1,5 @@
 import { IProtyle, Plugin, Dialog, Lute, openTab } from "siyuan";
-import { NewLute, extractLinks, newID, siyuan } from "./libs/utils";
+import { NewLute, extractLinks, newID, siyuan, siyuanCache } from "./libs/utils";
 import { DATA_ID, DATA_NODE_ID, DATA_TYPE } from "./libs/gconst";
 import { STORAGE_AUTO_BK, STORAGE_INSERT_HEADING, TOMATOBACKLINKKEY, TOMATOMENTIONKEY } from "./constants";
 import { events } from "./libs/Events";
@@ -21,6 +21,7 @@ class BKMaker {
         this.item = item;
         this.top = top;
         this.container = document.createElement("div");
+        this.container.setAttribute("BKMakerAdd", "1");
         this.docID = protyle?.block.rootID ?? "";
         this.itemID = item.getAttribute(DATA_NODE_ID);
         this.lute = NewLute();
@@ -31,6 +32,10 @@ class BKMaker {
     }
 
     async doTheWork(isMention: boolean) {
+        const div = this.item.querySelector('[BKMakerAdd="1"]');
+        if (this.item.querySelector('[BKMakerAdd="1"]')) {
+            this.item.removeChild(div);
+        }
         if (this.docID) {
             this.getBackLinks(isMention);
         }
@@ -49,17 +54,17 @@ class BKMaker {
 
     private async getBackLinks(isMention: boolean) {
         const allRefs: RefCollector = new Map();
-        const backlink2 = await siyuan.getBacklink2(this.docID);
+        const backlink2 = await siyuanCache.getBacklink2(10 * 1000, this.docID);
         if (!isMention) {
             for (const backlink of backlink2.backlinks.reverse()) {
-                const backlinkDoc = await siyuan.getBacklinkDoc(this.docID, backlink.id);
+                const backlinkDoc = await siyuanCache.getBacklinkDoc(10 * 1000, this.docID, backlink.id);
                 for (const backlinksInDoc of backlinkDoc.backlinks.reverse()) {
                     await this.fillContent(backlinksInDoc, allRefs);
                 }
             }
         } else {
             for (const mention of backlink2.backmentions.reverse()) {
-                const mentionDoc = await siyuan.getBackmentionDoc(this.docID, mention.id);
+                const mentionDoc = await siyuanCache.getBackmentionDoc(60 * 1000, this.docID, mention.id);
                 for (const mentionsInDoc of mentionDoc.backmentions) {
                     await this.fillContent(mentionsInDoc, allRefs);
                 }
