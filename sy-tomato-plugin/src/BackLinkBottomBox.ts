@@ -251,7 +251,7 @@ class BackLinkBottomBox {
             });
         }
 
-        this.insertHeading = (this.plugin as any).settingCfg[STORAGE_INSERT_HEADING] ?? false;
+        this.insertHeading = (this.plugin as any).settingCfg[STORAGE_INSERT_HEADING] ?? true;
 
         this.plugin.setting.addItem({
             title: "** 插入 '# 反链' 一级标题",
