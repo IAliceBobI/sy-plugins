@@ -222,7 +222,7 @@ class BackLinkBottomBox {
                 },
             });
         });
-        const auto_bk: boolean = (this.plugin as any).settingCfg[STORAGE_AUTO_BK] ?? true;
+        const auto_bk: boolean = (this.plugin as any).settingCfg[STORAGE_AUTO_BK] ?? false;
 
         this.plugin.setting.addItem({
             title: "** 自动添加底部反链",
