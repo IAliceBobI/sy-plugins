@@ -34,7 +34,7 @@ class TomatoClock {
 
         this.plugin.setting.addItem({
             title: "** 番茄钟时长(中英文逗号隔开，半角数字)",
-            description: "先开启：状态栏番茄钟",
+            description: "依赖：状态栏番茄钟",
             createActionElement: () => {
                 const input = document.createElement("input") as HTMLInputElement;
                 input.className = "input";

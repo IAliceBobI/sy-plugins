@@ -1,7 +1,7 @@
 import { IProtyle, Plugin, Dialog, Lute, openTab } from "siyuan";
 import { NewLute, extractLinks, newID, siyuan } from "./libs/utils";
 import { DATA_ID, DATA_NODE_ID, DATA_TYPE } from "./libs/gconst";
-import { STORAGE_AUTO_BK, TOMATOBACKLINKKEY, TOMATOMENTIONKEY } from "./constants";
+import { STORAGE_AUTO_BK, STORAGE_INSERT_HEADING, TOMATOBACKLINKKEY, TOMATOMENTIONKEY } from "./constants";
 import { events } from "./libs/Events";
 import BackLinkBottomSearchDialog from "./BackLinkBottomBox.svelte";
 
@@ -179,6 +179,7 @@ class BackLinkBottomBox {
     private plugin: Plugin;
     private static readonly GLOBAL_THIS: Record<string, any> = globalThis;
     private lastDocID: string;
+    private insertHeading: boolean;
 
     async onload(plugin: Plugin) {
         BackLinkBottomBox.GLOBAL_THIS[TOMATO] = { BKMaker, "tomato": this };
@@ -220,7 +221,7 @@ class BackLinkBottomBox {
 
         this.plugin.setting.addItem({
             title: "** 自动添加底部反链",
-            description: "先开启：底部反链",
+            description: "依赖：底部反链",
             createActionElement: () => {
                 const checkbox = document.createElement("input") as HTMLInputElement;
                 checkbox.type = "checkbox";
@@ -244,6 +245,23 @@ class BackLinkBottomBox {
                 });
             });
         }
+
+        this.insertHeading = (this.plugin as any).settingCfg[STORAGE_INSERT_HEADING] ?? false;
+
+        this.plugin.setting.addItem({
+            title: "** 插入 '# 反链' 一级标题",
+            description: "依赖：底部反链",
+            createActionElement: () => {
+                const checkbox = document.createElement("input") as HTMLInputElement;
+                checkbox.type = "checkbox";
+                checkbox.addEventListener("change", () => {
+                    (this.plugin as any).settingCfg[STORAGE_INSERT_HEADING] = checkbox.checked;
+                });
+                checkbox.className = "b3-switch fn__flex-center";
+                checkbox.checked = this.insertHeading;
+                return checkbox;
+            },
+        });
     }
 
     blockIconEvent(detail: any) {
@@ -297,10 +315,10 @@ class BackLinkBottomBox {
                         return execEmbeddedJs()}}`.replace(new RegExp("\\n\\s+", "g"), " ");
                     if (isMention) {
                         await this.insertMd(jsCode, lastID, TOMATOMENTIONKEY);
-                        await this.insertMd("# 提及", lastID);
+                        if (this.insertHeading) await this.insertMd("# 提及", lastID);
                     } else {
                         await this.insertMd(jsCode, lastID, TOMATOBACKLINKKEY);
-                        await this.insertMd("# 反链", lastID);
+                        if (this.insertHeading) await this.insertMd("# 反链", lastID);
                     }
                 }
             });
