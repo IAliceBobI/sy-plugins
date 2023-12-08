@@ -541,14 +541,17 @@ export const siyuanCache = {
 export function createCache<T extends Func>(originalFunction: T): (...args: [number, ...Parameters<T>]) => ReturnType<T> {
     const cache = new Map<string, { value: ReturnType<T>; timestamp: number }>();
     return function cachedFunction(cacheTime: number, ...args: Parameters<T>): ReturnType<T> {
+        const currentTime = Date.now();
+        for (const [k, v] of cache.entries()) {
+            if (currentTime - v.timestamp > cacheTime) {
+                cache.delete(k);
+            }
+        }
+
         const key = JSON.stringify(args);
         if (cache.has(key)) {
-            const { value, timestamp } = cache.get(key);
-            const currentTime = Date.now();
-
-            if (currentTime - timestamp <= cacheTime) {
-                return value;
-            }
+            const { value } = cache.get(key);
+            return value;
         }
         const result = originalFunction(...args);
         cache.set(key, { value: result, timestamp: Date.now() });
