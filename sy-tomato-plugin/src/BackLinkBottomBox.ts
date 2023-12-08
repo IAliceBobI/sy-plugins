@@ -33,7 +33,7 @@ class BKMaker {
 
     async doTheWork(isMention: boolean) {
         const div = this.item.querySelector('[BKMakerAdd="1"]');
-        if (this.item.querySelector('[BKMakerAdd="1"]')) {
+        if (div) {
             this.item.removeChild(div);
         }
         if (this.docID) {
