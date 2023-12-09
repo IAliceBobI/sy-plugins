@@ -10,7 +10,7 @@ class ImgOverlayBox {
         this.plugin = plugin;
         this.plugin.eventBus.on(EventType.open_menu_image, ({ detail }: any) => {
             detail.menu.addItem({
-                label: "添加图片遮挡层",
+                label: this.plugin.i18n.addPicOverlay,
                 icon: "iconOverlay",
                 click: () => { this.overlayEditor(detail.element); }
             });
@@ -24,6 +24,20 @@ class ImgOverlayBox {
                     if (!img) continue;
                     if (img.parentElement.querySelector(`[${OVERLAY_DIV}="1"]`)) continue;
                     showOverlayStyle(overlays, img);
+                }
+            }
+        });
+    }
+
+    blockIconEvent(detail: any) {
+        if (!this.plugin) return;
+        detail.menu.addItem({
+            iconHTML: "",
+            label: this.plugin.i18n.addPicOverlay,
+            click: () => {
+                for (const element of detail.blockElements) {
+                    this.overlayEditor(element);
+                    break;
                 }
             }
         });

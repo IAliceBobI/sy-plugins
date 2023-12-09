@@ -33,5 +33,6 @@
   "bilink": "双向互链",
   "backlink": "反链backlink",
   "bottombacklink": "插入底部反链#bottomBacklink",
-  "bottomMention": "插入底部提及#bottomMention"
+  "bottomMention": "插入底部提及#bottomMention",
+  "addPicOverlay": "添加图片遮挡层"
 }

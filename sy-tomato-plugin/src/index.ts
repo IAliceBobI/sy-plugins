@@ -39,13 +39,13 @@ export default class ThePlugin extends Plugin {
 
         this.addSettingItem("scheduleCheckbox", "* 内容提醒", true);
         if (this.settingCfg.scheduleCheckbox ?? true) await schedule.onload(this);
-        
+
         this.addSettingItem("readingPointBoxCheckbox", "* 阅读点", true);
         if (this.settingCfg.readingPointBoxCheckbox ?? true) await readingPointBox.onload(this);
 
         this.addSettingItem("cardBoxCheckbox", "* 闪卡工具", false);
         if (this.settingCfg.cardBoxCheckbox ?? false) await cardBox.onload(this);
-        
+
         this.addSettingItem("cpBoxCheckbox", "* 长内容工具", false);
         if (this.settingCfg.cpBoxCheckbox ?? false) await cpBox.onload(this);
 
@@ -81,5 +81,6 @@ export default class ThePlugin extends Plugin {
         backLinkBottomBox.blockIconEvent(detail);
         linkBox.blockIconEvent(detail);
         cardBox.blockIconEvent(detail);
+        imgOverlayBox.blockIconEvent(detail);
     }
 }
