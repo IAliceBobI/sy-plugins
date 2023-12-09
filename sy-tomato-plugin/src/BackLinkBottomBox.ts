@@ -79,6 +79,7 @@ class BKMaker {
 
         const button = document.createElement("button");
         button.textContent = "🔍";
+        button.style.border = "transparent";
         button.addEventListener("click", async () => {
             await globalThis[TOMATO].tomato.searchLinks(allLnks);
         });
