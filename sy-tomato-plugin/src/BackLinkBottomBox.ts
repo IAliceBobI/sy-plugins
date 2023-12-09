@@ -57,7 +57,7 @@ class BKMaker {
         const backlink2 = await siyuanCache.getBacklink2(10 * 1000, this.docID);
         if (!isMention) {
             for (const backlinkDoc of await Promise.all(backlink2.backlinks.map((backlink) => {
-                return siyuanCache.getBacklinkDoc(10 * 1000, this.docID, backlink.id)
+                return siyuanCache.getBacklinkDoc(10 * 1000, this.docID, backlink.id);
             }))) {
                 for (const backlinksInDoc of backlinkDoc.backlinks) {
                     await this.fillContent(backlinksInDoc, allRefs);
