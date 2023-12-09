@@ -129,7 +129,7 @@ class BKMaker {
                 refPathList.push(this.refTag(refPath.id, refPath.name, 0, 15));
             }
 
-            let { kramdown } = await siyuan.getBlockKramdown(refPath.id);
+            let { kramdown } = await siyuanCache.getBlockKramdown(15 * 1000, refPath.id);
             if (refPath.type == "NodeListItem" && kramdown) {
                 kramdown = kramdown.split("\n")[0];
             }

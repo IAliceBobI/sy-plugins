@@ -533,6 +533,7 @@ export const siyuan = {
 export const siyuanCache = {
     getDocNameByBlockID: createCache(siyuan.getDocNameByBlockID),
     getBlockMarkdownAndContent: createCache(siyuan.getBlockMarkdownAndContent),
+    getBlockKramdown: createCache(siyuan.getBlockKramdown),
     getBacklinkDoc: createCache(siyuan.getBacklinkDoc),
     getBacklink2: createCache(siyuan.getBacklink2),
     getBackmentionDoc: createCache(siyuan.getBackmentionDoc),
