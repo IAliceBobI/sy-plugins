@@ -269,7 +269,7 @@ export class Helper {
         return `<div>
             ${styleColor("var(--b3-card-error-background)", "var(--b3-card-error-color)")}
             <div>
-                <button title="${this.plugin.i18n.tipSkip}" onclick="${btnID}()" id="btn${btnID}">${this.plugin.i18n.DeleteAndBack}</button>
+                <button title="${this.plugin.i18n.tipDelBack}" onclick="${btnID}()" id="btn${btnID}">${this.plugin.i18n.DeleteAndBack}</button>
             </div>
             <script>
                 function ${btnID}() {
