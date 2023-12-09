@@ -554,12 +554,20 @@ class Progressive {
             height: "660px",
         });
         const div = dialog.element.querySelector("#" + id) as HTMLElement;
-        for (const bookID in this.storage.booksInfos()) {
+
+        const tasks = Object.entries(this.storage.booksInfos()).filter(([_bookID]) => {
+            // if(_bookID=="20231124021105-errwtja")
+            return true;
+        }).map(([bookID]) => {
+            const bookInfo = this.storage.booksInfo(bookID);
+            const idx = this.storage.loadBookIndexIfNeeded(bookID);
+            const row = siyuan.sqlOne(`select content from blocks where type='d' and id="${bookID}"`);
+            return [bookID, bookInfo, idx, row];
+        }).flat();
+        const books = utils.chunks(await Promise.all(tasks), 4) as [string, help.BookInfo, string[][], Block][];
+        for (const [bookID, bookInfo, idx, row] of books) {
             const subDiv = help.appendChild(div, "div", "", ["prog-style__container_div"]);
-            const bookInfo = await this.storage.booksInfo(bookID);
-            const idx = await this.storage.loadBookIndexIfNeeded(bookID);
-            const row = await siyuan.sqlOne(`select content from blocks where type='d' and id="${bookInfo.bookID}"`);
-            let name = bookInfo.bookID;
+            let name = bookID;
             if (row) name = row["content"];
             const progress = `${Math.ceil(bookInfo.point / idx.length * 100)}%`;
             help.appendChild(subDiv, "p", name, ["prog-style__id"]);
