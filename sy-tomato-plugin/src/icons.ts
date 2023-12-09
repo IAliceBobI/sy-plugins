@@ -10,6 +10,14 @@ export const ICONS = `
 </a>
 </svg></symbol>
 
+<symbol id="iconOverlay" viewBox="0 0 32 32"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+<g>
+  <circle cx="16" cy="16" r="12" fill="#ff0000" />
+  <rect x="10" y="14" width="12" height="4" fill="#fff" />
+  <rect x="14" y="10" width="4" height="12" fill="#fff" />
+</g>
+</svg></symbol>
+
 <symbol id="iconContents" viewBox="0 0 32 32"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
 <path d="M6 5h20v2H6zm0 4h20v2H6zm0 4h20v2H6zm0 4h20v2H6zm0 4h20v2H6zm0 4h20v2H6zm0 4h20v2H6z"/>
 </svg></symbol>

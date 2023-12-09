@@ -10,6 +10,7 @@ import { cardBox } from "./CardBox";
 import { EventType, events } from "@/libs/Events";
 import { STORAGE_SETTINGS } from "./constants";
 import { siyuan } from "@/libs/utils";
+import { imgOverlayBox } from "./ImgOverlayBox";
 
 export default class ThePlugin extends Plugin {
     private static readonly GLOBAL_THIS: Record<string, any> = globalThis;
@@ -53,6 +54,9 @@ export default class ThePlugin extends Plugin {
 
         this.addSettingItem("backLinkBottomBoxCheckbox", "* 底部反链", true);
         if (this.settingCfg.backLinkBottomBoxCheckbox ?? true) await backLinkBottomBox.onload(this);
+
+        this.addSettingItem("imgOverlayCheckbox", "* 图片遮挡", false);
+        if (this.settingCfg.imgOverlayCheckbox ?? false) await imgOverlayBox.onload(this);
     }
 
     private addSettingItem(key: string, title: string, defaultValue: boolean) {
