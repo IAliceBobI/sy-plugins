@@ -56,15 +56,17 @@ class BKMaker {
         const allRefs: RefCollector = new Map();
         const backlink2 = await siyuanCache.getBacklink2(10 * 1000, this.docID);
         if (!isMention) {
-            for (const backlink of backlink2.backlinks.reverse()) {
-                const backlinkDoc = await siyuanCache.getBacklinkDoc(10 * 1000, this.docID, backlink.id);
-                for (const backlinksInDoc of backlinkDoc.backlinks.reverse()) {
+            for (const backlinkDoc of await Promise.all(backlink2.backlinks.map((backlink) => {
+                return siyuanCache.getBacklinkDoc(10 * 1000, this.docID, backlink.id)
+            }))) {
+                for (const backlinksInDoc of backlinkDoc.backlinks) {
                     await this.fillContent(backlinksInDoc, allRefs);
                 }
             }
         } else {
-            for (const mention of backlink2.backmentions.reverse()) {
-                const mentionDoc = await siyuanCache.getBackmentionDoc(60 * 1000, this.docID, mention.id);
+            for (const mentionDoc of await Promise.all(backlink2.backmentions.map((mention) => {
+                return siyuanCache.getBackmentionDoc(60 * 1000, this.docID, mention.id);
+            }))) {
                 for (const mentionsInDoc of mentionDoc.backmentions) {
                     await this.fillContent(mentionsInDoc, allRefs);
                 }
