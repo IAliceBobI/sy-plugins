@@ -16,7 +16,7 @@ class LinkBox {
                 const ids = this.getSelectedIDs(protyle);
                 if (ids.length == 0) ids.push(events.lastBlockID);
                 for (const id of ids)
-                    await this.addLink(id);
+                    await this.addLink(id, protyle?.wysiwyg?.element);
             },
         });
         this.plugin.eventBus.on(EventType.open_menu_content, async ({ detail }) => {
@@ -27,7 +27,7 @@ class LinkBox {
                 accelerator: "⌥/",
                 click: () => {
                     const blockID = detail?.element?.getAttribute("data-node-id") ?? "";
-                    if (blockID) this.addLink(blockID);
+                    if (blockID) this.addLink(blockID, detail?.protyle?.wysiwyg?.element);
                 },
             });
         });
@@ -42,14 +42,14 @@ class LinkBox {
                 for (const element of detail.blockElements) {
                     const blockID = utils.getID(element);
                     if (blockID) {
-                        this.addLink(blockID);
+                        this.addLink(blockID, detail?.protyle?.wysiwyg?.element);
                     }
                 }
             }
         });
     }
 
-    private async turn2static(blockID: string, links: string[], lute: Lute) {
+    private async turn2static(blockID: string, links: string[], lute: Lute, element: HTMLLIElement) {
         const { dom } = await siyuan.getBlockDOM(blockID);
         let md = lute.BlockDOM2Md(dom);
         for (const lnk of links) {
@@ -59,9 +59,13 @@ class LinkBox {
             }
         }
         await siyuan.safeUpdateBlock(blockID, md);
+        const e = element.querySelector(`[${gconst.DATA_NODE_ID}="${blockID}"]`) as HTMLElement;
+        if (e) {
+            document.getSelection().collapse(e, 1)
+        }
     }
 
-    private async addLink(blockID: string) {
+    private async addLink(blockID: string, element: HTMLLIElement) {
         const { markdown } = await siyuan.getBlockMarkdownAndContent(blockID);
         const { links, ids } = utils.extractLinks(markdown);
         if (ids.length <= 0) return;
@@ -70,7 +74,7 @@ class LinkBox {
         const { content } = await siyuan.getBlockMarkdownAndContent(docID);
         if (!content) return;
         const lute = utils.NewLute();
-        await this.turn2static(blockID, links, lute);
+        await this.turn2static(blockID, links, lute, element);
         for (const link of ids) {
             const row = await siyuan.sqlOne(`select type from blocks where id="${link}"`);
             const idType = row?.type ?? "";
