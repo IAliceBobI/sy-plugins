@@ -7,23 +7,16 @@ import BackLinkBottomSearchDialog from "./BackLinkBottomBox.svelte";
 const TOMATO = "tomato_zZmqus5PtYRi";
 
 class BKMaker {
-    protyle: IProtyle;
-    top: number;
-    itemID: string;
-    item: HTMLElement;
-    docID: string;
-    container: HTMLDivElement;
-    lute: Lute;
+    private item: HTMLElement;
+    private docID: string;
+    private container: HTMLDivElement;
 
-    constructor(protyle: IProtyle, item: HTMLElement, top: number) {
-        this.protyle = protyle;
-        this.item = item;
-        this.top = top;
+    constructor(detail: any) {
+        const element: HTMLElement = detail.protyle?.wysiwyg?.element;
+        this.item = element;
         this.container = document.createElement("div");
         this.container.setAttribute("BKMakerAdd", "1");
-        this.docID = protyle?.block.rootID ?? "";
-        this.itemID = item.getAttribute(DATA_NODE_ID);
-        this.lute = NewLute();
+        this.docID = detail.protyle?.block.rootID ?? "";
     }
 
     private hr() {
@@ -91,10 +84,6 @@ class BKMaker {
             if (selection.toString().length <= 0) return;
             ev.stopPropagation();
         };
-
-        if (this.top) {
-            this.protyle.contentElement.scrollTop = this.top;
-        }
 
         this.container.appendChild(div);
         this.container.appendChild(this.hr());
@@ -200,12 +189,8 @@ class BackLinkBottomBox {
         events.addListener("BackLinkBottomBox", (eventType, detail) => {
             if (eventType == EventType.loaded_protyle_static || eventType == EventType.switch_protyle) {
                 navigator.locks.request("BackLinkBottomBoxLock", { ifAvailable: true }, async (lock) => {
-                    if (lock && detail) {
-                        // console.log(eventType, detail)
-                        const element: HTMLElement = detail.protyle?.wysiwyg?.element;
-                        if (element) {
-                            await (new BKMaker(detail.protyle, element, null)).doTheWork(false);
-                        }
+                    if (lock) {
+                        await new BKMaker(detail).doTheWork(false);
                     }
                 });
             }
