@@ -1,5 +1,5 @@
-import { IProtyle, Plugin, Dialog, Lute, } from "siyuan";
-import { NewLute, extractLinks, newID, siyuanCache } from "./libs/utils";
+import { Plugin, Dialog, } from "siyuan";
+import { extractLinks, newID, siyuanCache } from "./libs/utils";
 import { DATA_ID, DATA_NODE_ID, DATA_TYPE } from "./libs/gconst";
 import { EventType, events } from "./libs/Events";
 import BackLinkBottomSearchDialog from "./BackLinkBottomBox.svelte";
@@ -10,12 +10,11 @@ class BKMaker {
     private item: HTMLElement;
     private docID: string;
     private container: HTMLDivElement;
-
-    constructor(detail: any) {
-        const element: HTMLElement = detail.protyle?.wysiwyg?.element;
-        this.item = element;
+    private isMention: boolean;
+    constructor(detail: any, isMention: boolean) {
+        this.isMention = isMention;
+        this.item = detail.protyle?.wysiwyg?.element;
         this.container = document.createElement("div");
-        this.container.setAttribute("BKMakerAdd", "1");
         this.docID = detail.protyle?.block.rootID ?? "";
     }
 
@@ -23,16 +22,19 @@ class BKMaker {
         return document.createElement("hr");
     }
 
-    async doTheWork(isMention: boolean) {
-        const divs = this.item.querySelectorAll('[BKMakerAdd="1"]');
-        if (this.docID) {
-            await this.getBackLinks(isMention);
-        }
-        this.setReadonly(this.container);
-        this.container.setAttribute(DATA_NODE_ID, this.item.lastElementChild.getAttribute(DATA_NODE_ID));
-        this.container.style.border = "1px solid black"
-        this.item.lastElementChild.insertAdjacentElement("afterend", this.container);
-        divs?.forEach(e => e?.parentElement?.removeChild(e));
+    async doTheWork() {
+        await navigator.locks.request("BackLinkBottomBox-BKMakerLock", { ifAvailable: true }, async (lock) => {
+            if (lock && this.docID) {
+                const divs = this.item.parentElement.querySelectorAll('[BKMakerAdd="1"]');
+                await this.getBackLinks(this.isMention);
+                this.setReadonly(this.container);
+                this.container.setAttribute(DATA_NODE_ID, this.item.lastElementChild.getAttribute(DATA_NODE_ID));
+                this.container.style.border = "1px solid black"
+                divs?.forEach(e => e?.parentElement?.removeChild(e));
+                this.container.setAttribute("BKMakerAdd", "1");
+                this.item.lastElementChild.insertAdjacentElement("afterend", this.container);
+            }
+        });
     }
 
     private setReadonly(e: HTMLElement) {
@@ -182,6 +184,10 @@ class BKMaker {
 class BackLinkBottomBox {
     private plugin: Plugin;
     private static readonly GLOBAL_THIS: Record<string, any> = globalThis;
+    private maker: BKMaker;
+    private observer: MutationObserver;
+    private lastElementID: string;
+    private item: HTMLElement;
 
     async onload(plugin: Plugin) {
         BackLinkBottomBox.GLOBAL_THIS[TOMATO] = { BKMaker, "tomato": this };
@@ -190,7 +196,19 @@ class BackLinkBottomBox {
             if (eventType == EventType.loaded_protyle_static || eventType == EventType.switch_protyle) {
                 navigator.locks.request("BackLinkBottomBoxLock", { ifAvailable: true }, async (lock) => {
                     if (lock) {
-                        await new BKMaker(detail).doTheWork(false);
+                        this.observer?.disconnect();
+                        this.maker = new BKMaker(detail, false);
+                        await this.maker.doTheWork();
+                        this.item = detail.protyle?.wysiwyg?.element;
+                        this.lastElementID = this.item.lastElementChild.getAttribute(DATA_NODE_ID);
+                        this.observer = new MutationObserver((_mutationsList) => {
+                            const newLastID = this.item.lastElementChild.getAttribute(DATA_NODE_ID);
+                            if (newLastID != this.lastElementID) {
+                                this.lastElementID = newLastID;
+                                this.maker.doTheWork()
+                            }
+                        });
+                        this.observer.observe(this.item, { childList: true });
                     }
                 });
             }
