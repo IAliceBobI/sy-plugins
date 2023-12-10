@@ -52,8 +52,8 @@ export default class ThePlugin extends Plugin {
         this.addSettingItem("linkBoxCheckbox", "* 双向互链", false);
         if (this.settingCfg.linkBoxCheckbox ?? false) await linkBox.onload(this);
 
-        this.addSettingItem("backLinkBottomBoxCheckbox", "* 底部反链", false);
-        if (this.settingCfg.backLinkBottomBoxCheckbox ?? false) await backLinkBottomBox.onload(this);
+        this.addSettingItem("backLinkBottomBoxCheckbox", "* 底部反链", true);
+        if (this.settingCfg.backLinkBottomBoxCheckbox ?? true) await backLinkBottomBox.onload(this);
 
         this.addSettingItem("imgOverlayCheckbox", "* 图片遮挡", false);
         if (this.settingCfg.imgOverlayCheckbox ?? false) await imgOverlayBox.onload(this);
