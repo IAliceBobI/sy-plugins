@@ -101,10 +101,10 @@ class BKMaker {
 
     private async fillContent(backlinksInDoc: Backlink, allRefs: RefCollector, tempContainer: HTMLElement) {
         const div = document.createElement("div") as HTMLDivElement;
-        div.innerHTML = backlinksInDoc.dom;
+        div.innerHTML = backlinksInDoc?.dom ?? "";
         this.scanAllRef(allRefs, div);
         this.setReadonly(div);
-        tempContainer.appendChild(await this.path2div(backlinksInDoc.blockPaths, allRefs));
+        tempContainer.appendChild(await this.path2div(backlinksInDoc?.blockPaths ?? [], allRefs));
         tempContainer.appendChild(div);
         tempContainer.appendChild(this.hr());
     }
