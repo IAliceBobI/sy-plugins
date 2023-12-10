@@ -537,6 +537,7 @@ export const siyuanCache = {
     getBacklinkDoc: createCache(siyuan.getBacklinkDoc),
     getBacklink2: createCache(siyuan.getBacklink2),
     getBackmentionDoc: createCache(siyuan.getBackmentionDoc),
+    getChildBlocks: createCache(siyuan.getChildBlocks),
 };
 
 export function createCache<T extends Func>(originalFunction: T): (...args: [number, ...Parameters<T>]) => ReturnType<T> {

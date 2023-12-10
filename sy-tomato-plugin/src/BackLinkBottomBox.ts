@@ -24,15 +24,20 @@ class BKMaker {
     async doTheWork() {
         await navigator.locks.request("BackLinkBottomBox-BKMakerLock", { ifAvailable: true }, async (lock) => {
             if (lock && this.docID) {
-                const divs = this.item.parentElement.parentElement.querySelectorAll('[BKMakerAdd="1"]');
-                this.container = document.createElement("div");
-                await this.getBackLinks(this.isMention);
-                this.setReadonly(this.container);
-                this.container.setAttribute(DATA_NODE_ID, this.item.lastElementChild.getAttribute(DATA_NODE_ID));
-                this.container.style.border = "1px solid black"
-                this.container.setAttribute("BKMakerAdd", "1");
-                this.item.lastElementChild.insertAdjacentElement("afterend", this.container);
-                divs?.forEach(e => e?.parentElement?.removeChild(e));
+                const allIDs = await siyuanCache.getChildBlocks(5 * 1000, this.docID)
+                const lastID = this.item.lastElementChild.getAttribute(DATA_NODE_ID);
+                if (allIDs?.slice(-5)?.map(b => b.id)?.includes(lastID)) {
+                    const divs = this.item.parentElement.querySelectorAll('[BKMakerAdd="1"]');
+                    this.container = document.createElement("div");
+                    await this.getBackLinks(this.isMention);
+                    this.setReadonly(this.container);
+                    this.container.setAttribute(DATA_NODE_ID, lastID);
+                    this.container.style.border = "1px solid black"
+                    this.container.setAttribute("BKMakerAdd", "1");
+                    this.item.lastElementChild.insertAdjacentElement("afterend", this.container);
+                    divs?.forEach(e => e?.parentElement?.removeChild(e));
+                }
+
             }
         });
     }
