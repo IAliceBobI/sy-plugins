@@ -1,8 +1,7 @@
-import { IProtyle, Plugin, Dialog, Lute, openTab } from "siyuan";
-import { NewLute, extractLinks, newID, siyuan, siyuanCache } from "./libs/utils";
+import { IProtyle, Plugin, Dialog, Lute, } from "siyuan";
+import { NewLute, extractLinks, newID, siyuanCache } from "./libs/utils";
 import { DATA_ID, DATA_NODE_ID, DATA_TYPE } from "./libs/gconst";
-import { STORAGE_AUTO_BK, STORAGE_INSERT_HEADING, TOMATOBACKLINKKEY, TOMATOMENTIONKEY } from "./constants";
-import { events } from "./libs/Events";
+import { EventType, events } from "./libs/Events";
 import BackLinkBottomSearchDialog from "./BackLinkBottomBox.svelte";
 
 const TOMATO = "tomato_zZmqus5PtYRi";
@@ -32,17 +31,13 @@ class BKMaker {
     }
 
     async doTheWork(isMention: boolean) {
-        const div = this.item.querySelector('[BKMakerAdd="1"]');
-        if (div) {
-            this.item.removeChild(div);
-        }
+        const divs = this.item.querySelectorAll('[BKMakerAdd="1"]');
         if (this.docID) {
-            this.getBackLinks(isMention);
+            await this.getBackLinks(isMention);
         }
         this.setReadonly(this.container);
         this.item.lastElementChild.insertAdjacentElement("afterend", this.container);
-        this.item.querySelector(".fn__rotate")?.classList.remove("fn__rotate");
-        this.item.style.height = "";
+        divs?.forEach(e => e.parentElement.removeChild(e))
     }
 
     private setReadonly(e: HTMLElement) {
@@ -54,13 +49,14 @@ class BKMaker {
 
     private async getBackLinks(isMention: boolean) {
         const allRefs: RefCollector = new Map();
-        const backlink2 = await siyuanCache.getBacklink2(10 * 1000, this.docID);
+        const backlink2 = await siyuanCache.getBacklink2(15 * 1000, this.docID);
+        const tempContainer = document.createElement("div")
         if (!isMention) {
             for (const backlinkDoc of await Promise.all(backlink2.backlinks.map((backlink) => {
-                return siyuanCache.getBacklinkDoc(10 * 1000, this.docID, backlink.id);
+                return siyuanCache.getBacklinkDoc(20 * 1000, this.docID, backlink.id);
             }))) {
                 for (const backlinksInDoc of backlinkDoc.backlinks) {
-                    await this.fillContent(backlinksInDoc, allRefs);
+                    await this.fillContent(backlinksInDoc, allRefs, tempContainer);
                 }
             }
         } else {
@@ -68,23 +64,25 @@ class BKMaker {
                 return siyuanCache.getBackmentionDoc(60 * 1000, this.docID, mention.id);
             }))) {
                 for (const mentionsInDoc of mentionDoc.backmentions) {
-                    await this.fillContent(mentionsInDoc, allRefs);
+                    await this.fillContent(mentionsInDoc, allRefs, tempContainer);
                 }
             }
         }
         const div = document.createElement("div");
-        const allLnks = [...allRefs.values()];
-        const spaces = "&nbsp;".repeat(10);
-        div.innerHTML = spaces + allLnks.map(i => i.lnk).join(spaces);
 
         const button = document.createElement("button");
         button.textContent = "🔍";
         button.style.border = "transparent";
+        button.classList.add("b3-button")
         button.addEventListener("click", async () => {
             await globalThis[TOMATO].tomato.searchLinks(allLnks);
         });
         this.setReadonly(button);
-        div.insertAdjacentElement("afterbegin", button);
+        div.appendChild(button);
+
+        const allLnks = [...allRefs.values()];
+        const spaces = "&nbsp;".repeat(10);
+        div.appendChild(this.createDiv(allLnks.map(i => i.lnk).join(spaces)))
 
         this.container.onclick = (ev) => {
             const selection = document.getSelection();
@@ -96,19 +94,26 @@ class BKMaker {
             this.protyle.contentElement.scrollTop = this.top;
         }
 
-        this.container.insertAdjacentElement("beforebegin", div);
-        this.container.insertAdjacentElement("beforebegin", this.hr());
+        this.container.appendChild(div);
+        this.container.appendChild(this.hr());
+        this.container.appendChild(tempContainer);
         this.setReadonly(div);
     }
 
-    private async fillContent(backlinksInDoc: Backlink, allRefs: RefCollector) {
+    private createDiv(innerHTML: string) {
+        const div = document.createElement("div")
+        div.innerHTML = innerHTML;
+        return div;
+    }
+
+    private async fillContent(backlinksInDoc: Backlink, allRefs: RefCollector, tempContainer: HTMLElement) {
         const div = document.createElement("div") as HTMLDivElement;
         div.innerHTML = backlinksInDoc.dom;
         this.scanAllRef(allRefs, div);
         this.setReadonly(div);
-        this.container.appendChild(await this.path2div(backlinksInDoc.blockPaths, allRefs));
-        this.container.appendChild(div);
-        this.container.appendChild(this.hr());
+        tempContainer.appendChild(await this.path2div(backlinksInDoc.blockPaths, allRefs));
+        tempContainer.appendChild(div);
+        tempContainer.appendChild(this.hr());
     }
 
     private async path2div(blockPaths: BlockPath[], allRefs: RefCollector) {
@@ -186,176 +191,23 @@ class BKMaker {
 class BackLinkBottomBox {
     private plugin: Plugin;
     private static readonly GLOBAL_THIS: Record<string, any> = globalThis;
-    private lastDocID: string;
-    private insertHeading: boolean;
 
     async onload(plugin: Plugin) {
         BackLinkBottomBox.GLOBAL_THIS[TOMATO] = { BKMaker, "tomato": this };
         this.plugin = plugin;
-        this.plugin.addCommand({
-            langKey: "bottombacklink",
-            hotkey: "",
-            callback: async () => {
-                await this.doTheWork(events.docID);
-            },
-        });
-        this.plugin.addCommand({
-            langKey: "bottomMention",
-            hotkey: "",
-            callback: async () => {
-                await this.doTheWork(events.docID, true);
-            },
-        });
-        this.plugin.eventBus.on("open-menu-content", async ({ detail }) => {
-            const menu = detail.menu;
-            menu.addItem({
-                label: this.plugin.i18n.bottombacklink.split("#")[0],
-                icon: "iconLink",
-                click: async () => {
-                    const docID = detail?.protyle?.block.rootID ?? "";
-                    await this.doTheWork(docID);
-                },
-            });
-            menu.addItem({
-                label: this.plugin.i18n.bottomMention.split("#")[0],
-                icon: "iconLink",
-                click: async () => {
-                    const docID = detail?.protyle?.block.rootID ?? "";
-                    await this.doTheWork(docID, true);
-                },
-            });
-        });
-        const auto_bk: boolean = (this.plugin as any).settingCfg[STORAGE_AUTO_BK] ?? false;
-
-        this.plugin.setting.addItem({
-            title: "** 自动添加底部反链",
-            description: "依赖：底部反链",
-            createActionElement: () => {
-                const checkbox = document.createElement("input") as HTMLInputElement;
-                checkbox.type = "checkbox";
-                checkbox.addEventListener("change", () => {
-                    (this.plugin as any).settingCfg[STORAGE_AUTO_BK] = checkbox.checked;
-                });
-                checkbox.className = "b3-switch fn__flex-center";
-                checkbox.checked = auto_bk;
-                return checkbox;
-            },
-        });
-
-        if (auto_bk) {
-            events.addListener("BackLinkBottomBox", (_eventType, detail) => {
-                navigator.locks.request("BackLinkBottomBoxLock", () => {
-                    const docID = detail?.protyle?.block?.rootID ?? "";
-                    if (this.lastDocID != docID) {
-                        this.lastDocID = docID;
-                        this.doTheWork(docID);
-                    }
-                });
-            });
-        }
-
-        this.insertHeading = (this.plugin as any).settingCfg[STORAGE_INSERT_HEADING] ?? true;
-
-        this.plugin.setting.addItem({
-            title: "** 插入 '# 反链' 一级标题",
-            description: "依赖：底部反链",
-            createActionElement: () => {
-                const checkbox = document.createElement("input") as HTMLInputElement;
-                checkbox.type = "checkbox";
-                checkbox.addEventListener("change", () => {
-                    (this.plugin as any).settingCfg[STORAGE_INSERT_HEADING] = checkbox.checked;
-                });
-                checkbox.className = "b3-switch fn__flex-center";
-                checkbox.checked = this.insertHeading;
-                return checkbox;
-            },
-        });
-    }
-
-    blockIconEvent(detail: any) {
-        if (!this.plugin) return;
-        const docID = detail?.protyle?.block?.rootID ?? "";
-        detail.menu.addItem({
-            iconHTML: "",
-            label: this.plugin.i18n.bottombacklink.split("#")[0],
-            click: async () => {
-                await this.doTheWork(docID);
-            }
-        });
-        detail.menu.addItem({
-            iconHTML: "",
-            label: this.plugin.i18n.bottomMention.split("#")[0],
-            click: async () => {
-                await this.doTheWork(docID, true);
-            }
-        });
-    }
-
-    async hasInserted(docID: string, key: string) {
-        const row = await siyuan.sqlOne(`select ial from blocks where root_id="${docID}" 
-                and ial like "%${key}%"`);
-        const ial: string = row?.ial ?? "";
-        return ial.includes(key);
-    }
-
-    async doTheWork(docID: string, isMention = false) {
-        if (docID) {
-            if (isMention) {
-                if (await this.hasInserted(docID, TOMATOMENTIONKEY)) return;
-            } else {
-                if (await this.hasInserted(docID, TOMATOBACKLINKKEY)) return;
-            }
-
-            // await siyuan.pushMsg(`正在插入底部反链(${new Date().getTime()})`, 1000);
-            const lastID = await this.getLastBlockID(docID);
-
-            openTab({
-                app: this.plugin.app, doc: {
-                    id: lastID,
-                    action: ["cb-get-focus"],
-                },
-                afterOpen: async () => {
-                    // await sleep(300);
-                    const jsCode = `{{//!js_esc_newline_
-                        async function execEmbeddedJs() {
-                            (new ${TOMATO}.BKMaker(protyle, item, top)).doTheWork(${isMention})
+        events.addListener("BackLinkBottomBox", (eventType, detail) => {
+            if (eventType == EventType.loaded_protyle_static || eventType == EventType.switch_protyle) {
+                navigator.locks.request("BackLinkBottomBoxLock", { ifAvailable: true }, async (lock) => {
+                    if (lock && detail) {
+                        // console.log(eventType, detail)
+                        const element: HTMLElement = detail.protyle?.wysiwyg?.element;
+                        if (element) {
+                            await (new BKMaker(detail.protyle, element, null)).doTheWork(false)
                         }
-                        return execEmbeddedJs()}}`.replace(new RegExp("\\n\\s+", "g"), " ");
-                    if (isMention) {
-                        await this.insertMd(jsCode, lastID, TOMATOMENTIONKEY);
-                        if (this.insertHeading) await this.insertMd("# 提及", lastID);
-                    } else {
-                        await this.insertMd(jsCode, lastID, TOMATOBACKLINKKEY);
-                        if (this.insertHeading) await this.insertMd("# 反链", lastID);
                     }
-                }
-            });
-        }
-    }
-
-    private async insertMd(md: string, lastID: string, key?: string) {
-        if (key) {
-            md += "\n";
-            md += `{: ${key}="1"}`;
-        }
-        if (lastID) {
-            await siyuan.insertBlockAfter(md, lastID);
-        } else {
-            await siyuan.insertBlockAsChildOf(md, lastID);
-        }
-    }
-
-    async getLastBlockID(docID: string) {
-        const idtypes = await siyuan.getChildBlocks(docID);
-        idtypes.reverse();
-        for (const idtype of idtypes) {
-            const row = await siyuan.sqlOne(`select ial from blocks where id="${idtype.id}"`);
-            const ial: string = row?.ial ?? "";
-            if (!ial.includes(TOMATOBACKLINKKEY)) {
-                return idtype.id;
+                });
             }
-        }
-        return "";
+        });
     }
 
     async searchLinks(data: linkItem[]) {
@@ -381,51 +233,3 @@ class BackLinkBottomBox {
 }
 
 export const backLinkBottomBox = new BackLinkBottomBox();
-
-// async rmbacklink(docID: string) {
-//     const rows = await siyuan.sql(`select id from blocks where ial like '%${TOMATOBACKLINKKEY}%' and root_id="${docID}"`);
-//     for (const row of rows) {
-//         await siyuan.safeDeleteBlock(row["id"]);
-//     }
-// }
-// btnRefresh(docID: string,) {
-//     const btnID = newID().slice(0, IDLen);
-//     return `<div>
-//         ${styleColor("var(--b3-card-success-background)", "var(--b3-card-success-color)")}
-//         <div>
-//             <button title="😋是的，就是刷新底部反链区！" onclick="${btnID}()" id="btn${btnID}">🔄</button>
-//         </div>
-//         <script>
-//             function ${btnID}() {
-//                 globalThis.${TOMATO}.doTheWork("${docID}" )
-//             }
-//         </script>
-//     </div>`;
-// }
-// private keepPath2Root(div: HTMLDivElement) {
-//     if (!div) return;
-//     for (const child of div.parentElement?.childNodes ?? []) {
-//         if (child.nodeType === 1) {
-//             const subDiv = child as HTMLElement;
-//             const id = subDiv.getAttribute(DATA_NODE_ID);
-//             if (id == div.getAttribute(DATA_NODE_ID)) continue;
-//             for (const cls of subDiv.classList) {
-//                 if (cls.startsWith("protyle-")) continue;
-//             }
-//             div.parentElement?.removeChild(subDiv);
-//         }
-//     }
-//     this.keepPath2Root(div.parentElement as HTMLDivElement);
-// }
-
-// private removeDataNodeIdRecursively(element: HTMLElement) {
-//     element.removeAttribute("data-node-id");
-//     const childElements = element.children;
-//     for (let i = 0; i < childElements.length; i++) {
-//         const childElement = childElements[i] as HTMLElement;
-//         this.removeDataNodeIdRecursively(childElement);
-//     }
-// }
-
-
-
