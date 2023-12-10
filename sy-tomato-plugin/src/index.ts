@@ -78,7 +78,6 @@ export default class ThePlugin extends Plugin {
     private blockIconEvent({ detail }: any) {
         readingPointBox.blockIconEvent(detail);
         schedule.blockIconEvent(detail);
-        backLinkBottomBox.blockIconEvent(detail);
         linkBox.blockIconEvent(detail);
         cardBox.blockIconEvent(detail);
         imgOverlayBox.blockIconEvent(detail);
