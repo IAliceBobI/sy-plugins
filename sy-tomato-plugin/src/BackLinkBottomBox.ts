@@ -38,7 +38,7 @@ class BKMaker {
         this.setReadonly(this.container);
         this.container.setAttribute(DATA_NODE_ID, this.item.lastElementChild.getAttribute(DATA_NODE_ID));
         this.item.lastElementChild.insertAdjacentElement("afterend", this.container);
-        divs?.forEach(e => e.parentElement.removeChild(e));
+        divs?.forEach(e => e?.parentElement?.removeChild(e));
     }
 
     private setReadonly(e: HTMLElement) {
