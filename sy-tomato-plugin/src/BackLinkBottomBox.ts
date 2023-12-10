@@ -36,8 +36,9 @@ class BKMaker {
             await this.getBackLinks(isMention);
         }
         this.setReadonly(this.container);
+        this.container.setAttribute(DATA_NODE_ID, this.item.lastElementChild.getAttribute(DATA_NODE_ID));
         this.item.lastElementChild.insertAdjacentElement("afterend", this.container);
-        divs?.forEach(e => e.parentElement.removeChild(e))
+        divs?.forEach(e => e.parentElement.removeChild(e));
     }
 
     private setReadonly(e: HTMLElement) {
@@ -50,7 +51,7 @@ class BKMaker {
     private async getBackLinks(isMention: boolean) {
         const allRefs: RefCollector = new Map();
         const backlink2 = await siyuanCache.getBacklink2(15 * 1000, this.docID);
-        const tempContainer = document.createElement("div")
+        const tempContainer = document.createElement("div");
         if (!isMention) {
             for (const backlinkDoc of await Promise.all(backlink2.backlinks.map((backlink) => {
                 return siyuanCache.getBacklinkDoc(20 * 1000, this.docID, backlink.id);
@@ -73,7 +74,7 @@ class BKMaker {
         const button = document.createElement("button");
         button.textContent = "🔍";
         button.style.border = "transparent";
-        button.classList.add("b3-button")
+        button.classList.add("b3-button");
         button.addEventListener("click", async () => {
             await globalThis[TOMATO].tomato.searchLinks(allLnks);
         });
@@ -82,7 +83,7 @@ class BKMaker {
 
         const allLnks = [...allRefs.values()];
         const spaces = "&nbsp;".repeat(10);
-        div.appendChild(this.createDiv(allLnks.map(i => i.lnk).join(spaces)))
+        div.appendChild(this.createDiv(allLnks.map(i => i.lnk).join(spaces)));
 
         this.container.onclick = (ev) => {
             const selection = document.getSelection();
@@ -101,7 +102,7 @@ class BKMaker {
     }
 
     private createDiv(innerHTML: string) {
-        const div = document.createElement("div")
+        const div = document.createElement("div");
         div.innerHTML = innerHTML;
         return div;
     }
@@ -202,7 +203,7 @@ class BackLinkBottomBox {
                         // console.log(eventType, detail)
                         const element: HTMLElement = detail.protyle?.wysiwyg?.element;
                         if (element) {
-                            await (new BKMaker(detail.protyle, element, null)).doTheWork(false)
+                            await (new BKMaker(detail.protyle, element, null)).doTheWork(false);
                         }
                     }
                 });
