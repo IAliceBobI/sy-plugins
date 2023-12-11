@@ -420,7 +420,7 @@ ${this.btnOpenFlashcardTab(bookID, noteID, point)}
         await siyuan.pushMsg(this.plugin.i18n.getAllChildren, 3000);
 
         const size = 300;
-        const groups = [];
+        const groups: WordCountType[][] = [];
         while (allBlocks.length > 0) {
             groups.push(allBlocks.splice(0, size));
         }
@@ -429,9 +429,13 @@ ${this.btnOpenFlashcardTab(bookID, noteID, point)}
         let iter = 0;
         const content = [];
         for (const group of groups) {
-            const tasks = [];
-            for (const { id } of group) {
-                tasks.push(siyuan.getBlocksWordCount([id]));
+            const tasks: Promise<GetBlocksWordCount>[] = [];
+            for (const { id, type } of group) {
+                if (type == "h") {
+                    tasks.push({ wordCount: 0 } as any);
+                } else {
+                    tasks.push(siyuan.getBlocksWordCount([id]));
+                }
             }
             const rets = await Promise.all(tasks);
             let i = 0;

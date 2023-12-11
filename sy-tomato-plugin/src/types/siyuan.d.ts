@@ -103,3 +103,7 @@ interface Block {
     type: string;
     updated: string;
 }
+
+type GetBlocksWordCount = {
+    runeCount: number, wordCount: number, linkCount: number, imageCount: number, refCount: number
+}

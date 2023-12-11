@@ -74,6 +74,7 @@ class BKMaker {
 
         const button = document.createElement("button");
         button.textContent = "🔍";
+        button.style.background = "var(--b3-theme-background)"
         button.style.border = "transparent";
         // button.classList.add("b3-button");
         button.addEventListener("click", async () => {
