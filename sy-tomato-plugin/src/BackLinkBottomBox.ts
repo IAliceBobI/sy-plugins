@@ -35,7 +35,6 @@ function setReadonly(e: HTMLElement) {
 
 function refTag(id: string, text: string, count: number, len?: number): HTMLSpanElement {
     const span = document.createElement("span") as HTMLSpanElement;
-    markQueryable(span)
 
     const refSpan = span.appendChild(document.createElement("span"))
     refSpan.setAttribute(DATA_TYPE, "block-ref");
@@ -155,6 +154,7 @@ class BKMaker {
         });
 
         for (const { lnk } of allRefs.values()) {
+            markQueryable(lnk)
             div.appendChild(lnk)
             lnk.appendChild(createSpan("&nbsp;".repeat(10)))
         }
