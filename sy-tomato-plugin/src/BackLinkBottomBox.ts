@@ -14,10 +14,16 @@ function hr() {
     return document.createElement("hr");
 }
 
-function createDiv(innerHTML: string) {
-    const div = document.createElement("div");
-    div.innerHTML = innerHTML;
-    return div;
+// function createDiv(innerHTML: string) {
+//     const div = document.createElement("div");
+//     div.innerHTML = innerHTML;
+//     return div;
+// }
+
+function createSpan(innerHTML: string) {
+    const span = document.createElement("span");
+    span.innerHTML = innerHTML;
+    return span;
 }
 
 function setReadonly(e: HTMLElement) {
@@ -27,20 +33,26 @@ function setReadonly(e: HTMLElement) {
     });
 }
 
-function refTag(id: string, text: string, count: number, len?: number): any {
-    let countTag = "";
-    if (count > 0) {
-        countTag = `<span class="tomato-style__code">${count}</span>`;
-    }
-    let span = "";
+function refTag(id: string, text: string, count: number, len?: number): HTMLSpanElement {
+    const span = document.createElement("span") as HTMLSpanElement;
+    markQueryable(span)
+
+    const refSpan = span.appendChild(document.createElement("span"))
+    refSpan.setAttribute(DATA_TYPE, "block-ref");
+    refSpan.setAttribute(DATA_ID, id);
+    refSpan.innerText = text;
     if (len) {
         let sliced = text.slice(0, len);
         if (sliced.length != text.length) sliced += "……";
-        span = `<span data-type="block-ref" data-id="${id}">${sliced}</span>`
-    } else {
-        span = `<span data-type="block-ref" data-id="${id}">${text}</span>`
+        refSpan.innerText = sliced;
     }
-    return `<span ${QUERYABLE_ELEMENT}="1" >${span + countTag}</span>`
+
+    const countSpan = span.appendChild(document.createElement("span"))
+    if (count > 0) {
+        countSpan.classList.add("tomato-style__code")
+        countSpan.innerText = String(count);
+    }
+    return span;
 }
 
 function scanAllRef(allRefs: RefCollector, div: HTMLDivElement) {
@@ -55,10 +67,10 @@ function addRef(txt: string, id: string, allRefs: RefCollector) {
     if (txt != "*" && id != this.docID) {
         const key = id + txt;
         const c = (allRefs.get(key)?.count ?? 0) + 1;
-        const spanStr = refTag(id, txt, c);
+        const span = refTag(id, txt, c);
         allRefs.set(key, {
             count: c,
-            lnk: spanStr,
+            lnk: span,
             text: txt,
             id,
         });
@@ -134,16 +146,18 @@ class BKMaker {
             const newValue = (event.target as any).value;
             this.container.querySelectorAll(`[${QUERYABLE_ELEMENT}="1"]`).forEach(e => {
                 const el = e as HTMLElement;
-                el.style.display = ""
-                if (!e.textContent.toLowerCase().includes(newValue)) {
+                if (!e.textContent.toLowerCase().includes(newValue.toLowerCase())) {
                     el.style.display = "none"
+                } else {
+                    el.style.display = ""
                 }
             })
         });
 
-        const allLnks = [...allRefs.values()];
-        const spaces = "&nbsp;".repeat(10);
-        div.appendChild(createDiv(allLnks.map(i => i.lnk).join(spaces)));
+        for (const { lnk } of allRefs.values()) {
+            div.appendChild(lnk)
+            lnk.appendChild(createSpan("&nbsp;".repeat(10)))
+        }
 
         this.container.onclick = (ev) => {
             const selection = document.getSelection();
@@ -172,7 +186,7 @@ class BKMaker {
 
     private async path2div(blockPaths: BlockPath[], allRefs: RefCollector) {
         const div = document.createElement("div") as HTMLDivElement;
-        const refPathList = [];
+        const refPathList: HTMLSpanElement[] = [];
         for (const refPath of blockPaths) {
             if (refPath.type == "NodeDocument") {
                 if (refPath.id == this.docID) break;
@@ -200,7 +214,13 @@ class BKMaker {
                 }
             }
         }
-        div.innerHTML = refPathList.join(" ➡ ");
+        refPathList.forEach((s, idx) => {
+            s = s.cloneNode(true) as HTMLScriptElement;
+            if (idx < refPathList.length - 1) {
+                s.appendChild(createSpan(" ➡ "))
+            }
+            div.appendChild(s)
+        })
         setReadonly(div);
         return div;
     }
