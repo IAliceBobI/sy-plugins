@@ -223,8 +223,8 @@ QQ群: 263961482
 ## 2023-12-11
 
 * 修复反链出现在文件中间的问题。
-* `双向链接`功能触发后，光标改为定位到块的最后。
-* 修复`双向链接`无法识别带外观的链接的BUG。
+* `双向链接`功能触发后，光标改为定位到块的最后。[*](https://github.com/IAliceBobI/sy-tomato-plugin/issues/6)
+* 修复`双向链接`无法识别带外观的链接的BUG。[*](https://github.com/IAliceBobI/sy-tomato-plugin/issues/7)
 
 ## 2023-12-10
 
