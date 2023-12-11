@@ -11,7 +11,7 @@ class BKMaker {
     private docID: string;
     private container: HTMLDivElement;
     private isMention: boolean;
-    private queryGetFocus: boolean;
+    queryGetFocus: boolean;
     constructor(detail: any, isMention: boolean) {
         this.queryGetFocus = false;
         this.isMention = isMention;
@@ -73,9 +73,16 @@ class BKMaker {
             }
         }
         const div = document.createElement("div");
+        const bkBox = this;
 
         const query = div.appendChild(document.createElement("input"));
         query.classList.add("b3-text");
+        query.addEventListener("blur", function () {
+            bkBox.queryGetFocus = false;
+        });
+        query.addEventListener("focus", function () {
+            bkBox.queryGetFocus = true;
+        });
         query.addEventListener("input", function (event) {
             var newValue = (event.target as any).value;
             console.log("Input value changed: " + newValue);
@@ -85,7 +92,6 @@ class BKMaker {
         button.textContent = "🔍";
         button.style.background = "var(--b3-theme-background)";
         button.style.border = "transparent";
-        // button.classList.add("b3-button");
         button.addEventListener("click", async () => {
             await globalThis[TOMATO].tomato.searchLinks(allLnks);
         });
@@ -210,6 +216,7 @@ class BackLinkBottomBox {
             if (eventType == EventType.loaded_protyle_static || eventType == EventType.switch_protyle) {
                 navigator.locks.request("BackLinkBottomBoxLock", { ifAvailable: true }, async (lock) => {
                     if (lock) {
+                        if (this.maker?.queryGetFocus) return;
                         this.observer?.disconnect();
                         this.maker = new BKMaker(detail, false);
                         await this.maker.doTheWork();
