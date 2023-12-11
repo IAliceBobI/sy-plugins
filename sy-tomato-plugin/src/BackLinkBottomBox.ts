@@ -75,9 +75,9 @@ class BKMaker {
     private docID: string;
     private container: HTMLDivElement;
     private isMention: boolean;
-    queryGetFocus: boolean;
+    shouldFreeze: boolean;
     constructor(detail: any, isMention: boolean) {
-        this.queryGetFocus = false;
+        this.shouldFreeze = false;
         this.isMention = isMention;
         this.item = detail.protyle?.wysiwyg?.element;
         this.docID = detail.protyle?.block.rootID ?? "";
@@ -85,7 +85,7 @@ class BKMaker {
 
     async doTheWork() {
         await navigator.locks.request("BackLinkBottomBox-BKMakerLock", { ifAvailable: true }, async (lock) => {
-            if (lock && this.docID && !this.queryGetFocus) {
+            if (lock && this.docID && !this.shouldFreeze) {
                 const allIDs = await siyuanCache.getChildBlocks(5 * 1000, this.docID);
                 const lastID = this.item.lastElementChild.getAttribute(DATA_NODE_ID);
                 if (allIDs?.slice(-5)?.map(b => b.id)?.includes(lastID)) {
@@ -126,28 +126,42 @@ class BKMaker {
         }
         const topDiv = document.createElement("div");
 
-        const query = topDiv.appendChild(document.createElement("input"));
-        query.classList.add("b3-text-field");
-        query.placeholder = "反链过滤";
-        query.addEventListener("blur", () => {
-            this.queryGetFocus = false;
-        });
-        query.addEventListener("focus", () => {
-            this.queryGetFocus = true;
-        });
-        query.addEventListener("input", (event) => {
-            const newValue = (event.target as any).value;
-            this.container.querySelectorAll(`[${QUERYABLE_ELEMENT}="1"]`).forEach(e => {
-                const el = e as HTMLElement;
-                if (!e.textContent.toLowerCase().includes(newValue.toLowerCase())) {
-                    el.style.display = "none";
-                } else {
-                    el.style.display = "";
-                }
-            });
-        });
+        const freezeCheckBox = topDiv.appendChild(document.createElement("input"));
+        {
+            freezeCheckBox.type = "checkbox"
+            freezeCheckBox.classList.add("b3-switch");
+            freezeCheckBox.checked = false;
+            freezeCheckBox.addEventListener("change", () => {
+                this.shouldFreeze = freezeCheckBox.checked;
+            })
+            topDiv.appendChild(createSpan("&nbsp;".repeat(7)));
+        }
 
-        topDiv.appendChild(createSpan("&nbsp;".repeat(7)));
+        {
+            const query = topDiv.appendChild(document.createElement("input"));
+            query.classList.add("b3-text-field");
+            query.placeholder = "反链过滤";
+            // query.addEventListener("blur", () => {
+            //     this.queryGetFocus = false;
+            // });
+            query.addEventListener("focus", () => {
+                this.shouldFreeze = true;
+                freezeCheckBox.checked = true;
+            });
+            query.addEventListener("input", (event) => {
+                const newValue = (event.target as any).value;
+                this.container.querySelectorAll(`[${QUERYABLE_ELEMENT}="1"]`).forEach(e => {
+                    const el = e as HTMLElement;
+                    if (!e.textContent.toLowerCase().includes(newValue.toLowerCase())) {
+                        el.style.display = "none";
+                    } else {
+                        el.style.display = "";
+                    }
+                });
+            });
+            topDiv.appendChild(createSpan("&nbsp;".repeat(7)));
+        }
+
         for (const { lnk } of allRefs.values()) {
             markQueryable(lnk);
             topDiv.appendChild(lnk);
@@ -238,7 +252,7 @@ class BackLinkBottomBox {
             if (eventType == EventType.loaded_protyle_static || eventType == EventType.switch_protyle) {
                 navigator.locks.request("BackLinkBottomBoxLock", { ifAvailable: true }, async (lock) => {
                     if (lock) {
-                        if (this.maker?.queryGetFocus) return;
+                        if (this.maker?.shouldFreeze) return;
                         this.observer?.disconnect();
                         this.maker = new BKMaker(detail, false);
                         await this.maker.doTheWork();
