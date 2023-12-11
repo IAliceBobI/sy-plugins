@@ -11,7 +11,9 @@ class BKMaker {
     private docID: string;
     private container: HTMLDivElement;
     private isMention: boolean;
+    private queryGetFocus: boolean;
     constructor(detail: any, isMention: boolean) {
+        this.queryGetFocus = false;
         this.isMention = isMention;
         this.item = detail.protyle?.wysiwyg?.element;
         this.docID = detail.protyle?.block.rootID ?? "";
@@ -23,7 +25,7 @@ class BKMaker {
 
     async doTheWork() {
         await navigator.locks.request("BackLinkBottomBox-BKMakerLock", { ifAvailable: true }, async (lock) => {
-            if (lock && this.docID) {
+            if (lock && this.docID && !this.queryGetFocus) {
                 const allIDs = await siyuanCache.getChildBlocks(5 * 1000, this.docID);
                 const lastID = this.item.lastElementChild.getAttribute(DATA_NODE_ID);
                 if (allIDs?.slice(-5)?.map(b => b.id)?.includes(lastID)) {
@@ -72,7 +74,14 @@ class BKMaker {
         }
         const div = document.createElement("div");
 
-        const button = document.createElement("button");
+        const query = div.appendChild(document.createElement("input"));
+        query.classList.add("b3-text");
+        query.addEventListener("input", function (event) {
+            var newValue = (event.target as any).value;
+            console.log("Input value changed: " + newValue);
+        });
+
+        const button = div.appendChild(document.createElement("button"));
         button.textContent = "🔍";
         button.style.background = "var(--b3-theme-background)";
         button.style.border = "transparent";
@@ -81,7 +90,6 @@ class BKMaker {
             await globalThis[TOMATO].tomato.searchLinks(allLnks);
         });
         this.setReadonly(button);
-        div.appendChild(button);
 
         const allLnks = [...allRefs.values()];
         const spaces = "&nbsp;".repeat(10);
