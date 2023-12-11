@@ -51,17 +51,20 @@ class LinkBox {
 
     private async turn2static(blockID: string, links: string[], lute: Lute, element: HTMLLIElement) {
         const { dom } = await siyuan.getBlockDOM(blockID);
-        let md = lute.BlockDOM2Md(dom);
+        const md = lute.BlockDOM2Md(dom);
+        let mdTemp = md
         for (const lnk of links) {
             if (lnk.includes("'")) {
                 const st = lnk.replace(/'/g, '"');
-                md = md.replace(lnk, st);
+                mdTemp = mdTemp.replace(lnk, st);
             }
         }
-        await siyuan.safeUpdateBlock(blockID, md);
-        const e = element.querySelector(`[${gconst.DATA_NODE_ID}="${blockID}"]`) as HTMLElement;
-        if (e) {
-            document.getSelection().collapse(e, 1)
+        if (mdTemp != md) {
+            await siyuan.safeUpdateBlock(blockID, mdTemp);
+            const e = element.querySelector(`[${gconst.DATA_NODE_ID}="${blockID}"]`) as HTMLElement;
+            if (e) {
+                document.getSelection().collapse(e, 1)
+            }
         }
     }
 
