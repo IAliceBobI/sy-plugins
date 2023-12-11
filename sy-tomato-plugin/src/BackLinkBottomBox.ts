@@ -4,6 +4,21 @@ import { DATA_ID, DATA_NODE_ID, DATA_TYPE } from "./libs/gconst";
 import { EventType, events } from "./libs/Events";
 
 const TOMATO = "tomato_zZmqus5PtYRi";
+const QUERYABLE_ELEMENT = "QUERYABLE_ELEMENT";
+
+function makeQueryable(e: HTMLElement) {
+    e.setAttribute(QUERYABLE_ELEMENT, "1");
+}
+
+function hr() {
+    return document.createElement("hr");
+}
+
+function createDiv(innerHTML: string) {
+    const div = document.createElement("div");
+    div.innerHTML = innerHTML;
+    return div;
+}
 
 class BKMaker {
     private item: HTMLElement;
@@ -16,10 +31,6 @@ class BKMaker {
         this.isMention = isMention;
         this.item = detail.protyle?.wysiwyg?.element;
         this.docID = detail.protyle?.block.rootID ?? "";
-    }
-
-    private hr() {
-        return document.createElement("hr");
     }
 
     async doTheWork() {
@@ -88,7 +99,7 @@ class BKMaker {
 
         const allLnks = [...allRefs.values()];
         const spaces = "&nbsp;".repeat(10);
-        div.appendChild(this.createDiv(allLnks.map(i => i.lnk).join(spaces)));
+        div.appendChild(createDiv(allLnks.map(i => i.lnk).join(spaces)));
 
         this.container.onclick = (ev) => {
             const selection = document.getSelection();
@@ -97,25 +108,20 @@ class BKMaker {
         };
 
         this.container.appendChild(div);
-        this.container.appendChild(this.hr());
+        this.container.appendChild(hr());
         this.container.appendChild(tempContainer);
         this.setReadonly(div);
     }
 
-    private createDiv(innerHTML: string) {
-        const div = document.createElement("div");
-        div.innerHTML = innerHTML;
-        return div;
-    }
-
     private async fillContent(backlinksInDoc: Backlink, allRefs: RefCollector, tempContainer: HTMLElement) {
         const div = document.createElement("div") as HTMLDivElement;
+        makeQueryable(div);
         div.innerHTML = backlinksInDoc?.dom ?? "";
         this.scanAllRef(allRefs, div);
         this.setReadonly(div);
         tempContainer.appendChild(await this.path2div(backlinksInDoc?.blockPaths ?? [], allRefs));
         tempContainer.appendChild(div);
-        tempContainer.appendChild(this.hr());
+        tempContainer.appendChild(hr());
     }
 
     private async path2div(blockPaths: BlockPath[], allRefs: RefCollector) {
