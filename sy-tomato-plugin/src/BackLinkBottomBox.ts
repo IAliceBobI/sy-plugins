@@ -1,8 +1,7 @@
-import { Plugin, Dialog, } from "siyuan";
-import { extractLinks, newID, siyuanCache } from "./libs/utils";
+import { Plugin, } from "siyuan";
+import { extractLinks, siyuanCache } from "./libs/utils";
 import { DATA_ID, DATA_NODE_ID, DATA_TYPE } from "./libs/gconst";
 import { EventType, events } from "./libs/Events";
-import BackLinkBottomSearchDialog from "./BackLinkBottomBox.svelte";
 
 const TOMATO = "tomato_zZmqus5PtYRi";
 
@@ -73,29 +72,19 @@ class BKMaker {
             }
         }
         const div = document.createElement("div");
-        const bkBox = this;
 
         const query = div.appendChild(document.createElement("input"));
         query.classList.add("b3-text");
-        query.addEventListener("blur", function () {
-            bkBox.queryGetFocus = false;
+        query.addEventListener("blur", () => {
+            this.queryGetFocus = false;
         });
-        query.addEventListener("focus", function () {
-            bkBox.queryGetFocus = true;
+        query.addEventListener("focus", () => {
+            this.queryGetFocus = true;
         });
         query.addEventListener("input", function (event) {
-            var newValue = (event.target as any).value;
+            const newValue = (event.target as any).value;
             console.log("Input value changed: " + newValue);
         });
-
-        const button = div.appendChild(document.createElement("button"));
-        button.textContent = "🔍";
-        button.style.background = "var(--b3-theme-background)";
-        button.style.border = "transparent";
-        button.addEventListener("click", async () => {
-            await globalThis[TOMATO].tomato.searchLinks(allLnks);
-        });
-        this.setReadonly(button);
 
         const allLnks = [...allRefs.values()];
         const spaces = "&nbsp;".repeat(10);
@@ -212,6 +201,7 @@ class BackLinkBottomBox {
     async onload(plugin: Plugin) {
         BackLinkBottomBox.GLOBAL_THIS[TOMATO] = { BKMaker, "tomato": this };
         this.plugin = plugin;
+        this.plugin;
         events.addListener("BackLinkBottomBox", (eventType, detail) => {
             if (eventType == EventType.loaded_protyle_static || eventType == EventType.switch_protyle) {
                 navigator.locks.request("BackLinkBottomBoxLock", { ifAvailable: true }, async (lock) => {
@@ -232,27 +222,6 @@ class BackLinkBottomBox {
                         this.observer.observe(this.item, { childList: true });
                     }
                 });
-            }
-        });
-    }
-
-    async searchLinks(data: linkItem[]) {
-        const id = newID();
-        let d: BackLinkBottomSearchDialog = null;
-        const dialog = new Dialog({
-            title: "🔍",
-            content: `<div id="${id}"></div>`,
-            width: events.isMobile ? "92vw" : "560px",
-            height: "540px",
-            destroyCallback() {
-                if (d) d.$destroy();
-            },
-        });
-        d = new BackLinkBottomSearchDialog({
-            target: dialog.element.querySelector("#" + id),
-            props: {
-                plugin: this.plugin,
-                data,
             }
         });
     }
