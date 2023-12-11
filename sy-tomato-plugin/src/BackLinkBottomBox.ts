@@ -30,7 +30,7 @@ function setReadonly(e: HTMLElement) {
 function refTag(id: string, text: string, count: number, len?: number): HTMLSpanElement {
     const span = document.createElement("span") as HTMLSpanElement;
 
-    const refSpan = span.appendChild(document.createElement("span"))
+    const refSpan = span.appendChild(document.createElement("span"));
     refSpan.setAttribute(DATA_TYPE, "block-ref");
     refSpan.setAttribute(DATA_ID, id);
     refSpan.innerText = text;
@@ -40,9 +40,9 @@ function refTag(id: string, text: string, count: number, len?: number): HTMLSpan
         refSpan.innerText = sliced;
     }
 
-    const countSpan = span.appendChild(document.createElement("span"))
+    const countSpan = span.appendChild(document.createElement("span"));
     if (count > 0) {
-        countSpan.classList.add("tomato-style__code")
+        countSpan.classList.add("tomato-style__code");
         countSpan.innerText = String(count);
     }
     return span;
@@ -140,18 +140,18 @@ class BKMaker {
             this.container.querySelectorAll(`[${QUERYABLE_ELEMENT}="1"]`).forEach(e => {
                 const el = e as HTMLElement;
                 if (!e.textContent.toLowerCase().includes(newValue.toLowerCase())) {
-                    el.style.display = "none"
+                    el.style.display = "none";
                 } else {
-                    el.style.display = ""
+                    el.style.display = "";
                 }
-            })
+            });
         });
 
-        div.appendChild(createSpan("&nbsp;".repeat(10)))
+        div.appendChild(createSpan("&nbsp;".repeat(10)));
         for (const { lnk } of allRefs.values()) {
-            markQueryable(lnk)
-            div.appendChild(lnk)
-            lnk.appendChild(createSpan("&nbsp;".repeat(10)))
+            markQueryable(lnk);
+            div.appendChild(lnk);
+            lnk.appendChild(createSpan("&nbsp;".repeat(10)));
         }
 
         this.container.onclick = (ev) => {
@@ -212,10 +212,10 @@ class BKMaker {
         refPathList.forEach((s, idx) => {
             s = s.cloneNode(true) as HTMLScriptElement;
             if (idx < refPathList.length - 1) {
-                s.appendChild(createSpan(" ➡ "))
+                s.appendChild(createSpan(" ➡ "));
             }
-            div.appendChild(s)
-        })
+            div.appendChild(s);
+        });
         setReadonly(div);
         return div;
     }
