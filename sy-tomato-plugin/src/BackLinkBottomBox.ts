@@ -175,12 +175,13 @@ class BKMaker {
         scanAllRef(allRefs, div, this.docID);
         temp.appendChild(await this.path2div(backlinksInDoc?.blockPaths ?? [], allRefs));
         temp.appendChild(div);
-        temp.appendChild(hr());
         tc.appendChild(temp);
     }
 
     private async path2div(blockPaths: BlockPath[], allRefs: RefCollector) {
         const div = document.createElement("div") as HTMLDivElement;
+        div.appendChild(createSpan("📄 "));
+        // leading.classList.add("b3-label__text")
         const refPathList: HTMLSpanElement[] = [];
         for (const refPath of blockPaths) {
             if (refPath.type == "NodeDocument") {
@@ -212,7 +213,7 @@ class BKMaker {
         refPathList.forEach((s, idx) => {
             s = s.cloneNode(true) as HTMLScriptElement;
             if (idx < refPathList.length - 1) {
-                s.appendChild(createSpan(" ➡ "));
+                s.appendChild(createSpan("  ➡  "));
             }
             div.appendChild(s);
         });
