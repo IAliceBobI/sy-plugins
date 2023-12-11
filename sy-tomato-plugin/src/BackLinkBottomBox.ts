@@ -6,7 +6,7 @@ import { EventType, events } from "./libs/Events";
 const TOMATO = "tomato_zZmqus5PtYRi";
 const QUERYABLE_ELEMENT = "QUERYABLE_ELEMENT";
 
-function makeQueryable(e: HTMLElement) {
+function markQueryable(e: HTMLElement) {
     e.setAttribute(QUERYABLE_ELEMENT, "1");
 }
 
@@ -32,17 +32,19 @@ function refTag(id: string, text: string, count: number, len?: number): any {
     if (count > 0) {
         countTag = `<span class="tomato-style__code">${count}</span>`;
     }
+    let span = "";
     if (len) {
         let sliced = text.slice(0, len);
         if (sliced.length != text.length) sliced += "……";
-        return `<span data-type="block-ref" data-id="${id}">${sliced}</span>` + countTag;
+        span = `<span data-type="block-ref" data-id="${id}">${sliced}</span>`
     } else {
-        return `<span data-type="block-ref" data-id="${id}">${text}</span>` + countTag;
+        span = `<span data-type="block-ref" data-id="${id}">${text}</span>`
     }
+    return `<span ${QUERYABLE_ELEMENT}="1" >${span + countTag}</span>`
 }
 
 function scanAllRef(allRefs: RefCollector, div: HTMLDivElement) {
-    for (const element of div.querySelectorAll(`[${DATA_TYPE}="block-ref"]`)) {
+    for (const element of div.querySelectorAll(`[${DATA_TYPE}*="block-ref"]`)) {
         const id = element.getAttribute(DATA_ID);
         const txt = element.textContent;
         addRef(txt, id, allRefs);
@@ -128,9 +130,15 @@ class BKMaker {
         query.addEventListener("focus", () => {
             this.queryGetFocus = true;
         });
-        query.addEventListener("input", function (event) {
+        query.addEventListener("input", (event) => {
             const newValue = (event.target as any).value;
-            console.log("Input value changed: " + newValue);
+            this.container.querySelectorAll(`[${QUERYABLE_ELEMENT}="1"]`).forEach(e => {
+                const el = e as HTMLElement;
+                el.style.display = ""
+                if (!e.textContent.toLowerCase().includes(newValue)) {
+                    el.style.display = "none"
+                }
+            })
         });
 
         const allLnks = [...allRefs.values()];
@@ -149,15 +157,17 @@ class BKMaker {
         setReadonly(div);
     }
 
-    private async fillContent(backlinksInDoc: Backlink, allRefs: RefCollector, tempContainer: HTMLElement) {
+    private async fillContent(backlinksInDoc: Backlink, allRefs: RefCollector, tc: HTMLElement) {
+        const temp = document.createElement("div") as HTMLDivElement;
+        markQueryable(temp);
         const div = document.createElement("div") as HTMLDivElement;
-        makeQueryable(div);
+        setReadonly(div);
         div.innerHTML = backlinksInDoc?.dom ?? "";
         scanAllRef(allRefs, div);
-        setReadonly(div);
-        tempContainer.appendChild(await this.path2div(backlinksInDoc?.blockPaths ?? [], allRefs));
-        tempContainer.appendChild(div);
-        tempContainer.appendChild(hr());
+        temp.appendChild(await this.path2div(backlinksInDoc?.blockPaths ?? [], allRefs));
+        temp.appendChild(div);
+        temp.appendChild(hr());
+        tc.appendChild(temp);
     }
 
     private async path2div(blockPaths: BlockPath[], allRefs: RefCollector) {
