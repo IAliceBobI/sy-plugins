@@ -5,6 +5,7 @@ import { EventType, events } from "./libs/Events";
 
 const TOMATO = "tomato_zZmqus5PtYRi";
 const QUERYABLE_ELEMENT = "QUERYABLE_ELEMENT";
+const BKMakerAdd = "BKMakerAdd";
 
 function markQueryable(e: HTMLElement) {
     e.setAttribute(QUERYABLE_ELEMENT, "1");
@@ -89,13 +90,13 @@ class BKMaker {
                 const allIDs = await siyuanCache.getChildBlocks(5 * 1000, this.docID);
                 const lastID = this.item.lastElementChild.getAttribute(DATA_NODE_ID);
                 if (allIDs?.slice(-5)?.map(b => b.id)?.includes(lastID)) {
-                    const divs = this.item.parentElement.querySelectorAll('[BKMakerAdd="1"]');
+                    const divs = this.item.parentElement.querySelectorAll(`[${BKMakerAdd}="1"]`);
                     this.container = document.createElement("div");
                     await this.getBackLinks(this.isMention);
                     setReadonly(this.container);
                     this.container.setAttribute(DATA_NODE_ID, lastID);
                     this.container.style.border = "1px solid black";
-                    this.container.setAttribute("BKMakerAdd", "1");
+                    this.container.setAttribute(BKMakerAdd, "1");
                     this.item.lastElementChild.insertAdjacentElement("afterend", this.container);
                     divs?.forEach(e => e?.parentElement?.removeChild(e));
                 }
@@ -126,14 +127,21 @@ class BKMaker {
         }
         const topDiv = document.createElement("div");
 
+        const label = topDiv.appendChild(document.createElement("label"));
+        label.classList.add("b3-label__text");
+        label.innerText = "🔄";
+        topDiv.appendChild(createSpan("&nbsp;".repeat(1)));
+
         const freezeCheckBox = topDiv.appendChild(document.createElement("input"));
         {
-            freezeCheckBox.type = "checkbox"
+            freezeCheckBox.type = "checkbox";
             freezeCheckBox.classList.add("b3-switch");
             freezeCheckBox.checked = false;
             freezeCheckBox.addEventListener("change", () => {
                 this.shouldFreeze = freezeCheckBox.checked;
-            })
+                if (this.shouldFreeze) label.innerText = "🚫";
+                else label.innerText = "🔄";
+            });
             topDiv.appendChild(createSpan("&nbsp;".repeat(7)));
         }
 
@@ -147,6 +155,7 @@ class BKMaker {
             query.addEventListener("focus", () => {
                 this.shouldFreeze = true;
                 freezeCheckBox.checked = true;
+                label.innerText = "🚫";
             });
             query.addEventListener("input", (event) => {
                 const newValue = (event.target as any).value;
@@ -252,7 +261,8 @@ class BackLinkBottomBox {
             if (eventType == EventType.loaded_protyle_static || eventType == EventType.switch_protyle) {
                 navigator.locks.request("BackLinkBottomBoxLock", { ifAvailable: true }, async (lock) => {
                     if (lock) {
-                        if (this.maker?.shouldFreeze) return;
+                        const exists = this.item?.querySelectorAll(`[${BKMakerAdd}]`)?.length > 0 ?? false;
+                        if (exists && this.maker?.shouldFreeze) return;
                         this.observer?.disconnect();
                         this.maker = new BKMaker(detail, false);
                         await this.maker.doTheWork();
