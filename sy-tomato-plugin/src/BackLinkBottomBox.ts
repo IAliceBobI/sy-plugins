@@ -24,7 +24,7 @@ class BKMaker {
     async doTheWork() {
         await navigator.locks.request("BackLinkBottomBox-BKMakerLock", { ifAvailable: true }, async (lock) => {
             if (lock && this.docID) {
-                const allIDs = await siyuanCache.getChildBlocks(5 * 1000, this.docID)
+                const allIDs = await siyuanCache.getChildBlocks(5 * 1000, this.docID);
                 const lastID = this.item.lastElementChild.getAttribute(DATA_NODE_ID);
                 if (allIDs?.slice(-5)?.map(b => b.id)?.includes(lastID)) {
                     const divs = this.item.parentElement.querySelectorAll('[BKMakerAdd="1"]');
@@ -32,7 +32,7 @@ class BKMaker {
                     await this.getBackLinks(this.isMention);
                     this.setReadonly(this.container);
                     this.container.setAttribute(DATA_NODE_ID, lastID);
-                    this.container.style.border = "1px solid black"
+                    this.container.style.border = "1px solid black";
                     this.container.setAttribute("BKMakerAdd", "1");
                     this.item.lastElementChild.insertAdjacentElement("afterend", this.container);
                     divs?.forEach(e => e?.parentElement?.removeChild(e));
@@ -74,7 +74,7 @@ class BKMaker {
 
         const button = document.createElement("button");
         button.textContent = "🔍";
-        button.style.background = "var(--b3-theme-background)"
+        button.style.background = "var(--b3-theme-background)";
         button.style.border = "transparent";
         // button.classList.add("b3-button");
         button.addEventListener("click", async () => {
@@ -211,7 +211,7 @@ class BackLinkBottomBox {
                             const newLastID = this.item.lastElementChild.getAttribute(DATA_NODE_ID);
                             if (newLastID != this.lastElementID) {
                                 this.lastElementID = newLastID;
-                                this.maker.doTheWork()
+                                this.maker.doTheWork();
                             }
                         });
                         this.observer.observe(this.item, { childList: true });

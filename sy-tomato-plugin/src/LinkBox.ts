@@ -52,7 +52,7 @@ class LinkBox {
     private async turn2static(blockID: string, links: string[], lute: Lute, element: HTMLLIElement) {
         const { dom } = await siyuan.getBlockDOM(blockID);
         const md = lute.BlockDOM2Md(dom);
-        let mdTemp = md
+        let mdTemp = md;
         for (const lnk of links) {
             if (lnk.includes("'")) {
                 const st = lnk.replace(/'/g, '"');
@@ -63,14 +63,33 @@ class LinkBox {
             await siyuan.safeUpdateBlock(blockID, mdTemp);
             const e = element.querySelector(`[${gconst.DATA_NODE_ID}="${blockID}"]`) as HTMLElement;
             if (e) {
-                document.getSelection().collapse(e, 1)
+                document.getSelection().collapse(e, 1);
             }
         }
     }
 
+    async extractLinksFromDom(blockID: string) {
+        const { dom } = await siyuan.getBlockDOM(blockID);
+        const div = document.createElement("div") as HTMLElement;
+        div.innerHTML = dom;
+        const ids = [];
+        const links = [];
+        for (const e of div.querySelectorAll("[data-type*=\"block-ref\"]")) {
+            const id = e.getAttribute(gconst.DATA_ID);
+            const txt = e.textContent;
+            const type = e.getAttribute("data-subtype");
+            ids.push(id);
+            if (type == "d") {
+                links.push(`((${id} '${txt}'))`);
+            } else {
+                links.push(`((${id} "${txt}"))`);
+            }
+        }
+        return { links, ids };
+    }
+
     private async addLink(blockID: string, element: HTMLLIElement) {
-        const { markdown } = await siyuan.getBlockMarkdownAndContent(blockID);
-        const { links, ids } = utils.extractLinks(markdown);
+        const { links, ids } = await this.extractLinksFromDom(blockID);
         if (ids.length <= 0) return;
         const docID = await siyuan.getDocIDByBlockID(blockID);
         if (!docID) return;
