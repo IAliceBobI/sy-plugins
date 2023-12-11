@@ -14,12 +14,6 @@ function hr() {
     return document.createElement("hr");
 }
 
-// function createDiv(innerHTML: string) {
-//     const div = document.createElement("div");
-//     div.innerHTML = innerHTML;
-//     return div;
-// }
-
 function createSpan(innerHTML: string) {
     const span = document.createElement("span");
     span.innerHTML = innerHTML;
@@ -105,7 +99,6 @@ class BKMaker {
                     this.item.lastElementChild.insertAdjacentElement("afterend", this.container);
                     divs?.forEach(e => e?.parentElement?.removeChild(e));
                 }
-
             }
         });
     }
@@ -135,6 +128,7 @@ class BKMaker {
 
         const query = div.appendChild(document.createElement("input"));
         query.classList.add("b3-text-field");
+        query.placeholder = "反链过滤";
         query.addEventListener("blur", () => {
             this.queryGetFocus = false;
         });
