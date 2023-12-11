@@ -106,13 +106,13 @@ class BKMaker {
     private async getBackLinks(isMention: boolean) {
         const allRefs: RefCollector = new Map();
         const backlink2 = await siyuanCache.getBacklink2(15 * 1000, this.docID);
-        const tempContainer = document.createElement("div");
+        const contentContainer = document.createElement("div");
         if (!isMention) {
             for (const backlinkDoc of await Promise.all(backlink2.backlinks.map((backlink) => {
                 return siyuanCache.getBacklinkDoc(20 * 1000, this.docID, backlink.id);
             }))) {
                 for (const backlinksInDoc of backlinkDoc.backlinks) {
-                    await this.fillContent(backlinksInDoc, allRefs, tempContainer);
+                    await this.fillContent(backlinksInDoc, allRefs, contentContainer);
                 }
             }
         } else {
@@ -120,13 +120,13 @@ class BKMaker {
                 return siyuanCache.getBackmentionDoc(60 * 1000, this.docID, mention.id);
             }))) {
                 for (const mentionsInDoc of mentionDoc.backmentions) {
-                    await this.fillContent(mentionsInDoc, allRefs, tempContainer);
+                    await this.fillContent(mentionsInDoc, allRefs, contentContainer);
                 }
             }
         }
-        const div = document.createElement("div");
+        const topDiv = document.createElement("div");
 
-        const query = div.appendChild(document.createElement("input"));
+        const query = topDiv.appendChild(document.createElement("input"));
         query.classList.add("b3-text-field");
         query.placeholder = "反链过滤";
         query.addEventListener("blur", () => {
@@ -147,11 +147,11 @@ class BKMaker {
             });
         });
 
-        div.appendChild(createSpan("&nbsp;".repeat(10)));
+        topDiv.appendChild(createSpan("&nbsp;".repeat(7)));
         for (const { lnk } of allRefs.values()) {
             markQueryable(lnk);
-            div.appendChild(lnk);
-            lnk.appendChild(createSpan("&nbsp;".repeat(10)));
+            topDiv.appendChild(lnk);
+            lnk.appendChild(createSpan("&nbsp;".repeat(7)));
         }
 
         this.container.onclick = (ev) => {
@@ -160,10 +160,10 @@ class BKMaker {
             ev.stopPropagation();
         };
 
-        this.container.appendChild(div);
+        this.container.appendChild(topDiv);
         this.container.appendChild(hr());
-        this.container.appendChild(tempContainer);
-        setReadonly(div);
+        this.container.appendChild(contentContainer);
+        setReadonly(topDiv);
     }
 
     private async fillContent(backlinksInDoc: Backlink, allRefs: RefCollector, tc: HTMLElement) {
