@@ -20,6 +20,13 @@ function createDiv(innerHTML: string) {
     return div;
 }
 
+function setReadonly(e: HTMLElement) {
+    e.setAttribute("contenteditable", "false");
+    e.querySelectorAll('[contenteditable="true"]')?.forEach(sub => {
+        sub?.setAttribute("contenteditable", "false");
+    });
+}
+
 class BKMaker {
     private item: HTMLElement;
     private docID: string;
@@ -42,7 +49,7 @@ class BKMaker {
                     const divs = this.item.parentElement.querySelectorAll('[BKMakerAdd="1"]');
                     this.container = document.createElement("div");
                     await this.getBackLinks(this.isMention);
-                    this.setReadonly(this.container);
+                    setReadonly(this.container);
                     this.container.setAttribute(DATA_NODE_ID, lastID);
                     this.container.style.border = "1px solid black";
                     this.container.setAttribute("BKMakerAdd", "1");
@@ -51,13 +58,6 @@ class BKMaker {
                 }
 
             }
-        });
-    }
-
-    private setReadonly(e: HTMLElement) {
-        e.setAttribute("contenteditable", "false");
-        e.querySelectorAll('[contenteditable="true"]')?.forEach(sub => {
-            sub?.setAttribute("contenteditable", "false");
         });
     }
 
@@ -110,7 +110,7 @@ class BKMaker {
         this.container.appendChild(div);
         this.container.appendChild(hr());
         this.container.appendChild(tempContainer);
-        this.setReadonly(div);
+        setReadonly(div);
     }
 
     private async fillContent(backlinksInDoc: Backlink, allRefs: RefCollector, tempContainer: HTMLElement) {
@@ -118,7 +118,7 @@ class BKMaker {
         makeQueryable(div);
         div.innerHTML = backlinksInDoc?.dom ?? "";
         this.scanAllRef(allRefs, div);
-        this.setReadonly(div);
+        setReadonly(div);
         tempContainer.appendChild(await this.path2div(backlinksInDoc?.blockPaths ?? [], allRefs));
         tempContainer.appendChild(div);
         tempContainer.appendChild(hr());
@@ -155,7 +155,7 @@ class BKMaker {
             }
         }
         div.innerHTML = refPathList.join(" ➡ ");
-        this.setReadonly(div);
+        setReadonly(div);
         return div;
     }
 
