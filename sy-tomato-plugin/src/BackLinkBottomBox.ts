@@ -48,16 +48,16 @@ function refTag(id: string, text: string, count: number, len?: number): HTMLSpan
     return span;
 }
 
-function scanAllRef(allRefs: RefCollector, div: HTMLDivElement) {
+function scanAllRef(allRefs: RefCollector, div: HTMLDivElement, docID: string) {
     for (const element of div.querySelectorAll(`[${DATA_TYPE}*="block-ref"]`)) {
         const id = element.getAttribute(DATA_ID);
         const txt = element.textContent;
-        addRef(txt, id, allRefs);
+        addRef(txt, id, allRefs, docID);
     }
 }
 
-function addRef(txt: string, id: string, allRefs: RefCollector) {
-    if (txt != "*" && id != this.docID) {
+function addRef(txt: string, id: string, allRefs: RefCollector, docID: string) {
+    if (txt != "*" && id != docID) {
         const key = id + txt;
         const c = (allRefs.get(key)?.count ?? 0) + 1;
         const span = refTag(id, txt, c);
@@ -172,7 +172,7 @@ class BKMaker {
         const div = document.createElement("div") as HTMLDivElement;
         setReadonly(div);
         div.innerHTML = backlinksInDoc?.dom ?? "";
-        scanAllRef(allRefs, div);
+        scanAllRef(allRefs, div, this.docID);
         temp.appendChild(await this.path2div(backlinksInDoc?.blockPaths ?? [], allRefs));
         temp.appendChild(div);
         temp.appendChild(hr());
@@ -187,13 +187,13 @@ class BKMaker {
                 if (refPath.id == this.docID) break;
                 const fileName = refPath.name.split("/").pop();
                 refPathList.push(refTag(refPath.id, fileName, 0));
-                addRef(fileName, refPath.id, allRefs);
+                addRef(fileName, refPath.id, allRefs, this.docID);
                 continue;
             }
 
             if (refPath.type == "NodeHeading") {
                 refPathList.push(refTag(refPath.id, refPath.name, 0));
-                addRef(refPath.name, refPath.id, allRefs);
+                addRef(refPath.name, refPath.id, allRefs, this.docID);
             } else {
                 refPathList.push(refTag(refPath.id, refPath.name, 0, 15));
             }
@@ -205,7 +205,7 @@ class BKMaker {
             if (kramdown) {
                 const { idLnks } = extractLinks(kramdown);
                 for (const idLnk of idLnks) {
-                    addRef(idLnk.txt, idLnk.id, allRefs);
+                    addRef(idLnk.txt, idLnk.id, allRefs, this.docID);
                 }
             }
         }
