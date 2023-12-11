@@ -27,6 +27,42 @@ function setReadonly(e: HTMLElement) {
     });
 }
 
+function refTag(id: string, text: string, count: number, len?: number): any {
+    let countTag = "";
+    if (count > 0) {
+        countTag = `<span class="tomato-style__code">${count}</span>`;
+    }
+    if (len) {
+        let sliced = text.slice(0, len);
+        if (sliced.length != text.length) sliced += "……";
+        return `<span data-type="block-ref" data-id="${id}">${sliced}</span>` + countTag;
+    } else {
+        return `<span data-type="block-ref" data-id="${id}">${text}</span>` + countTag;
+    }
+}
+
+function scanAllRef(allRefs: RefCollector, div: HTMLDivElement) {
+    for (const element of div.querySelectorAll(`[${DATA_TYPE}="block-ref"]`)) {
+        const id = element.getAttribute(DATA_ID);
+        const txt = element.textContent;
+        addRef(txt, id, allRefs);
+    }
+}
+
+function addRef(txt: string, id: string, allRefs: RefCollector) {
+    if (txt != "*" && id != this.docID) {
+        const key = id + txt;
+        const c = (allRefs.get(key)?.count ?? 0) + 1;
+        const spanStr = refTag(id, txt, c);
+        allRefs.set(key, {
+            count: c,
+            lnk: spanStr,
+            text: txt,
+            id,
+        });
+    }
+}
+
 class BKMaker {
     private item: HTMLElement;
     private docID: string;
@@ -117,7 +153,7 @@ class BKMaker {
         const div = document.createElement("div") as HTMLDivElement;
         makeQueryable(div);
         div.innerHTML = backlinksInDoc?.dom ?? "";
-        this.scanAllRef(allRefs, div);
+        scanAllRef(allRefs, div);
         setReadonly(div);
         tempContainer.appendChild(await this.path2div(backlinksInDoc?.blockPaths ?? [], allRefs));
         tempContainer.appendChild(div);
@@ -131,16 +167,16 @@ class BKMaker {
             if (refPath.type == "NodeDocument") {
                 if (refPath.id == this.docID) break;
                 const fileName = refPath.name.split("/").pop();
-                refPathList.push(this.refTag(refPath.id, fileName, 0));
-                this.addRef(fileName, refPath.id, allRefs);
+                refPathList.push(refTag(refPath.id, fileName, 0));
+                addRef(fileName, refPath.id, allRefs);
                 continue;
             }
 
             if (refPath.type == "NodeHeading") {
-                refPathList.push(this.refTag(refPath.id, refPath.name, 0));
-                this.addRef(refPath.name, refPath.id, allRefs);
+                refPathList.push(refTag(refPath.id, refPath.name, 0));
+                addRef(refPath.name, refPath.id, allRefs);
             } else {
-                refPathList.push(this.refTag(refPath.id, refPath.name, 0, 15));
+                refPathList.push(refTag(refPath.id, refPath.name, 0, 15));
             }
 
             let { kramdown } = await siyuanCache.getBlockKramdown(15 * 1000, refPath.id);
@@ -150,49 +186,13 @@ class BKMaker {
             if (kramdown) {
                 const { idLnks } = extractLinks(kramdown);
                 for (const idLnk of idLnks) {
-                    this.addRef(idLnk.txt, idLnk.id, allRefs);
+                    addRef(idLnk.txt, idLnk.id, allRefs);
                 }
             }
         }
         div.innerHTML = refPathList.join(" ➡ ");
         setReadonly(div);
         return div;
-    }
-
-    private refTag(id: string, text: string, count: number, len?: number): any {
-        let countTag = "";
-        if (count > 0) {
-            countTag = `<span class="tomato-style__code">${count}</span>`;
-        }
-        if (len) {
-            let sliced = text.slice(0, len);
-            if (sliced.length != text.length) sliced += "……";
-            return `<span data-type="block-ref" data-id="${id}">${sliced}</span>` + countTag;
-        } else {
-            return `<span data-type="block-ref" data-id="${id}">${text}</span>` + countTag;
-        }
-    }
-
-    private scanAllRef(allRefs: RefCollector, div: HTMLDivElement) {
-        for (const element of div.querySelectorAll(`[${DATA_TYPE}="block-ref"]`)) {
-            const id = element.getAttribute(DATA_ID);
-            const txt = element.textContent;
-            this.addRef(txt, id, allRefs);
-        }
-    }
-
-    private addRef(txt: string, id: string, allRefs: RefCollector) {
-        if (txt != "*" && id != this.docID) {
-            const key = id + txt;
-            const c = (allRefs.get(key)?.count ?? 0) + 1;
-            const spanStr = this.refTag(id, txt, c);
-            allRefs.set(key, {
-                count: c,
-                lnk: spanStr,
-                text: txt,
-                id,
-            });
-        }
     }
 }
 
