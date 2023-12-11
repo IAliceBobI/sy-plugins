@@ -417,19 +417,19 @@ class Progressive {
                 break;
             case HtmlCBType.deleteAndExit:
                 await siyuan.removeRiffCards([noteID]);
-                await siyuan.removeDocByID(noteID);
+                siyuan.removeDocByID(noteID);
                 break;
             case HtmlCBType.deleteAndBack:
                 await siyuan.removeRiffCards([noteID]);
                 await this.storage.gotoBlock(bookID, point - 1);
                 await this.startToLearn(bookID);
-                await siyuan.removeDocByID(noteID);
+                siyuan.removeDocByID(noteID);
                 break;
             case HtmlCBType.deleteAndNext:
                 await siyuan.removeRiffCards([noteID]);
                 await this.storage.gotoBlock(bookID, point + 1);
                 await this.startToLearn(bookID);
-                await siyuan.removeDocByID(noteID);
+                siyuan.removeDocByID(noteID);
                 break;
             case HtmlCBType.nextBook:
                 await this.startToLearn();

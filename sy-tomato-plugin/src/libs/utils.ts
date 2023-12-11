@@ -216,9 +216,15 @@ export const siyuan = {
         return siyuan.call("/api/filetree/removeDoc", { notebook: notebookID, path: path_not_readable });
     },
     async removeDocByID(docID: string) {
-        const row = await this.sqlOne(`select box, path from blocks where id="${docID}" and type="d"`);
-        if (row) {
-            return siyuan.removeDoc(row["box"], row["path"]);
+        let count = 10;
+        while (count-- > 0) {
+            const row = await this.sqlOne(`select box, path from blocks where id="${docID}" and type="d"`);
+            const box = row?.box ?? "";
+            const path = row?.path ?? "";
+            if (box && path) {
+                return siyuan.removeDoc(box, path);
+            }
+            await sleep(1000);
         }
         return {};
     },
