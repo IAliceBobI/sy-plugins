@@ -37,10 +37,9 @@
 
 在`皂荚`文档内，看到的只有相关信息（上下级），直到根部，其他分支隐藏。并且把涉及到的引用（概念）与引用次数也列出，方便查看。
 
-![Alt text](assets/logseqbl.png)
+输入框内支持实时搜索，。
 
-> 老版本：反链使用的js嵌入块部分代码参考了：[siyuan-plugin-data-query](https://github.com/zxhd863943427/siyuan-plugin-data-query)，感谢：[zxhd863943427](https://github.com/zxhd863943427)。
-> 新版本不用js嵌入块了。
+![Alt text](assets/logseqbl.png)
 
 ## 双向互链
 
@@ -219,6 +218,10 @@ QQ群: 263961482
 [或者到官方论坛提交问题](https://ld246.com/tag/siyuan)
 
 # 更新日志
+
+## 2023-12-12
+
+* 底部反链整体支持搜索。
 
 ## 2023-12-11
 

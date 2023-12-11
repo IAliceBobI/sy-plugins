@@ -134,7 +134,7 @@ class BKMaker {
         const div = document.createElement("div");
 
         const query = div.appendChild(document.createElement("input"));
-        query.classList.add("b3-text");
+        query.classList.add("b3-text-field");
         query.addEventListener("blur", () => {
             this.queryGetFocus = false;
         });
@@ -153,6 +153,7 @@ class BKMaker {
             })
         });
 
+        div.appendChild(createSpan("&nbsp;".repeat(10)))
         for (const { lnk } of allRefs.values()) {
             markQueryable(lnk)
             div.appendChild(lnk)
