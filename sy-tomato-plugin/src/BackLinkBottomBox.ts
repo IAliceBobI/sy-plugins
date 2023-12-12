@@ -1,5 +1,5 @@
 import { Plugin, } from "siyuan";
-import { extractLinks, siyuanCache } from "./libs/utils";
+import { extractLinks, isBoolean, siyuanCache } from "./libs/utils";
 import { DATA_ID, DATA_NODE_ID, DATA_TYPE } from "./libs/gconst";
 import { EventType, events } from "./libs/Events";
 
@@ -75,13 +75,14 @@ class BKMaker {
     private item: HTMLElement;
     private docID: string;
     private container: HTMLDivElement;
-    private isMention: boolean;
+    mentionEnabled: boolean;
     shouldFreeze: boolean;
-    constructor(detail: any, isMention: boolean) {
+    constructor(detail: any, mentionEnabled: boolean) {
         this.shouldFreeze = false;
-        this.isMention = isMention;
+        this.mentionEnabled = false;
         this.item = detail.protyle?.wysiwyg?.element;
         this.docID = detail.protyle?.block.rootID ?? "";
+        this.mentionEnabled = mentionEnabled;
     }
 
     async doTheWork() {
@@ -92,7 +93,7 @@ class BKMaker {
                 if (allIDs?.slice(-5)?.map(b => b.id)?.includes(lastID)) {
                     const divs = this.item.parentElement.querySelectorAll(`[${BKMakerAdd}="1"]`);
                     this.container = document.createElement("div");
-                    await this.getBackLinks(this.isMention);
+                    await this.getBackLinks();
                     setReadonly(this.container);
                     this.container.setAttribute(DATA_NODE_ID, lastID);
                     this.container.style.border = "1px solid black";
@@ -104,19 +105,18 @@ class BKMaker {
         });
     }
 
-    private async getBackLinks(isMention: boolean) {
+    private async getBackLinks() {
         const allRefs: RefCollector = new Map();
         const backlink2 = await siyuanCache.getBacklink2(15 * 1000, this.docID);
         const contentContainer = document.createElement("div");
-        if (!isMention) {
-            for (const backlinkDoc of await Promise.all(backlink2.backlinks.map((backlink) => {
-                return siyuanCache.getBacklinkDoc(20 * 1000, this.docID, backlink.id);
-            }))) {
-                for (const backlinksInDoc of backlinkDoc.backlinks) {
-                    await this.fillContent(backlinksInDoc, allRefs, contentContainer);
-                }
+        for (const backlinkDoc of await Promise.all(backlink2.backlinks.map((backlink) => {
+            return siyuanCache.getBacklinkDoc(20 * 1000, this.docID, backlink.id);
+        }))) {
+            for (const backlinksInDoc of backlinkDoc.backlinks) {
+                await this.fillContent(backlinksInDoc, allRefs, contentContainer);
             }
-        } else {
+        }
+        if (this.mentionEnabled) {
             for (const mentionDoc of await Promise.all(backlink2.backmentions.map((mention) => {
                 return siyuanCache.getBackmentionDoc(60 * 1000, this.docID, mention.id);
             }))) {
@@ -127,8 +127,8 @@ class BKMaker {
         }
         const topDiv = document.createElement("div");
 
-        const { freezeCheckBox, label } = this.addRefreshCheckBox(topDiv);
-
+        const { freezeCheckBox, label } = this.addRefreshCheckBox(topDiv); // 1
+        this.addMentionCheckBox(topDiv);// 2
         {
             const query = topDiv.appendChild(document.createElement("input"));
             query.classList.add("b3-text-field");
@@ -157,7 +157,7 @@ class BKMaker {
 
         for (const { lnk } of allRefs.values()) {
             markQueryable(lnk);
-            topDiv.appendChild(lnk);
+            topDiv.appendChild(lnk); // 3
             lnk.appendChild(createSpan("&nbsp;".repeat(7)));
         }
 
@@ -167,10 +167,21 @@ class BKMaker {
             ev.stopPropagation();
         };
 
-        this.container.appendChild(topDiv);
+        this.container.appendChild(topDiv); // 4
         this.container.appendChild(hr());
         this.container.appendChild(contentContainer);
         setReadonly(topDiv);
+    }
+
+    private addMentionCheckBox(topDiv: HTMLDivElement) {
+        const mentionCheckBox = topDiv.appendChild(document.createElement("input"));
+        mentionCheckBox.type = "checkbox";
+        mentionCheckBox.classList.add("b3-switch");
+        mentionCheckBox.checked = this.mentionEnabled;
+        mentionCheckBox.addEventListener("change", () => {
+            this.mentionEnabled = mentionCheckBox.checked;
+        });
+        topDiv.appendChild(createSpan("&nbsp;".repeat(7)));
     }
 
     private addRefreshCheckBox(topDiv: HTMLDivElement) {
@@ -260,6 +271,7 @@ class BackLinkBottomBox {
     private lastElementID: string;
     private item: HTMLElement;
     private docID: string;
+    private mentionEnabled: boolean = false;
 
     async onload(plugin: Plugin) {
         BackLinkBottomBox.GLOBAL_THIS[TOMATO] = { BKMaker, "tomato": this };
@@ -269,12 +281,16 @@ class BackLinkBottomBox {
             if (eventType == EventType.loaded_protyle_static || eventType == EventType.switch_protyle) {
                 navigator.locks.request("BackLinkBottomBoxLock", { ifAvailable: true }, async (lock) => {
                     if (lock) {
+                        if (isBoolean(this.maker?.mentionEnabled)) {
+                            this.mentionEnabled = this.maker?.mentionEnabled;
+                        }
+                        this.mentionEnabled = this.maker?.mentionEnabled ?? this.mentionEnabled;
                         const docID = detail.protyle?.block.rootID ?? "";
                         const exists = this.item?.querySelector(`[${BKMakerAdd}]`) ?? false;
                         if (exists && this.maker?.shouldFreeze && docID === this.docID && eventType == EventType.loaded_protyle_static) return;
                         this.docID = docID;
                         this.observer?.disconnect();
-                        this.maker = new BKMaker(detail, false);
+                        this.maker = new BKMaker(detail, this.mentionEnabled);
                         await this.maker.doTheWork();
                         this.item = detail.protyle?.wysiwyg?.element;
                         this.lastElementID = this.item.lastElementChild.getAttribute(DATA_NODE_ID);

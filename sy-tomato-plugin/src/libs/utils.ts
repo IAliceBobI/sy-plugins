@@ -51,6 +51,10 @@ export function divideArrayIntoParts<T>(array: T[], n: number): T[][] {
     return chunks(array, n);
 }
 
+export function isBoolean(value: any): boolean {
+    return typeof value === "boolean";
+}
+
 export function chunks<T>(array: T[], n: number): T[][] {
     const newArr: T[][] = [];
     for (let i = 0; i < array.length; i += n) {
