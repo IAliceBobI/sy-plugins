@@ -6,9 +6,12 @@ import * as utils from "@/libs/utils";
 
 class LinkBox {
     private plugin: Plugin;
+    private lute: Lute;
 
     async onload(plugin: Plugin) {
         this.plugin = plugin;
+        this.lute = utils.NewLute();
+
         this.plugin.addCommand({
             langKey: "bilink",
             hotkey: "⌥/",
@@ -49,9 +52,7 @@ class LinkBox {
         });
     }
 
-    private async turn2static(blockID: string, links: string[], lute: Lute, element: HTMLLIElement) {
-        const { dom } = await siyuan.getBlockDOM(blockID);
-        const md = lute.BlockDOM2Md(dom);
+    private async turn2static(blockID: string, md: string, links: string[], element: HTMLLIElement) {
         let mdTemp = md;
         for (const lnk of links) {
             if (lnk.includes("'")) {
@@ -85,28 +86,28 @@ class LinkBox {
                 links.push(`((${id} "${txt}"))`);
             }
         }
-        return { links, ids };
+        return { links, ids, md: this.lute.BlockDOM2Md(dom).trim(), content: div.innerText };
     }
 
     private async addLink(blockID: string, element: HTMLLIElement) {
-        const { links, ids } = await this.extractLinksFromDom(blockID);
+        const { links, ids, md, content } = await this.extractLinksFromDom(blockID);
         if (ids.length <= 0) return;
         const docID = await siyuan.getDocIDByBlockID(blockID);
         if (!docID) return;
-        const { content } = await siyuan.getBlockMarkdownAndContent(docID);
-        if (!content) return;
-        const lute = utils.NewLute();
-        await this.turn2static(blockID, links, lute, element);
+        const { content: docName } = await siyuan.getBlockMarkdownAndContent(docID);
+        if (!docName) return;
+        await this.turn2static(blockID, md, links, element);
         for (const link of ids) {
             const row = await siyuan.sqlOne(`select type from blocks where id="${link}"`);
             const idType = row?.type ?? "";
             if (!idType) continue;
-            const backLink = `((${blockID} "[${content}]"))`;
             if (idType == "d") {
+                const backLink = `((${blockID} '${content}'))`;
                 await siyuan.insertBlockAsChildOf(backLink, link);
             } else {
+                const backLink = `((${blockID} "[${docName}]"))`;
                 const { dom } = await siyuan.getBlockDOM(link);
-                const md = lute.BlockDOM2Md(dom).trim();
+                const md = this.lute.BlockDOM2Md(dom).trim();
                 if (md.includes(backLink)) continue;
                 const parts = md.split("\n");
                 if (parts.length >= 2) {
