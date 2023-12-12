@@ -127,23 +127,7 @@ class BKMaker {
         }
         const topDiv = document.createElement("div");
 
-        const label = topDiv.appendChild(document.createElement("label"));
-        label.classList.add("b3-label__text");
-        label.innerText = "🔄";
-        topDiv.appendChild(createSpan("&nbsp;".repeat(1)));
-
-        const freezeCheckBox = topDiv.appendChild(document.createElement("input"));
-        {
-            freezeCheckBox.type = "checkbox";
-            freezeCheckBox.classList.add("b3-switch");
-            freezeCheckBox.checked = false;
-            freezeCheckBox.addEventListener("change", () => {
-                this.shouldFreeze = freezeCheckBox.checked;
-                if (this.shouldFreeze) label.innerText = "🚫";
-                else label.innerText = "🔄";
-            });
-            topDiv.appendChild(createSpan("&nbsp;".repeat(7)));
-        }
+        const { freezeCheckBox, label } = this.addRefreshCheckBox(topDiv);
 
         {
             const query = topDiv.appendChild(document.createElement("input"));
@@ -187,6 +171,29 @@ class BKMaker {
         this.container.appendChild(hr());
         this.container.appendChild(contentContainer);
         setReadonly(topDiv);
+    }
+
+    private addRefreshCheckBox(topDiv: HTMLDivElement) {
+        const label = topDiv.appendChild(document.createElement("label"));
+        {
+            label.classList.add("b3-label__text");
+            label.innerText = "🔄";
+            topDiv.appendChild(createSpan("&nbsp;".repeat(1)));
+        }
+
+        const freezeCheckBox = topDiv.appendChild(document.createElement("input"));
+        {
+            freezeCheckBox.type = "checkbox";
+            freezeCheckBox.classList.add("b3-switch");
+            freezeCheckBox.checked = false;
+            freezeCheckBox.addEventListener("change", () => {
+                this.shouldFreeze = freezeCheckBox.checked;
+                if (this.shouldFreeze) label.innerText = "🚫";
+                else label.innerText = "🔄";
+            });
+            topDiv.appendChild(createSpan("&nbsp;".repeat(7)));
+        }
+        return { freezeCheckBox, label };
     }
 
     private async fillContent(backlinksInDoc: Backlink, allRefs: RefCollector, tc: HTMLElement) {
