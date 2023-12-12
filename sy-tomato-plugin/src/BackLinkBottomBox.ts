@@ -94,12 +94,17 @@ class BKMaker {
                     const divs = this.item.parentElement.querySelectorAll(`[${BKMakerAdd}="1"]`);
                     this.container = document.createElement("div");
                     this.item.lastElementChild.insertAdjacentElement("afterend", this.container);
-                    divs?.forEach(e => e?.parentElement?.removeChild(e));
+                    // dont shake
+                    for (const d of divs) {
+                        this.item.lastElementChild.insertAdjacentElement("afterend", d);
+                        break;
+                    }
                     this.container.setAttribute(DATA_NODE_ID, lastID);
                     this.container.style.border = "1px solid black";
                     this.container.setAttribute(BKMakerAdd, "1");
                     await this.getBackLinks();
                     setReadonly(this.container, true);
+                    divs?.forEach(e => e?.parentElement?.removeChild(e));
                 }
             }
         });
@@ -122,8 +127,8 @@ class BKMaker {
         }))) {
             for (const backlinksInDoc of backlinkDoc.backlinks) {
                 await this.fillContent(backlinksInDoc, allRefs, contentContainer);
-                this.refreshTopDiv(topDiv, allRefs);
             }
+            this.refreshTopDiv(topDiv, allRefs);
         }
         if (this.mentionEnabled) {
             for (const mentionDoc of await Promise.all(backlink2.backmentions.map((mention) => {
@@ -188,6 +193,7 @@ class BKMaker {
 
     private addMentionCheckBox(topDiv: HTMLDivElement) {
         const mentionCheckBox = topDiv.appendChild(document.createElement("input"));
+        mentionCheckBox.title = "提及：每次刷新随机展示一部分";
         mentionCheckBox.type = "checkbox";
         mentionCheckBox.classList.add("b3-switch");
         mentionCheckBox.checked = this.mentionEnabled;
@@ -207,6 +213,7 @@ class BKMaker {
 
         const freezeCheckBox = topDiv.appendChild(document.createElement("input"));
         {
+            freezeCheckBox.title = "是否自动刷新";
             freezeCheckBox.type = "checkbox";
             freezeCheckBox.classList.add("b3-switch");
             freezeCheckBox.checked = false;
