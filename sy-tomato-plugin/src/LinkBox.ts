@@ -8,6 +8,12 @@ function getDocNameFromProtyle(protyle?: IProtyle) {
     return protyle?.title?.editElement?.textContent ?? "";
 }
 
+const LinkBoxDocLinkIAL = "custom-linkboxdoclinkial"
+
+function getDocIAL(blockID: string) {
+    return `${LinkBoxDocLinkIAL}="${blockID}"`;
+}
+
 class LinkBox {
     private plugin: Plugin;
     private lute: Lute;
@@ -96,12 +102,18 @@ class LinkBox {
         const idRows = utils.chunks(await Promise.all(Array.from(ids.keys()).map((id) => {
             return [id, siyuan.sqlOne(`select type from blocks where id="${id}"`)];
         }).flat()), 2) as [string, Block][];
+        let insertCount = 0;
         for (const [id, row] of idRows) {
             const idType = row?.type ?? "";
             if (!idType) continue;
             if (idType == "d") {
-                const backLink = `((${blockID} "[${docName}]")): ((${blockID} '${dom.innerText}'))`;
-                await siyuan.insertBlockAsChildOf(backLink, id);
+                const row = await siyuan.sqlOne(`select id from blocks where ial like '%${getDocIAL(blockID)}%' and root_id="${id}"`)
+                if (!row?.id) {
+                    let backLink = `((${blockID} "[${docName}]")): ((${blockID} '${dom.innerText}'))`;
+                    backLink += "\n{: " + getDocIAL(blockID) + "}";
+                    await siyuan.insertBlockAsChildOf(backLink, id);
+                    insertCount++;
+                }
             } else {
                 const backLink = `((${blockID} "[${docName}]"))`;
                 const { dom } = await siyuan.getBlockDOM(id);
@@ -113,9 +125,10 @@ class LinkBox {
                     parts[parts.length - 2] = lastLine + backLink;
                 }
                 await siyuan.safeUpdateBlock(id, parts.join("\n"));
+                insertCount++;
             }
         }
-        await siyuan.pushMsg(`已经插入${ids.size}个链接。`);
+        await siyuan.pushMsg(`插入链接：${insertCount}/${ids.size}`);
     }
 
     private getSelectedIDs(protyle: any) {
