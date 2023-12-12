@@ -1,19 +1,20 @@
 import { Plugin, } from "siyuan";
-import { extractLinks, shuffleArray, siyuanCache } from "./libs/utils";
+import { extractLinks, siyuanCache } from "./libs/utils";
 import { DATA_ID, DATA_NODE_ID, DATA_TYPE } from "./libs/gconst";
 import { EventType, events } from "./libs/Events";
 
 const QUERYABLE_ELEMENT = "QUERYABLE_ELEMENT";
 const BKMakerAdd = "BKMakerAdd";
-const MentionLimit = 10;
+const MentionLimit = 5;
+const cacheLimit = 100;
 
 class BKMaker {
-    private container: HTMLDivElement;
-    private blBox: IBackLinkBottomBox;
+    private container: HTMLElement;
+    private blBox: BackLinkBottomBox;
     private docID: string;
     private item: HTMLElement;
     shouldFreeze: boolean;
-    constructor(blBox: IBackLinkBottomBox) {
+    constructor(blBox: BackLinkBottomBox) {
         this.blBox = blBox;
         this.item = blBox.item;
         this.docID = blBox.docID;
@@ -26,17 +27,23 @@ class BKMaker {
                 const allIDs = await siyuanCache.getChildBlocks(5 * 1000, this.docID);
                 const lastID = this.item.lastElementChild.getAttribute(DATA_NODE_ID);
                 if (allIDs?.slice(-5)?.map(b => b.id)?.includes(lastID)) {
-                    const divs = this.item.parentElement.querySelectorAll(`[${BKMakerAdd}="1"]`);
+                    const divs = Array.from(this.item.parentElement.querySelectorAll(`[${BKMakerAdd}="1"]`)?.values() ?? []);
+                    if (divs.length == 0) {
+                        const oldEle = this.blBox.getCache(this.docID, null)
+                        if (oldEle) {
+                            this.item.lastElementChild.insertAdjacentElement("afterend", oldEle);
+                            divs.push(oldEle);
+                        }
+                    }
                     this.container = document.createElement("div");
-                    this.container.style.display = "none";
-                    this.item.lastElementChild.insertAdjacentElement("afterend", this.container);
                     await this.getBackLinks(); // start
                     this.container.setAttribute(DATA_NODE_ID, lastID);
                     this.container.style.border = "1px solid black";
                     this.container.setAttribute(BKMakerAdd, "1");
                     setReadonly(this.container, true);
-                    this.container.style.display = "";
+                    this.item.lastElementChild.insertAdjacentElement("afterend", this.container);
                     divs?.forEach(e => e?.parentElement?.removeChild(e));
+                    this.blBox.addCache(this.docID, this.container);
                 }
             }
         });
@@ -67,10 +74,10 @@ class BKMaker {
             }
         }
         if (this.blBox.mentionEnabled) {
-            for (const mentionDoc of await Promise.all(backlink2.backmentions.map((mention) => {
+            for (const mentionDoc of await Promise.all(backlink2.backmentions.slice(0, MentionLimit).map((mention) => {
                 return siyuanCache.getBackmentionDoc(60 * 1000, this.docID, mention.id);
             }))) {
-                for (const mentionsInDoc of shuffleArray(mentionDoc.backmentions).slice(0, MentionLimit)) {
+                for (const mentionsInDoc of mentionDoc.backmentions) {
                     if (this.shouldStop()) return;
                     await this.fillContent(mentionsInDoc, allRefs, contentContainer);
                 }
@@ -78,7 +85,7 @@ class BKMaker {
         }
 
         this.refreshTopDiv(topDiv, allRefs);
-        
+
         this.container.onclick = (ev) => {
             const selection = document.getSelection();
             if (selection.toString().length <= 0) return;
@@ -131,7 +138,7 @@ class BKMaker {
 
     private addMentionCheckBox(topDiv: HTMLDivElement) {
         const mentionCheckBox = topDiv.appendChild(document.createElement("input"));
-        mentionCheckBox.title = "是否显示提及（每次刷新随机展示一部分提及）";
+        mentionCheckBox.title = "是否显示提及（展示一部分提及）";
         mentionCheckBox.type = "checkbox";
         mentionCheckBox.classList.add("b3-switch");
         mentionCheckBox.checked = this.blBox.mentionEnabled;
@@ -221,14 +228,38 @@ class BKMaker {
     }
 }
 
-class BackLinkBottomBox implements IBackLinkBottomBox {
-    plugin: Plugin;
+class BackLinkBottomBox {
+    public plugin: Plugin;
     private maker: BKMaker;
     private observer: MutationObserver;
     private lastElementID: string;
-    item: HTMLElement;
-    docID: string = "";
-    mentionEnabled: boolean = false;
+    private cache: Map<string, { container: HTMLElement, timestamp: number }> = new Map();
+    private _item: HTMLElement;
+    public get item(): HTMLElement {
+        return this._item;
+    }
+    private _docID: string = "";
+    public get docID(): string {
+        return this._docID;
+    }
+    public mentionEnabled: boolean = false;
+
+    public addCache(docID: string, container: HTMLElement): HTMLElement {
+        const entries = Array.from(this.cache.entries())
+        if (entries.length > cacheLimit) {
+            entries.sort((e1, e2) => {
+                return e1[1].timestamp - e2[1].timestamp;
+            }).slice(0, entries.length / 2).forEach(e => {
+                this.cache.delete(e[0])
+            })
+        }
+        this.cache.set(docID, { container, timestamp: new Date().getTime() })
+        return container;
+    }
+
+    public getCache(docID: string, defaultValue: HTMLElement): HTMLElement {
+        return this.cache.get(docID)?.container ?? defaultValue
+    }
 
     async onload(plugin: Plugin) {
         this.plugin = plugin;
@@ -240,9 +271,9 @@ class BackLinkBottomBox implements IBackLinkBottomBox {
                         if (!nextDocID) return;
                         const exists = this.item?.querySelector(`[${BKMakerAdd}]`) ?? false;
                         if (exists && this.maker?.shouldFreeze && nextDocID === this.docID) return;
-                        this.item = detail.protyle?.wysiwyg?.element;
+                        this._item = detail.protyle?.wysiwyg?.element;
                         if (!this.item) return;
-                        this.docID = nextDocID;
+                        this._docID = nextDocID;
                         this.observer?.disconnect();
                         this.maker = new BKMaker(this);
                         this.maker.doTheWork();
@@ -328,10 +359,4 @@ function addRef(txt: string, id: string, allRefs: RefCollector, docID: string) {
             id,
         });
     }
-}
-
-interface IBackLinkBottomBox {
-    mentionEnabled: boolean;
-    docID: string;
-    item: HTMLElement;
 }
