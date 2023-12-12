@@ -100,7 +100,7 @@ class LinkBox {
             const idType = row?.type ?? "";
             if (!idType) continue;
             if (idType == "d") {
-                const backLink = `((${blockID} '${dom.innerText}'))`;
+                const backLink = `((${blockID} "[${docName}]")): ((${blockID} '${dom.innerText}'))`;
                 await siyuan.insertBlockAsChildOf(backLink, id);
             } else {
                 const backLink = `((${blockID} "[${docName}]"))`;
