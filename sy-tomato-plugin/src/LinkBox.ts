@@ -8,7 +8,7 @@ function getDocNameFromProtyle(protyle?: IProtyle) {
     return protyle?.title?.editElement?.textContent ?? "";
 }
 
-const LinkBoxDocLinkIAL = "custom-linkboxdoclinkial"
+const LinkBoxDocLinkIAL = "custom-linkboxdoclinkial";
 
 function getDocIAL(blockID: string) {
     return `${LinkBoxDocLinkIAL}="${blockID}"`;
@@ -107,7 +107,7 @@ class LinkBox {
             const idType = row?.type ?? "";
             if (!idType) continue;
             if (idType == "d") {
-                const row = await siyuan.sqlOne(`select id from blocks where ial like '%${getDocIAL(blockID)}%' and root_id="${id}"`)
+                const row = await siyuan.sqlOne(`select id from blocks where ial like '%${getDocIAL(blockID)}%' and root_id="${id}"`);
                 if (!row?.id) {
                     let backLink = `((${blockID} "[${docName}]")): ((${blockID} '${dom.innerText}'))`;
                     backLink += "\n{: " + getDocIAL(blockID) + "}";

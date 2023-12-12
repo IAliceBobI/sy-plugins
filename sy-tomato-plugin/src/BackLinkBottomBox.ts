@@ -1,9 +1,8 @@
 import { Plugin, } from "siyuan";
-import { extractLinks, isBoolean, shuffleArray, siyuanCache } from "./libs/utils";
+import { extractLinks, shuffleArray, siyuanCache } from "./libs/utils";
 import { DATA_ID, DATA_NODE_ID, DATA_TYPE } from "./libs/gconst";
 import { EventType, events } from "./libs/Events";
 
-const TOMATO = "tomato_zZmqus5PtYRi";
 const QUERYABLE_ELEMENT = "QUERYABLE_ELEMENT";
 const BKMakerAdd = "BKMakerAdd";
 
@@ -71,23 +70,28 @@ function addRef(txt: string, id: string, allRefs: RefCollector, docID: string) {
     }
 }
 
-class BKMaker {
-    private item: HTMLElement;
-    private docID: string;
-    private container: HTMLDivElement;
+interface IBackLinkBottomBox {
     mentionEnabled: boolean;
+    docID: string;
+    item: HTMLElement;
+}
+
+class BKMaker {
+    private container: HTMLDivElement;
+    private blBox: IBackLinkBottomBox;
+    private docID: string;
+    private item: HTMLElement;
     shouldFreeze: boolean;
-    constructor(detail: any, mentionEnabled: boolean) {
+    constructor(blBox: IBackLinkBottomBox) {
+        this.blBox = blBox;
+        this.item = blBox.item;
+        this.docID = blBox.docID;
         this.shouldFreeze = false;
-        this.mentionEnabled = false;
-        this.item = detail.protyle?.wysiwyg?.element;
-        this.docID = detail.protyle?.block.rootID ?? "";
-        this.mentionEnabled = mentionEnabled;
     }
 
     async doTheWork() {
-        await navigator.locks.request("BackLinkBottomBox-BKMakerLock", { ifAvailable: true }, async (lock) => {
-            if (lock && this.docID && !this.shouldFreeze) {
+        await navigator.locks.request("BackLinkBottomBox-BKMakerLock" + this.docID, { ifAvailable: true }, async (lock) => {
+            if (lock && !this.shouldFreeze) {
                 const allIDs = await siyuanCache.getChildBlocks(5 * 1000, this.docID);
                 const lastID = this.item.lastElementChild.getAttribute(DATA_NODE_ID);
                 if (allIDs?.slice(-5)?.map(b => b.id)?.includes(lastID)) {
@@ -95,19 +99,23 @@ class BKMaker {
                     this.container = document.createElement("div");
                     this.item.lastElementChild.insertAdjacentElement("afterend", this.container);
                     // dont shake
-                    for (const d of divs) {
+                    for (const d of divs ?? []) {
                         this.item.lastElementChild.insertAdjacentElement("afterend", d);
                         break;
                     }
                     this.container.setAttribute(DATA_NODE_ID, lastID);
                     this.container.style.border = "1px solid black";
                     this.container.setAttribute(BKMakerAdd, "1");
-                    await this.getBackLinks();
+                    await this.getBackLinks(); // start
                     setReadonly(this.container, true);
                     divs?.forEach(e => e?.parentElement?.removeChild(e));
                 }
             }
         });
+    }
+
+    private shouldStop() {
+        return this.docID != this.blBox.docID;
     }
 
     private async getBackLinks() {
@@ -126,15 +134,17 @@ class BKMaker {
             return siyuanCache.getBacklinkDoc(20 * 1000, this.docID, backlink.id);
         }))) {
             for (const backlinksInDoc of backlinkDoc.backlinks) {
+                if (this.shouldStop()) return;
                 await this.fillContent(backlinksInDoc, allRefs, contentContainer);
+                this.refreshTopDiv(topDiv, allRefs);
             }
-            this.refreshTopDiv(topDiv, allRefs);
         }
-        if (this.mentionEnabled) {
+        if (this.blBox.mentionEnabled) {
             for (const mentionDoc of await Promise.all(backlink2.backmentions.map((mention) => {
                 return siyuanCache.getBackmentionDoc(60 * 1000, this.docID, mention.id);
             }))) {
                 for (const mentionsInDoc of shuffleArray(mentionDoc.backmentions).slice(0, 5)) {
+                    if (this.shouldStop()) return;
                     await this.fillContent(mentionsInDoc, allRefs, contentContainer);
                     this.refreshTopDiv(topDiv, allRefs);
                 }
@@ -154,7 +164,7 @@ class BKMaker {
     private refreshTopDiv(topDiv: HTMLDivElement, allRefs: RefCollector) {
         topDiv.innerHTML = "";
         for (const { lnk } of allRefs.values()) {
-            const d = topDiv.appendChild(document.createElement("span"))
+            const d = topDiv.appendChild(document.createElement("span"));
             markQueryable(d);
             d.appendChild(lnk);
             d.appendChild(createSpan("&nbsp;".repeat(7)));
@@ -196,9 +206,9 @@ class BKMaker {
         mentionCheckBox.title = "提及：每次刷新随机展示一部分";
         mentionCheckBox.type = "checkbox";
         mentionCheckBox.classList.add("b3-switch");
-        mentionCheckBox.checked = this.mentionEnabled;
+        mentionCheckBox.checked = this.blBox.mentionEnabled;
         mentionCheckBox.addEventListener("change", () => {
-            this.mentionEnabled = mentionCheckBox.checked;
+            this.blBox.mentionEnabled = mentionCheckBox.checked;
         });
         topDiv.appendChild(createSpan("&nbsp;".repeat(4)));
     }
@@ -283,36 +293,33 @@ class BKMaker {
     }
 }
 
-class BackLinkBottomBox {
-    private plugin: Plugin;
-    private static readonly GLOBAL_THIS: Record<string, any> = globalThis;
+class BackLinkBottomBox implements IBackLinkBottomBox {
+    plugin: Plugin;
     private maker: BKMaker;
     private observer: MutationObserver;
     private lastElementID: string;
-    private item: HTMLElement;
-    private docID: string;
-    private mentionEnabled: boolean = false;
+    item: HTMLElement;
+    docID: string = "";
+    mentionEnabled: boolean = false;
 
     async onload(plugin: Plugin) {
-        BackLinkBottomBox.GLOBAL_THIS[TOMATO] = { BKMaker, "tomato": this };
         this.plugin = plugin;
-        this.plugin;
         events.addListener("BackLinkBottomBox", (eventType, detail) => {
             if (eventType == EventType.loaded_protyle_static || eventType == EventType.switch_protyle) {
                 navigator.locks.request("BackLinkBottomBoxLock", { ifAvailable: true }, async (lock) => {
                     if (lock) {
-                        if (isBoolean(this.maker?.mentionEnabled)) {
-                            this.mentionEnabled = this.maker?.mentionEnabled;
-                        }
-                        this.mentionEnabled = this.maker?.mentionEnabled ?? this.mentionEnabled;
-                        const docID = detail.protyle?.block.rootID ?? "";
+                        const nextDocID = detail.protyle?.block.rootID ?? "";
+                        if (!nextDocID) return;
                         const exists = this.item?.querySelector(`[${BKMakerAdd}]`) ?? false;
-                        if (exists && this.maker?.shouldFreeze && docID === this.docID && eventType == EventType.loaded_protyle_static) return;
-                        this.docID = docID;
-                        this.observer?.disconnect();
-                        this.maker = new BKMaker(detail, this.mentionEnabled);
-                        await this.maker.doTheWork();
+                        if (exists && this.maker?.shouldFreeze && nextDocID === this.docID) return;
                         this.item = detail.protyle?.wysiwyg?.element;
+                        if (!this.item) return;
+                        this.docID = nextDocID;
+                        this.observer?.disconnect();
+                        this.maker = new BKMaker(this);
+                        this.maker.doTheWork();
+
+                        // OB
                         this.lastElementID = this.item.lastElementChild.getAttribute(DATA_NODE_ID);
                         this.observer = new MutationObserver((_mutationsList) => {
                             const newLastID = this.item.lastElementChild.getAttribute(DATA_NODE_ID);
