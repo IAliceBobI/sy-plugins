@@ -14,11 +14,13 @@ class BKMaker {
     private docID: string;
     private item: HTMLElement;
     shouldFreeze: boolean;
+    private firstTime: boolean;
     constructor(blBox: BackLinkBottomBox) {
         this.blBox = blBox;
         this.item = blBox.item;
         this.docID = blBox.docID;
         this.shouldFreeze = false;
+        this.firstTime = true;
     }
 
     async doTheWork() {
@@ -33,15 +35,19 @@ class BKMaker {
                         if (oldEle) {
                             this.item.lastElementChild.insertAdjacentElement("afterend", oldEle);
                             divs.push(oldEle);
+                            this.firstTime = false;
+                        } else {
+                            this.firstTime = true;
                         }
                     }
                     this.container = document.createElement("div");
+                    if (this.firstTime) this.item.lastElementChild.insertAdjacentElement("afterend", this.container);
                     await this.getBackLinks(); // start
                     this.container.setAttribute(DATA_NODE_ID, lastID);
                     this.container.style.border = "1px solid black";
                     this.container.setAttribute(BKMakerAdd, "1");
-                    this.item.lastElementChild.insertAdjacentElement("afterend", this.container);
-                    divs?.forEach(e => e?.parentElement?.removeChild(e));
+                    if (!this.firstTime) this.item.lastElementChild.insertAdjacentElement("afterend", this.container);
+                    divs.forEach(e => e.parentElement.removeChild(e));
                     this.blBox.addCache(this.docID, this.container);
                 }
             }
@@ -70,6 +76,7 @@ class BKMaker {
             for (const backlinksInDoc of backlinkDoc.backlinks) {
                 if (this.shouldStop()) return;
                 await this.fillContent(backlinksInDoc, allRefs, contentContainer);
+                if (this.firstTime) this.refreshTopDiv(topDiv, allRefs);
             }
         }
         if (this.blBox.mentionEnabled) {
@@ -79,11 +86,12 @@ class BKMaker {
                 for (const mentionsInDoc of mentionDoc.backmentions) {
                     if (this.shouldStop()) return;
                     await this.fillContent(mentionsInDoc, allRefs, contentContainer);
+                    if (this.firstTime) this.refreshTopDiv(topDiv, allRefs);
                 }
             }
         }
 
-        this.refreshTopDiv(topDiv, allRefs);
+        if (!this.firstTime) this.refreshTopDiv(topDiv, allRefs);
 
         topDiv.onclick = (ev) => {
             const selection = document.getSelection();
