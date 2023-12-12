@@ -263,7 +263,7 @@ class BackLinkBottomBox {
                 navigator.locks.request("BackLinkBottomBoxLock", { ifAvailable: true }, async (lock) => {
                     if (lock) {
                         const docID = detail.protyle?.block.rootID ?? "";
-                        const exists = this.item?.querySelectorAll(`[${BKMakerAdd}]`)?.length > 0 ?? false;
+                        const exists = this.item?.querySelector(`[${BKMakerAdd}]`) ?? false;
                         if (exists && this.maker?.shouldFreeze && docID === this.docID) return;
                         this.docID = docID;
                         this.observer?.disconnect();
