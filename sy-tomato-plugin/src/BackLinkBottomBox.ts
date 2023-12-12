@@ -7,76 +7,6 @@ const QUERYABLE_ELEMENT = "QUERYABLE_ELEMENT";
 const BKMakerAdd = "BKMakerAdd";
 const MentionLimit = 10;
 
-function markQueryable(e: HTMLElement) {
-    e.setAttribute(QUERYABLE_ELEMENT, "1");
-}
-
-function hr() {
-    return document.createElement("hr");
-}
-
-function createSpan(innerHTML: string) {
-    const span = document.createElement("span");
-    span.innerHTML = innerHTML;
-    return span;
-}
-
-function setReadonly(e: HTMLElement, all = false) {
-    e.setAttribute("contenteditable", "false");
-    if (all) e.querySelectorAll('[contenteditable="true"]')?.forEach(sub => {
-        sub?.setAttribute("contenteditable", "false");
-    });
-}
-
-function refTag(id: string, text: string, count: number, len?: number): HTMLSpanElement {
-    const span = document.createElement("span") as HTMLSpanElement;
-
-    const refSpan = span.appendChild(document.createElement("span"));
-    refSpan.setAttribute(DATA_TYPE, "block-ref");
-    refSpan.setAttribute(DATA_ID, id);
-    refSpan.innerText = text;
-    if (len) {
-        let sliced = text.slice(0, len);
-        if (sliced.length != text.length) sliced += "……";
-        refSpan.innerText = sliced;
-    }
-
-    const countSpan = span.appendChild(document.createElement("span"));
-    if (count > 0) {
-        countSpan.classList.add("tomato-style__code");
-        countSpan.innerText = String(count);
-    }
-    return span;
-}
-
-function scanAllRef(allRefs: RefCollector, div: HTMLDivElement, docID: string) {
-    for (const element of div.querySelectorAll(`[${DATA_TYPE}*="block-ref"]`)) {
-        const id = element.getAttribute(DATA_ID);
-        const txt = element.textContent;
-        addRef(txt, id, allRefs, docID);
-    }
-}
-
-function addRef(txt: string, id: string, allRefs: RefCollector, docID: string) {
-    if (txt != "*" && id != docID) {
-        const key = id + txt;
-        const c = (allRefs.get(key)?.count ?? 0) + 1;
-        const span = refTag(id, txt, c);
-        allRefs.set(key, {
-            count: c,
-            lnk: span,
-            text: txt,
-            id,
-        });
-    }
-}
-
-interface IBackLinkBottomBox {
-    mentionEnabled: boolean;
-    docID: string;
-    item: HTMLElement;
-}
-
 class BKMaker {
     private container: HTMLDivElement;
     private blBox: IBackLinkBottomBox;
@@ -98,12 +28,14 @@ class BKMaker {
                 if (allIDs?.slice(-5)?.map(b => b.id)?.includes(lastID)) {
                     const divs = this.item.parentElement.querySelectorAll(`[${BKMakerAdd}="1"]`);
                     this.container = document.createElement("div");
+                    this.container.style.display = "none";
                     this.item.lastElementChild.insertAdjacentElement("afterend", this.container);
                     await this.getBackLinks(); // start
                     this.container.setAttribute(DATA_NODE_ID, lastID);
                     this.container.style.border = "1px solid black";
                     this.container.setAttribute(BKMakerAdd, "1");
                     setReadonly(this.container, true);
+                    this.container.style.display = "";
                     divs?.forEach(e => e?.parentElement?.removeChild(e));
                 }
             }
@@ -132,7 +64,6 @@ class BKMaker {
             for (const backlinksInDoc of backlinkDoc.backlinks) {
                 if (this.shouldStop()) return;
                 await this.fillContent(backlinksInDoc, allRefs, contentContainer);
-                this.refreshTopDiv(topDiv, allRefs);
             }
         }
         if (this.blBox.mentionEnabled) {
@@ -142,11 +73,12 @@ class BKMaker {
                 for (const mentionsInDoc of shuffleArray(mentionDoc.backmentions).slice(0, MentionLimit)) {
                     if (this.shouldStop()) return;
                     await this.fillContent(mentionsInDoc, allRefs, contentContainer);
-                    this.refreshTopDiv(topDiv, allRefs);
                 }
             }
         }
 
+        this.refreshTopDiv(topDiv, allRefs);
+        
         this.container.onclick = (ev) => {
             const selection = document.getSelection();
             if (selection.toString().length <= 0) return;
@@ -333,3 +265,73 @@ class BackLinkBottomBox implements IBackLinkBottomBox {
 }
 
 export const backLinkBottomBox = new BackLinkBottomBox();
+
+function markQueryable(e: HTMLElement) {
+    e.setAttribute(QUERYABLE_ELEMENT, "1");
+}
+
+function hr() {
+    return document.createElement("hr");
+}
+
+function createSpan(innerHTML: string) {
+    const span = document.createElement("span");
+    span.innerHTML = innerHTML;
+    return span;
+}
+
+function setReadonly(e: HTMLElement, all = false) {
+    e.setAttribute("contenteditable", "false");
+    if (all) e.querySelectorAll('[contenteditable="true"]')?.forEach(sub => {
+        sub?.setAttribute("contenteditable", "false");
+    });
+}
+
+function refTag(id: string, text: string, count: number, len?: number): HTMLSpanElement {
+    const span = document.createElement("span") as HTMLSpanElement;
+
+    const refSpan = span.appendChild(document.createElement("span"));
+    refSpan.setAttribute(DATA_TYPE, "block-ref");
+    refSpan.setAttribute(DATA_ID, id);
+    refSpan.innerText = text;
+    if (len) {
+        let sliced = text.slice(0, len);
+        if (sliced.length != text.length) sliced += "……";
+        refSpan.innerText = sliced;
+    }
+
+    const countSpan = span.appendChild(document.createElement("span"));
+    if (count > 0) {
+        countSpan.classList.add("tomato-style__code");
+        countSpan.innerText = String(count);
+    }
+    return span;
+}
+
+function scanAllRef(allRefs: RefCollector, div: HTMLDivElement, docID: string) {
+    for (const element of div.querySelectorAll(`[${DATA_TYPE}*="block-ref"]`)) {
+        const id = element.getAttribute(DATA_ID);
+        const txt = element.textContent;
+        addRef(txt, id, allRefs, docID);
+    }
+}
+
+function addRef(txt: string, id: string, allRefs: RefCollector, docID: string) {
+    if (txt != "*" && id != docID) {
+        const key = id + txt;
+        const c = (allRefs.get(key)?.count ?? 0) + 1;
+        const span = refTag(id, txt, c);
+        allRefs.set(key, {
+            count: c,
+            lnk: span,
+            text: txt,
+            id,
+        });
+    }
+}
+
+interface IBackLinkBottomBox {
+    mentionEnabled: boolean;
+    docID: string;
+    item: HTMLElement;
+}
