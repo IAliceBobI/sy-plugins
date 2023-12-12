@@ -152,7 +152,7 @@ class BKMaker {
 
     private addMentionCheckBox(topDiv: HTMLDivElement) {
         const mentionCheckBox = topDiv.appendChild(document.createElement("input"));
-        mentionCheckBox.title = "是否显示提及（展示一部分提及）";
+        mentionCheckBox.title = "是否显示提及（展示一部分提及，之后在开发配置选项。）";
         mentionCheckBox.type = "checkbox";
         mentionCheckBox.classList.add("b3-switch");
         mentionCheckBox.checked = this.blBox.mentionEnabled;
