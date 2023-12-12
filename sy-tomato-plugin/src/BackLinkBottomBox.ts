@@ -5,7 +5,7 @@ import { EventType, events } from "./libs/Events";
 
 const QUERYABLE_ELEMENT = "QUERYABLE_ELEMENT";
 const BKMakerAdd = "BKMakerAdd";
-const MentionLimit = 500;
+const MentionLimit = 3;
 const MentionCacheTime = 5 * 60 * 1000;
 const cacheLimit = 100;
 
