@@ -558,9 +558,9 @@ export const siyuanCache = {
     getChildBlocks: createCache(siyuan.getChildBlocks),
 };
 
-export function createCache<T extends Func>(originalFunction: T): (...args: [number, ...Parameters<T>]) => ReturnType<T> {
+export function createCache<T extends Func>(originalFunction: T): (...args: [number, ...Parameters<T>]) => Promise<ReturnType<T>> {
     const cache = new Map<string, { value: ReturnType<T>; timestamp: number }>();
-    return function cachedFunction(cacheTime: number, ...args: Parameters<T>): ReturnType<T> {
+    return async function cachedFunction(cacheTime: number, ...args: Parameters<T>): Promise<ReturnType<T>> {
         const currentTime = Date.now();
         for (const [k, v] of cache.entries()) {
             if (currentTime - v.timestamp > cacheTime) {
@@ -573,7 +573,8 @@ export function createCache<T extends Func>(originalFunction: T): (...args: [num
             const { value } = cache.get(key);
             return value;
         }
-        const result = originalFunction(...args);
+
+        const result = await originalFunction(...args);
         cache.set(key, { value: result, timestamp: Date.now() });
         return result;
     };

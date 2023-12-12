@@ -5,6 +5,7 @@ import { EventType, events } from "./libs/Events";
 
 const QUERYABLE_ELEMENT = "QUERYABLE_ELEMENT";
 const BKMakerAdd = "BKMakerAdd";
+const MentionLimit = 10;
 
 function markQueryable(e: HTMLElement) {
     e.setAttribute(QUERYABLE_ELEMENT, "1");
@@ -98,15 +99,10 @@ class BKMaker {
                     const divs = this.item.parentElement.querySelectorAll(`[${BKMakerAdd}="1"]`);
                     this.container = document.createElement("div");
                     this.item.lastElementChild.insertAdjacentElement("afterend", this.container);
-                    // dont shake
-                    for (const d of divs ?? []) {
-                        this.item.lastElementChild.insertAdjacentElement("afterend", d);
-                        break;
-                    }
+                    await this.getBackLinks(); // start
                     this.container.setAttribute(DATA_NODE_ID, lastID);
                     this.container.style.border = "1px solid black";
                     this.container.setAttribute(BKMakerAdd, "1");
-                    await this.getBackLinks(); // start
                     setReadonly(this.container, true);
                     divs?.forEach(e => e?.parentElement?.removeChild(e));
                 }
@@ -143,7 +139,7 @@ class BKMaker {
             for (const mentionDoc of await Promise.all(backlink2.backmentions.map((mention) => {
                 return siyuanCache.getBackmentionDoc(60 * 1000, this.docID, mention.id);
             }))) {
-                for (const mentionsInDoc of shuffleArray(mentionDoc.backmentions).slice(0, 5)) {
+                for (const mentionsInDoc of shuffleArray(mentionDoc.backmentions).slice(0, MentionLimit)) {
                     if (this.shouldStop()) return;
                     await this.fillContent(mentionsInDoc, allRefs, contentContainer);
                     this.refreshTopDiv(topDiv, allRefs);
@@ -203,7 +199,7 @@ class BKMaker {
 
     private addMentionCheckBox(topDiv: HTMLDivElement) {
         const mentionCheckBox = topDiv.appendChild(document.createElement("input"));
-        mentionCheckBox.title = "提及：每次刷新随机展示一部分";
+        mentionCheckBox.title = "是否显示提及（每次刷新随机展示一部分提及）";
         mentionCheckBox.type = "checkbox";
         mentionCheckBox.classList.add("b3-switch");
         mentionCheckBox.checked = this.blBox.mentionEnabled;
