@@ -1,11 +1,12 @@
 import { Plugin, } from "siyuan";
-import { extractLinks, siyuanCache } from "./libs/utils";
+import { chunks, extractLinks, siyuanCache } from "./libs/utils";
 import { DATA_ID, DATA_NODE_ID, DATA_TYPE } from "./libs/gconst";
 import { EventType, events } from "./libs/Events";
 
 const QUERYABLE_ELEMENT = "QUERYABLE_ELEMENT";
 const BKMakerAdd = "BKMakerAdd";
-const MentionLimit = 5;
+const MentionLimit = 500;
+const MentionCacheTime = 5 * 60 * 1000;
 const cacheLimit = 100;
 
 class BKMaker {
@@ -14,41 +15,42 @@ class BKMaker {
     private docID: string;
     private item: HTMLElement;
     shouldFreeze: boolean;
-    private firstTime: boolean;
     constructor(blBox: BackLinkBottomBox) {
         this.blBox = blBox;
         this.item = blBox.item;
         this.docID = blBox.docID;
         this.shouldFreeze = false;
-        this.firstTime = true;
     }
 
     async doTheWork() {
         await navigator.locks.request("BackLinkBottomBox-BKMakerLock" + this.docID, { ifAvailable: true }, async (lock) => {
-            if (lock && !this.shouldFreeze) {
-                const allIDs = await siyuanCache.getChildBlocks(5 * 1000, this.docID);
-                const lastID = this.item.lastElementChild.getAttribute(DATA_NODE_ID);
-                if (allIDs?.slice(-5)?.map(b => b.id)?.includes(lastID)) {
-                    const divs = Array.from(this.item.parentElement.querySelectorAll(`[${BKMakerAdd}="1"]`)?.values() ?? []);
-                    if (divs.length == 0) {
-                        const oldEle = this.blBox.getCache(this.docID, null)
-                        if (oldEle) {
-                            this.item.lastElementChild.insertAdjacentElement("afterend", oldEle);
-                            divs.push(oldEle);
-                            this.firstTime = false;
-                        } else {
-                            this.firstTime = true;
+            if (lock) {
+                if (!this.shouldFreeze) {
+                    const allIDs = await siyuanCache.getChildBlocks(5 * 1000, this.docID);
+                    const lastID = this.item.lastElementChild.getAttribute(DATA_NODE_ID);
+                    if (allIDs?.slice(-5)?.map(b => b.id)?.includes(lastID)) {
+                        const divs = Array.from(this.item.parentElement.querySelectorAll(`[${BKMakerAdd}="1"]`)?.values() ?? []);
+                        if (divs.length == 0) {
+                            const oldEle = this.blBox.getCache(this.docID, null);
+                            if (oldEle) {
+                                this.item.lastElementChild.insertAdjacentElement("afterend", oldEle);
+                                divs.push(oldEle);
+                            }
                         }
+                        this.container = document.createElement("div");
+                        await this.getBackLinks(); // start
+                        this.container.setAttribute(DATA_NODE_ID, lastID);
+                        this.container.style.border = "1px solid black";
+                        this.container.setAttribute(BKMakerAdd, "1");
+                        this.item.lastElementChild.insertAdjacentElement("afterend", this.container);
+                        divs.forEach(e => e.parentElement?.removeChild(e));
+                        this.blBox.addCache(this.docID, this.container);
                     }
-                    this.container = document.createElement("div");
-                    if (this.firstTime) this.item.lastElementChild.insertAdjacentElement("afterend", this.container);
-                    await this.getBackLinks(); // start
-                    this.container.setAttribute(DATA_NODE_ID, lastID);
-                    this.container.style.border = "1px solid black";
-                    this.container.setAttribute(BKMakerAdd, "1");
-                    if (!this.firstTime) this.item.lastElementChild.insertAdjacentElement("afterend", this.container);
-                    divs.forEach(e => e.parentElement.removeChild(e));
-                    this.blBox.addCache(this.docID, this.container);
+                }
+            } else {
+                const oldEle = this.blBox.getCache(this.docID, null);
+                if (oldEle) {
+                    this.item.lastElementChild.insertAdjacentElement("afterend", oldEle);
                 }
             }
         });
@@ -70,28 +72,28 @@ class BKMaker {
         this.container.appendChild(hr());
         this.container.appendChild(contentContainer);
 
+        // const start = new Date().getTime();
         for (const backlinkDoc of await Promise.all(backlink2.backlinks.map((backlink) => {
             return siyuanCache.getBacklinkDoc(20 * 1000, this.docID, backlink.id);
         }))) {
             for (const backlinksInDoc of backlinkDoc.backlinks) {
                 if (this.shouldStop()) return;
                 await this.fillContent(backlinksInDoc, allRefs, contentContainer);
-                if (this.firstTime) this.refreshTopDiv(topDiv, allRefs);
             }
         }
         if (this.blBox.mentionEnabled) {
             for (const mentionDoc of await Promise.all(backlink2.backmentions.slice(0, MentionLimit).map((mention) => {
-                return siyuanCache.getBackmentionDoc(60 * 1000, this.docID, mention.id);
+                return siyuanCache.getBackmentionDoc(MentionCacheTime, this.docID, mention.id);
             }))) {
                 for (const mentionsInDoc of mentionDoc.backmentions) {
                     if (this.shouldStop()) return;
                     await this.fillContent(mentionsInDoc, allRefs, contentContainer);
-                    if (this.firstTime) this.refreshTopDiv(topDiv, allRefs);
                 }
             }
         }
+        // console.log(`time: ${((new Date().getTime()) - start) / 1000}s`)
 
-        if (!this.firstTime) this.refreshTopDiv(topDiv, allRefs);
+        this.refreshTopDiv(topDiv, allRefs);
 
         topDiv.onclick = (ev) => {
             const selection = document.getSelection();
@@ -200,7 +202,10 @@ class BKMaker {
         div.appendChild(createSpan("📄 "));
         // leading.classList.add("b3-label__text")
         const refPathList: HTMLSpanElement[] = [];
-        for (const refPath of blockPaths) {
+        for (const ret of chunks(await Promise.all(blockPaths.map((refPath) => {
+            return [refPath, siyuanCache.getBlockKramdown(MentionCacheTime, refPath.id)];
+        }).flat()), 2)) {
+            const [refPath, { kramdown: _kramdown }] = ret as [BlockPath, GetBlockKramdown];
             if (refPath.type == "NodeDocument") {
                 if (refPath.id == this.docID) break;
                 const fileName = refPath.name.split("/").pop();
@@ -216,7 +221,7 @@ class BKMaker {
                 refPathList.push(refTag(refPath.id, refPath.name, 0, 15));
             }
 
-            let { kramdown } = await siyuanCache.getBlockKramdown(15 * 1000, refPath.id);
+            let kramdown = _kramdown;
             if (refPath.type == "NodeListItem" && kramdown) {
                 kramdown = kramdown.split("\n")[0];
             }
@@ -255,20 +260,20 @@ class BackLinkBottomBox {
     public mentionEnabled: boolean = false;
 
     public addCache(docID: string, container: HTMLElement): HTMLElement {
-        const entries = Array.from(this.cache.entries())
+        const entries = Array.from(this.cache.entries());
         if (entries.length > cacheLimit) {
             entries.sort((e1, e2) => {
                 return e1[1].timestamp - e2[1].timestamp;
             }).slice(0, entries.length / 2).forEach(e => {
-                this.cache.delete(e[0])
-            })
+                this.cache.delete(e[0]);
+            });
         }
-        this.cache.set(docID, { container, timestamp: new Date().getTime() })
+        this.cache.set(docID, { container, timestamp: new Date().getTime() });
         return container;
     }
 
     public getCache(docID: string, defaultValue: HTMLElement): HTMLElement {
-        return this.cache.get(docID)?.container ?? defaultValue
+        return this.cache.get(docID)?.container ?? defaultValue;
     }
 
     async onload(plugin: Plugin) {

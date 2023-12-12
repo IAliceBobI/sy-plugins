@@ -315,7 +315,7 @@ export const siyuan = {
         if (await siyuan.checkBlockExist(id))
             return siyuan.call("/api/block/moveBlock", { id, previousID });
     },
-    async getBlockKramdown(id: string): Promise<{ id: string, kramdown: string }> {
+    async getBlockKramdown(id: string): Promise<GetBlockKramdown> {
         return siyuan.call("/api/block/getBlockKramdown", { id });
     },
     async safeUpdateBlock(id: string, data: string, dataType = "markdown") {

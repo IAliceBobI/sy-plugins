@@ -107,3 +107,5 @@ interface Block {
 type GetBlocksWordCount = {
     runeCount: number, wordCount: number, linkCount: number, imageCount: number, refCount: number
 }
+
+type GetBlockKramdown = { id: string, kramdown: string }
