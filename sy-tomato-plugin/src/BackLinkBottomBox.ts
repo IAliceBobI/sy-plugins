@@ -1,5 +1,5 @@
 import { Plugin, } from "siyuan";
-import { extractLinks, isBoolean, siyuanCache } from "./libs/utils";
+import { extractLinks, isBoolean, shuffleArray, siyuanCache } from "./libs/utils";
 import { DATA_ID, DATA_NODE_ID, DATA_TYPE } from "./libs/gconst";
 import { EventType, events } from "./libs/Events";
 
@@ -21,9 +21,9 @@ function createSpan(innerHTML: string) {
     return span;
 }
 
-function setReadonly(e: HTMLElement) {
+function setReadonly(e: HTMLElement, all = false) {
     e.setAttribute("contenteditable", "false");
-    e.querySelectorAll('[contenteditable="true"]')?.forEach(sub => {
+    if (all) e.querySelectorAll('[contenteditable="true"]')?.forEach(sub => {
         sub?.setAttribute("contenteditable", "false");
     });
 }
@@ -93,13 +93,13 @@ class BKMaker {
                 if (allIDs?.slice(-5)?.map(b => b.id)?.includes(lastID)) {
                     const divs = this.item.parentElement.querySelectorAll(`[${BKMakerAdd}="1"]`);
                     this.container = document.createElement("div");
-                    await this.getBackLinks();
-                    setReadonly(this.container);
+                    this.item.lastElementChild.insertAdjacentElement("afterend", this.container);
+                    divs?.forEach(e => e?.parentElement?.removeChild(e));
                     this.container.setAttribute(DATA_NODE_ID, lastID);
                     this.container.style.border = "1px solid black";
                     this.container.setAttribute(BKMakerAdd, "1");
-                    this.item.lastElementChild.insertAdjacentElement("afterend", this.container);
-                    divs?.forEach(e => e?.parentElement?.removeChild(e));
+                    await this.getBackLinks();
+                    setReadonly(this.container, true);
                 }
             }
         });
@@ -109,26 +109,56 @@ class BKMaker {
         const allRefs: RefCollector = new Map();
         const backlink2 = await siyuanCache.getBacklink2(15 * 1000, this.docID);
         const contentContainer = document.createElement("div");
+        const btnDiv = document.createElement("div");
+        this.initBtnDiv(btnDiv);
+        const topDiv = document.createElement("div");
+        this.container.appendChild(btnDiv);
+        this.container.appendChild(topDiv);
+        this.container.appendChild(hr());
+        this.container.appendChild(contentContainer);
+
         for (const backlinkDoc of await Promise.all(backlink2.backlinks.map((backlink) => {
             return siyuanCache.getBacklinkDoc(20 * 1000, this.docID, backlink.id);
         }))) {
             for (const backlinksInDoc of backlinkDoc.backlinks) {
                 await this.fillContent(backlinksInDoc, allRefs, contentContainer);
+                this.refreshTopDiv(topDiv, allRefs);
             }
         }
         if (this.mentionEnabled) {
             for (const mentionDoc of await Promise.all(backlink2.backmentions.map((mention) => {
                 return siyuanCache.getBackmentionDoc(60 * 1000, this.docID, mention.id);
             }))) {
-                for (const mentionsInDoc of mentionDoc.backmentions) {
+                for (const mentionsInDoc of shuffleArray(mentionDoc.backmentions).slice(0, 5)) {
                     await this.fillContent(mentionsInDoc, allRefs, contentContainer);
+                    this.refreshTopDiv(topDiv, allRefs);
                 }
             }
         }
-        const topDiv = document.createElement("div");
 
-        const { freezeCheckBox, label } = this.addRefreshCheckBox(topDiv); // 1
-        this.addMentionCheckBox(topDiv);// 2
+        this.container.onclick = (ev) => {
+            const selection = document.getSelection();
+            if (selection.toString().length <= 0) return;
+            ev.stopPropagation();
+        };
+
+        setReadonly(btnDiv);
+        setReadonly(topDiv);
+    }
+
+    private refreshTopDiv(topDiv: HTMLDivElement, allRefs: RefCollector) {
+        topDiv.innerHTML = "";
+        for (const { lnk } of allRefs.values()) {
+            const d = topDiv.appendChild(document.createElement("span"))
+            markQueryable(d);
+            d.appendChild(lnk);
+            d.appendChild(createSpan("&nbsp;".repeat(7)));
+        }
+    }
+
+    private initBtnDiv(topDiv: HTMLDivElement) {
+        const { freezeCheckBox, label } = this.addRefreshCheckBox(topDiv);
+        this.addMentionCheckBox(topDiv);
         {
             const query = topDiv.appendChild(document.createElement("input"));
             query.classList.add("b3-text-field");
@@ -154,23 +184,6 @@ class BKMaker {
             });
             topDiv.appendChild(createSpan("&nbsp;".repeat(7)));
         }
-
-        for (const { lnk } of allRefs.values()) {
-            markQueryable(lnk);
-            topDiv.appendChild(lnk); // 3
-            lnk.appendChild(createSpan("&nbsp;".repeat(7)));
-        }
-
-        this.container.onclick = (ev) => {
-            const selection = document.getSelection();
-            if (selection.toString().length <= 0) return;
-            ev.stopPropagation();
-        };
-
-        this.container.appendChild(topDiv); // 4
-        this.container.appendChild(hr());
-        this.container.appendChild(contentContainer);
-        setReadonly(topDiv);
     }
 
     private addMentionCheckBox(topDiv: HTMLDivElement) {
@@ -181,7 +194,7 @@ class BKMaker {
         mentionCheckBox.addEventListener("change", () => {
             this.mentionEnabled = mentionCheckBox.checked;
         });
-        topDiv.appendChild(createSpan("&nbsp;".repeat(7)));
+        topDiv.appendChild(createSpan("&nbsp;".repeat(4)));
     }
 
     private addRefreshCheckBox(topDiv: HTMLDivElement) {
@@ -202,7 +215,7 @@ class BKMaker {
                 if (this.shouldFreeze) label.innerText = "🚫";
                 else label.innerText = "🔄";
             });
-            topDiv.appendChild(createSpan("&nbsp;".repeat(7)));
+            topDiv.appendChild(createSpan("&nbsp;".repeat(4)));
         }
         return { freezeCheckBox, label };
     }
