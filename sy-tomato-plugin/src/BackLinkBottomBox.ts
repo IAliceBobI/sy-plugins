@@ -264,7 +264,7 @@ class BackLinkBottomBox {
                     if (lock) {
                         const docID = detail.protyle?.block.rootID ?? "";
                         const exists = this.item?.querySelector(`[${BKMakerAdd}]`) ?? false;
-                        if (exists && this.maker?.shouldFreeze && docID === this.docID) return;
+                        if (exists && this.maker?.shouldFreeze && docID === this.docID && eventType == EventType.loaded_protyle_static) return;
                         this.docID = docID;
                         this.observer?.disconnect();
                         this.maker = new BKMaker(detail, false);
