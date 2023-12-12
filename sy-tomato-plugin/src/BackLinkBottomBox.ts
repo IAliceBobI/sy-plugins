@@ -40,7 +40,6 @@ class BKMaker {
                     this.container.setAttribute(DATA_NODE_ID, lastID);
                     this.container.style.border = "1px solid black";
                     this.container.setAttribute(BKMakerAdd, "1");
-                    setReadonly(this.container, true);
                     this.item.lastElementChild.insertAdjacentElement("afterend", this.container);
                     divs?.forEach(e => e?.parentElement?.removeChild(e));
                     this.blBox.addCache(this.docID, this.container);
@@ -86,14 +85,19 @@ class BKMaker {
 
         this.refreshTopDiv(topDiv, allRefs);
 
-        this.container.onclick = (ev) => {
+        topDiv.onclick = (ev) => {
+            const selection = document.getSelection();
+            if (selection.toString().length <= 0) return;
+            ev.stopPropagation();
+        };
+        contentContainer.onclick = (ev) => {
             const selection = document.getSelection();
             if (selection.toString().length <= 0) return;
             ev.stopPropagation();
         };
 
-        setReadonly(btnDiv);
-        setReadonly(topDiv);
+        setReadonly(topDiv, true);
+        setReadonly(contentContainer, true);
     }
 
     private refreshTopDiv(topDiv: HTMLDivElement, allRefs: RefCollector) {
@@ -176,7 +180,6 @@ class BKMaker {
         const temp = document.createElement("div") as HTMLDivElement;
         markQueryable(temp);
         const div = document.createElement("div") as HTMLDivElement;
-        setReadonly(div);
         div.innerHTML = backlinksInDoc?.dom ?? "";
         scanAllRef(allRefs, div, this.docID);
         temp.appendChild(await this.path2div(backlinksInDoc?.blockPaths ?? [], allRefs));
@@ -223,7 +226,6 @@ class BKMaker {
             }
             div.appendChild(s);
         });
-        setReadonly(div);
         return div;
     }
 }
