@@ -252,6 +252,7 @@ class BackLinkBottomBox {
     private observer: MutationObserver;
     private lastElementID: string;
     private item: HTMLElement;
+    private docID: string;
 
     async onload(plugin: Plugin) {
         BackLinkBottomBox.GLOBAL_THIS[TOMATO] = { BKMaker, "tomato": this };
@@ -261,8 +262,10 @@ class BackLinkBottomBox {
             if (eventType == EventType.loaded_protyle_static || eventType == EventType.switch_protyle) {
                 navigator.locks.request("BackLinkBottomBoxLock", { ifAvailable: true }, async (lock) => {
                     if (lock) {
+                        const docID = detail.protyle?.block.rootID ?? "";
                         const exists = this.item?.querySelectorAll(`[${BKMakerAdd}]`)?.length > 0 ?? false;
-                        if (exists && this.maker?.shouldFreeze) return;
+                        if (exists && this.maker?.shouldFreeze && docID === this.docID) return;
+                        this.docID = docID;
                         this.observer?.disconnect();
                         this.maker = new BKMaker(detail, false);
                         await this.maker.doTheWork();
