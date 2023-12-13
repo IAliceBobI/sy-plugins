@@ -1,5 +1,5 @@
 import { Plugin, } from "siyuan";
-import { chunks, extractLinks, isValidNumber, siyuanCache, sleep } from "./libs/utils";
+import { chunks, extractLinks, isValidNumber, siyuanCache } from "./libs/utils";
 import { DATA_ID, DATA_NODE_ID, DATA_TYPE } from "./libs/gconst";
 import { EventType, events } from "./libs/Events";
 import { MaxCache } from "./libs/cache";
@@ -8,7 +8,6 @@ const QUERYABLE_ELEMENT = "QUERYABLE_ELEMENT";
 const BKMAKER_ADD = "BKMAKER_ADD";
 const MENTION_CACHE_TIME = 5 * 60 * 1000;
 const CACHE_LIMIT = 100;
-const FETCH_INTERVAL = 3000;
 
 class BKMaker {
     private container: HTMLElement;
@@ -28,7 +27,7 @@ class BKMaker {
             const divs = this.findOrLoadFromCache();
             if (lock && !this.shouldFreeze) {
                 const allIDs = await siyuanCache.getChildBlocks(5 * 1000, this.docID);
-                const lastID = this.item.lastElementChild.getAttribute(DATA_NODE_ID);
+                const lastID = getLastElementID(this.item);
                 if (allIDs?.slice(-5)?.map(b => b.id)?.includes(lastID)) {
                     // retrieve new data
                     this.container = document.createElement("div");
@@ -319,9 +318,9 @@ class BackLinkBottomBox {
                             this.observer?.disconnect();
                             const maker = this.makerCache.getOrElse(nextDocID, () => { return new BKMaker(this, nextDocID) });
                             maker.doTheWork(item);
-                            let lastElementID = item.lastElementChild.getAttribute(DATA_NODE_ID);
+                            let lastElementID = getLastElementID(item);
                             this.observer = new MutationObserver((_mutationsList) => {
-                                const newLastID = item.lastElementChild.getAttribute(DATA_NODE_ID);
+                                const newLastID = getLastElementID(item);
                                 if (newLastID != lastElementID) {
                                     lastElementID = newLastID;
                                     maker.doTheWork(item);
@@ -340,6 +339,10 @@ class BackLinkBottomBox {
 }
 
 export const backLinkBottomBox = new BackLinkBottomBox();
+
+function getLastElementID(item: HTMLElement): string {
+    return item.lastElementChild.getAttribute(DATA_NODE_ID);
+}
 
 function markQueryable(e: HTMLElement) {
     e.setAttribute(QUERYABLE_ELEMENT, "1");
