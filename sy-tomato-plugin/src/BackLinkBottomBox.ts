@@ -18,12 +18,12 @@ class BKMaker {
     shouldFreeze: boolean;
     constructor(blBox: BackLinkBottomBox) {
         this.blBox = blBox;
-        this.item = blBox.item;
         this.docID = blBox.docID;
         this.shouldFreeze = false;
     }
 
-    async doTheWork() {
+    async doTheWork(item: HTMLElement) {
+        this.item = item;
         await navigator.locks.request("BackLinkBottomBox-BKMakerLock" + this.docID, { ifAvailable: true }, async (lock) => {
             const startTime = new Date().getTime();
             if (lock) {
@@ -312,14 +312,7 @@ class BackLinkBottomBox {
     public makerCache: MaxCache<BKMaker> = new MaxCache(CACHE_LIMIT);
     public mentionCount: number = 1;
 
-    private maker: BKMaker;
     private observer: MutationObserver;
-    private lastElementID: string;
-
-    private _item: HTMLElement;
-    public get item(): HTMLElement {
-        return this._item;
-    }
 
     private _docID: string = "";
     public get docID(): string {
@@ -332,31 +325,26 @@ class BackLinkBottomBox {
             if (eventType == EventType.loaded_protyle_static || eventType == EventType.switch_protyle) {
                 navigator.locks.request("BackLinkBottomBoxLock", { ifAvailable: true }, async (lock) => {
                     if (lock) {
-                        this._docID = detail.protyle?.block.rootID ?? "";
-                        if (!this.docID) return;
-                        this._item = detail.protyle?.wysiwyg?.element;
-                        if (!this.item) return;
-                        this.maker = this.makerCache.getOrElse(this.docID, () => { new BKMaker(this) });
-
-                        // const exists = this.item?.querySelector(`[${BKMAKER_ADD}]`) ?? false;
-                        // if (exists && this.maker?.shouldFreeze && nextDocID === this.docID) return;
-                        // this._item = detail.protyle?.wysiwyg?.element;
-                        // if (!this.item) return;
-                        // this._docID = nextDocID;
-                        // this.observer?.disconnect();
-                        // this.maker = new BKMaker(this);
-                        // this.maker.doTheWork();
-
-                        // // OB
-                        // this.lastElementID = this.item.lastElementChild.getAttribute(DATA_NODE_ID);
-                        // this.observer = new MutationObserver((_mutationsList) => {
-                        //     const newLastID = this.item.lastElementChild.getAttribute(DATA_NODE_ID);
-                        //     if (newLastID != this.lastElementID) {
-                        //         this.lastElementID = newLastID;
-                        //         this.maker.doTheWork();
-                        //     }
-                        // });
-                        // this.observer.observe(this.item, { childList: true });
+                        const item = detail.protyle?.wysiwyg?.element;
+                        if (!item) return;
+                        const nextDocID = detail.protyle?.block.rootID ?? "";
+                        if (!nextDocID) return;
+                        if (this.docID != nextDocID) {
+                            this._docID = nextDocID;
+                            // OB
+                            this.observer?.disconnect();
+                            let lastElementID = item.lastElementChild.getAttribute(DATA_NODE_ID);
+                            this.observer = new MutationObserver((_mutationsList) => {
+                                const newLastID = item.lastElementChild.getAttribute(DATA_NODE_ID);
+                                if (newLastID != lastElementID) {
+                                    lastElementID = newLastID;
+                                    maker.doTheWork(item);
+                                }
+                            });
+                            this.observer.observe(item, { childList: true });
+                        }
+                        const maker = this.makerCache.getOrElse(this.docID, () => { new BKMaker(this) });
+                        maker.doTheWork(item);
                     }
                 });
             }
