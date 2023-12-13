@@ -2,6 +2,7 @@ import { Plugin, } from "siyuan";
 import { chunks, extractLinks, isValidNumber, siyuanCache, sleep } from "./libs/utils";
 import { DATA_ID, DATA_NODE_ID, DATA_TYPE } from "./libs/gconst";
 import { EventType, events } from "./libs/Events";
+import { MaxCache } from "./libs/cache";
 
 const QUERYABLE_ELEMENT = "QUERYABLE_ELEMENT";
 const BKMAKER_ADD = "BKMAKER_ADD";
@@ -24,12 +25,12 @@ class BKMaker {
 
     async doTheWork() {
         await navigator.locks.request("BackLinkBottomBox-BKMakerLock" + this.docID, { ifAvailable: true }, async (lock) => {
+            const startTime = new Date().getTime();
             if (lock) {
                 if (!this.shouldFreeze) {
                     const allIDs = await siyuanCache.getChildBlocks(5 * 1000, this.docID);
                     const lastID = this.item.lastElementChild.getAttribute(DATA_NODE_ID);
                     if (allIDs?.slice(-5)?.map(b => b.id)?.includes(lastID)) {
-                        const startTime = new Date().getTime();
 
                         // find or load from cache
                         const divs = Array.from(this.item.parentElement.querySelectorAll(`[${BKMAKER_ADD}="1"]`)?.values() ?? []);
@@ -56,11 +57,6 @@ class BKMaker {
                             this.item.lastElementChild.insertAdjacentElement("afterend", this.container);
                             divs.forEach(e => e.parentElement?.removeChild(e));
                         }
-                        const duration = (new Date().getTime()) - startTime;
-                        const remainTime = FETCH_INTERVAL - duration;
-                        if (remainTime > 0) {
-                            await sleep(remainTime);
-                        }
                     }
                 }
             } else {
@@ -68,6 +64,12 @@ class BKMaker {
                 if (oldEle) {
                     this.item.lastElementChild.insertAdjacentElement("afterend", oldEle);
                 }
+            }
+            const duration = (new Date().getTime()) - startTime;
+            const remainTime = FETCH_INTERVAL - duration;
+            if (remainTime > 0) {
+                await sleep(remainTime);
+                console.log(":xxxx" + remainTime / 1000)
             }
         });
     }
@@ -306,35 +308,22 @@ class BKMaker {
 
 class BackLinkBottomBox {
     public plugin: Plugin;
+    public divCache: MaxCache<HTMLElement> = new MaxCache(CACHE_LIMIT);
+    public makerCache: MaxCache<BKMaker> = new MaxCache(CACHE_LIMIT);
+    public mentionCount: number = 1;
+
     private maker: BKMaker;
     private observer: MutationObserver;
     private lastElementID: string;
-    private cache: Map<string, { container: HTMLElement, timestamp: number }> = new Map();
+
     private _item: HTMLElement;
     public get item(): HTMLElement {
         return this._item;
     }
+
     private _docID: string = "";
     public get docID(): string {
         return this._docID;
-    }
-    public mentionCount: number = 1;
-
-    public addCache(docID: string, container: HTMLElement): HTMLElement {
-        const entries = Array.from(this.cache.entries());
-        if (entries.length > CACHE_LIMIT) {
-            entries.sort((e1, e2) => {
-                return e1[1].timestamp - e2[1].timestamp;
-            }).slice(0, entries.length / 2).forEach(e => {
-                this.cache.delete(e[0]);
-            });
-        }
-        this.cache.set(docID, { container, timestamp: new Date().getTime() });
-        return container;
-    }
-
-    public getCache(docID: string, defaultValue: HTMLElement): HTMLElement {
-        return this.cache.get(docID)?.container ?? defaultValue;
     }
 
     async onload(plugin: Plugin) {
@@ -343,27 +332,31 @@ class BackLinkBottomBox {
             if (eventType == EventType.loaded_protyle_static || eventType == EventType.switch_protyle) {
                 navigator.locks.request("BackLinkBottomBoxLock", { ifAvailable: true }, async (lock) => {
                     if (lock) {
-                        const nextDocID = detail.protyle?.block.rootID ?? "";
-                        if (!nextDocID) return;
-                        const exists = this.item?.querySelector(`[${BKMAKER_ADD}]`) ?? false;
-                        if (exists && this.maker?.shouldFreeze && nextDocID === this.docID) return;
+                        this._docID = detail.protyle?.block.rootID ?? "";
+                        if (!this.docID) return;
                         this._item = detail.protyle?.wysiwyg?.element;
                         if (!this.item) return;
-                        this._docID = nextDocID;
-                        this.observer?.disconnect();
-                        this.maker = new BKMaker(this);
-                        this.maker.doTheWork();
+                        this.maker = this.makerCache.getOrElse(this.docID, () => { new BKMaker(this) });
 
-                        // OB
-                        this.lastElementID = this.item.lastElementChild.getAttribute(DATA_NODE_ID);
-                        this.observer = new MutationObserver((_mutationsList) => {
-                            const newLastID = this.item.lastElementChild.getAttribute(DATA_NODE_ID);
-                            if (newLastID != this.lastElementID) {
-                                this.lastElementID = newLastID;
-                                this.maker.doTheWork();
-                            }
-                        });
-                        this.observer.observe(this.item, { childList: true });
+                        // const exists = this.item?.querySelector(`[${BKMAKER_ADD}]`) ?? false;
+                        // if (exists && this.maker?.shouldFreeze && nextDocID === this.docID) return;
+                        // this._item = detail.protyle?.wysiwyg?.element;
+                        // if (!this.item) return;
+                        // this._docID = nextDocID;
+                        // this.observer?.disconnect();
+                        // this.maker = new BKMaker(this);
+                        // this.maker.doTheWork();
+
+                        // // OB
+                        // this.lastElementID = this.item.lastElementChild.getAttribute(DATA_NODE_ID);
+                        // this.observer = new MutationObserver((_mutationsList) => {
+                        //     const newLastID = this.item.lastElementChild.getAttribute(DATA_NODE_ID);
+                        //     if (newLastID != this.lastElementID) {
+                        //         this.lastElementID = newLastID;
+                        //         this.maker.doTheWork();
+                        //     }
+                        // });
+                        // this.observer.observe(this.item, { childList: true });
                     }
                 });
             }
