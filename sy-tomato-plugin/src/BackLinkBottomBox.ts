@@ -28,10 +28,10 @@ class BKMaker {
     async doTheWork(item: HTMLElement) {
         this.item = item;
         await navigator.locks.request("BackLinkBottomBox-BKMakerLock" + this.docID, { ifAvailable: true }, async (lock) => {
-            const divs = this.findOrLoadFromCache();
+            const divs = await this.findOrLoadFromCache();
             if (lock && !this.shouldFreeze) {
                 const [lastID, lastElement] = getLastElementID(this.item);
-                if (this.sholdInsertDiv(lastID)) {
+                if (await this.sholdInsertDiv(lastID)) {
                     // retrieve new data
                     this.container = document.createElement("div");
                     await this.getBackLinks(); // start
@@ -46,7 +46,7 @@ class BKMaker {
                         this.container.setAttribute(DATA_NODE_ID, lastID);
                         this.countingSpan.setAttribute(DATA_NODE_ID, lastID);
                         lastElement.insertAdjacentElement("afterend", this.container);
-                        lastElement.insertAdjacentElement("afterend", this.countingSpan);
+                        // lastElement.insertAdjacentElement("afterend", this.countingSpan);
                         divs.forEach(e => e.parentElement?.removeChild(e));
                     }
                 }
@@ -61,28 +61,22 @@ class BKMaker {
                 return true;
             }
         }
-        this.removeMidDiv();
         return false;
     }
 
-    private removeMidDiv() {
-        const divs = Array.from(this.item.parentElement.querySelectorAll(`[${BKMAKER_ADD}="1"]`)?.values() ?? []);
-        divs.forEach(e => e.parentElement?.removeChild(e));
-    }
-
-    private findOrLoadFromCache() {
+    private async findOrLoadFromCache() {
         const divs = Array.from(this.item.parentElement.querySelectorAll(`[${BKMAKER_ADD}="1"]`)?.values() ?? []);
         if (divs.length == 0) {
             const oldEle = this.blBox.divCache.get(this.docID);
             if (oldEle) {
                 const [lastID, lastElement] = getLastElementID(this.item);
-                if (this.sholdInsertDiv(lastID)) {
-
-                    this.countingSpan.setAttribute(DATA_NODE_ID, lastID);
-                    lastElement.insertAdjacentElement("afterend", this.countingSpan);
+                if (await this.sholdInsertDiv(lastID)) {
 
                     oldEle.setAttribute(DATA_NODE_ID, lastID);
                     lastElement.insertAdjacentElement("afterend", oldEle);
+
+                    this.countingSpan.setAttribute(DATA_NODE_ID, lastID);
+                    // lastElement.insertAdjacentElement("afterend", this.countingSpan);
 
                     divs.push(oldEle);
                 }
