@@ -56,14 +56,13 @@ class BKMaker {
 
     private async sholdInsertDiv(lastID: string) {
         const allIDs = await siyuanCache.getChildBlocks(10 * 1000, this.docID);
-        if (allIDs.length > 0) {
-            const l = allIDs[allIDs.length - 1].id;
-            if (l != lastID) {
-                this.removeMidDiv();
-                return false;
+        for (const { id } of allIDs.slice(-5)) {
+            if (id === lastID) {
+                return true;
             }
         }
-        return true;
+        this.removeMidDiv();
+        return false;
     }
 
     private removeMidDiv() {
