@@ -18,11 +18,10 @@ export class MaxCache<T> {
      */
     public add(key: string, obj: T): T {
         if (obj === undefined || obj === null) return obj;
-        const entries = Array.from(this.cache.entries());
-        if (entries.length > this.maxSize) {
-            entries.sort((e1, e2) => {
+        if (this.cache.size > this.maxSize) {
+            Array.from(this.cache.entries()).sort((e1, e2) => {
                 return e1[1].timestamp - e2[1].timestamp;
-            }).slice(0, entries.length / 2).forEach(e => {
+            }).slice(0, this.cache.size / 2).forEach(e => {
                 this.cache.delete(e[0]);
             });
         }
