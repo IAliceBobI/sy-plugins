@@ -81,12 +81,14 @@ class BKMaker {
             }
         }
         if (this.blBox.mentionCount > 0) {
-            for (const mentionDoc of await Promise.all(backlink2.backmentions.slice(0, this.blBox.mentionCount).map((mention) => {
-                return siyuanCache.getBackmentionDoc(MentionCacheTime, this.docID, mention.id);
-            }))) {
-                for (const mentionsInDoc of mentionDoc.backmentions) {
+            let count = 0;
+            outer: for (const mention of backlink2.backmentions) {
+                if (this.shouldStop()) return;
+                const mentionDoc = await siyuanCache.getBackmentionDoc(MentionCacheTime, this.docID, mention.id);
+                for (const mentionItem of mentionDoc.backmentions) {
                     if (this.shouldStop()) return;
-                    await this.fillContent(mentionsInDoc, allRefs, contentContainer);
+                    await this.fillContent(mentionItem, allRefs, contentContainer);
+                    if (++count >= this.blBox.mentionCount) break outer;
                 }
             }
         }
@@ -180,26 +182,25 @@ class BKMaker {
     }
 
     private addMentionCheckBox(topDiv: HTMLDivElement, clickQueryField: Func, freezeCheckBox: HTMLInputElement, label: HTMLElement) {
-        const mentionCountInput = topDiv.appendChild(document.createElement("input"));
-        setReadonly(mentionCountInput);
-        mentionCountInput.title = "提及数量";
-        mentionCountInput.classList.add("b3-text-field");
-        mentionCountInput.size = 1;
-        mentionCountInput.value = String(this.blBox.mentionCount);
-        mentionCountInput.addEventListener("focus", () => {
+        const mentionInput = topDiv.appendChild(document.createElement("input"));
+        setReadonly(mentionInput);
+        mentionInput.title = "展开的提及数";
+        mentionInput.classList.add("b3-text-field");
+        mentionInput.size = 1;
+        mentionInput.value = String(this.blBox.mentionCount);
+        mentionInput.addEventListener("focus", () => {
             clickQueryField();
-        })
-        mentionCountInput.addEventListener("blur", () => {
+        });
+        mentionInput.addEventListener("blur", () => {
             this.shouldFreeze = freezeCheckBox.checked = false;
             label.innerText = "🔄";
-        })
-        mentionCountInput.addEventListener("input", () => {
-            const n = Number(mentionCountInput.value.trim());
-            if (isValidNumber(n)) {
+        });
+        mentionInput.addEventListener("input", () => {
+            const n = Number(mentionInput.value.trim());
+            if (isValidNumber(n) && n > 0) {
                 this.blBox.mentionCount = n;
             } else {
                 this.blBox.mentionCount = 0;
-                mentionCountInput.value = "0"
             }
         });
         topDiv.appendChild(createSpan("&nbsp;".repeat(4)));
@@ -302,7 +303,7 @@ class BackLinkBottomBox {
     public get docID(): string {
         return this._docID;
     }
-    public mentionCount: number = 0;
+    public mentionCount: number = 1;
 
     public addCache(docID: string, container: HTMLElement): HTMLElement {
         const entries = Array.from(this.cache.entries());
