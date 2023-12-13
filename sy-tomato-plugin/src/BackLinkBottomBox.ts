@@ -111,11 +111,11 @@ class BKMaker {
                 for (const mentionItem of mentionDoc.backmentions) {
                     await this.fillContent(mentionItem, allRefs, contentContainer);
                     ++count;
-                    this.countingSpan.innerText = String(count)
+                    this.countingSpan.innerText = String(count);
                     if (count >= this.blBox.mentionCount) break outer;
                 }
             }
-            this.countingSpan.innerText = ""
+            this.countingSpan.innerText = "";
         }
 
         this.refreshTopDiv(topDiv, allRefs);
@@ -335,7 +335,7 @@ class BackLinkBottomBox {
                             this.docID = nextDocID;
                             // OB
                             this.observer?.disconnect();
-                            const maker = this.makerCache.getOrElse(nextDocID, () => { return new BKMaker(this, nextDocID) });
+                            const maker = this.makerCache.getOrElse(nextDocID, () => { return new BKMaker(this, nextDocID); });
                             maker.doTheWork(item);
                             let [lastElementID] = getLastElementID(item);
                             this.observer = new MutationObserver((_mutationsList) => {
@@ -347,7 +347,7 @@ class BackLinkBottomBox {
                             });
                             this.observer.observe(item, { childList: true });
                         } else {
-                            const maker = this.makerCache.getOrElse(nextDocID, () => { return new BKMaker(this, nextDocID) });
+                            const maker = this.makerCache.getOrElse(nextDocID, () => { return new BKMaker(this, nextDocID); });
                             maker.doTheWork(item);
                         }
                     }

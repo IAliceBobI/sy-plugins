@@ -35,7 +35,7 @@ export class MaxCache<T> {
      * @returns 
      */
     public get(key: string, defaultValue?: T): T {
-        const v = this.cache.get(key)
+        const v = this.cache.get(key);
         if (!v) {
             return this.add(key, defaultValue);
         }
@@ -48,9 +48,9 @@ export class MaxCache<T> {
      * @returns 
      */
     public getOrElse(key: string, createValue: Func): T {
-        const v = this.cache.get(key)
+        const v = this.cache.get(key);
         if (!v) {
-            return this.add(key, createValue())
+            return this.add(key, createValue());
         }
         return v.obj;
     }
