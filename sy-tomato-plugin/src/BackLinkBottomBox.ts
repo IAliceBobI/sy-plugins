@@ -138,9 +138,10 @@ class BKMaker {
             // });
             query.addEventListener("focus", clickQueryField);
             query.addEventListener("input", (event) => {
-                const newValue = (event.target as any).value;
-                this.searchInDiv(newValue);
+                const newValue: string = (event.target as any).value;
+                this.searchInDiv(newValue.trim());
             });
+            topDiv.appendChild(createSpan("&nbsp;".repeat(2)));
         }
         {
             const btn = topDiv.appendChild(document.createElement("button")) as HTMLButtonElement;
@@ -150,11 +151,24 @@ class BKMaker {
             btn.classList.add("b3-button--outline");
             btn.addEventListener("click", async () => {
                 clickQueryField();
-                query.value = await navigator.clipboard.readText();
+                query.value = (await navigator.clipboard.readText()).trim();
                 this.searchInDiv(query.value);
             });
             btn.innerHTML = "<svg><use xlink:href=\"#iconPaste\"></use></svg>";
-            topDiv.appendChild(createSpan("&nbsp;".repeat(7)));
+            topDiv.appendChild(createSpan("&nbsp;".repeat(2)));
+        }
+        {
+            const btn = topDiv.appendChild(document.createElement("button")) as HTMLButtonElement;
+            setReadonly(btn);
+            btn.title = "清空查询框";
+            btn.classList.add("b3-button");
+            btn.classList.add("b3-button--outline");
+            btn.addEventListener("click", async () => {
+                clickQueryField();
+                query.value = "";
+                this.searchInDiv(query.value);
+            });
+            btn.innerHTML = "<svg><use xlink:href=\"#iconTrashcan\"></use></svg>";
         }
     }
 
