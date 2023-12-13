@@ -16,66 +16,54 @@ class BKMaker {
     private docID: string;
     private item: HTMLElement;
     shouldFreeze: boolean;
-    constructor(blBox: BackLinkBottomBox) {
+    constructor(blBox: BackLinkBottomBox, docID: string) {
+        this.docID = docID;
         this.blBox = blBox;
-        this.docID = blBox.docID;
         this.shouldFreeze = false;
     }
 
     async doTheWork(item: HTMLElement) {
         this.item = item;
         await navigator.locks.request("BackLinkBottomBox-BKMakerLock" + this.docID, { ifAvailable: true }, async (lock) => {
-            const startTime = new Date().getTime();
-            if (lock) {
-                if (!this.shouldFreeze) {
-                    const allIDs = await siyuanCache.getChildBlocks(5 * 1000, this.docID);
-                    const lastID = this.item.lastElementChild.getAttribute(DATA_NODE_ID);
-                    if (allIDs?.slice(-5)?.map(b => b.id)?.includes(lastID)) {
+            const divs = this.findOrLoadFromCache();
+            if (lock && !this.shouldFreeze) {
+                const allIDs = await siyuanCache.getChildBlocks(5 * 1000, this.docID);
+                const lastID = this.item.lastElementChild.getAttribute(DATA_NODE_ID);
+                if (allIDs?.slice(-5)?.map(b => b.id)?.includes(lastID)) {
+                    // retrieve new data
+                    this.container = document.createElement("div");
+                    await this.getBackLinks(); // start
+                    this.container.setAttribute(DATA_NODE_ID, lastID);
+                    this.container.style.border = "1px solid black";
+                    this.container.setAttribute(BKMAKER_ADD, "1");
 
-                        // find or load from cache
-                        const divs = Array.from(this.item.parentElement.querySelectorAll(`[${BKMAKER_ADD}="1"]`)?.values() ?? []);
-                        if (divs.length == 0) {
-                            const oldEle = this.blBox.getCache(this.docID, null);
-                            if (oldEle) {
-                                this.item.lastElementChild.insertAdjacentElement("afterend", oldEle);
-                                divs.push(oldEle);
-                            }
-                        }
+                    // put new data into cache
+                    this.blBox.divCache.add(this.docID, this.container);
 
-                        // retrieve new data
-                        this.container = document.createElement("div");
-                        await this.getBackLinks(); // start
-                        this.container.setAttribute(DATA_NODE_ID, lastID);
-                        this.container.style.border = "1px solid black";
-                        this.container.setAttribute(BKMAKER_ADD, "1");
-
-                        // put new data into cache
-                        this.blBox.addCache(this.docID, this.container);
-
-                        if (!this.shouldFreeze) {
-                            // substitute old for new
-                            this.item.lastElementChild.insertAdjacentElement("afterend", this.container);
-                            divs.forEach(e => e.parentElement?.removeChild(e));
-                        }
+                    if (!this.shouldFreeze) {
+                        // substitute old for new
+                        this.item.lastElementChild.insertAdjacentElement("afterend", this.container);
+                        divs.forEach(e => e.parentElement?.removeChild(e));
                     }
                 }
-            } else {
-                const oldEle = this.blBox.getCache(this.docID, null);
-                if (oldEle) {
-                    this.item.lastElementChild.insertAdjacentElement("afterend", oldEle);
-                }
-            }
-            const duration = (new Date().getTime()) - startTime;
-            const remainTime = FETCH_INTERVAL - duration;
-            if (remainTime > 0) {
-                await sleep(remainTime);
-                console.log(":xxxx" + remainTime / 1000)
             }
         });
     }
 
+    private findOrLoadFromCache() {
+        const divs = Array.from(this.item.parentElement.querySelectorAll(`[${BKMAKER_ADD}="1"]`)?.values() ?? []);
+        if (divs.length == 0) {
+            const oldEle = this.blBox.divCache.get(this.docID);
+            if (oldEle) {
+                this.item.lastElementChild.insertAdjacentElement("afterend", oldEle);
+                divs.push(oldEle);
+            }
+        }
+        return divs;
+    }
+
     private shouldStop() {
-        return this.docID != this.blBox.docID;
+        return this.docID != this.docID;
     }
 
     private async getBackLinks() {
@@ -313,11 +301,7 @@ class BackLinkBottomBox {
     public mentionCount: number = 1;
 
     private observer: MutationObserver;
-
-    private _docID: string = "";
-    public get docID(): string {
-        return this._docID;
-    }
+    private docID: string = "";
 
     async onload(plugin: Plugin) {
         this.plugin = plugin;
@@ -330,9 +314,11 @@ class BackLinkBottomBox {
                         const nextDocID = detail.protyle?.block.rootID ?? "";
                         if (!nextDocID) return;
                         if (this.docID != nextDocID) {
-                            this._docID = nextDocID;
+                            this.docID = nextDocID;
                             // OB
                             this.observer?.disconnect();
+                            const maker = this.makerCache.getOrElse(nextDocID, () => { return new BKMaker(this, nextDocID) });
+                            maker.doTheWork(item);
                             let lastElementID = item.lastElementChild.getAttribute(DATA_NODE_ID);
                             this.observer = new MutationObserver((_mutationsList) => {
                                 const newLastID = item.lastElementChild.getAttribute(DATA_NODE_ID);
@@ -342,9 +328,10 @@ class BackLinkBottomBox {
                                 }
                             });
                             this.observer.observe(item, { childList: true });
+                        } else {
+                            const maker = this.makerCache.getOrElse(nextDocID, () => { return new BKMaker(this, nextDocID) });
+                            maker.doTheWork(item);
                         }
-                        const maker = this.makerCache.getOrElse(this.docID, () => { new BKMaker(this) });
-                        maker.doTheWork(item);
                     }
                 });
             }

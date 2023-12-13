@@ -17,6 +17,7 @@ export class MaxCache<T> {
      * @returns return the new value NOT the old one
      */
     public add(key: string, obj: T): T {
+        if (obj === undefined || obj === null) return obj;
         const entries = Array.from(this.cache.entries());
         if (entries.length > this.maxSize) {
             entries.sort((e1, e2) => {
@@ -28,13 +29,25 @@ export class MaxCache<T> {
         this.cache.set(key, { obj: obj, timestamp: new Date().getTime() });
         return obj;
     }
-    public get(key: string, defaultValue: T): T {
+    /**
+     * get or save
+     * @param key 
+     * @param defaultValue 
+     * @returns 
+     */
+    public get(key: string, defaultValue?: T): T {
         const v = this.cache.get(key)
         if (!v) {
-            return this.add(key, defaultValue)
+            return this.add(key, defaultValue);
         }
         return v.obj;
     }
+    /**
+     * get or save
+     * @param key 
+     * @param createValue 
+     * @returns 
+     */
     public getOrElse(key: string, createValue: Func): T {
         const v = this.cache.get(key)
         if (!v) {
