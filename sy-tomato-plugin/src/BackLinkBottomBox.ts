@@ -1,11 +1,10 @@
 import { Plugin, } from "siyuan";
-import { chunks, extractLinks, siyuanCache } from "./libs/utils";
+import { chunks, extractLinks, isValidNumber, siyuanCache } from "./libs/utils";
 import { DATA_ID, DATA_NODE_ID, DATA_TYPE } from "./libs/gconst";
 import { EventType, events } from "./libs/Events";
 
 const QUERYABLE_ELEMENT = "QUERYABLE_ELEMENT";
 const BKMakerAdd = "BKMakerAdd";
-const MentionLimit = 3;
 const MentionCacheTime = 5 * 60 * 1000;
 const cacheLimit = 100;
 
@@ -81,8 +80,8 @@ class BKMaker {
                 await this.fillContent(backlinksInDoc, allRefs, contentContainer);
             }
         }
-        if (this.blBox.mentionEnabled) {
-            for (const mentionDoc of await Promise.all(backlink2.backmentions.slice(0, MentionLimit).map((mention) => {
+        if (this.blBox.mentionCount > 0) {
+            for (const mentionDoc of await Promise.all(backlink2.backmentions.slice(0, this.blBox.mentionCount).map((mention) => {
                 return siyuanCache.getBackmentionDoc(MentionCacheTime, this.docID, mention.id);
             }))) {
                 for (const mentionsInDoc of mentionDoc.backmentions) {
@@ -122,20 +121,17 @@ class BKMaker {
 
     private initBtnDiv(topDiv: HTMLDivElement) {
         const { freezeCheckBox, label } = this.addRefreshCheckBox(topDiv);
-        this.addMentionCheckBox(topDiv);
-        const query = topDiv.appendChild(document.createElement("input"));
-        setReadonly(query);
         const clickQueryField = () => {
             this.shouldFreeze = true;
             freezeCheckBox.checked = true;
             label.innerText = "🚫";
         };
+        this.addMentionCheckBox(topDiv, clickQueryField, freezeCheckBox, label);
+        const query = topDiv.appendChild(document.createElement("input"));
+        setReadonly(query);
         {
             query.classList.add("b3-text-field");
             query.placeholder = "反链过滤";
-            // query.addEventListener("blur", () => {
-            //     this.queryGetFocus = false;
-            // });
             query.addEventListener("focus", clickQueryField);
             query.addEventListener("input", (event) => {
                 const newValue: string = (event.target as any).value;
@@ -183,15 +179,28 @@ class BKMaker {
         });
     }
 
-    private addMentionCheckBox(topDiv: HTMLDivElement) {
-        const mentionCheckBox = topDiv.appendChild(document.createElement("input"));
-        setReadonly(mentionCheckBox);
-        mentionCheckBox.title = "是否显示提及（展示一部分提及，之后在开发配置选项。）";
-        mentionCheckBox.type = "checkbox";
-        mentionCheckBox.classList.add("b3-switch");
-        mentionCheckBox.checked = this.blBox.mentionEnabled;
-        mentionCheckBox.addEventListener("change", () => {
-            this.blBox.mentionEnabled = mentionCheckBox.checked;
+    private addMentionCheckBox(topDiv: HTMLDivElement, clickQueryField: Func, freezeCheckBox: HTMLInputElement, label: HTMLElement) {
+        const mentionCountInput = topDiv.appendChild(document.createElement("input"));
+        setReadonly(mentionCountInput);
+        mentionCountInput.title = "提及数量";
+        mentionCountInput.classList.add("b3-text-field");
+        mentionCountInput.size = 1;
+        mentionCountInput.value = String(this.blBox.mentionCount);
+        mentionCountInput.addEventListener("focus", () => {
+            clickQueryField();
+        })
+        mentionCountInput.addEventListener("blur", () => {
+            this.shouldFreeze = freezeCheckBox.checked = false;
+            label.innerText = "🔄";
+        })
+        mentionCountInput.addEventListener("input", () => {
+            const n = Number(mentionCountInput.value.trim());
+            if (isValidNumber(n)) {
+                this.blBox.mentionCount = n;
+            } else {
+                this.blBox.mentionCount = 0;
+                mentionCountInput.value = "0"
+            }
         });
         topDiv.appendChild(createSpan("&nbsp;".repeat(4)));
     }
@@ -293,7 +302,7 @@ class BackLinkBottomBox {
     public get docID(): string {
         return this._docID;
     }
-    public mentionEnabled: boolean = false;
+    public mentionCount: number = 0;
 
     public addCache(docID: string, container: HTMLElement): HTMLElement {
         const entries = Array.from(this.cache.entries());
