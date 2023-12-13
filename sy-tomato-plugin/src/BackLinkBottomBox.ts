@@ -123,35 +123,55 @@ class BKMaker {
     private initBtnDiv(topDiv: HTMLDivElement) {
         const { freezeCheckBox, label } = this.addRefreshCheckBox(topDiv);
         this.addMentionCheckBox(topDiv);
+        const query = topDiv.appendChild(document.createElement("input"));
+        setReadonly(query);
+        const clickQueryField = () => {
+            this.shouldFreeze = true;
+            freezeCheckBox.checked = true;
+            label.innerText = "🚫";
+        };
         {
-            const query = topDiv.appendChild(document.createElement("input"));
             query.classList.add("b3-text-field");
             query.placeholder = "反链过滤";
             // query.addEventListener("blur", () => {
             //     this.queryGetFocus = false;
             // });
-            query.addEventListener("focus", () => {
-                this.shouldFreeze = true;
-                freezeCheckBox.checked = true;
-                label.innerText = "🚫";
-            });
+            query.addEventListener("focus", clickQueryField);
             query.addEventListener("input", (event) => {
                 const newValue = (event.target as any).value;
-                this.container.querySelectorAll(`[${QUERYABLE_ELEMENT}="1"]`).forEach(e => {
-                    const el = e as HTMLElement;
-                    if (!e.textContent.toLowerCase().includes(newValue.toLowerCase())) {
-                        el.style.display = "none";
-                    } else {
-                        el.style.display = "";
-                    }
-                });
+                this.searchInDiv(newValue);
             });
+        }
+        {
+            const btn = topDiv.appendChild(document.createElement("button")) as HTMLButtonElement;
+            setReadonly(btn);
+            btn.title = "粘贴内容到查询框";
+            btn.classList.add("b3-button");
+            btn.classList.add("b3-button--outline");
+            btn.addEventListener("click", async () => {
+                clickQueryField();
+                query.value = await navigator.clipboard.readText();
+                this.searchInDiv(query.value);
+            });
+            btn.innerHTML = "<svg><use xlink:href=\"#iconPaste\"></use></svg>";
             topDiv.appendChild(createSpan("&nbsp;".repeat(7)));
         }
     }
 
+    private searchInDiv(newValue: string) {
+        this.container.querySelectorAll(`[${QUERYABLE_ELEMENT}="1"]`).forEach(e => {
+            const el = e as HTMLElement;
+            if (!e.textContent.toLowerCase().includes(newValue.toLowerCase())) {
+                el.style.display = "none";
+            } else {
+                el.style.display = "";
+            }
+        });
+    }
+
     private addMentionCheckBox(topDiv: HTMLDivElement) {
         const mentionCheckBox = topDiv.appendChild(document.createElement("input"));
+        setReadonly(mentionCheckBox);
         mentionCheckBox.title = "是否显示提及（展示一部分提及，之后在开发配置选项。）";
         mentionCheckBox.type = "checkbox";
         mentionCheckBox.classList.add("b3-switch");
@@ -164,6 +184,7 @@ class BKMaker {
 
     private addRefreshCheckBox(topDiv: HTMLDivElement) {
         const label = topDiv.appendChild(document.createElement("label"));
+        setReadonly(label);
         {
             label.classList.add("b3-label__text");
             label.innerText = "🔄";
@@ -171,6 +192,7 @@ class BKMaker {
         }
 
         const freezeCheckBox = topDiv.appendChild(document.createElement("input"));
+        setReadonly(freezeCheckBox);
         {
             freezeCheckBox.title = "是否自动刷新";
             freezeCheckBox.type = "checkbox";
@@ -317,11 +339,12 @@ function markQueryable(e: HTMLElement) {
 }
 
 function hr() {
-    return document.createElement("hr");
+    return setReadonly(document.createElement("hr"));
 }
 
 function createSpan(innerHTML: string) {
     const span = document.createElement("span");
+    setReadonly(span);
     span.innerHTML = innerHTML;
     return span;
 }
@@ -331,6 +354,7 @@ function setReadonly(e: HTMLElement, all = false) {
     if (all) e.querySelectorAll('[contenteditable="true"]')?.forEach(sub => {
         sub?.setAttribute("contenteditable", "false");
     });
+    return e;
 }
 
 function refTag(id: string, text: string, count: number, len?: number): HTMLSpanElement {
