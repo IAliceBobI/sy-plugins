@@ -22,6 +22,7 @@ class BKMaker {
         this.shouldFreeze = false;
         this.countingSpan = document.createElement("span");
         this.countingSpan.classList.add("b3-label__text");
+        this.countingSpan.setAttribute(BKMAKER_ADD, "1");
     }
 
     async doTheWork(item: HTMLElement) {
@@ -29,13 +30,11 @@ class BKMaker {
         await navigator.locks.request("BackLinkBottomBox-BKMakerLock" + this.docID, { ifAvailable: true }, async (lock) => {
             const divs = this.findOrLoadFromCache();
             if (lock && !this.shouldFreeze) {
-                const allIDs = await siyuanCache.getChildBlocks(5 * 1000, this.docID);
-                const lastID = getLastElementID(this.item);
-                if (allIDs?.slice(-5)?.map(b => b.id)?.includes(lastID)) {
+                const [lastID, lastElement] = getLastElementID(this.item);
+                if (this.sholdInsertDiv(lastID)) {
                     // retrieve new data
                     this.container = document.createElement("div");
                     await this.getBackLinks(); // start
-                    this.container.setAttribute(DATA_NODE_ID, lastID);
                     this.container.style.border = "1px solid black";
                     this.container.setAttribute(BKMAKER_ADD, "1");
 
@@ -44,8 +43,10 @@ class BKMaker {
 
                     if (!this.shouldFreeze) {
                         // substitute old for new
-                        this.item.lastElementChild.insertAdjacentElement("afterend", this.countingSpan);
-                        this.item.lastElementChild.insertAdjacentElement("afterend", this.container);
+                        this.container.setAttribute(DATA_NODE_ID, lastID);
+                        this.countingSpan.setAttribute(DATA_NODE_ID, lastID);
+                        lastElement.insertAdjacentElement("afterend", this.container);
+                        lastElement.insertAdjacentElement("afterend", this.countingSpan);
                         divs.forEach(e => e.parentElement?.removeChild(e));
                     }
                 }
@@ -53,14 +54,39 @@ class BKMaker {
         });
     }
 
+    private async sholdInsertDiv(lastID: string) {
+        const allIDs = await siyuanCache.getChildBlocks(10 * 1000, this.docID);
+        if (allIDs.length > 0) {
+            const l = allIDs[allIDs.length - 1].id;
+            if (l != lastID) {
+                this.removeMidDiv();
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private removeMidDiv() {
+        const divs = Array.from(this.item.parentElement.querySelectorAll(`[${BKMAKER_ADD}="1"]`)?.values() ?? []);
+        divs.forEach(e => e.parentElement?.removeChild(e));
+    }
+
     private findOrLoadFromCache() {
         const divs = Array.from(this.item.parentElement.querySelectorAll(`[${BKMAKER_ADD}="1"]`)?.values() ?? []);
         if (divs.length == 0) {
             const oldEle = this.blBox.divCache.get(this.docID);
             if (oldEle) {
-                this.item.lastElementChild.insertAdjacentElement("afterend", this.countingSpan);
-                this.item.lastElementChild.insertAdjacentElement("afterend", oldEle);
-                divs.push(oldEle);
+                const [lastID, lastElement] = getLastElementID(this.item);
+                if (this.sholdInsertDiv(lastID)) {
+
+                    this.countingSpan.setAttribute(DATA_NODE_ID, lastID);
+                    lastElement.insertAdjacentElement("afterend", this.countingSpan);
+
+                    oldEle.setAttribute(DATA_NODE_ID, lastID);
+                    lastElement.insertAdjacentElement("afterend", oldEle);
+
+                    divs.push(oldEle);
+                }
             }
         }
         return divs;
@@ -318,9 +344,9 @@ class BackLinkBottomBox {
                             this.observer?.disconnect();
                             const maker = this.makerCache.getOrElse(nextDocID, () => { return new BKMaker(this, nextDocID) });
                             maker.doTheWork(item);
-                            let lastElementID = getLastElementID(item);
+                            let [lastElementID] = getLastElementID(item);
                             this.observer = new MutationObserver((_mutationsList) => {
-                                const newLastID = getLastElementID(item);
+                                const [newLastID] = getLastElementID(item);
                                 if (newLastID != lastElementID) {
                                     lastElementID = newLastID;
                                     maker.doTheWork(item);
@@ -340,8 +366,9 @@ class BackLinkBottomBox {
 
 export const backLinkBottomBox = new BackLinkBottomBox();
 
-function getLastElementID(item: HTMLElement): string {
-    return item.lastElementChild.getAttribute(DATA_NODE_ID);
+function getLastElementID(item: HTMLElement): [string, HTMLElement] {
+    const last = item.lastElementChild as HTMLElement;
+    return [last.getAttribute(DATA_NODE_ID), last];
 }
 
 function markQueryable(e: HTMLElement) {
