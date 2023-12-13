@@ -1,12 +1,13 @@
 import { Plugin, } from "siyuan";
-import { chunks, extractLinks, isValidNumber, siyuanCache } from "./libs/utils";
+import { chunks, extractLinks, isValidNumber, siyuanCache, sleep } from "./libs/utils";
 import { DATA_ID, DATA_NODE_ID, DATA_TYPE } from "./libs/gconst";
 import { EventType, events } from "./libs/Events";
 
 const QUERYABLE_ELEMENT = "QUERYABLE_ELEMENT";
-const BKMakerAdd = "BKMakerAdd";
-const MentionCacheTime = 5 * 60 * 1000;
-const cacheLimit = 100;
+const BKMAKER_ADD = "BKMAKER_ADD";
+const MENTION_CACHE_TIME = 5 * 60 * 1000;
+const CACHE_LIMIT = 100;
+const FETCH_INTERVAL = 3000;
 
 class BKMaker {
     private container: HTMLElement;
@@ -28,7 +29,10 @@ class BKMaker {
                     const allIDs = await siyuanCache.getChildBlocks(5 * 1000, this.docID);
                     const lastID = this.item.lastElementChild.getAttribute(DATA_NODE_ID);
                     if (allIDs?.slice(-5)?.map(b => b.id)?.includes(lastID)) {
-                        const divs = Array.from(this.item.parentElement.querySelectorAll(`[${BKMakerAdd}="1"]`)?.values() ?? []);
+                        const startTime = new Date().getTime();
+
+                        // find or load from cache
+                        const divs = Array.from(this.item.parentElement.querySelectorAll(`[${BKMAKER_ADD}="1"]`)?.values() ?? []);
                         if (divs.length == 0) {
                             const oldEle = this.blBox.getCache(this.docID, null);
                             if (oldEle) {
@@ -36,14 +40,27 @@ class BKMaker {
                                 divs.push(oldEle);
                             }
                         }
+
+                        // retrieve new data
                         this.container = document.createElement("div");
                         await this.getBackLinks(); // start
                         this.container.setAttribute(DATA_NODE_ID, lastID);
                         this.container.style.border = "1px solid black";
-                        this.container.setAttribute(BKMakerAdd, "1");
-                        this.item.lastElementChild.insertAdjacentElement("afterend", this.container);
-                        divs.forEach(e => e.parentElement?.removeChild(e));
+                        this.container.setAttribute(BKMAKER_ADD, "1");
+
+                        // put new data into cache
                         this.blBox.addCache(this.docID, this.container);
+
+                        if (!this.shouldFreeze) {
+                            // substitute old for new
+                            this.item.lastElementChild.insertAdjacentElement("afterend", this.container);
+                            divs.forEach(e => e.parentElement?.removeChild(e));
+                        }
+                        const duration = (new Date().getTime()) - startTime;
+                        const remainTime = FETCH_INTERVAL - duration;
+                        if (remainTime > 0) {
+                            await sleep(remainTime);
+                        }
                     }
                 }
             } else {
@@ -71,7 +88,6 @@ class BKMaker {
         this.container.appendChild(hr());
         this.container.appendChild(contentContainer);
 
-        // const start = new Date().getTime();
         for (const backlinkDoc of await Promise.all(backlink2.backlinks.map((backlink) => {
             return siyuanCache.getBacklinkDoc(20 * 1000, this.docID, backlink.id);
         }))) {
@@ -84,7 +100,7 @@ class BKMaker {
             let count = 0;
             outer: for (const mention of backlink2.backmentions) {
                 if (this.shouldStop()) return;
-                const mentionDoc = await siyuanCache.getBackmentionDoc(MentionCacheTime, this.docID, mention.id);
+                const mentionDoc = await siyuanCache.getBackmentionDoc(MENTION_CACHE_TIME, this.docID, mention.id);
                 for (const mentionItem of mentionDoc.backmentions) {
                     if (this.shouldStop()) return;
                     await this.fillContent(mentionItem, allRefs, contentContainer);
@@ -92,7 +108,6 @@ class BKMaker {
                 }
             }
         }
-        // console.log(`time: ${((new Date().getTime()) - start) / 1000}s`)
 
         this.refreshTopDiv(topDiv, allRefs);
 
@@ -249,7 +264,7 @@ class BKMaker {
         // leading.classList.add("b3-label__text")
         const refPathList: HTMLSpanElement[] = [];
         for (const ret of chunks(await Promise.all(blockPaths.map((refPath) => {
-            return [refPath, siyuanCache.getBlockKramdown(MentionCacheTime, refPath.id)];
+            return [refPath, siyuanCache.getBlockKramdown(MENTION_CACHE_TIME, refPath.id)];
         }).flat()), 2)) {
             const [refPath, { kramdown: _kramdown }] = ret as [BlockPath, GetBlockKramdown];
             if (refPath.type == "NodeDocument") {
@@ -307,7 +322,7 @@ class BackLinkBottomBox {
 
     public addCache(docID: string, container: HTMLElement): HTMLElement {
         const entries = Array.from(this.cache.entries());
-        if (entries.length > cacheLimit) {
+        if (entries.length > CACHE_LIMIT) {
             entries.sort((e1, e2) => {
                 return e1[1].timestamp - e2[1].timestamp;
             }).slice(0, entries.length / 2).forEach(e => {
@@ -330,7 +345,7 @@ class BackLinkBottomBox {
                     if (lock) {
                         const nextDocID = detail.protyle?.block.rootID ?? "";
                         if (!nextDocID) return;
-                        const exists = this.item?.querySelector(`[${BKMakerAdd}]`) ?? false;
+                        const exists = this.item?.querySelector(`[${BKMAKER_ADD}]`) ?? false;
                         if (exists && this.maker?.shouldFreeze && nextDocID === this.docID) return;
                         this._item = detail.protyle?.wysiwyg?.element;
                         if (!this.item) return;
