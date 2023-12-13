@@ -87,7 +87,7 @@ class BKMaker {
 
     private async getBackLinks() {
         const allRefs: RefCollector = new Map();
-        const backlink2 = await siyuanCache.getBacklink2(15 * 1000, this.docID);
+        const backlink2 = await siyuanCache.getBacklink2(6 * 1000, this.docID);
         const contentContainer = document.createElement("div");
         const btnDiv = document.createElement("div");
         this.initBtnDiv(btnDiv);
@@ -98,7 +98,7 @@ class BKMaker {
         this.container.appendChild(contentContainer);
 
         for (const backlinkDoc of await Promise.all(backlink2.backlinks.map((backlink) => {
-            return siyuanCache.getBacklinkDoc(20 * 1000, this.docID, backlink.id);
+            return siyuanCache.getBacklinkDoc(12 * 1000, this.docID, backlink.id);
         }))) {
             for (const backlinksInDoc of backlinkDoc.backlinks) {
                 await this.fillContent(backlinksInDoc, allRefs, contentContainer);
