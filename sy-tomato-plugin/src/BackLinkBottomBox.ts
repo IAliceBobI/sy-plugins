@@ -14,11 +14,14 @@ class BKMaker {
     private blBox: BackLinkBottomBox;
     private docID: string;
     private item: HTMLElement;
+    private countingSpan: HTMLSpanElement;
     shouldFreeze: boolean;
     constructor(blBox: BackLinkBottomBox, docID: string) {
         this.docID = docID;
         this.blBox = blBox;
         this.shouldFreeze = false;
+        this.countingSpan = document.createElement("span");
+        this.countingSpan.classList.add("b3-label__text");
     }
 
     async doTheWork(item: HTMLElement) {
@@ -41,6 +44,7 @@ class BKMaker {
 
                     if (!this.shouldFreeze) {
                         // substitute old for new
+                        this.item.lastElementChild.insertAdjacentElement("afterend", this.countingSpan);
                         this.item.lastElementChild.insertAdjacentElement("afterend", this.container);
                         divs.forEach(e => e.parentElement?.removeChild(e));
                     }
@@ -54,15 +58,12 @@ class BKMaker {
         if (divs.length == 0) {
             const oldEle = this.blBox.divCache.get(this.docID);
             if (oldEle) {
+                this.item.lastElementChild.insertAdjacentElement("afterend", this.countingSpan);
                 this.item.lastElementChild.insertAdjacentElement("afterend", oldEle);
                 divs.push(oldEle);
             }
         }
         return divs;
-    }
-
-    private shouldStop() {
-        return this.docID != this.docID;
     }
 
     private async getBackLinks() {
@@ -81,21 +82,21 @@ class BKMaker {
             return siyuanCache.getBacklinkDoc(20 * 1000, this.docID, backlink.id);
         }))) {
             for (const backlinksInDoc of backlinkDoc.backlinks) {
-                if (this.shouldStop()) return;
                 await this.fillContent(backlinksInDoc, allRefs, contentContainer);
             }
         }
         if (this.blBox.mentionCount > 0) {
             let count = 0;
             outer: for (const mention of backlink2.backmentions) {
-                if (this.shouldStop()) return;
                 const mentionDoc = await siyuanCache.getBackmentionDoc(MENTION_CACHE_TIME, this.docID, mention.id);
                 for (const mentionItem of mentionDoc.backmentions) {
-                    if (this.shouldStop()) return;
                     await this.fillContent(mentionItem, allRefs, contentContainer);
-                    if (++count >= this.blBox.mentionCount) break outer;
+                    ++count;
+                    this.countingSpan.innerText = String(count)
+                    if (count >= this.blBox.mentionCount) break outer;
                 }
             }
+            this.countingSpan.innerText = ""
         }
 
         this.refreshTopDiv(topDiv, allRefs);
@@ -250,7 +251,6 @@ class BKMaker {
     private async path2div(blockPaths: BlockPath[], allRefs: RefCollector) {
         const div = document.createElement("div") as HTMLDivElement;
         div.appendChild(createSpan("📄 "));
-        // leading.classList.add("b3-label__text")
         const refPathList: HTMLSpanElement[] = [];
         for (const ret of chunks(await Promise.all(blockPaths.map((refPath) => {
             return [refPath, siyuanCache.getBlockKramdown(MENTION_CACHE_TIME, refPath.id)];
