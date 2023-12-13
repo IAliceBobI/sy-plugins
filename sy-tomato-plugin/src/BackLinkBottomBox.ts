@@ -55,7 +55,7 @@ class BKMaker {
     }
 
     private async sholdInsertDiv(lastID: string) {
-        const allIDs = await siyuanCache.getChildBlocks(10 * 1000, this.docID);
+        const allIDs = await siyuanCache.getChildBlocks(5 * 1000, this.docID);
         for (const { id } of allIDs.slice(-5)) {
             if (id === lastID) {
                 return true;
@@ -360,7 +360,8 @@ class BackLinkBottomBox {
 export const backLinkBottomBox = new BackLinkBottomBox();
 
 function getLastElementID(item: HTMLElement): [string, HTMLElement] {
-    const last = item.lastElementChild as HTMLElement;
+    let last = item.lastElementChild.previousElementSibling as HTMLElement;
+    if (!last) last = item.lastElementChild as HTMLElement;
     return [last.getAttribute(DATA_NODE_ID), last];
 }
 
