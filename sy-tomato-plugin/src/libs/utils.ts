@@ -210,6 +210,9 @@ export const siyuan = {
         }
         return {} as Block;
     },
+    async setUILayout(layout: any): Promise<any> {
+        return await siyuan.call("/api/system/setUILayout", { layout });
+    },
     async createDocWithMdIfNotExists(notebookID: string, path_readable: string, markdown: string) {
         const row = await siyuan.sqlOne(`select id from blocks where hpath="${path_readable}" and type='d' limit 1`);
         const docID = row?.id ?? "";
