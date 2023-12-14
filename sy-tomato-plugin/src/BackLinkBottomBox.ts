@@ -158,13 +158,13 @@ class BKMaker {
     private freeze() {
         this.shouldFreeze = true;
         this.freezeCheckBox.checked = true;
-        this.label.innerText = "🚫";
+        this.label.innerHTML = icon("Focus", 15);
     }
 
     private unfreeze() {
         this.shouldFreeze = false;
         this.freezeCheckBox.checked = false;
-        this.label.innerText = "🔄";
+        this.label.innerHTML = icon("Play", 15);
     }
 
     private initBtnDiv(topDiv: HTMLDivElement) {
@@ -253,8 +253,10 @@ class BKMaker {
         this.label = topDiv.appendChild(document.createElement("label"));
         setReadonly(this.label);
         {
+            this.label.classList.add("b3-label");
             this.label.classList.add("b3-label__text");
-            topDiv.appendChild(createSpan("&nbsp;".repeat(2)));
+            this.label.classList.add("b3-label--noborder");
+            topDiv.appendChild(createSpan("&nbsp;".repeat(1)));
         }
 
         this.freezeCheckBox = topDiv.appendChild(document.createElement("input"));
