@@ -63,7 +63,7 @@ class BKMaker {
     }
 
     private async sholdInsertDiv(lastID: string) {
-        const allIDs = await siyuanCache.getChildBlocks(5 * 1000, this.docID);
+        const allIDs = await siyuanCache.getChildBlocks(3 * 1000, this.docID);
         for (const { id } of allIDs.slice(-5)) {
             if (id === lastID) {
                 return true;
@@ -152,10 +152,8 @@ class BKMaker {
             markQueryable(d);
             const btn = d.appendChild(this.createEyeBtn());
             btn.addEventListener("click", () => {
-                console.log(`${id} ${lnk.textContent}`)
                 this.freeze();
                 this.container.querySelectorAll(`[${QUERYABLE_ELEMENT}]`).forEach((e: HTMLElement) => {
-                    console.log(e)
                     const divs = e.querySelectorAll(`[${DATA_ID}="${id}"]`);
                     if (divs.length > 0) {
                         e.style.display = "none";
