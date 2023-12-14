@@ -11,7 +11,8 @@ const MENTION_CACHE_TIME = 5 * 60 * 1000;
 const CACHE_LIMIT = 100;
 
 class BKMaker {
-    public shouldFreeze: boolean;
+    private shouldFreeze: boolean;
+    private mentionCount: number = 1;
 
     private container: HTMLElement;
     private blBox: BackLinkBottomBox;
@@ -114,7 +115,7 @@ class BKMaker {
                 await this.fillContent(backlinksInDoc, allRefs, contentContainer);
             }
         }
-        if (this.blBox.mentionCount > 0) {
+        if (this.mentionCount > 0) {
             let count = 0;
             outer: for (const mention of backlink2.backmentions) {
                 const mentionDoc = await siyuanCache.getBackmentionDoc(MENTION_CACHE_TIME, this.docID, mention.id);
@@ -122,7 +123,7 @@ class BKMaker {
                     await this.fillContent(mentionItem, allRefs, contentContainer);
                     ++count;
                     this.mentionCounting.innerText = `提及读取中：${count}`;
-                    if (count >= this.blBox.mentionCount) break outer;
+                    if (count >= this.mentionCount) break outer;
                 }
             }
             this.mentionCounting.innerText = "";
@@ -184,7 +185,7 @@ class BKMaker {
         setReadonly(query);
         {
             query.classList.add("b3-text-field");
-            query.placeholder = "反链过滤";
+            query.placeholder = "搜索";
             query.addEventListener("focus", () => { this.freeze(); });
             query.addEventListener("input", (event) => {
                 const newValue: string = (event.target as any).value;
@@ -241,7 +242,7 @@ class BKMaker {
         mentionInput.title = "展开的提及数";
         mentionInput.classList.add("b3-text-field");
         mentionInput.size = 1;
-        mentionInput.value = String(this.blBox.mentionCount);
+        mentionInput.value = String(this.mentionCount);
         mentionInput.addEventListener("focus", () => {
             this.freeze();
         });
@@ -251,9 +252,9 @@ class BKMaker {
         mentionInput.addEventListener("input", () => {
             const n = Number(mentionInput.value.trim());
             if (isValidNumber(n) && n > 0) {
-                this.blBox.mentionCount = n;
+                this.mentionCount = n;
             } else {
-                this.blBox.mentionCount = 0;
+                this.mentionCount = 0;
             }
         });
         topDiv.appendChild(createSpan("&nbsp;".repeat(4)));
@@ -344,7 +345,7 @@ class BKMaker {
     }
 
     private createEyeBtn() {
-        const btn = document.createElement("button")
+        const btn = document.createElement("button");
         btn.title = "隐藏";
         btn.classList.add("b3-button");
         btn.classList.add("b3-button--text");
@@ -358,9 +359,8 @@ class BKMaker {
 class BackLinkBottomBox {
     public plugin: Plugin;
     public divCache: MaxCache<HTMLElement> = new MaxCache(CACHE_LIMIT);
-    public makerCache: MaxCache<BKMaker> = new MaxCache(CACHE_LIMIT);
-    public mentionCount: number = 1;
-
+    
+    private makerCache: MaxCache<BKMaker> = new MaxCache(CACHE_LIMIT);
     private observer: MutationObserver;
     private docID: string = "";
 
