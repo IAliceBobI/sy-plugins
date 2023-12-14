@@ -11,12 +11,17 @@ const MENTION_CACHE_TIME = 5 * 60 * 1000;
 const CACHE_LIMIT = 100;
 
 class BKMaker {
+    public shouldFreeze: boolean;
+
     private container: HTMLElement;
     private blBox: BackLinkBottomBox;
     private docID: string;
     private item: HTMLElement;
     private mentionCounting: HTMLSpanElement;
-    shouldFreeze: boolean;
+
+    private freezeCheckBox: HTMLInputElement;
+    private label: HTMLLabelElement;
+
     constructor(blBox: BackLinkBottomBox, docID: string) {
         this.docID = docID;
         this.blBox = blBox;
@@ -95,7 +100,7 @@ class BKMaker {
         const backlink2 = await siyuanCache.getBacklink2(6 * 1000, this.docID);
         const contentContainer = document.createElement("div");
         const btnDiv = document.createElement("div");
-        const { freezeCheckBox, label } = this.initBtnDiv(btnDiv);
+        this.initBtnDiv(btnDiv);
         const topDiv = document.createElement("div");
         this.container.appendChild(btnDiv);
         this.container.appendChild(topDiv);
@@ -106,7 +111,7 @@ class BKMaker {
             return siyuanCache.getBacklinkDoc(12 * 1000, this.docID, backlink.id);
         }))) {
             for (const backlinksInDoc of backlinkDoc.backlinks) {
-                await this.fillContent(backlinksInDoc, allRefs, contentContainer, freezeCheckBox, label);
+                await this.fillContent(backlinksInDoc, allRefs, contentContainer);
             }
         }
         if (this.blBox.mentionCount > 0) {
@@ -114,7 +119,7 @@ class BKMaker {
             outer: for (const mention of backlink2.backmentions) {
                 const mentionDoc = await siyuanCache.getBackmentionDoc(MENTION_CACHE_TIME, this.docID, mention.id);
                 for (const mentionItem of mentionDoc.backmentions) {
-                    await this.fillContent(mentionItem, allRefs, contentContainer, freezeCheckBox, label);
+                    await this.fillContent(mentionItem, allRefs, contentContainer);
                     ++count;
                     this.mentionCounting.innerText = `提及读取中：${count}`;
                     if (count >= this.blBox.mentionCount) break outer;
@@ -150,27 +155,27 @@ class BKMaker {
         }
     }
 
-    private freeze(freezeCheckBox: HTMLInputElement, label: HTMLLabelElement) {
+    private freeze() {
         this.shouldFreeze = true;
-        freezeCheckBox.checked = true;
-        label.innerText = "🚫";
+        this.freezeCheckBox.checked = true;
+        this.label.innerText = "🚫";
     }
 
-    private unfreeze(freezeCheckBox: HTMLInputElement, label: HTMLLabelElement) {
+    private unfreeze() {
         this.shouldFreeze = false;
-        freezeCheckBox.checked = false;
-        label.innerText = "🔄";
+        this.freezeCheckBox.checked = false;
+        this.label.innerText = "🔄";
     }
 
     private initBtnDiv(topDiv: HTMLDivElement) {
-        const { freezeCheckBox, label } = this.addRefreshCheckBox(topDiv);
-        this.addMentionCheckBox(topDiv, freezeCheckBox, label);
+        this.addRefreshCheckBox(topDiv);
+        this.addMentionCheckBox(topDiv);
         const query = topDiv.appendChild(document.createElement("input"));
         setReadonly(query);
         {
             query.classList.add("b3-text-field");
             query.placeholder = "反链过滤";
-            query.addEventListener("focus", () => { this.freeze(freezeCheckBox, label); });
+            query.addEventListener("focus", () => { this.freeze(); });
             query.addEventListener("input", (event) => {
                 const newValue: string = (event.target as any).value;
                 this.searchInDiv(newValue.trim());
@@ -184,7 +189,7 @@ class BKMaker {
             btn.classList.add("b3-button");
             btn.classList.add("b3-button--outline");
             btn.addEventListener("click", async () => {
-                this.freeze(freezeCheckBox, label);
+                this.freeze();
                 query.value = (await navigator.clipboard.readText()).trim();
                 this.searchInDiv(query.value);
             });
@@ -198,7 +203,7 @@ class BKMaker {
             btn.classList.add("b3-button");
             btn.classList.add("b3-button--outline");
             btn.addEventListener("click", async () => {
-                this.freeze(freezeCheckBox, label);
+                this.freeze();
                 query.value = "";
                 this.searchInDiv(query.value);
             });
@@ -207,7 +212,6 @@ class BKMaker {
         }
         const container_mention_counting = topDiv.appendChild(document.createElement("span"));
         container_mention_counting.setAttribute(MENTION_COUTING_SPAN, "1");
-        return { freezeCheckBox, label };
     }
 
     private searchInDiv(newValue: string) {
@@ -221,7 +225,7 @@ class BKMaker {
         });
     }
 
-    private addMentionCheckBox(topDiv: HTMLDivElement, freezeCheckBox: HTMLInputElement, label: HTMLLabelElement) {
+    private addMentionCheckBox(topDiv: HTMLDivElement) {
         const mentionInput = topDiv.appendChild(document.createElement("input"));
         setReadonly(mentionInput);
         mentionInput.title = "展开的提及数";
@@ -229,10 +233,10 @@ class BKMaker {
         mentionInput.size = 1;
         mentionInput.value = String(this.blBox.mentionCount);
         mentionInput.addEventListener("focus", () => {
-            this.freeze(freezeCheckBox, label);
+            this.freeze();
         });
         mentionInput.addEventListener("blur", () => {
-            this.unfreeze(freezeCheckBox, label);
+            this.unfreeze();
         });
         mentionInput.addEventListener("input", () => {
             const n = Number(mentionInput.value.trim());
@@ -246,43 +250,40 @@ class BKMaker {
     }
 
     private addRefreshCheckBox(topDiv: HTMLDivElement) {
-        const label = topDiv.appendChild(document.createElement("label"));
-        setReadonly(label);
+        this.label = topDiv.appendChild(document.createElement("label"));
+        setReadonly(this.label);
         {
-            label.classList.add("b3-label__text");
-            label.innerText = "🔄";
-            topDiv.appendChild(createSpan("&nbsp;".repeat(1)));
+            this.label.classList.add("b3-label__text");
+            topDiv.appendChild(createSpan("&nbsp;".repeat(2)));
         }
 
-        const freezeCheckBox = topDiv.appendChild(document.createElement("input"));
-        setReadonly(freezeCheckBox);
+        this.freezeCheckBox = topDiv.appendChild(document.createElement("input"));
+        setReadonly(this.freezeCheckBox);
         {
-            freezeCheckBox.title = "是否自动刷新";
-            freezeCheckBox.type = "checkbox";
-            freezeCheckBox.classList.add("b3-switch");
-            freezeCheckBox.checked = false;
-            freezeCheckBox.addEventListener("change", () => {
-                this.shouldFreeze = freezeCheckBox.checked;
-                if (this.shouldFreeze) label.innerText = "🚫";
-                else label.innerText = "🔄";
+            this.freezeCheckBox.title = "是否自动刷新";
+            this.freezeCheckBox.type = "checkbox";
+            this.freezeCheckBox.classList.add("b3-switch");
+            this.unfreeze();
+            this.freezeCheckBox.addEventListener("change", () => {
+                if (this.freezeCheckBox.checked) this.freeze();
+                else this.unfreeze();
             });
             topDiv.appendChild(createSpan("&nbsp;".repeat(4)));
         }
-        return { freezeCheckBox, label };
     }
 
-    private async fillContent(backlinksInDoc: Backlink, allRefs: RefCollector, tc: HTMLElement, freezeCheckBox: HTMLInputElement, label: HTMLLabelElement) {
+    private async fillContent(backlinksInDoc: Backlink, allRefs: RefCollector, tc: HTMLElement) {
         const temp = document.createElement("div") as HTMLDivElement;
         markQueryable(temp);
         const div = document.createElement("div") as HTMLDivElement;
         div.innerHTML = backlinksInDoc?.dom ?? "";
         scanAllRef(allRefs, div, this.docID);
-        temp.appendChild(await this.path2div(temp, backlinksInDoc?.blockPaths ?? [], allRefs, freezeCheckBox, label));
+        temp.appendChild(await this.path2div(temp, backlinksInDoc?.blockPaths ?? [], allRefs));
         temp.appendChild(div);
         tc.appendChild(temp);
     }
 
-    private async path2div(docBlock: HTMLElement, blockPaths: BlockPath[], allRefs: RefCollector, freezeCheckBox: HTMLInputElement, label: HTMLLabelElement) {
+    private async path2div(docBlock: HTMLElement, blockPaths: BlockPath[], allRefs: RefCollector) {
         const div = document.createElement("div") as HTMLDivElement;
         const btn = div.appendChild(document.createElement("button"));
         btn.classList.add("b3-button");
@@ -291,7 +292,7 @@ class BKMaker {
         btn.style.outline = "none";
         btn.innerHTML = icon("Eye");
         btn.addEventListener("click", () => {
-            this.freeze(freezeCheckBox, label);
+            this.freeze();
             docBlock.style.display = "none";
         });
         const refPathList: HTMLSpanElement[] = [];
