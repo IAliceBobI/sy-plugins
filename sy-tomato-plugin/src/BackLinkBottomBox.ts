@@ -4,6 +4,7 @@ import { DATA_ID, DATA_NODE_ID, DATA_TYPE } from "./libs/gconst";
 import { EventType, events } from "./libs/Events";
 import { MaxCache } from "./libs/cache";
 
+const MENTION_COUTING_SPAN = "MENTION_COUTING_SPAN";
 const QUERYABLE_ELEMENT = "QUERYABLE_ELEMENT";
 const BKMAKER_ADD = "BKMAKER_ADD";
 const MENTION_CACHE_TIME = 5 * 60 * 1000;
@@ -14,15 +15,14 @@ class BKMaker {
     private blBox: BackLinkBottomBox;
     private docID: string;
     private item: HTMLElement;
-    private countingSpan: HTMLSpanElement;
+    private mentionCounting: HTMLSpanElement;
     shouldFreeze: boolean;
     constructor(blBox: BackLinkBottomBox, docID: string) {
         this.docID = docID;
         this.blBox = blBox;
         this.shouldFreeze = false;
-        this.countingSpan = document.createElement("span");
-        this.countingSpan.classList.add("b3-label__text");
-        this.countingSpan.setAttribute(BKMAKER_ADD, "1");
+        this.mentionCounting = document.createElement("span");
+        this.mentionCounting.classList.add("b3-label__text");
     }
 
     async doTheWork(item: HTMLElement) {
@@ -44,14 +44,17 @@ class BKMaker {
                     if (!this.shouldFreeze) {
                         // substitute old for new
                         this.container.setAttribute(DATA_NODE_ID, lastID);
-                        this.countingSpan.setAttribute(DATA_NODE_ID, lastID);
                         lastElement.insertAdjacentElement("afterend", this.container);
-                        // lastElement.insertAdjacentElement("afterend", this.countingSpan);
-                        divs.forEach(e => e.parentElement?.removeChild(e));
+                        this.integrateCounting();
+                        deleteSelf(divs);
                     }
                 }
             }
         });
+    }
+
+    private async integrateCounting() {
+        this.container.querySelector(`[${MENTION_COUTING_SPAN}]`)?.appendChild(this.mentionCounting)
     }
 
     private async sholdInsertDiv(lastID: string) {
@@ -66,20 +69,22 @@ class BKMaker {
 
     private async findOrLoadFromCache() {
         const divs = Array.from(this.item.parentElement.querySelectorAll(`[${BKMAKER_ADD}="1"]`)?.values() ?? []);
-        if (divs.length == 0) {
-            const oldEle = this.blBox.divCache.get(this.docID);
-            if (oldEle) {
-                const [lastID, lastElement] = getLastElementID(this.item);
-                if (await this.sholdInsertDiv(lastID)) {
-
-                    oldEle.setAttribute(DATA_NODE_ID, lastID);
+        const [lastID, lastElement] = getLastElementID(this.item);
+        if (await this.sholdInsertDiv(lastID)) {
+            let oldEle: HTMLElement;
+            if (divs.length == 0) {
+                oldEle = this.blBox.divCache.get(this.docID);
+                if (oldEle) {
                     lastElement.insertAdjacentElement("afterend", oldEle);
-
-                    this.countingSpan.setAttribute(DATA_NODE_ID, lastID);
-                    // lastElement.insertAdjacentElement("afterend", this.countingSpan);
-
-                    divs.push(oldEle);
                 }
+            } else {
+                oldEle = divs.pop() as HTMLElement;
+                deleteSelf(divs);
+            }
+            if (oldEle) {
+                oldEle.setAttribute(DATA_NODE_ID, lastID);
+                this.integrateCounting();
+                divs.push(oldEle);
             }
         }
         return divs;
@@ -111,11 +116,11 @@ class BKMaker {
                 for (const mentionItem of mentionDoc.backmentions) {
                     await this.fillContent(mentionItem, allRefs, contentContainer);
                     ++count;
-                    this.countingSpan.innerText = String(count);
+                    this.mentionCounting.innerText = `提及读取中：${count}`;
                     if (count >= this.blBox.mentionCount) break outer;
                 }
             }
-            this.countingSpan.innerText = "";
+            this.mentionCounting.innerText = "";
         }
 
         this.refreshTopDiv(topDiv, allRefs);
@@ -191,7 +196,10 @@ class BKMaker {
                 this.searchInDiv(query.value);
             });
             btn.innerHTML = "<svg><use xlink:href=\"#iconTrashcan\"></use></svg>";
+            topDiv.appendChild(createSpan("&nbsp;".repeat(2)));
         }
+        const container_mention_counting = topDiv.appendChild(document.createElement("span"));
+        container_mention_counting.setAttribute(MENTION_COUTING_SPAN, "1");
     }
 
     private searchInDiv(newValue: string) {
@@ -429,4 +437,8 @@ function addRef(txt: string, id: string, allRefs: RefCollector, docID: string) {
             id,
         });
     }
+}
+
+function deleteSelf(divs: Element[]) {
+    divs.forEach(e => e.parentElement?.removeChild(e));
 }
