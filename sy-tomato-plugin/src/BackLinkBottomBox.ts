@@ -288,6 +288,7 @@ class BKMaker {
     private async path2div(docBlock: HTMLElement, blockPaths: BlockPath[], allRefs: RefCollector) {
         const div = document.createElement("div") as HTMLDivElement;
         const btn = div.appendChild(document.createElement("button"));
+        btn.title = "隐藏此行";
         btn.classList.add("b3-button");
         btn.classList.add("b3-button--text");
         btn.style.border = "none";
