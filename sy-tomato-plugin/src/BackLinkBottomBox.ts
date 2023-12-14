@@ -203,7 +203,7 @@ class BKMaker {
             btn.classList.add("b3-button");
             btn.classList.add("b3-button--outline");
             btn.addEventListener("click", async () => {
-                this.freeze();
+                this.unfreeze();
                 query.value = "";
                 this.searchInDiv(query.value);
             });
