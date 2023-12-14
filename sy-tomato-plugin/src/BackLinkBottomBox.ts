@@ -1,6 +1,6 @@
 import { Plugin, } from "siyuan";
 import { chunks, extractLinks, isValidNumber, siyuanCache } from "./libs/utils";
-import { DATA_ID, DATA_NODE_ID, DATA_TYPE } from "./libs/gconst";
+import { BLOCK_REF, DATA_ID, DATA_NODE_ID, DATA_TYPE } from "./libs/gconst";
 import { EventType, events } from "./libs/Events";
 import { MaxCache } from "./libs/cache";
 
@@ -147,9 +147,21 @@ class BKMaker {
 
     private refreshTopDiv(topDiv: HTMLDivElement, allRefs: RefCollector) {
         topDiv.innerHTML = "";
-        for (const { lnk } of allRefs.values()) {
+        for (const { lnk, id } of allRefs.values()) {
             const d = topDiv.appendChild(document.createElement("span"));
             markQueryable(d);
+            const btn = d.appendChild(this.createEyeBtn());
+            btn.addEventListener("click", () => {
+                console.log(`${id} ${lnk.textContent}`)
+                this.freeze();
+                this.container.querySelectorAll(`[${QUERYABLE_ELEMENT}]`).forEach((e: HTMLElement) => {
+                    console.log(e)
+                    const divs = e.querySelectorAll(`[${DATA_ID}="${id}"]`);
+                    if (divs.length > 0) {
+                        e.style.display = "none";
+                    }
+                });
+            });
             d.appendChild(lnk);
             d.appendChild(createSpan("&nbsp;".repeat(7)));
         }
@@ -185,7 +197,7 @@ class BKMaker {
         {
             const btn = topDiv.appendChild(document.createElement("button")) as HTMLButtonElement;
             setReadonly(btn);
-            btn.title = "粘贴内容到查询框";
+            btn.title = "粘贴内容到查询框，并锁定";
             btn.classList.add("b3-button");
             btn.classList.add("b3-button--outline");
             btn.addEventListener("click", async () => {
@@ -199,7 +211,7 @@ class BKMaker {
         {
             const btn = topDiv.appendChild(document.createElement("button")) as HTMLButtonElement;
             setReadonly(btn);
-            btn.title = "清空查询框";
+            btn.title = "清空查询框，并解除锁定";
             btn.classList.add("b3-button");
             btn.classList.add("b3-button--outline");
             btn.addEventListener("click", async () => {
@@ -287,13 +299,7 @@ class BKMaker {
 
     private async path2div(docBlock: HTMLElement, blockPaths: BlockPath[], allRefs: RefCollector) {
         const div = document.createElement("div") as HTMLDivElement;
-        const btn = div.appendChild(document.createElement("button"));
-        btn.title = "隐藏此行";
-        btn.classList.add("b3-button");
-        btn.classList.add("b3-button--text");
-        btn.style.border = "none";
-        btn.style.outline = "none";
-        btn.innerHTML = icon("Eye");
+        const btn = div.appendChild(this.createEyeBtn());
         btn.addEventListener("click", () => {
             this.freeze();
             docBlock.style.display = "none";
@@ -337,6 +343,17 @@ class BKMaker {
             div.appendChild(s);
         });
         return div;
+    }
+
+    private createEyeBtn() {
+        const btn = document.createElement("button")
+        btn.title = "隐藏";
+        btn.classList.add("b3-button");
+        btn.classList.add("b3-button--text");
+        btn.style.border = "none";
+        btn.style.outline = "none";
+        btn.innerHTML = icon("Eye");
+        return btn;
     }
 }
 
@@ -420,7 +437,7 @@ function refTag(id: string, text: string, count: number, len?: number): HTMLSpan
     const span = document.createElement("span") as HTMLSpanElement;
 
     const refSpan = span.appendChild(document.createElement("span"));
-    refSpan.setAttribute(DATA_TYPE, "block-ref");
+    refSpan.setAttribute(DATA_TYPE, BLOCK_REF);
     refSpan.setAttribute(DATA_ID, id);
     refSpan.innerText = text;
     if (len) {
@@ -438,7 +455,7 @@ function refTag(id: string, text: string, count: number, len?: number): HTMLSpan
 }
 
 function scanAllRef(allRefs: RefCollector, div: HTMLDivElement, docID: string) {
-    for (const element of div.querySelectorAll(`[${DATA_TYPE}*="block-ref"]`)) {
+    for (const element of div.querySelectorAll(`[${DATA_TYPE}*="${BLOCK_REF}"]`)) {
         const id = element.getAttribute(DATA_ID);
         const txt = element.textContent;
         addRef(txt, id, allRefs, docID);
