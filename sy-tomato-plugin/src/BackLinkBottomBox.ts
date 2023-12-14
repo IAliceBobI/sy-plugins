@@ -54,7 +54,7 @@ class BKMaker {
     }
 
     private async integrateCounting() {
-        this.container.querySelector(`[${MENTION_COUTING_SPAN}]`)?.appendChild(this.mentionCounting)
+        this.container.querySelector(`[${MENTION_COUTING_SPAN}]`)?.appendChild(this.mentionCounting);
     }
 
     private async sholdInsertDiv(lastID: string) {
@@ -95,7 +95,7 @@ class BKMaker {
         const backlink2 = await siyuanCache.getBacklink2(6 * 1000, this.docID);
         const contentContainer = document.createElement("div");
         const btnDiv = document.createElement("div");
-        this.initBtnDiv(btnDiv);
+        const { freezeCheckBox, label } = this.initBtnDiv(btnDiv);
         const topDiv = document.createElement("div");
         this.container.appendChild(btnDiv);
         this.container.appendChild(topDiv);
@@ -106,7 +106,7 @@ class BKMaker {
             return siyuanCache.getBacklinkDoc(12 * 1000, this.docID, backlink.id);
         }))) {
             for (const backlinksInDoc of backlinkDoc.backlinks) {
-                await this.fillContent(backlinksInDoc, allRefs, contentContainer);
+                await this.fillContent(backlinksInDoc, allRefs, contentContainer, freezeCheckBox, label);
             }
         }
         if (this.blBox.mentionCount > 0) {
@@ -114,7 +114,7 @@ class BKMaker {
             outer: for (const mention of backlink2.backmentions) {
                 const mentionDoc = await siyuanCache.getBackmentionDoc(MENTION_CACHE_TIME, this.docID, mention.id);
                 for (const mentionItem of mentionDoc.backmentions) {
-                    await this.fillContent(mentionItem, allRefs, contentContainer);
+                    await this.fillContent(mentionItem, allRefs, contentContainer, freezeCheckBox, label);
                     ++count;
                     this.mentionCounting.innerText = `提及读取中：${count}`;
                     if (count >= this.blBox.mentionCount) break outer;
@@ -150,20 +150,27 @@ class BKMaker {
         }
     }
 
+    private freeze(freezeCheckBox: HTMLInputElement, label: HTMLLabelElement) {
+        this.shouldFreeze = true;
+        freezeCheckBox.checked = true;
+        label.innerText = "🚫";
+    }
+
+    private unfreeze(freezeCheckBox: HTMLInputElement, label: HTMLLabelElement) {
+        this.shouldFreeze = false;
+        freezeCheckBox.checked = false;
+        label.innerText = "🔄";
+    }
+
     private initBtnDiv(topDiv: HTMLDivElement) {
         const { freezeCheckBox, label } = this.addRefreshCheckBox(topDiv);
-        const clickQueryField = () => {
-            this.shouldFreeze = true;
-            freezeCheckBox.checked = true;
-            label.innerText = "🚫";
-        };
-        this.addMentionCheckBox(topDiv, clickQueryField, freezeCheckBox, label);
+        this.addMentionCheckBox(topDiv, freezeCheckBox, label);
         const query = topDiv.appendChild(document.createElement("input"));
         setReadonly(query);
         {
             query.classList.add("b3-text-field");
             query.placeholder = "反链过滤";
-            query.addEventListener("focus", clickQueryField);
+            query.addEventListener("focus", () => { this.freeze(freezeCheckBox, label); });
             query.addEventListener("input", (event) => {
                 const newValue: string = (event.target as any).value;
                 this.searchInDiv(newValue.trim());
@@ -177,11 +184,11 @@ class BKMaker {
             btn.classList.add("b3-button");
             btn.classList.add("b3-button--outline");
             btn.addEventListener("click", async () => {
-                clickQueryField();
+                this.freeze(freezeCheckBox, label);
                 query.value = (await navigator.clipboard.readText()).trim();
                 this.searchInDiv(query.value);
             });
-            btn.innerHTML = "<svg><use xlink:href=\"#iconPaste\"></use></svg>";
+            btn.innerHTML = icon("Paste");
             topDiv.appendChild(createSpan("&nbsp;".repeat(2)));
         }
         {
@@ -191,19 +198,20 @@ class BKMaker {
             btn.classList.add("b3-button");
             btn.classList.add("b3-button--outline");
             btn.addEventListener("click", async () => {
-                clickQueryField();
+                this.freeze(freezeCheckBox, label);
                 query.value = "";
                 this.searchInDiv(query.value);
             });
-            btn.innerHTML = "<svg><use xlink:href=\"#iconTrashcan\"></use></svg>";
+            btn.innerHTML = icon("Trashcan");
             topDiv.appendChild(createSpan("&nbsp;".repeat(2)));
         }
         const container_mention_counting = topDiv.appendChild(document.createElement("span"));
         container_mention_counting.setAttribute(MENTION_COUTING_SPAN, "1");
+        return { freezeCheckBox, label };
     }
 
     private searchInDiv(newValue: string) {
-        this.container.querySelectorAll(`[${QUERYABLE_ELEMENT}="1"]`).forEach(e => {
+        this.container.querySelectorAll(`[${QUERYABLE_ELEMENT}]`).forEach(e => {
             const el = e as HTMLElement;
             if (!e.textContent.toLowerCase().includes(newValue.toLowerCase())) {
                 el.style.display = "none";
@@ -213,7 +221,7 @@ class BKMaker {
         });
     }
 
-    private addMentionCheckBox(topDiv: HTMLDivElement, clickQueryField: Func, freezeCheckBox: HTMLInputElement, label: HTMLElement) {
+    private addMentionCheckBox(topDiv: HTMLDivElement, freezeCheckBox: HTMLInputElement, label: HTMLLabelElement) {
         const mentionInput = topDiv.appendChild(document.createElement("input"));
         setReadonly(mentionInput);
         mentionInput.title = "展开的提及数";
@@ -221,11 +229,10 @@ class BKMaker {
         mentionInput.size = 1;
         mentionInput.value = String(this.blBox.mentionCount);
         mentionInput.addEventListener("focus", () => {
-            clickQueryField();
+            this.freeze(freezeCheckBox, label);
         });
         mentionInput.addEventListener("blur", () => {
-            this.shouldFreeze = freezeCheckBox.checked = false;
-            label.innerText = "🔄";
+            this.unfreeze(freezeCheckBox, label);
         });
         mentionInput.addEventListener("input", () => {
             const n = Number(mentionInput.value.trim());
@@ -264,20 +271,29 @@ class BKMaker {
         return { freezeCheckBox, label };
     }
 
-    private async fillContent(backlinksInDoc: Backlink, allRefs: RefCollector, tc: HTMLElement) {
+    private async fillContent(backlinksInDoc: Backlink, allRefs: RefCollector, tc: HTMLElement, freezeCheckBox: HTMLInputElement, label: HTMLLabelElement) {
         const temp = document.createElement("div") as HTMLDivElement;
         markQueryable(temp);
         const div = document.createElement("div") as HTMLDivElement;
         div.innerHTML = backlinksInDoc?.dom ?? "";
         scanAllRef(allRefs, div, this.docID);
-        temp.appendChild(await this.path2div(backlinksInDoc?.blockPaths ?? [], allRefs));
+        temp.appendChild(await this.path2div(temp, backlinksInDoc?.blockPaths ?? [], allRefs, freezeCheckBox, label));
         temp.appendChild(div);
         tc.appendChild(temp);
     }
 
-    private async path2div(blockPaths: BlockPath[], allRefs: RefCollector) {
+    private async path2div(docBlock: HTMLElement, blockPaths: BlockPath[], allRefs: RefCollector, freezeCheckBox: HTMLInputElement, label: HTMLLabelElement) {
         const div = document.createElement("div") as HTMLDivElement;
-        div.appendChild(createSpan("📄 "));
+        const btn = div.appendChild(document.createElement("button"));
+        btn.classList.add("b3-button");
+        btn.classList.add("b3-button--text");
+        btn.style.border = "none";
+        btn.style.outline = "none";
+        btn.innerHTML = icon("Eye");
+        btn.addEventListener("click", () => {
+            this.freeze(freezeCheckBox, label);
+            docBlock.style.display = "none";
+        });
         const refPathList: HTMLSpanElement[] = [];
         for (const ret of chunks(await Promise.all(blockPaths.map((refPath) => {
             return [refPath, siyuanCache.getBlockKramdown(MENTION_CACHE_TIME, refPath.id)];
@@ -441,4 +457,11 @@ function addRef(txt: string, id: string, allRefs: RefCollector, docID: string) {
 
 function deleteSelf(divs: Element[]) {
     divs.forEach(e => e.parentElement?.removeChild(e));
+}
+
+function icon(name: string, size?: number) {
+    if (size) {
+        return `<svg width="${size}px" height="${size}px"><use xlink:href="#icon${name}"></use></svg>`;
+    }
+    return `<svg><use xlink:href="#icon${name}"></use></svg>`;
 }
