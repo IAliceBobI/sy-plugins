@@ -35,8 +35,8 @@ class BKMaker {
 
     async doTheWork(item: HTMLElement) {
         this.item = item;
+        const divs = await this.findOrLoadFromCache();
         await navigator.locks.request("BackLinkBottomBox-BKMakerLock" + this.docID, { ifAvailable: true }, async (lock) => {
-            const divs = await this.findOrLoadFromCache();
             if (lock && !this.shouldFreeze) {
                 const [lastID, lastElement] = getLastElementID(this.item);
                 if (await this.sholdInsertDiv(lastID)) {
@@ -50,6 +50,7 @@ class BKMaker {
                     this.blBox.divCache.add(this.docID, this.container);
 
                     if (!this.shouldFreeze) {
+                        // this.printPreviousEle(this.item);
                         // substitute old for new
                         this.container.setAttribute(DATA_NODE_ID, lastID);
                         lastElement.insertAdjacentElement("afterend", this.container);
@@ -59,6 +60,15 @@ class BKMaker {
                 }
             }
         });
+    }
+
+    printPreviousEle(item: HTMLElement) {
+        console.log("---");
+        item = item.lastElementChild as HTMLElement;
+        for (let i = 0; i < 5 && item; i++) {
+            console.log(item.getAttribute(DATA_NODE_ID));
+            item = item.previousElementSibling as HTMLElement;
+        }
     }
 
     private async integrateCounting() {
@@ -76,26 +86,28 @@ class BKMaker {
     }
 
     async findOrLoadFromCache() {
-        const divs = Array.from(this.item.parentElement.querySelectorAll(`[${BKMAKER_ADD}="1"]`)?.values() ?? []);
-        const [lastID, lastElement] = getLastElementID(this.item);
-        if (await this.sholdInsertDiv(lastID)) {
-            let oldEle: HTMLElement;
-            if (divs.length == 0) {
-                oldEle = this.blBox.divCache.get(this.docID);
-                if (oldEle) {
-                    lastElement.insertAdjacentElement("afterend", oldEle);
+        return navigator.locks.request("BackLinkBottomBox-BKMakerLock" + this.docID, async () => {
+            const divs = Array.from(this.item.parentElement.querySelectorAll(`[${BKMAKER_ADD}="1"]`)?.values() ?? []);
+            const [lastID, lastElement] = getLastElementID(this.item);
+            if (await this.sholdInsertDiv(lastID)) {
+                let oldEle: HTMLElement;
+                if (divs.length == 0) {
+                    oldEle = this.blBox.divCache.get(this.docID);
+                    if (oldEle) {
+                        lastElement.insertAdjacentElement("afterend", oldEle);
+                    }
+                } else {
+                    oldEle = divs.pop() as HTMLElement;
+                    deleteSelf(divs);
                 }
-            } else {
-                oldEle = divs.pop() as HTMLElement;
-                deleteSelf(divs);
+                if (oldEle) {
+                    oldEle.setAttribute(DATA_NODE_ID, lastID);
+                    this.integrateCounting();
+                    divs.push(oldEle);
+                }
             }
-            if (oldEle) {
-                oldEle.setAttribute(DATA_NODE_ID, lastID);
-                this.integrateCounting();
-                divs.push(oldEle);
-            }
-        }
-        return divs;
+            return divs;
+        });
     }
 
     private async getBackLinks() {
@@ -439,7 +451,7 @@ export const backLinkBottomBox = new BackLinkBottomBox();
 function getLastElementID(item: HTMLElement): [string, HTMLElement] {
     let last = item.lastElementChild.previousElementSibling as HTMLElement;
     if (!last) last = item.lastElementChild as HTMLElement;
-    return [last.getAttribute(DATA_NODE_ID), last];
+    return [last.getAttribute(DATA_NODE_ID), item.lastElementChild as HTMLElement];
 }
 
 function markQueryable(e: HTMLElement) {
