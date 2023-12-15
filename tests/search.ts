@@ -9,7 +9,7 @@ enum SearchEngineConditionType {
 }
 
 type SearchEngineConditionOr = { type: SearchEngineConditionTypeOr, value: string }
-type SearchEngineCondition = { type: SearchEngineConditionType, value?: string, values?: SearchEngineConditionOr[] }
+type SearchEngineCondition = { type: SearchEngineConditionType, value: string, values: SearchEngineConditionOr[] }
 
 export class SearchEngine {
     private conditions: SearchEngineCondition[] = [];
@@ -22,11 +22,9 @@ export class SearchEngine {
     setQuery(query: string) {
         if (this.isCaseInsensitive)
             query = query.toLowerCase();
-        this.conditions = query
-            .replace(/[！!]+/g, "!")
-            .replace(/\s+/, " ")
-            .replace(/ ?\| ?/g, "|")
-            .split(" ").filter(c => c != "!").map(c => {
+        this.conditions = query.trim().replace(/[！!]+/g, "!").replace(/\s+/, " ")
+            .replace(/ ?\| ?/g, "|").split(" ").filter(c => c.length > 0)
+            .filter(c => c != "!").filter(c => c != "|").map(c => {
                 const con = c.split("|").map(c => c.trim()).filter(c => c.length > 0);
                 const ret = {} as SearchEngineCondition;
                 if (con.length == 1) {
@@ -55,7 +53,7 @@ export class SearchEngine {
                 return ret;
             }).filter(c => {
                 if (c.type == SearchEngineConditionType.or) {
-                    if (c.values?.length == 0) return false;
+                    if (c.values.length == 0) return false;
                 }
                 return true;
             });
@@ -68,13 +66,27 @@ export class SearchEngine {
     match(text: string): boolean {
         if (this.isCaseInsensitive)
             text = text.toLowerCase();
-        console.log(text)
-        console.log(this.conditions)
         for (const con of this.conditions) {
-            if (typeof con === "string") {
-
-            } else {
-
+            if (con.type == SearchEngineConditionType.include) {
+                if (!text.includes(con.value)) return false;
+            } else if (con.type == SearchEngineConditionType.exclude) {
+                if (text.includes(con.value)) return false;
+            } else if (con.type == SearchEngineConditionType.or) {
+                let flag = false;
+                for (const subCon of con.values) {
+                    if (subCon.type == SearchEngineConditionTypeOr.exclude) {
+                        if (!text.includes(subCon.value)) {
+                            flag = true;
+                            break;
+                        }
+                    } else if (subCon.type == SearchEngineConditionTypeOr.include) {
+                        if (text.includes(subCon.value)) {
+                            flag = true;
+                            break;
+                        }
+                    }
+                }
+                if (!flag) return false;
             }
         }
         return true;
