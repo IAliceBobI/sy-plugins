@@ -230,11 +230,12 @@ class BKMaker {
         const se = new SearchEngine(true);
         se.setQuery(query);
         this.container.querySelectorAll(`[${QUERYABLE_ELEMENT}]`).forEach((e: HTMLElement) => {
-            // if (!e.textContent.toLowerCase().includes(query.toLowerCase())) {
-            //     el.style.display = "none";
-            // } else {
-            //     el.style.display = "";
-            // }
+            const m = se.match(e.textContent);
+            if (!m) {
+                e.style.display = "none";
+            } else {
+                e.style.display = "";
+            }
         });
     }
 
