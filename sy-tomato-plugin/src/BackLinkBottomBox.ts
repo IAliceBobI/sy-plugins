@@ -188,7 +188,7 @@ class BKMaker {
             help.classList.add("b3-label__text");
             help.title = "搜索语法";
             help.innerHTML = icon("Help", 20);
-            help.addEventListener("click", () => { new Dialog({ title: "搜索语法", content: SEARCH_HELP }) });
+            help.addEventListener("click", () => { new Dialog({ title: "搜索语法", content: SEARCH_HELP }); });
             topDiv.appendChild(createSpan("&nbsp;".repeat(1)));
         }
         const query = topDiv.appendChild(document.createElement("input"));
