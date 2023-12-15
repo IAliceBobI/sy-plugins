@@ -207,7 +207,7 @@ class BKMaker {
         {
             const btn = topDiv.appendChild(document.createElement("button")) as HTMLButtonElement;
             setReadonly(btn);
-            btn.title = "粘贴内容到查询框，并锁定";
+            btn.title = "粘贴内容到搜索框，并锁定";
             btn.classList.add("b3-button");
             btn.classList.add("b3-button--outline");
             btn.addEventListener("click", () => {
@@ -223,7 +223,19 @@ class BKMaker {
         {
             const btn = topDiv.appendChild(document.createElement("button")) as HTMLButtonElement;
             setReadonly(btn);
-            btn.title = "清空查询框，并解除锁定";
+            btn.title = "复制搜索框内容到剪贴板";
+            btn.classList.add("b3-button");
+            btn.classList.add("b3-button--outline");
+            btn.addEventListener("click", async () => {
+                navigator.clipboard.writeText(query.value);
+            });
+            btn.innerHTML = icon("Copy");
+            topDiv.appendChild(createSpan("&nbsp;".repeat(2)));
+        }
+        {
+            const btn = topDiv.appendChild(document.createElement("button")) as HTMLButtonElement;
+            setReadonly(btn);
+            btn.title = "清空搜索框，并解除锁定";
             btn.classList.add("b3-button");
             btn.classList.add("b3-button--outline");
             btn.addEventListener("click", () => {
