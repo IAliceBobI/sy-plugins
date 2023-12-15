@@ -1,7 +1,5 @@
 #!/bin/env zsh
 
-set -ex
-
 projDir=${0:a:h:h}
 cd ${projDir}
 

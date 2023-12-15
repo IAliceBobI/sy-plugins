@@ -3,6 +3,7 @@ import { chunks, extractLinks, isValidNumber, siyuanCache } from "./libs/utils";
 import { BLOCK_REF, DATA_ID, DATA_NODE_ID, DATA_TYPE } from "./libs/gconst";
 import { EventType, events } from "./libs/Events";
 import { MaxCache } from "./libs/cache";
+import { SearchEngine } from "./libs/search";
 
 const MENTION_COUTING_SPAN = "MENTION_COUTING_SPAN";
 const QUERYABLE_ELEMENT = "QUERYABLE_ELEMENT";
@@ -226,19 +227,8 @@ class BKMaker {
     }
 
     private searchInDiv(query: string) {
-        const conditions = query
-            .replace(/[！!]+/g, "!")
-            .replace(/\s+/, " ")
-            .replace(/ ?\| ?/g, "|")
-            .split(" ").map(c => {
-                const or = c.split("|").map(c => c.trim()).filter(c => c.length > 0);
-                if (or.length == 1) return or[0];
-                return or;
-            });
-        if (conditions.length == 0) return;
-        console.log(conditions);
-
-
+        const se = new SearchEngine(true);
+        se.setQuery(query);
         this.container.querySelectorAll(`[${QUERYABLE_ELEMENT}]`).forEach((e: HTMLElement) => {
             // if (!e.textContent.toLowerCase().includes(query.toLowerCase())) {
             //     el.style.display = "none";
