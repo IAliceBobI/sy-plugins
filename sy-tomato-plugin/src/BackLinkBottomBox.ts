@@ -200,10 +200,12 @@ class BKMaker {
             btn.title = "粘贴内容到查询框，并锁定";
             btn.classList.add("b3-button");
             btn.classList.add("b3-button--outline");
-            btn.addEventListener("click", async () => {
+            btn.addEventListener("click", () => {
                 this.freeze();
-                query.value = (await navigator.clipboard.readText()).trim();
-                this.searchInDiv(query.value);
+                navigator.clipboard.readText().then(t => {
+                    query.value = t;
+                    this.searchInDiv(query.value);
+                });
             });
             btn.innerHTML = icon("Paste");
             topDiv.appendChild(createSpan("&nbsp;".repeat(2)));
@@ -214,7 +216,7 @@ class BKMaker {
             btn.title = "清空查询框，并解除锁定";
             btn.classList.add("b3-button");
             btn.classList.add("b3-button--outline");
-            btn.addEventListener("click", async () => {
+            btn.addEventListener("click", () => {
                 this.unfreeze();
                 query.value = "";
                 this.searchInDiv(query.value);

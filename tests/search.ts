@@ -28,7 +28,7 @@ export class SearchEngine {
                 const con = c.split("|").map(c => c.trim()).filter(c => c.length > 0);
                 const ret = {} as SearchEngineCondition;
                 if (con.length == 1) {
-                    const s = con[0]
+                    const s = con[0];
                     if (s[0] == "!") {
                         ret.type = SearchEngineConditionType.exclude;
                         ret.value = s.slice(1);
@@ -42,13 +42,13 @@ export class SearchEngine {
                         const ret = {} as SearchEngineConditionOr;
                         if (c[0] == "!") {
                             ret.type = SearchEngineConditionTypeOr.exclude;
-                            ret.value = c.slice(1)
+                            ret.value = c.slice(1);
                         } else {
                             ret.type = SearchEngineConditionTypeOr.include;
-                            ret.value = c
+                            ret.value = c;
                         }
                         return ret;
-                    })
+                    });
                 }
                 return ret;
             }).filter(c => {
