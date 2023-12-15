@@ -75,7 +75,7 @@ class BKMaker {
         return false;
     }
 
-    private async findOrLoadFromCache() {
+    async findOrLoadFromCache() {
         const divs = Array.from(this.item.parentElement.querySelectorAll(`[${BKMAKER_ADD}="1"]`)?.values() ?? []);
         const [lastID, lastElement] = getLastElementID(this.item);
         if (await this.sholdInsertDiv(lastID)) {
@@ -391,6 +391,7 @@ class BackLinkBottomBox {
     private makerCache: MaxCache<BKMaker> = new MaxCache(CACHE_LIMIT);
     private observer: MutationObserver;
     private docID: string = "";
+    private keepAliveID: any;
 
     async onload(plugin: Plugin) {
         this.plugin = plugin;
@@ -417,6 +418,11 @@ class BackLinkBottomBox {
                                 }
                             });
                             this.observer.observe(item, { childList: true });
+                            // keep
+                            clearInterval(this.keepAliveID);
+                            this.keepAliveID = setInterval(() => {
+                                maker.findOrLoadFromCache();
+                            }, 2000);
                         } else {
                             const maker = this.makerCache.getOrElse(nextDocID, () => { return new BKMaker(this, nextDocID); });
                             maker.doTheWork(item);
