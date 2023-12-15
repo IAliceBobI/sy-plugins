@@ -225,14 +225,26 @@ class BKMaker {
         container_mention_counting.setAttribute(MENTION_COUTING_SPAN, "1");
     }
 
-    private searchInDiv(newValue: string) {
-        this.container.querySelectorAll(`[${QUERYABLE_ELEMENT}]`).forEach(e => {
-            const el = e as HTMLElement;
-            if (!e.textContent.toLowerCase().includes(newValue.toLowerCase())) {
-                el.style.display = "none";
-            } else {
-                el.style.display = "";
-            }
+    private searchInDiv(query: string) {
+        const conditions = query
+            .replace(/[！!]+/g, "!")
+            .replace(/\s+/, " ")
+            .replace(/ ?\| ?/g, "|")
+            .split(" ").map(c => {
+                const or = c.split("|").map(c => c.trim()).filter(c => c.length > 0)
+                if (or.length == 1) return or[0];
+                return or;
+            });
+        if (conditions.length == 0) return;
+        console.log(conditions)
+
+
+        this.container.querySelectorAll(`[${QUERYABLE_ELEMENT}]`).forEach((e: HTMLElement) => {
+            // if (!e.textContent.toLowerCase().includes(query.toLowerCase())) {
+            //     el.style.display = "none";
+            // } else {
+            //     el.style.display = "";
+            // }
         });
     }
 
@@ -359,7 +371,7 @@ class BKMaker {
 class BackLinkBottomBox {
     public plugin: Plugin;
     public divCache: MaxCache<HTMLElement> = new MaxCache(CACHE_LIMIT);
-    
+
     private makerCache: MaxCache<BKMaker> = new MaxCache(CACHE_LIMIT);
     private observer: MutationObserver;
     private docID: string = "";
