@@ -1,6 +1,6 @@
 export class SearchEngine  {
  
     abc(){
-       console.log("dfdf")
+       console.log("dfdf");
     }
 }

@@ -1,6 +1,7 @@
 #!/bin/env zsh
 
-dir=$(pwd)
+dir=${0:a:h:h}
+cd ${dir}
 
 cd "${dir}/sy-progressive-plugin"
 rm -rf dev dist .eslintcache package.zip node_modules

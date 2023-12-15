@@ -231,12 +231,12 @@ class BKMaker {
             .replace(/\s+/, " ")
             .replace(/ ?\| ?/g, "|")
             .split(" ").map(c => {
-                const or = c.split("|").map(c => c.trim()).filter(c => c.length > 0)
+                const or = c.split("|").map(c => c.trim()).filter(c => c.length > 0);
                 if (or.length == 1) return or[0];
                 return or;
             });
         if (conditions.length == 0) return;
-        console.log(conditions)
+        console.log(conditions);
 
 
         this.container.querySelectorAll(`[${QUERYABLE_ELEMENT}]`).forEach((e: HTMLElement) => {
