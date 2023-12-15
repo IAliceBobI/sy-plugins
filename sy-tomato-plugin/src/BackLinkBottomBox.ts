@@ -1,9 +1,10 @@
-import { Plugin, } from "siyuan";
+import { Dialog, Plugin, } from "siyuan";
 import { chunks, extractLinks, isValidNumber, siyuanCache } from "./libs/utils";
 import { BLOCK_REF, DATA_ID, DATA_NODE_ID, DATA_TYPE } from "./libs/gconst";
 import { EventType, events } from "./libs/Events";
 import { MaxCache } from "./libs/cache";
 import { SearchEngine } from "./libs/search";
+import { SEARCH_HELP } from "./constants";
 
 const MENTION_COUTING_SPAN = "MENTION_COUTING_SPAN";
 const QUERYABLE_ELEMENT = "QUERYABLE_ELEMENT";
@@ -187,9 +188,7 @@ class BKMaker {
             help.classList.add("b3-label__text");
             help.title = "搜索语法";
             help.innerHTML = icon("Help", 20);
-            help.addEventListener("click", () => {
-                console.log("dasfasdf");
-            });
+            help.addEventListener("click", () => { new Dialog({ title: "搜索语法", content: SEARCH_HELP }) });
             topDiv.appendChild(createSpan("&nbsp;".repeat(1)));
         }
         const query = topDiv.appendChild(document.createElement("input"));
