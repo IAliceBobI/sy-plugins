@@ -182,10 +182,20 @@ class BKMaker {
     private initBtnDiv(topDiv: HTMLDivElement) {
         this.addRefreshCheckBox(topDiv);
         this.addMentionCheckBox(topDiv);
+        {
+            const help = topDiv.appendChild(document.createElement("span"));
+            help.classList.add("b3-label__text");
+            help.title = "搜索语法";
+            help.innerHTML = icon("Help", 20);
+            help.addEventListener("click", () => {
+                console.log("dasfasdf");
+            });
+            topDiv.appendChild(createSpan("&nbsp;".repeat(1)));
+        }
         const query = topDiv.appendChild(document.createElement("input"));
         setReadonly(query);
         {
-            query.title = "必须包含AA、BB，DD与EE至少包含一个，但不能包含CC，也不能包含FF"
+            query.title = "必须包含AA、BB，DD与EE至少包含一个，但不能包含CC，也不能包含FF";
             query.classList.add("b3-text-field");
             query.placeholder = "AA BB !CC DD|EE !FF";
             query.addEventListener("focus", () => { this.freeze(); });
