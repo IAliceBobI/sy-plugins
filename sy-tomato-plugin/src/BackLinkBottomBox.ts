@@ -185,8 +185,9 @@ class BKMaker {
         const query = topDiv.appendChild(document.createElement("input"));
         setReadonly(query);
         {
+            query.title = "必须包含AA、BB，DD与EE至少包含一个，但不能包含CC，也不能包含FF"
             query.classList.add("b3-text-field");
-            query.placeholder = "搜索";
+            query.placeholder = "AA BB !CC DD|EE !FF";
             query.addEventListener("focus", () => { this.freeze(); });
             query.addEventListener("input", (event) => {
                 const newValue: string = (event.target as any).value;
