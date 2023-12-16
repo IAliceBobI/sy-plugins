@@ -22,6 +22,7 @@ class BKMakerOut {
     private item: HTMLElement;
     private protyle: IProtyle;
     private mentionCounting: HTMLSpanElement;
+    // private scrollTop: number;
 
     private freezeCheckBox: HTMLInputElement;
     private label: HTMLLabelElement;
@@ -58,15 +59,25 @@ class BKMakerOut {
         });
     }
 
+    // private saveScrollTop() {
+    //     this.scrollTop = this.protyle.contentElement.scrollTop;
+    // }
+
+    // private restoreScrollTop() {
+    //     this.protyle.contentElement.scrollTop = this.scrollTop;
+    // }
+
     private async integrateCounting() {
         this.container.querySelector(`[${MENTION_COUTING_SPAN}]`)?.appendChild(this.mentionCounting);
     }
 
     private async insertBkPanel(div: HTMLElement) {
+        // this.saveScrollTop();
         this.protyle.wysiwyg.element.style.paddingBottom = '0px'
         div.style.paddingLeft = this.protyle.wysiwyg.element.style.paddingLeft
         div.style.paddingRight = this.protyle.wysiwyg.element.style.paddingRight
         this.protyle.wysiwyg.element.insertAdjacentElement("afterend", div);
+        // this.restoreScrollTop();
     }
 
     async findOrLoadFromCache() {
