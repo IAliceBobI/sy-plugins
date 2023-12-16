@@ -21,7 +21,6 @@ class BKMaker {
     private docID: string;
     private item: HTMLElement;
     private protyle: IProtyle;
-    private scrollTop: number;
     private mentionCounting: HTMLSpanElement;
 
     private freezeCheckBox: HTMLInputElement;
@@ -43,7 +42,6 @@ class BKMaker {
             if (lock && !this.shouldFreeze) {
                 const [lastID, lastElement] = getLastElementID(this.item);
                 if (await this.sholdInsertDiv(lastID)) {
-                    this.saveScrollTop()
                     // retrieve new data
                     this.container = document.createElement("div");
                     await this.getBackLinks(); // start
@@ -60,21 +58,10 @@ class BKMaker {
                         this.integrateCounting();
                         deleteSelf(divs);
                         this.rmLastDupBlock();
-                        this.restoreScrollTop();
                     }
                 }
             }
         });
-    }
-
-    private saveScrollTop() {
-        this.scrollTop = this.protyle.contentElement.scrollTop;
-        console.log(this.scrollTop)
-
-    }
-
-    private restoreScrollTop() {
-        this.protyle.contentElement.scrollTop = this.scrollTop;
     }
 
     private rmLastDupBlock() {
@@ -98,6 +85,14 @@ class BKMaker {
     }
 
     private async sholdInsertDiv(lastID: string) {
+        // const totalLen = this.protyle.contentElement.scrollHeight;
+        // const scrollPosition = this.protyle.contentElement.scrollTop;
+        // const winHeight = window.innerHeight;
+        // // console.log(`${1000 + scrollPosition + winHeight} ~~ ${totalLen}`)
+        // if (1000 + scrollPosition + winHeight >= totalLen){
+        //     console.log(`${1000 + scrollPosition + winHeight} > ${totalLen}`)
+        //     return true;
+        // }
         const allIDs = await siyuanCache.getChildBlocks(3 * 1000, this.docID);
         for (const { id } of allIDs.slice(-5)) {
             if (id === lastID) {
@@ -112,7 +107,6 @@ class BKMaker {
             const divs = Array.from(this.item.parentElement.querySelectorAll(`[${BKMAKER_ADD}="1"]`)?.values() ?? []);
             const [lastID, lastElement] = getLastElementID(this.item);
             if (await this.sholdInsertDiv(lastID)) {
-                this.saveScrollTop();
                 let oldEle: HTMLElement;
                 if (divs.length == 0) {
                     oldEle = this.blBox.divCache.get(this.docID);
@@ -129,7 +123,6 @@ class BKMaker {
                     this.integrateCounting();
                     divs.push(oldEle);
                 }
-                this.restoreScrollTop();
             }
             return divs;
         });
@@ -428,7 +421,7 @@ class BackLinkBottomBox {
     private makerCache: MaxCache<BKMaker> = new MaxCache(CACHE_LIMIT);
     private observer: MutationObserver;
     private docID: string = "";
-    // private keepAliveID: any;
+    private keepAliveID: any;
 
     async onload(plugin: Plugin) {
         this.plugin = plugin;
@@ -456,10 +449,10 @@ class BackLinkBottomBox {
                             });
                             this.observer.observe(item, { childList: true });
                             // keep
-                            // clearInterval(this.keepAliveID);
-                            // this.keepAliveID = setInterval(() => {
-                            //     maker.findOrLoadFromCache();
-                            // }, 1500);
+                            clearInterval(this.keepAliveID);
+                            this.keepAliveID = setInterval(() => {
+                                maker.findOrLoadFromCache();
+                            }, 1500);
                         } else {
                             const maker = this.makerCache.getOrElse(nextDocID, () => { return new BKMaker(this, nextDocID); });
                             maker.doTheWork(item, detail.protyle);
