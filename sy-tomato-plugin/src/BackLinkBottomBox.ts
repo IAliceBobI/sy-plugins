@@ -69,6 +69,8 @@ class BKMaker {
 
     private saveScrollTop() {
         this.scrollTop = this.protyle.contentElement.scrollTop;
+        console.log(this.scrollTop)
+
     }
 
     private restoreScrollTop() {
@@ -426,7 +428,7 @@ class BackLinkBottomBox {
     private makerCache: MaxCache<BKMaker> = new MaxCache(CACHE_LIMIT);
     private observer: MutationObserver;
     private docID: string = "";
-    private keepAliveID: any;
+    // private keepAliveID: any;
 
     async onload(plugin: Plugin) {
         this.plugin = plugin;
@@ -454,10 +456,10 @@ class BackLinkBottomBox {
                             });
                             this.observer.observe(item, { childList: true });
                             // keep
-                            clearInterval(this.keepAliveID);
-                            this.keepAliveID = setInterval(() => {
-                                maker.findOrLoadFromCache();
-                            }, 1500);
+                            // clearInterval(this.keepAliveID);
+                            // this.keepAliveID = setInterval(() => {
+                            //     maker.findOrLoadFromCache();
+                            // }, 1500);
                         } else {
                             const maker = this.makerCache.getOrElse(nextDocID, () => { return new BKMaker(this, nextDocID); });
                             maker.doTheWork(item, detail.protyle);
