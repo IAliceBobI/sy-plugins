@@ -1,5 +1,5 @@
 import { BLOCK_REF, DATA_ID, DATA_NODE_ID, DATA_TYPE } from "./gconst";
-import { siyuanCache } from "./utils";
+import { chunks, extractLinks, siyuanCache } from "./utils";
 
 export function setReadonly(e: HTMLElement, all = false) {
     e.setAttribute("contenteditable", "false");
@@ -107,7 +107,7 @@ export function getLastElementID(item: HTMLElement) {
     return item.lastElementChild.getAttribute(DATA_NODE_ID);
 }
 
-export  function createEyeBtn() {
+export function createEyeBtn() {
     const btn = document.createElement("button");
     btn.title = "隐藏";
     btn.classList.add("b3-button");
@@ -117,3 +117,70 @@ export  function createEyeBtn() {
     btn.innerHTML = icon("Eye");
     return btn;
 }
+
+export const MENTION_CACHE_TIME = 5 * 60 * 1000;
+
+export interface IBKMaker {
+    docID: string
+    freeze: Func;
+}
+
+export async function fillContent(self: IBKMaker, backlinksInDoc: Backlink, allRefs: RefCollector, tc: HTMLElement) {
+    const temp = document.createElement("div") as HTMLDivElement;
+    markQueryable(temp);
+    const div = document.createElement("div") as HTMLDivElement;
+    div.innerHTML = backlinksInDoc?.dom ?? "";
+    scanAllRef(allRefs, div, self.docID);
+    temp.appendChild(await path2div(self, temp, backlinksInDoc?.blockPaths ?? [], allRefs));
+    temp.appendChild(div);
+    tc.appendChild(temp);
+}
+
+export async function path2div(self: IBKMaker, docBlock: HTMLElement, blockPaths: BlockPath[], allRefs: RefCollector) {
+    const div = document.createElement("div") as HTMLDivElement;
+    const btn = div.appendChild(createEyeBtn());
+    btn.addEventListener("click", () => {
+        self.freeze();
+        docBlock.style.display = "none";
+    });
+    const refPathList: HTMLSpanElement[] = [];
+    for (const ret of chunks(await Promise.all(blockPaths.map((refPath) => {
+        return [refPath, siyuanCache.getBlockKramdown(MENTION_CACHE_TIME, refPath.id)];
+    }).flat()), 2)) {
+        const [refPath, { kramdown: _kramdown }] = ret as [BlockPath, GetBlockKramdown];
+        if (refPath.type == "NodeDocument") {
+            if (refPath.id == self.docID) break;
+            const fileName = refPath.name.split("/").pop();
+            refPathList.push(refTag(refPath.id, fileName, 0));
+            addRef(fileName, refPath.id, allRefs, self.docID);
+            continue;
+        }
+
+        if (refPath.type == "NodeHeading") {
+            refPathList.push(refTag(refPath.id, refPath.name, 0));
+            addRef(refPath.name, refPath.id, allRefs, self.docID);
+        } else {
+            refPathList.push(refTag(refPath.id, refPath.name, 0, 15));
+        }
+
+        let kramdown = _kramdown;
+        if (refPath.type == "NodeListItem" && kramdown) {
+            kramdown = kramdown.split("\n")[0];
+        }
+        if (kramdown) {
+            const { idLnks } = extractLinks(kramdown);
+            for (const idLnk of idLnks) {
+                addRef(idLnk.txt, idLnk.id, allRefs, self.docID);
+            }
+        }
+    }
+    refPathList.forEach((s, idx) => {
+        s = s.cloneNode(true) as HTMLScriptElement;
+        if (idx < refPathList.length - 1) {
+            s.appendChild(createSpan("  ➡  "));
+        }
+        div.appendChild(s);
+    });
+    return div;
+}
+

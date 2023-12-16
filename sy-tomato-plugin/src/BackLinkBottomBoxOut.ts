@@ -1,28 +1,29 @@
 import { Dialog, IProtyle, Plugin, openTab, } from "siyuan";
-import { chunks, extractLinks, isValidNumber, siyuanCache } from "./libs/utils";
+import { isValidNumber, siyuanCache } from "./libs/utils";
 import { BLOCK_REF, DATA_ID, DATA_TYPE } from "./libs/gconst";
 import { EventType, events } from "./libs/Events";
 import { MaxCache } from "./libs/cache";
 import { SearchEngine } from "./libs/search";
 import { SEARCH_HELP } from "./constants";
 import {
-    QUERYABLE_ELEMENT, addRef, createEyeBtn, createSpan,
-    deleteSelf, getLastElementID, hr, icon, markQueryable,
-    refTag, scanAllRef, shouldInsertDiv
+    IBKMaker,
+    MENTION_CACHE_TIME,
+    QUERYABLE_ELEMENT, createEyeBtn, createSpan,
+    deleteSelf, fillContent, getLastElementID, hr, icon, markQueryable,
+    shouldInsertDiv
 } from "./libs/bkUtils";
 
 const MENTION_COUTING_SPAN = "MENTION_COUTING_SPAN";
 const BKMAKER_ADD = "BKMAKER_ADD";
-const MENTION_CACHE_TIME = 5 * 60 * 1000;
 const CACHE_LIMIT = 100;
 
-class BKMakerOut {
+class BKMakerOut implements IBKMaker {
     private shouldFreeze: boolean;
     private mentionCount: number = 1;
 
     private container: HTMLElement;
     private blBox: BackLinkBottomBoxOut;
-    private docID: string;
+    public docID: string;
     private item: HTMLElement;
     private protyle: IProtyle;
     private mentionCounting: HTMLSpanElement;
@@ -125,7 +126,7 @@ class BKMakerOut {
             return siyuanCache.getBacklinkDoc(12 * 1000, this.docID, backlink.id);
         }))) {
             for (const backlinksInDoc of backlinkDoc.backlinks) {
-                await this.fillContent(backlinksInDoc, allRefs, contentContainer);
+                await fillContent(this, backlinksInDoc, allRefs, contentContainer);
             }
         }
         if (this.mentionCount > 0) {
@@ -133,7 +134,7 @@ class BKMakerOut {
             outer: for (const mention of backlink2.backmentions) {
                 const mentionDoc = await siyuanCache.getBackmentionDoc(MENTION_CACHE_TIME, this.docID, mention.id);
                 for (const mentionItem of mentionDoc.backmentions) {
-                    await this.fillContent(mentionItem, allRefs, contentContainer);
+                    await fillContent(this, mentionItem, allRefs, contentContainer);
                     ++count;
                     this.mentionCounting.innerText = `提及读取中：${count}`;
                     if (count >= this.mentionCount) break outer;
@@ -178,7 +179,7 @@ class BKMakerOut {
         }
     }
 
-    private freeze() {
+    public freeze() {
         this.shouldFreeze = true;
         this.freezeCheckBox.checked = true;
         this.label.innerHTML = icon("Focus", 15);
@@ -316,64 +317,7 @@ class BKMakerOut {
         }
     }
 
-    private async fillContent(backlinksInDoc: Backlink, allRefs: RefCollector, tc: HTMLElement) {
-        const temp = document.createElement("div") as HTMLDivElement;
-        markQueryable(temp);
-        const div = document.createElement("div") as HTMLDivElement;
-        div.innerHTML = backlinksInDoc?.dom ?? "";
-        scanAllRef(allRefs, div, this.docID);
-        temp.appendChild(await this.path2div(temp, backlinksInDoc?.blockPaths ?? [], allRefs));
-        temp.appendChild(div);
-        tc.appendChild(temp);
-    }
 
-    private async path2div(docBlock: HTMLElement, blockPaths: BlockPath[], allRefs: RefCollector) {
-        const div = document.createElement("div") as HTMLDivElement;
-        const btn = div.appendChild(createEyeBtn());
-        btn.addEventListener("click", () => {
-            this.freeze();
-            docBlock.style.display = "none";
-        });
-        const refPathList: HTMLSpanElement[] = [];
-        for (const ret of chunks(await Promise.all(blockPaths.map((refPath) => {
-            return [refPath, siyuanCache.getBlockKramdown(MENTION_CACHE_TIME, refPath.id)];
-        }).flat()), 2)) {
-            const [refPath, { kramdown: _kramdown }] = ret as [BlockPath, GetBlockKramdown];
-            if (refPath.type == "NodeDocument") {
-                if (refPath.id == this.docID) break;
-                const fileName = refPath.name.split("/").pop();
-                refPathList.push(refTag(refPath.id, fileName, 0));
-                addRef(fileName, refPath.id, allRefs, this.docID);
-                continue;
-            }
-
-            if (refPath.type == "NodeHeading") {
-                refPathList.push(refTag(refPath.id, refPath.name, 0));
-                addRef(refPath.name, refPath.id, allRefs, this.docID);
-            } else {
-                refPathList.push(refTag(refPath.id, refPath.name, 0, 15));
-            }
-
-            let kramdown = _kramdown;
-            if (refPath.type == "NodeListItem" && kramdown) {
-                kramdown = kramdown.split("\n")[0];
-            }
-            if (kramdown) {
-                const { idLnks } = extractLinks(kramdown);
-                for (const idLnk of idLnks) {
-                    addRef(idLnk.txt, idLnk.id, allRefs, this.docID);
-                }
-            }
-        }
-        refPathList.forEach((s, idx) => {
-            s = s.cloneNode(true) as HTMLScriptElement;
-            if (idx < refPathList.length - 1) {
-                s.appendChild(createSpan("  ➡  "));
-            }
-            div.appendChild(s);
-        });
-        return div;
-    }
 }
 
 class BackLinkBottomBoxOut {
