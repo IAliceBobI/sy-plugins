@@ -1,6 +1,7 @@
-import { Dialog, IProtyle, Plugin, } from "siyuan";
+import { Dialog, IProtyle, Plugin, openTab, } from "siyuan";
 import { chunks, extractLinks, isValidNumber, siyuanCache } from "./libs/utils";
 import { BLOCK_REF, DATA_ID, DATA_TYPE } from "./libs/gconst";
+import { setReadonly } from "./libs/domUtils";
 import { EventType, events } from "./libs/Events";
 import { MaxCache } from "./libs/cache";
 import { SearchEngine } from "./libs/search";
@@ -149,12 +150,17 @@ class BKMakerOut {
 
         this.refreshTopDiv(topDiv, allRefs);
 
-        this.container.querySelectorAll(`[${DATA_TYPE}$=${BLOCK_REF}]`).forEach((e: HTMLElement) => {
-            if (e.getAttribute(DATA_ID) == this.docID) {
-                e.removeAttribute(BLOCK_REF)
-                e.removeAttribute(DATA_ID)
-            }
-        })
+        this.container.querySelectorAll(`[${DATA_TYPE}*="${BLOCK_REF}"]`).forEach((e: HTMLElement) => {
+            const btn = document.createElement("button") as HTMLButtonElement;
+            btn.style.border = "transparent";
+            btn.style.background = "var(--b3-button)";
+            btn.style.color = "var(--b3-protyle-inline-blockref-color)";
+            btn.textContent = e.textContent;
+            btn.addEventListener("click", () => {
+                openTab({ app: this.blBox.plugin.app, doc: { id: e.getAttribute(DATA_ID), action: ["cb-get-all", "cb-get-focus", "cb-get-hl"] } });
+            });
+            e.parentElement.replaceChild(btn, e);
+        });
     }
 
     private refreshTopDiv(topDiv: HTMLDivElement, allRefs: RefCollector) {
