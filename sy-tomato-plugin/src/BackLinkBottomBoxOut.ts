@@ -5,7 +5,11 @@ import { EventType, events } from "./libs/Events";
 import { MaxCache } from "./libs/cache";
 import { SearchEngine } from "./libs/search";
 import { SEARCH_HELP } from "./constants";
-import { QUERYABLE_ELEMENT, addRef, createSpan, deleteSelf, getLastElementID, hr, icon, markQueryable, refTag, scanAllRef, sholdInsertDiv as shouldInsertDiv } from "./libs/bkUtils";
+import {
+    QUERYABLE_ELEMENT, addRef, createEyeBtn, createSpan,
+    deleteSelf, getLastElementID, hr, icon, markQueryable,
+    refTag, scanAllRef, shouldInsertDiv
+} from "./libs/bkUtils";
 
 const MENTION_COUTING_SPAN = "MENTION_COUTING_SPAN";
 const BKMAKER_ADD = "BKMAKER_ADD";
@@ -159,7 +163,7 @@ class BKMakerOut {
         for (const { lnk, id } of allRefs.values()) {
             const d = topDiv.appendChild(document.createElement("span"));
             markQueryable(d);
-            const btn = d.appendChild(this.createEyeBtn());
+            const btn = d.appendChild(createEyeBtn());
             btn.addEventListener("click", () => {
                 this.freeze();
                 this.container.querySelectorAll(`[${QUERYABLE_ELEMENT}]`).forEach((e: HTMLElement) => {
@@ -325,7 +329,7 @@ class BKMakerOut {
 
     private async path2div(docBlock: HTMLElement, blockPaths: BlockPath[], allRefs: RefCollector) {
         const div = document.createElement("div") as HTMLDivElement;
-        const btn = div.appendChild(this.createEyeBtn());
+        const btn = div.appendChild(createEyeBtn());
         btn.addEventListener("click", () => {
             this.freeze();
             docBlock.style.display = "none";
@@ -369,17 +373,6 @@ class BKMakerOut {
             div.appendChild(s);
         });
         return div;
-    }
-
-    private createEyeBtn() {
-        const btn = document.createElement("button");
-        btn.title = "隐藏";
-        btn.classList.add("b3-button");
-        btn.classList.add("b3-button--text");
-        btn.style.border = "none";
-        btn.style.outline = "none";
-        btn.innerHTML = icon("Eye");
-        return btn;
     }
 }
 

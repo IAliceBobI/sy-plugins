@@ -79,7 +79,7 @@ export function icon(name: string, size?: number) {
     return `<svg><use xlink:href="#icon${name}"></use></svg>`;
 }
 
-export async function sholdInsertDiv(lastID: string, docID: string) {
+export async function shouldInsertDiv(lastID: string, docID: string) {
     // const totalLen = this.protyle.contentElement.scrollHeight;
     // const scrollPosition = this.protyle.contentElement.scrollTop;
     // const winHeight = window.innerHeight;
@@ -105,4 +105,15 @@ export function getSecondLastElementID(item: HTMLElement) {
 
 export function getLastElementID(item: HTMLElement) {
     return item.lastElementChild.getAttribute(DATA_NODE_ID);
+}
+
+export  function createEyeBtn() {
+    const btn = document.createElement("button");
+    btn.title = "隐藏";
+    btn.classList.add("b3-button");
+    btn.classList.add("b3-button--text");
+    btn.style.border = "none";
+    btn.style.outline = "none";
+    btn.innerHTML = icon("Eye");
+    return btn;
 }
