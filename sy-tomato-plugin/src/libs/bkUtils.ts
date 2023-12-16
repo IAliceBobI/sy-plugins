@@ -196,7 +196,7 @@ export async function integrateCounting(self: IBKMaker) {
     self.container.querySelector(`[${MENTION_COUTING_SPAN}]`)?.appendChild(self.mentionCounting);
 }
 
-export function refreshTopDiv(self: IBKMaker, topDiv: HTMLDivElement, allRefs: RefCollector) {
+function refreshTopDiv(self: IBKMaker, topDiv: HTMLDivElement, allRefs: RefCollector) {
     topDiv.innerHTML = "";
     for (const { lnk, id } of allRefs.values()) {
         const d = topDiv.appendChild(document.createElement("span"));
@@ -228,7 +228,7 @@ function unfreeze(self: IBKMaker) {
     self.label.innerHTML = icon("Play", 15);
 }
 
-export function searchInDiv(self: IBKMaker, query: string) {
+function searchInDiv(self: IBKMaker, query: string) {
     const se = new SearchEngine(true);
     se.setQuery(query);
     self.container.querySelectorAll(`[${QUERYABLE_ELEMENT}]`).forEach((e: HTMLElement) => {
@@ -241,7 +241,7 @@ export function searchInDiv(self: IBKMaker, query: string) {
     });
 }
 
-export async function fillContent(self: IBKMaker, backlinksInDoc: Backlink, allRefs: RefCollector, tc: HTMLElement) {
+async function fillContent(self: IBKMaker, backlinksInDoc: Backlink, allRefs: RefCollector, tc: HTMLElement) {
     const temp = document.createElement("div") as HTMLDivElement;
     markQueryable(temp);
     const div = document.createElement("div") as HTMLDivElement;
@@ -252,7 +252,7 @@ export async function fillContent(self: IBKMaker, backlinksInDoc: Backlink, allR
     tc.appendChild(temp);
 }
 
-export async function path2div(self: IBKMaker, docBlock: HTMLElement, blockPaths: BlockPath[], allRefs: RefCollector) {
+async function path2div(self: IBKMaker, docBlock: HTMLElement, blockPaths: BlockPath[], allRefs: RefCollector) {
     const div = document.createElement("div") as HTMLDivElement;
     const btn = div.appendChild(createEyeBtn());
     btn.addEventListener("click", () => {
@@ -300,7 +300,7 @@ export async function path2div(self: IBKMaker, docBlock: HTMLElement, blockPaths
     return div;
 }
 
-export function addRefreshCheckBox(self: IBKMaker, topDiv: HTMLDivElement) {
+function addRefreshCheckBox(self: IBKMaker, topDiv: HTMLDivElement) {
     self.label = topDiv.appendChild(document.createElement("label"));
     {
         self.label.classList.add("b3-label");
@@ -323,7 +323,7 @@ export function addRefreshCheckBox(self: IBKMaker, topDiv: HTMLDivElement) {
     }
 }
 
-export function addMentionCheckBox(self: IBKMaker, topDiv: HTMLDivElement) {
+function addMentionCheckBox(self: IBKMaker, topDiv: HTMLDivElement) {
     const mentionInput = topDiv.appendChild(document.createElement("input"));
     mentionInput.title = "展开的提及数";
     mentionInput.classList.add("b3-text-field");
@@ -345,9 +345,9 @@ export function addMentionCheckBox(self: IBKMaker, topDiv: HTMLDivElement) {
     });
     topDiv.appendChild(createSpan("&nbsp;".repeat(4)));
 }
-export const MENTION_COUTING_SPAN = "MENTION_COUTING_SPAN";
+const MENTION_COUTING_SPAN = "MENTION_COUTING_SPAN";
 
-export function initBtnDiv(self: IBKMaker, topDiv: HTMLDivElement) {
+function initBtnDiv(self: IBKMaker, topDiv: HTMLDivElement) {
     addRefreshCheckBox(self, topDiv);
     addMentionCheckBox(self, topDiv);
     {
