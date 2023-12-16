@@ -5,7 +5,7 @@ import { EventType, events } from "./libs/Events";
 import { MaxCache } from "./libs/cache";
 import { SearchEngine } from "./libs/search";
 import { SEARCH_HELP } from "./constants";
-import { QUERYABLE_ELEMENT, addRef, createSpan, deleteSelf, hr, icon, markQueryable, refTag, scanAllRef } from "./libs/domUtils";
+import { QUERYABLE_ELEMENT, addRef, createSpan, deleteSelf, getLastElementID, hr, icon, markQueryable, refTag, scanAllRef, sholdInsertDiv as shouldInsertDiv } from "./libs/bkUtils";
 
 const MENTION_COUTING_SPAN = "MENTION_COUTING_SPAN";
 const BKMAKER_ADD = "BKMAKER_ADD";
@@ -40,7 +40,8 @@ class BKMakerOut {
         this.protyle = protyle;
         const divs = await this.findOrLoadFromCache();
         await navigator.locks.request("BackLinkBottomBox-BKMakerLock" + this.docID, { ifAvailable: true }, async (lock) => {
-            if (lock && !this.shouldFreeze && this.sholdUpdate()) {
+            const lastID = getLastElementID(this.item);
+            if (lock && !this.shouldFreeze && await shouldInsertDiv(lastID)) {
                 // retrieve new data
                 this.container = document.createElement("div");
                 await this.getBackLinks(); // start
@@ -68,18 +69,6 @@ class BKMakerOut {
     //     this.protyle.contentElement.scrollTop = this.scrollTop;
     // }
 
-    private sholdUpdate() {
-        // const totalLen = this.protyle.contentElement.scrollHeight;
-        // const scrollPosition = this.protyle.contentElement.scrollTop;
-        // const winHeight = window.innerHeight;
-        // if (1000 + scrollPosition + winHeight >= totalLen) {
-        //     l(`${1000 + scrollPosition + winHeight} > ${totalLen}`)
-        //     return true;
-        // }
-        // return false;
-        return true;
-    }
-
     private async integrateCounting() {
         this.container.querySelector(`[${MENTION_COUTING_SPAN}]`)?.appendChild(this.mentionCounting);
     }
@@ -97,19 +86,21 @@ class BKMakerOut {
     async findOrLoadFromCache() {
         return navigator.locks.request("BackLinkBottomBox-BKMakerLock" + this.docID, async () => {
             const divs = Array.from(this.item.parentElement.querySelectorAll(`[${BKMAKER_ADD}="1"]`)?.values() ?? []);
-            let oldEle: HTMLElement;
-            if (divs.length == 0) {
-                oldEle = this.blBox.divCache.get(this.docID);
-                if (oldEle) {
-                    this.insertBkPanel(oldEle);
+            if (await shouldInsertDiv(getLastElementID(this.item))) {
+                let oldEle: HTMLElement;
+                if (divs.length == 0) {
+                    oldEle = this.blBox.divCache.get(this.docID);
+                    if (oldEle) {
+                        this.insertBkPanel(oldEle);
+                    }
+                } else {
+                    oldEle = divs.pop() as HTMLElement;
+                    deleteSelf(divs);
                 }
-            } else {
-                oldEle = divs.pop() as HTMLElement;
-                deleteSelf(divs);
-            }
-            if (oldEle) {
-                this.integrateCounting();
-                divs.push(oldEle);
+                if (oldEle) {
+                    this.integrateCounting();
+                    divs.push(oldEle);
+                }
             }
             return divs;
         });

@@ -1,4 +1,5 @@
-import { BLOCK_REF, DATA_ID, DATA_TYPE } from "./gconst";
+import { BLOCK_REF, DATA_ID, DATA_NODE_ID, DATA_TYPE } from "./gconst";
+import { siyuanCache } from "./utils";
 
 export function setReadonly(e: HTMLElement, all = false) {
     e.setAttribute("contenteditable", "false");
@@ -76,4 +77,32 @@ export function icon(name: string, size?: number) {
         return `<svg width="${size}px" height="${size}px"><use xlink:href="#icon${name}"></use></svg>`;
     }
     return `<svg><use xlink:href="#icon${name}"></use></svg>`;
+}
+
+export async function sholdInsertDiv(lastID: string) {
+    // const totalLen = this.protyle.contentElement.scrollHeight;
+    // const scrollPosition = this.protyle.contentElement.scrollTop;
+    // const winHeight = window.innerHeight;
+    // if (1000 + scrollPosition + winHeight >= totalLen) {
+    //     l(`${1000 + scrollPosition + winHeight} > ${totalLen}`)
+    //     return true;
+    // }
+    // return false;
+    const allIDs = await siyuanCache.getChildBlocks(3 * 1000, this.docID);
+    for (const { id } of allIDs.slice(-5)) {
+        if (id === lastID) {
+            return true;
+        }
+    }
+    return false;
+}
+
+export function getSecondLastElementID(item: HTMLElement) {
+    let last = item.lastElementChild.previousElementSibling as HTMLElement;
+    if (!last) last = item.lastElementChild as HTMLElement;
+    return last.getAttribute(DATA_NODE_ID);
+}
+
+export function getLastElementID(item: HTMLElement) {
+    return item.lastElementChild.getAttribute(DATA_NODE_ID);
 }
