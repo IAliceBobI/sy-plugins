@@ -54,7 +54,7 @@ class BKMaker {
                     if (!this.shouldFreeze) {
                         // substitute old for new
                         this.container.setAttribute(DATA_NODE_ID, lastID);
-                        lastElement.insertAdjacentElement("afterend", this.container);
+                        this.protyle.wysiwyg.element.insertAdjacentElement("afterend", this.container);
                         this.integrateCounting();
                         deleteSelf(divs);
                         this.rmLastDupBlock();
@@ -65,19 +65,16 @@ class BKMaker {
     }
 
     private rmLastDupBlock() {
-        let item = this.item.lastElementChild as HTMLElement;
-        const lastID = item.getAttribute(DATA_NODE_ID);
-        const dupItems = [];
-        for (let i = 0; i < 5 && item; i++) {
-            if (lastID == item.getAttribute(DATA_NODE_ID)) dupItems.push(item);
-            item = item.previousElementSibling as HTMLElement;
-        }
-        if (dupItems.length == 3) {
-            this.item.removeChild(dupItems[1]);
-            // console.log("---");
-            // dupItems.splice(1, 1);
-            // dupItems.forEach(e => console.log(e.getAttribute(DATA_NODE_ID)))
-        }
+        // let item = this.item.lastElementChild as HTMLElement;
+        // const lastID = item.getAttribute(DATA_NODE_ID);
+        // const dupItems = [];
+        // for (let i = 0; i < 5 && item; i++) {
+        //     if (lastID == item.getAttribute(DATA_NODE_ID)) dupItems.push(item);
+        //     item = item.previousElementSibling as HTMLElement;
+        // }
+        // if (dupItems.length == 3) {
+        //     this.item.removeChild(dupItems[1]);
+        // }
     }
 
     private async integrateCounting() {
@@ -85,21 +82,14 @@ class BKMaker {
     }
 
     private async sholdInsertDiv(lastID: string) {
-        // const totalLen = this.protyle.contentElement.scrollHeight;
-        // const scrollPosition = this.protyle.contentElement.scrollTop;
-        // const winHeight = window.innerHeight;
-        // // console.log(`${1000 + scrollPosition + winHeight} ~~ ${totalLen}`)
-        // if (1000 + scrollPosition + winHeight >= totalLen){
-        //     console.log(`${1000 + scrollPosition + winHeight} > ${totalLen}`)
-        //     return true;
+        return true;
+        // const allIDs = await siyuanCache.getChildBlocks(3 * 1000, this.docID);
+        // for (const { id } of allIDs.slice(-5)) {
+        //     if (id === lastID) {
+        //         return true;
+        //     }
         // }
-        const allIDs = await siyuanCache.getChildBlocks(3 * 1000, this.docID);
-        for (const { id } of allIDs.slice(-5)) {
-            if (id === lastID) {
-                return true;
-            }
-        }
-        return false;
+        // return false;
     }
 
     async findOrLoadFromCache() {
@@ -111,7 +101,7 @@ class BKMaker {
                 if (divs.length == 0) {
                     oldEle = this.blBox.divCache.get(this.docID);
                     if (oldEle) {
-                        lastElement.insertAdjacentElement("afterend", oldEle);
+                        this.protyle.wysiwyg.element.insertAdjacentElement("afterend", oldEle);
                         this.rmLastDupBlock();
                     }
                 } else {
@@ -421,7 +411,7 @@ class BackLinkBottomBox {
     private makerCache: MaxCache<BKMaker> = new MaxCache(CACHE_LIMIT);
     private observer: MutationObserver;
     private docID: string = "";
-    private keepAliveID: any;
+    // private keepAliveID: any;
 
     async onload(plugin: Plugin) {
         this.plugin = plugin;
@@ -449,10 +439,10 @@ class BackLinkBottomBox {
                             });
                             this.observer.observe(item, { childList: true });
                             // keep
-                            clearInterval(this.keepAliveID);
-                            this.keepAliveID = setInterval(() => {
-                                maker.findOrLoadFromCache();
-                            }, 1500);
+                            // clearInterval(this.keepAliveID);
+                            // this.keepAliveID = setInterval(() => {
+                            //     maker.findOrLoadFromCache();
+                            // }, 1500);
                         } else {
                             const maker = this.makerCache.getOrElse(nextDocID, () => { return new BKMaker(this, nextDocID); });
                             maker.doTheWork(item, detail.protyle);
