@@ -3,13 +3,13 @@ import { siyuanCache } from "./libs/utils";
 import { BLOCK_REF, DATA_ID, DATA_TYPE } from "./libs/gconst";
 import { EventType, events } from "./libs/Events";
 import { MaxCache } from "./libs/cache";
-import { SearchEngine } from "./libs/search";
 import { SEARCH_HELP } from "./constants";
 import {
     IBKMaker,
     MENTION_CACHE_TIME,
     QUERYABLE_ELEMENT, addMentionCheckBox, addRefreshCheckBox, createEyeBtn, createSpan,
     deleteSelf, fillContent, getLastElementID, hr, icon, markQueryable,
+    searchInDiv,
     shouldInsertDiv
 } from "./libs/bkUtils";
 
@@ -211,7 +211,7 @@ class BKMakerOut implements IBKMaker {
             query.addEventListener("focus", () => { this.freeze(); });
             query.addEventListener("input", (event) => {
                 const newValue: string = (event.target as any).value;
-                this.searchInDiv(newValue.trim());
+                searchInDiv(this, newValue.trim());
             });
             topDiv.appendChild(createSpan("&nbsp;".repeat(2)));
         }
@@ -224,7 +224,7 @@ class BKMakerOut implements IBKMaker {
                 this.freeze();
                 navigator.clipboard.readText().then(t => {
                     query.value = t;
-                    this.searchInDiv(query.value);
+                    searchInDiv(this, query.value);
                 });
             });
             btn.innerHTML = icon("Paste");
@@ -249,7 +249,7 @@ class BKMakerOut implements IBKMaker {
             btn.addEventListener("click", () => {
                 this.unfreeze();
                 query.value = "";
-                this.searchInDiv(query.value);
+                searchInDiv(this, query.value);
             });
             btn.innerHTML = icon("Trashcan");
             topDiv.appendChild(createSpan("&nbsp;".repeat(2)));
@@ -257,20 +257,6 @@ class BKMakerOut implements IBKMaker {
         const container_mention_counting = topDiv.appendChild(document.createElement("span"));
         container_mention_counting.setAttribute(MENTION_COUTING_SPAN, "1");
     }
-
-    private searchInDiv(query: string) {
-        const se = new SearchEngine(true);
-        se.setQuery(query);
-        this.container.querySelectorAll(`[${QUERYABLE_ELEMENT}]`).forEach((e: HTMLElement) => {
-            const m = se.match(e.textContent);
-            if (!m) {
-                e.style.display = "none";
-            } else {
-                e.style.display = "";
-            }
-        });
-    }
-
 }
 
 class BackLinkBottomBoxOut {

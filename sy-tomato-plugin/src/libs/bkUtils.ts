@@ -1,4 +1,5 @@
 import { BLOCK_REF, DATA_ID, DATA_NODE_ID, DATA_TYPE } from "./gconst";
+import { SearchEngine } from "./search";
 import { chunks, extractLinks, isValidNumber, siyuanCache } from "./utils";
 
 export function setReadonly(e: HTMLElement, all = false) {
@@ -124,9 +125,23 @@ export interface IBKMaker {
     docID: string
     freeze: Func;
     unfreeze: Func;
+    container: HTMLElement;
     label: HTMLElement;
     freezeCheckBox: HTMLInputElement;
     mentionCount: number;
+}
+
+export function searchInDiv(self: IBKMaker,query: string) {
+    const se = new SearchEngine(true);
+    se.setQuery(query);
+    self.container.querySelectorAll(`[${QUERYABLE_ELEMENT}]`).forEach((e: HTMLElement) => {
+        const m = se.match(e.textContent);
+        if (!m) {
+            e.style.display = "none";
+        } else {
+            e.style.display = "";
+        }
+    });
 }
 
 export async function fillContent(self: IBKMaker, backlinksInDoc: Backlink, allRefs: RefCollector, tc: HTMLElement) {
