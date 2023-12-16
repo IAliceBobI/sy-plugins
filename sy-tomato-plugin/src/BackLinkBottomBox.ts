@@ -1,4 +1,4 @@
-import { Dialog, Plugin, } from "siyuan";
+import { Dialog, IProtyle, Plugin, } from "siyuan";
 import { chunks, extractLinks, isValidNumber, siyuanCache } from "./libs/utils";
 import { BLOCK_REF, DATA_ID, DATA_NODE_ID, DATA_TYPE } from "./libs/gconst";
 import { EventType, events } from "./libs/Events";
@@ -20,6 +20,8 @@ class BKMaker {
     private blBox: BackLinkBottomBox;
     private docID: string;
     private item: HTMLElement;
+    private protyle: IProtyle;
+    private scrollTop: number;
     private mentionCounting: HTMLSpanElement;
 
     private freezeCheckBox: HTMLInputElement;
@@ -33,13 +35,15 @@ class BKMaker {
         this.mentionCounting.classList.add("b3-label__text");
     }
 
-    async doTheWork(item: HTMLElement) {
+    async doTheWork(item: HTMLElement, protyle: IProtyle) {
         this.item = item;
+        this.protyle = protyle;
         const divs = await this.findOrLoadFromCache();
         await navigator.locks.request("BackLinkBottomBox-BKMakerLock" + this.docID, { ifAvailable: true }, async (lock) => {
             if (lock && !this.shouldFreeze) {
                 const [lastID, lastElement] = getLastElementID(this.item);
                 if (await this.sholdInsertDiv(lastID)) {
+                    this.saveScrollTop()
                     // retrieve new data
                     this.container = document.createElement("div");
                     await this.getBackLinks(); // start
@@ -56,10 +60,19 @@ class BKMaker {
                         this.integrateCounting();
                         deleteSelf(divs);
                         this.rmLastDupBlock();
+                        this.restoreScrollTop();
                     }
                 }
             }
         });
+    }
+
+    private saveScrollTop() {
+        this.scrollTop = this.protyle.contentElement.scrollTop;
+    }
+
+    private restoreScrollTop() {
+        this.protyle.contentElement.scrollTop = this.scrollTop;
     }
 
     private rmLastDupBlock() {
@@ -97,6 +110,7 @@ class BKMaker {
             const divs = Array.from(this.item.parentElement.querySelectorAll(`[${BKMAKER_ADD}="1"]`)?.values() ?? []);
             const [lastID, lastElement] = getLastElementID(this.item);
             if (await this.sholdInsertDiv(lastID)) {
+                this.saveScrollTop();
                 let oldEle: HTMLElement;
                 if (divs.length == 0) {
                     oldEle = this.blBox.divCache.get(this.docID);
@@ -113,6 +127,7 @@ class BKMaker {
                     this.integrateCounting();
                     divs.push(oldEle);
                 }
+                this.restoreScrollTop();
             }
             return divs;
         });
@@ -428,13 +443,13 @@ class BackLinkBottomBox {
                             // OB
                             this.observer?.disconnect();
                             const maker = this.makerCache.getOrElse(nextDocID, () => { return new BKMaker(this, nextDocID); });
-                            maker.doTheWork(item);
+                            maker.doTheWork(item, detail.protyle);
                             let [lastElementID] = getLastElementID(item);
                             this.observer = new MutationObserver((_mutationsList) => {
                                 const [newLastID] = getLastElementID(item);
                                 if (newLastID != lastElementID) {
                                     lastElementID = newLastID;
-                                    maker.doTheWork(item);
+                                    maker.doTheWork(item, detail.protyle);
                                 }
                             });
                             this.observer.observe(item, { childList: true });
@@ -445,7 +460,7 @@ class BackLinkBottomBox {
                             }, 1500);
                         } else {
                             const maker = this.makerCache.getOrElse(nextDocID, () => { return new BKMaker(this, nextDocID); });
-                            maker.doTheWork(item);
+                            maker.doTheWork(item, detail.protyle);
                         }
                     }
                 });
