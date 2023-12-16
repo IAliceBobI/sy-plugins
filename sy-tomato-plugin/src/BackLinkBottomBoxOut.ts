@@ -1,14 +1,13 @@
 import { Dialog, IProtyle, Plugin, openTab, } from "siyuan";
 import { chunks, extractLinks, isValidNumber, siyuanCache } from "./libs/utils";
 import { BLOCK_REF, DATA_ID, DATA_TYPE } from "./libs/gconst";
-import { setReadonly } from "./libs/domUtils";
 import { EventType, events } from "./libs/Events";
 import { MaxCache } from "./libs/cache";
 import { SearchEngine } from "./libs/search";
 import { SEARCH_HELP } from "./constants";
+import { QUERYABLE_ELEMENT, addRef, createSpan, deleteSelf, hr, icon, markQueryable, refTag, scanAllRef } from "./libs/domUtils";
 
 const MENTION_COUTING_SPAN = "MENTION_COUTING_SPAN";
-const QUERYABLE_ELEMENT = "QUERYABLE_ELEMENT";
 const BKMAKER_ADD = "BKMAKER_ADD";
 const MENTION_CACHE_TIME = 5 * 60 * 1000;
 const CACHE_LIMIT = 100;
@@ -91,6 +90,7 @@ class BKMakerOut {
         div.style.paddingLeft = this.protyle.wysiwyg.element.style.paddingLeft;
         div.style.paddingRight = this.protyle.wysiwyg.element.style.paddingRight;
         this.protyle.wysiwyg.element.insertAdjacentElement("afterend", div);
+        // this.protyle.contentElement.appendChild(div);
         // this.restoreScrollTop();
     }
 
@@ -152,6 +152,7 @@ class BKMakerOut {
 
         this.container.querySelectorAll(`[${DATA_TYPE}*="${BLOCK_REF}"]`).forEach((e: HTMLElement) => {
             const btn = document.createElement("button") as HTMLButtonElement;
+            btn.setAttribute(DATA_ID, e.getAttribute(DATA_ID))
             btn.style.border = "transparent";
             btn.style.background = "var(--b3-button)";
             btn.style.color = "var(--b3-protyle-inline-blockref-color)";
@@ -417,71 +418,3 @@ class BackLinkBottomBoxOut {
 }
 
 export const backLinkBottomBoxOut = new BackLinkBottomBoxOut();
-
-function markQueryable(e: HTMLElement) {
-    e.setAttribute(QUERYABLE_ELEMENT, "1");
-}
-
-function hr() {
-    return document.createElement("hr");
-}
-
-function createSpan(innerHTML: string) {
-    const span = document.createElement("span");
-    span.innerHTML = innerHTML;
-    return span;
-}
-
-function refTag(id: string, text: string, count: number, len?: number): HTMLSpanElement {
-    const span = document.createElement("span") as HTMLSpanElement;
-
-    const refSpan = span.appendChild(document.createElement("span"));
-    refSpan.setAttribute(DATA_TYPE, BLOCK_REF);
-    refSpan.setAttribute(DATA_ID, id);
-    refSpan.innerText = text;
-    if (len) {
-        let sliced = text.slice(0, len);
-        if (sliced.length != text.length) sliced += "……";
-        refSpan.innerText = sliced;
-    }
-
-    const countSpan = span.appendChild(document.createElement("span"));
-    if (count > 0) {
-        countSpan.classList.add("tomato-style__code");
-        countSpan.innerText = String(count);
-    }
-    return span;
-}
-
-function scanAllRef(allRefs: RefCollector, div: HTMLDivElement, docID: string) {
-    for (const element of div.querySelectorAll(`[${DATA_TYPE}*="${BLOCK_REF}"]`)) {
-        const id = element.getAttribute(DATA_ID);
-        const txt = element.textContent;
-        addRef(txt, id, allRefs, docID);
-    }
-}
-
-function addRef(txt: string, id: string, allRefs: RefCollector, docID: string) {
-    if (txt != "*" && id != docID) {
-        const key = id + txt;
-        const c = (allRefs.get(key)?.count ?? 0) + 1;
-        const span = refTag(id, txt, c);
-        allRefs.set(key, {
-            count: c,
-            lnk: span,
-            text: txt,
-            id,
-        });
-    }
-}
-
-function deleteSelf(divs: Element[]) {
-    divs.forEach(e => e.parentElement?.removeChild(e));
-}
-
-function icon(name: string, size?: number) {
-    if (size) {
-        return `<svg width="${size}px" height="${size}px"><use xlink:href="#icon${name}"></use></svg>`;
-    }
-    return `<svg><use xlink:href="#icon${name}"></use></svg>`;
-}
