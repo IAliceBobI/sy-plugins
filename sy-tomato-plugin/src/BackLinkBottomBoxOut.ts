@@ -135,20 +135,6 @@ class BKMakerOut {
         }
 
         this.refreshTopDiv(topDiv, allRefs);
-
-        topDiv.onclick = (ev) => {
-            const selection = document.getSelection();
-            if (selection.toString().length <= 0) return;
-            ev.stopPropagation();
-        };
-        contentContainer.onclick = (ev) => {
-            const selection = document.getSelection();
-            if (selection.toString().length <= 0) return;
-            ev.stopPropagation();
-        };
-
-        setReadonly(topDiv, true);
-        setReadonly(contentContainer, true);
     }
 
     private refreshTopDiv(topDiv: HTMLDivElement, allRefs: RefCollector) {
@@ -195,7 +181,6 @@ class BKMakerOut {
             topDiv.appendChild(createSpan("&nbsp;".repeat(1)));
         }
         const query = topDiv.appendChild(document.createElement("input"));
-        setReadonly(query);
         {
             query.title = "必须包含AA、BB，DD与EE至少包含一个，但不能包含CC，也不能包含FF";
             query.classList.add("b3-text-field");
@@ -210,7 +195,6 @@ class BKMakerOut {
         }
         {
             const btn = topDiv.appendChild(document.createElement("button")) as HTMLButtonElement;
-            setReadonly(btn);
             btn.title = "粘贴内容到搜索框，并锁定";
             btn.classList.add("b3-button");
             btn.classList.add("b3-button--outline");
@@ -226,7 +210,6 @@ class BKMakerOut {
         }
         {
             const btn = topDiv.appendChild(document.createElement("button")) as HTMLButtonElement;
-            setReadonly(btn);
             btn.title = "复制搜索框内容到剪贴板";
             btn.classList.add("b3-button");
             btn.classList.add("b3-button--outline");
@@ -238,7 +221,6 @@ class BKMakerOut {
         }
         {
             const btn = topDiv.appendChild(document.createElement("button")) as HTMLButtonElement;
-            setReadonly(btn);
             btn.title = "清空搜索框，并解除锁定";
             btn.classList.add("b3-button");
             btn.classList.add("b3-button--outline");
@@ -269,7 +251,6 @@ class BKMakerOut {
 
     private addMentionCheckBox(topDiv: HTMLDivElement) {
         const mentionInput = topDiv.appendChild(document.createElement("input"));
-        setReadonly(mentionInput);
         mentionInput.title = "展开的提及数";
         mentionInput.classList.add("b3-text-field");
         mentionInput.size = 1;
@@ -293,7 +274,6 @@ class BKMakerOut {
 
     private addRefreshCheckBox(topDiv: HTMLDivElement) {
         this.label = topDiv.appendChild(document.createElement("label"));
-        setReadonly(this.label);
         {
             this.label.classList.add("b3-label");
             this.label.classList.add("b3-label__text");
@@ -302,7 +282,6 @@ class BKMakerOut {
         }
 
         this.freezeCheckBox = topDiv.appendChild(document.createElement("input"));
-        setReadonly(this.freezeCheckBox);
         {
             this.freezeCheckBox.title = "是否自动刷新";
             this.freezeCheckBox.type = "checkbox";
@@ -418,22 +397,13 @@ function markQueryable(e: HTMLElement) {
 }
 
 function hr() {
-    return setReadonly(document.createElement("hr"));
+    return document.createElement("hr");
 }
 
 function createSpan(innerHTML: string) {
     const span = document.createElement("span");
-    setReadonly(span);
     span.innerHTML = innerHTML;
     return span;
-}
-
-function setReadonly(e: HTMLElement, all = false) {
-    e.setAttribute("contenteditable", "false");
-    if (all) e.querySelectorAll('[contenteditable="true"]')?.forEach(sub => {
-        sub?.setAttribute("contenteditable", "false");
-    });
-    return e;
 }
 
 function refTag(id: string, text: string, count: number, len?: number): HTMLSpanElement {
