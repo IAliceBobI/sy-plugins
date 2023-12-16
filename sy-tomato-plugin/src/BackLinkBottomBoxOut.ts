@@ -40,7 +40,7 @@ class BKMakerOut {
         this.protyle = protyle;
         const divs = await this.findOrLoadFromCache();
         await navigator.locks.request("BackLinkBottomBox-BKMakerLock" + this.docID, { ifAvailable: true }, async (lock) => {
-            if (lock && !this.shouldFreeze) {
+            if (lock && !this.shouldFreeze && this.sholdUpdate()) {
                 // retrieve new data
                 this.container = document.createElement("div");
                 await this.getBackLinks(); // start
@@ -66,6 +66,18 @@ class BKMakerOut {
     // private restoreScrollTop() {
     //     this.protyle.contentElement.scrollTop = this.scrollTop;
     // }
+
+    private sholdUpdate() {
+        // const totalLen = this.protyle.contentElement.scrollHeight;
+        // const scrollPosition = this.protyle.contentElement.scrollTop;
+        // const winHeight = window.innerHeight;
+        // if (1000 + scrollPosition + winHeight >= totalLen) {
+        //     console.log(`${1000 + scrollPosition + winHeight} > ${totalLen}`)
+        //     return true;
+        // }
+        // return false;
+        return true;
+    }
 
     private async integrateCounting() {
         this.container.querySelector(`[${MENTION_COUTING_SPAN}]`)?.appendChild(this.mentionCounting);
