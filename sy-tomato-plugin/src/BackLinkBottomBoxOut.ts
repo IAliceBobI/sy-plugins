@@ -40,8 +40,7 @@ class BKMakerOut {
         this.protyle = protyle;
         const divs = await this.findOrLoadFromCache();
         await navigator.locks.request("BackLinkBottomBox-BKMakerLock" + this.docID, { ifAvailable: true }, async (lock) => {
-            const lastID = getLastElementID(this.item);
-            if (lock && !this.shouldFreeze && await shouldInsertDiv(lastID)) {
+            if (lock && !this.shouldFreeze && await shouldInsertDiv(getLastElementID(this.item), this.docID)) {
                 // retrieve new data
                 this.container = document.createElement("div");
                 await this.getBackLinks(); // start
@@ -86,7 +85,7 @@ class BKMakerOut {
     async findOrLoadFromCache() {
         return navigator.locks.request("BackLinkBottomBox-BKMakerLock" + this.docID, { ifAvailable: true }, async (lock) => {
             const divs = Array.from(this.item.parentElement.querySelectorAll(`[${BKMAKER_ADD}="1"]`)?.values() ?? []);
-            if (lock && await shouldInsertDiv(getLastElementID(this.item))) {
+            if (lock && await shouldInsertDiv(getLastElementID(this.item), this.docID)) {
                 let oldEle: HTMLElement;
                 if (divs.length == 0) {
                     oldEle = this.blBox.divCache.get(this.docID);
@@ -143,7 +142,7 @@ class BKMakerOut {
 
         this.container.querySelectorAll(`[${DATA_TYPE}*="${BLOCK_REF}"]`).forEach((e: HTMLElement) => {
             const btn = document.createElement("button") as HTMLButtonElement;
-            btn.setAttribute(DATA_ID, e.getAttribute(DATA_ID))
+            btn.setAttribute(DATA_ID, e.getAttribute(DATA_ID));
             btn.style.border = "transparent";
             btn.style.background = "var(--b3-button)";
             btn.style.color = "var(--b3-protyle-inline-blockref-color)";

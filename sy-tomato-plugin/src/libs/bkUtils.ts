@@ -79,7 +79,7 @@ export function icon(name: string, size?: number) {
     return `<svg><use xlink:href="#icon${name}"></use></svg>`;
 }
 
-export async function sholdInsertDiv(lastID: string) {
+export async function sholdInsertDiv(lastID: string, docID: string) {
     // const totalLen = this.protyle.contentElement.scrollHeight;
     // const scrollPosition = this.protyle.contentElement.scrollTop;
     // const winHeight = window.innerHeight;
@@ -88,7 +88,7 @@ export async function sholdInsertDiv(lastID: string) {
     //     return true;
     // }
     // return false;
-    const allIDs = await siyuanCache.getChildBlocks(3 * 1000, this.docID);
+    const allIDs = await siyuanCache.getChildBlocks(3 * 1000, docID);
     for (const { id } of allIDs.slice(-5)) {
         if (id === lastID) {
             return true;
