@@ -1,5 +1,5 @@
 import { BLOCK_REF, DATA_ID, DATA_NODE_ID, DATA_TYPE } from "./gconst";
-import { chunks, extractLinks, siyuanCache } from "./utils";
+import { chunks, extractLinks, isValidNumber, siyuanCache } from "./utils";
 
 export function setReadonly(e: HTMLElement, all = false) {
     e.setAttribute("contenteditable", "false");
@@ -80,8 +80,8 @@ export function icon(name: string, size?: number) {
 }
 
 export async function shouldInsertDiv(lastID: string, docID: string) {
-    // const totalLen = this.protyle.contentElement.scrollHeight;
-    // const scrollPosition = this.protyle.contentElement.scrollTop;
+    // const totalLen = self.protyle.contentElement.scrollHeight;
+    // const scrollPosition = self.protyle.contentElement.scrollTop;
     // const winHeight = window.innerHeight;
     // if (1000 + scrollPosition + winHeight >= totalLen) {
     //     l(`${1000 + scrollPosition + winHeight} > ${totalLen}`)
@@ -123,6 +123,10 @@ export const MENTION_CACHE_TIME = 5 * 60 * 1000;
 export interface IBKMaker {
     docID: string
     freeze: Func;
+    unfreeze: Func;
+    label: HTMLElement;
+    freezeCheckBox: HTMLInputElement;
+    mentionCount: number;
 }
 
 export async function fillContent(self: IBKMaker, backlinksInDoc: Backlink, allRefs: RefCollector, tc: HTMLElement) {
@@ -184,3 +188,48 @@ export async function path2div(self: IBKMaker, docBlock: HTMLElement, blockPaths
     return div;
 }
 
+export function addRefreshCheckBox(self: IBKMaker, topDiv: HTMLDivElement) {
+    self.label = topDiv.appendChild(document.createElement("label"));
+    {
+        self.label.classList.add("b3-label");
+        self.label.classList.add("b3-label__text");
+        self.label.classList.add("b3-label--noborder");
+        topDiv.appendChild(createSpan("&nbsp;".repeat(1)));
+    }
+
+    self.freezeCheckBox = topDiv.appendChild(document.createElement("input"));
+    {
+        self.freezeCheckBox.title = "是否自动刷新";
+        self.freezeCheckBox.type = "checkbox";
+        self.freezeCheckBox.classList.add("b3-switch");
+        self.unfreeze();
+        self.freezeCheckBox.addEventListener("change", () => {
+            if (self.freezeCheckBox.checked) self.freeze();
+            else self.unfreeze();
+        });
+        topDiv.appendChild(createSpan("&nbsp;".repeat(4)));
+    }
+}
+
+export function addMentionCheckBox(self: IBKMaker, topDiv: HTMLDivElement) {
+    const mentionInput = topDiv.appendChild(document.createElement("input"));
+    mentionInput.title = "展开的提及数";
+    mentionInput.classList.add("b3-text-field");
+    mentionInput.size = 1;
+    mentionInput.value = String(self.mentionCount);
+    mentionInput.addEventListener("focus", () => {
+        self.freeze();
+    });
+    mentionInput.addEventListener("blur", () => {
+        self.unfreeze();
+    });
+    mentionInput.addEventListener("input", () => {
+        const n = Number(mentionInput.value.trim());
+        if (isValidNumber(n) && n > 0) {
+            self.mentionCount = n;
+        } else {
+            self.mentionCount = 0;
+        }
+    });
+    topDiv.appendChild(createSpan("&nbsp;".repeat(4)));
+}

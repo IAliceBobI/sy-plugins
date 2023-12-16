@@ -1,5 +1,5 @@
 import { Dialog, IProtyle, Plugin, openTab, } from "siyuan";
-import { isValidNumber, siyuanCache } from "./libs/utils";
+import { siyuanCache } from "./libs/utils";
 import { BLOCK_REF, DATA_ID, DATA_TYPE } from "./libs/gconst";
 import { EventType, events } from "./libs/Events";
 import { MaxCache } from "./libs/cache";
@@ -8,7 +8,7 @@ import { SEARCH_HELP } from "./constants";
 import {
     IBKMaker,
     MENTION_CACHE_TIME,
-    QUERYABLE_ELEMENT, createEyeBtn, createSpan,
+    QUERYABLE_ELEMENT, addMentionCheckBox, addRefreshCheckBox, createEyeBtn, createSpan,
     deleteSelf, fillContent, getLastElementID, hr, icon, markQueryable,
     shouldInsertDiv
 } from "./libs/bkUtils";
@@ -18,19 +18,19 @@ const BKMAKER_ADD = "BKMAKER_ADD";
 const CACHE_LIMIT = 100;
 
 class BKMakerOut implements IBKMaker {
-    private shouldFreeze: boolean;
-    private mentionCount: number = 1;
+    public shouldFreeze: boolean;
+    public mentionCount: number = 1;
 
-    private container: HTMLElement;
-    private blBox: BackLinkBottomBoxOut;
+    public container: HTMLElement;
+    public blBox: BackLinkBottomBoxOut;
     public docID: string;
-    private item: HTMLElement;
-    private protyle: IProtyle;
-    private mentionCounting: HTMLSpanElement;
+    public item: HTMLElement;
+    public protyle: IProtyle;
+    public mentionCounting: HTMLSpanElement;
     // private scrollTop: number;
 
-    private freezeCheckBox: HTMLInputElement;
-    private label: HTMLLabelElement;
+    public freezeCheckBox: HTMLInputElement;
+    public label: HTMLLabelElement;
 
     constructor(blBox: BackLinkBottomBoxOut, docID: string) {
         this.docID = docID;
@@ -185,15 +185,15 @@ class BKMakerOut implements IBKMaker {
         this.label.innerHTML = icon("Focus", 15);
     }
 
-    private unfreeze() {
+    public unfreeze() {
         this.shouldFreeze = false;
         this.freezeCheckBox.checked = false;
         this.label.innerHTML = icon("Play", 15);
     }
 
     private initBtnDiv(topDiv: HTMLDivElement) {
-        this.addRefreshCheckBox(topDiv);
-        this.addMentionCheckBox(topDiv);
+        addRefreshCheckBox(this, topDiv);
+        addMentionCheckBox(this, topDiv);
         {
             const help = topDiv.appendChild(document.createElement("span"));
             help.classList.add("b3-label__text");
@@ -271,60 +271,12 @@ class BKMakerOut implements IBKMaker {
         });
     }
 
-    private addMentionCheckBox(topDiv: HTMLDivElement) {
-        const mentionInput = topDiv.appendChild(document.createElement("input"));
-        mentionInput.title = "展开的提及数";
-        mentionInput.classList.add("b3-text-field");
-        mentionInput.size = 1;
-        mentionInput.value = String(this.mentionCount);
-        mentionInput.addEventListener("focus", () => {
-            this.freeze();
-        });
-        mentionInput.addEventListener("blur", () => {
-            this.unfreeze();
-        });
-        mentionInput.addEventListener("input", () => {
-            const n = Number(mentionInput.value.trim());
-            if (isValidNumber(n) && n > 0) {
-                this.mentionCount = n;
-            } else {
-                this.mentionCount = 0;
-            }
-        });
-        topDiv.appendChild(createSpan("&nbsp;".repeat(4)));
-    }
-
-    private addRefreshCheckBox(topDiv: HTMLDivElement) {
-        this.label = topDiv.appendChild(document.createElement("label"));
-        {
-            this.label.classList.add("b3-label");
-            this.label.classList.add("b3-label__text");
-            this.label.classList.add("b3-label--noborder");
-            topDiv.appendChild(createSpan("&nbsp;".repeat(1)));
-        }
-
-        this.freezeCheckBox = topDiv.appendChild(document.createElement("input"));
-        {
-            this.freezeCheckBox.title = "是否自动刷新";
-            this.freezeCheckBox.type = "checkbox";
-            this.freezeCheckBox.classList.add("b3-switch");
-            this.unfreeze();
-            this.freezeCheckBox.addEventListener("change", () => {
-                if (this.freezeCheckBox.checked) this.freeze();
-                else this.unfreeze();
-            });
-            topDiv.appendChild(createSpan("&nbsp;".repeat(4)));
-        }
-    }
-
-
 }
 
 class BackLinkBottomBoxOut {
     public plugin: Plugin;
     public divCache: MaxCache<HTMLElement> = new MaxCache(CACHE_LIMIT);
     private makerCache: MaxCache<BKMakerOut> = new MaxCache(CACHE_LIMIT);
-    private keepAliveID: any;
     private docID: string;
     async onload(plugin: Plugin) {
         this.plugin = plugin;
@@ -340,14 +292,11 @@ class BackLinkBottomBoxOut {
                         maker.doTheWork(item, detail.protyle);
                         if (this.docID != nextDocID) {
                             this.docID = nextDocID;
-                            clearInterval(this.keepAliveID);
-                            this.keepAliveID = setInterval(() => {
-                                maker.findOrLoadFromCache();
-                            }, 1500);
-                            setTimeout(() => {
-                                clearInterval(this.keepAliveID);
-                                this.keepAliveID = null;
-                            }, 5000);
+                            for (let i = 1; i <= 3; i++) {
+                                setTimeout(() => {
+                                    maker.findOrLoadFromCache();
+                                }, 1500 * i);
+                            }
                         }
                     }
                 });
