@@ -84,9 +84,9 @@ class BKMakerOut {
     }
 
     async findOrLoadFromCache() {
-        return navigator.locks.request("BackLinkBottomBox-BKMakerLock" + this.docID, async () => {
+        return navigator.locks.request("BackLinkBottomBox-BKMakerLock" + this.docID, { ifAvailable: true }, async (lock) => {
             const divs = Array.from(this.item.parentElement.querySelectorAll(`[${BKMAKER_ADD}="1"]`)?.values() ?? []);
-            if (await shouldInsertDiv(getLastElementID(this.item))) {
+            if (lock && await shouldInsertDiv(getLastElementID(this.item))) {
                 let oldEle: HTMLElement;
                 if (divs.length == 0) {
                     oldEle = this.blBox.divCache.get(this.docID);
