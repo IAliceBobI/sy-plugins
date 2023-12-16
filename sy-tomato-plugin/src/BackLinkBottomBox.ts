@@ -50,24 +50,31 @@ class BKMaker {
                     this.blBox.divCache.add(this.docID, this.container);
 
                     if (!this.shouldFreeze) {
-                        // this.printPreviousEle(this.item);
                         // substitute old for new
                         this.container.setAttribute(DATA_NODE_ID, lastID);
                         lastElement.insertAdjacentElement("afterend", this.container);
                         this.integrateCounting();
                         deleteSelf(divs);
+                        this.rmLastDupBlock();
                     }
                 }
             }
         });
     }
 
-    printPreviousEle(item: HTMLElement) {
-        console.log("---");
-        item = item.lastElementChild as HTMLElement;
+    private rmLastDupBlock() {
+        let item = this.item.lastElementChild as HTMLElement;
+        const lastID = item.getAttribute(DATA_NODE_ID);
+        const dupItems = [];
         for (let i = 0; i < 5 && item; i++) {
-            console.log(item.getAttribute(DATA_NODE_ID));
+            if (lastID == item.getAttribute(DATA_NODE_ID)) dupItems.push(item);
             item = item.previousElementSibling as HTMLElement;
+        }
+        if (dupItems.length == 3) {
+            this.item.removeChild(dupItems[1]);
+            // console.log("---");
+            // dupItems.splice(1, 1);
+            // dupItems.forEach(e => console.log(e.getAttribute(DATA_NODE_ID)))
         }
     }
 
@@ -95,6 +102,7 @@ class BKMaker {
                     oldEle = this.blBox.divCache.get(this.docID);
                     if (oldEle) {
                         lastElement.insertAdjacentElement("afterend", oldEle);
+                        this.rmLastDupBlock();
                     }
                 } else {
                     oldEle = divs.pop() as HTMLElement;
@@ -434,7 +442,7 @@ class BackLinkBottomBox {
                             clearInterval(this.keepAliveID);
                             this.keepAliveID = setInterval(() => {
                                 maker.findOrLoadFromCache();
-                            }, 2000);
+                            }, 1500);
                         } else {
                             const maker = this.makerCache.getOrElse(nextDocID, () => { return new BKMaker(this, nextDocID); });
                             maker.doTheWork(item);
