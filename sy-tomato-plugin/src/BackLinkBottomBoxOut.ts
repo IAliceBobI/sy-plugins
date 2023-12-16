@@ -1,6 +1,6 @@
-import { Dialog, Plugin, } from "siyuan";
+import { Dialog, IProtyle, Plugin, } from "siyuan";
 import { chunks, extractLinks, isValidNumber, siyuanCache } from "./libs/utils";
-import { BLOCK_REF, DATA_ID, DATA_NODE_ID, DATA_TYPE } from "./libs/gconst";
+import { BLOCK_REF, DATA_ID, DATA_TYPE } from "./libs/gconst";
 import { EventType, events } from "./libs/Events";
 import { MaxCache } from "./libs/cache";
 import { SearchEngine } from "./libs/search";
@@ -12,20 +12,21 @@ const BKMAKER_ADD = "BKMAKER_ADD";
 const MENTION_CACHE_TIME = 5 * 60 * 1000;
 const CACHE_LIMIT = 100;
 
-class BKMaker {
+class BKMakerOut {
     private shouldFreeze: boolean;
     private mentionCount: number = 1;
 
     private container: HTMLElement;
-    private blBox: BackLinkBottomBox;
+    private blBox: BackLinkBottomBoxOut;
     private docID: string;
     private item: HTMLElement;
+    private protyle: IProtyle;
     private mentionCounting: HTMLSpanElement;
 
     private freezeCheckBox: HTMLInputElement;
     private label: HTMLLabelElement;
 
-    constructor(blBox: BackLinkBottomBox, docID: string) {
+    constructor(blBox: BackLinkBottomBoxOut, docID: string) {
         this.docID = docID;
         this.blBox = blBox;
         this.shouldFreeze = false;
@@ -33,86 +34,57 @@ class BKMaker {
         this.mentionCounting.classList.add("b3-label__text");
     }
 
-    async doTheWork(item: HTMLElement) {
+    async doTheWork(item: HTMLElement, protyle: IProtyle) {
         this.item = item;
+        this.protyle = protyle;
         const divs = await this.findOrLoadFromCache();
         await navigator.locks.request("BackLinkBottomBox-BKMakerLock" + this.docID, { ifAvailable: true }, async (lock) => {
             if (lock && !this.shouldFreeze) {
-                const [lastID, lastElement] = getLastElementID(this.item);
-                if (await this.sholdInsertDiv(lastID)) {
-                    // retrieve new data
-                    this.container = document.createElement("div");
-                    await this.getBackLinks(); // start
-                    this.container.style.border = "1px solid black";
-                    this.container.setAttribute(BKMAKER_ADD, "1");
+                // retrieve new data
+                this.container = document.createElement("div");
+                await this.getBackLinks(); // start
+                this.container.setAttribute(BKMAKER_ADD, "1");
 
-                    // put new data into cache
-                    this.blBox.divCache.add(this.docID, this.container);
+                // put new data into cache
+                this.blBox.divCache.add(this.docID, this.container);
 
-                    if (!this.shouldFreeze) {
-                        // substitute old for new
-                        this.container.setAttribute(DATA_NODE_ID, lastID);
-                        lastElement.insertAdjacentElement("afterend", this.container);
-                        this.integrateCounting();
-                        deleteSelf(divs);
-                        this.rmLastDupBlock();
-                    }
+                if (!this.shouldFreeze) {
+                    // substitute old for new
+                    this.insertBkPanel(this.container);
+                    this.integrateCounting();
+                    deleteSelf(divs);
                 }
             }
         });
-    }
-
-    private rmLastDupBlock() {
-        let item = this.item.lastElementChild as HTMLElement;
-        const lastID = item.getAttribute(DATA_NODE_ID);
-        const dupItems = [];
-        for (let i = 0; i < 5 && item; i++) {
-            if (lastID == item.getAttribute(DATA_NODE_ID)) dupItems.push(item);
-            item = item.previousElementSibling as HTMLElement;
-        }
-        if (dupItems.length == 3) {
-            this.item.removeChild(dupItems[1]);
-            // console.log("---");
-            // dupItems.splice(1, 1);
-            // dupItems.forEach(e => console.log(e.getAttribute(DATA_NODE_ID)))
-        }
     }
 
     private async integrateCounting() {
         this.container.querySelector(`[${MENTION_COUTING_SPAN}]`)?.appendChild(this.mentionCounting);
     }
 
-    private async sholdInsertDiv(lastID: string) {
-        const allIDs = await siyuanCache.getChildBlocks(3 * 1000, this.docID);
-        for (const { id } of allIDs.slice(-5)) {
-            if (id === lastID) {
-                return true;
-            }
-        }
-        return false;
+    private async insertBkPanel(div: HTMLElement) {
+        this.protyle.wysiwyg.element.style.paddingBottom = '0px'
+        div.style.paddingLeft = this.protyle.wysiwyg.element.style.paddingLeft
+        div.style.paddingRight = this.protyle.wysiwyg.element.style.paddingRight
+        this.protyle.wysiwyg.element.insertAdjacentElement("afterend", div);
     }
 
     async findOrLoadFromCache() {
         return navigator.locks.request("BackLinkBottomBox-BKMakerLock" + this.docID, async () => {
             const divs = Array.from(this.item.parentElement.querySelectorAll(`[${BKMAKER_ADD}="1"]`)?.values() ?? []);
-            const [lastID, lastElement] = getLastElementID(this.item);
-            if (await this.sholdInsertDiv(lastID)) {
-                let oldEle: HTMLElement;
-                if (divs.length == 0) {
-                    oldEle = this.blBox.divCache.get(this.docID);
-                    if (oldEle) {
-                        lastElement.insertAdjacentElement("afterend", oldEle);
-                        this.rmLastDupBlock();
-                    }
-                } else {
-                    oldEle = divs.pop() as HTMLElement;
-                    deleteSelf(divs);
-                }
+            let oldEle: HTMLElement;
+            if (divs.length == 0) {
+                oldEle = this.blBox.divCache.get(this.docID);
                 if (oldEle) {
-                    oldEle.setAttribute(DATA_NODE_ID, lastID);
-                    this.integrateCounting();
-                    divs.push(oldEle);
+                    this.insertBkPanel(oldEle);
                 }
+            } else {
+                oldEle = divs.pop() as HTMLElement;
+                deleteSelf(divs);
+            }
+            if (oldEle) {
+                this.integrateCounting();
+                divs.push(oldEle);
             }
             return divs;
         });
@@ -404,14 +376,10 @@ class BKMaker {
     }
 }
 
-class BackLinkBottomBox {
+class BackLinkBottomBoxOut {
     public plugin: Plugin;
     public divCache: MaxCache<HTMLElement> = new MaxCache(CACHE_LIMIT);
-
-    private makerCache: MaxCache<BKMaker> = new MaxCache(CACHE_LIMIT);
-    private observer: MutationObserver;
-    private docID: string = "";
-    private keepAliveID: any;
+    private makerCache: MaxCache<BKMakerOut> = new MaxCache(CACHE_LIMIT);
 
     async onload(plugin: Plugin) {
         this.plugin = plugin;
@@ -423,30 +391,8 @@ class BackLinkBottomBox {
                         if (!item) return;
                         const nextDocID = detail.protyle?.block.rootID ?? "";
                         if (!nextDocID) return;
-                        if (this.docID != nextDocID) {
-                            this.docID = nextDocID;
-                            // OB
-                            this.observer?.disconnect();
-                            const maker = this.makerCache.getOrElse(nextDocID, () => { return new BKMaker(this, nextDocID); });
-                            maker.doTheWork(item);
-                            let [lastElementID] = getLastElementID(item);
-                            this.observer = new MutationObserver((_mutationsList) => {
-                                const [newLastID] = getLastElementID(item);
-                                if (newLastID != lastElementID) {
-                                    lastElementID = newLastID;
-                                    maker.doTheWork(item);
-                                }
-                            });
-                            this.observer.observe(item, { childList: true });
-                            // keep
-                            clearInterval(this.keepAliveID);
-                            this.keepAliveID = setInterval(() => {
-                                maker.findOrLoadFromCache();
-                            }, 1500);
-                        } else {
-                            const maker = this.makerCache.getOrElse(nextDocID, () => { return new BKMaker(this, nextDocID); });
-                            maker.doTheWork(item);
-                        }
+                        const maker = this.makerCache.getOrElse(nextDocID, () => { return new BKMakerOut(this, nextDocID); });
+                        maker.doTheWork(item, detail.protyle);
                     }
                 });
             }
@@ -454,13 +400,7 @@ class BackLinkBottomBox {
     }
 }
 
-export const backLinkBottomBox = new BackLinkBottomBox();
-
-function getLastElementID(item: HTMLElement): [string, HTMLElement] {
-    let last = item.lastElementChild.previousElementSibling as HTMLElement;
-    if (!last) last = item.lastElementChild as HTMLElement;
-    return [last.getAttribute(DATA_NODE_ID), item.lastElementChild as HTMLElement];
-}
+export const backLinkBottomBoxOut = new BackLinkBottomBoxOut();
 
 function markQueryable(e: HTMLElement) {
     e.setAttribute(QUERYABLE_ELEMENT, "1");

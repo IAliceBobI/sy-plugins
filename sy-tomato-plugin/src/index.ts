@@ -6,6 +6,7 @@ import { schedule } from "./Schedule";
 import { readingPointBox } from "./ReadingPointBox";
 import { cpBox } from "./CpBox";
 import { backLinkBottomBox } from "./BackLinkBottomBox";
+import { backLinkBottomBoxOut } from "./BackLinkBottomBoxOut";
 import { cardBox } from "./CardBox";
 import { EventType, events } from "@/libs/Events";
 import { STORAGE_SETTINGS } from "./constants";
@@ -52,8 +53,11 @@ export default class ThePlugin extends Plugin {
         this.addSettingItem("linkBoxCheckbox", "* 双向互链", false);
         if (this.settingCfg.linkBoxCheckbox ?? false) await linkBox.onload(this);
 
-        this.addSettingItem("backLinkBottomBoxCheckbox", "* 底部反链", false);
+        this.addSettingItem("backLinkBottomBoxCheckbox", "* 底部反链（编辑器里）", false);
         if (this.settingCfg.backLinkBottomBoxCheckbox ?? false) await backLinkBottomBox.onload(this);
+
+        this.addSettingItem("backLinkBottomBoxCheckboxOut", "* 底部反链（编辑器外）", false);
+        if (this.settingCfg.backLinkBottomBoxCheckboxOut ?? false) await backLinkBottomBoxOut.onload(this);
 
         this.addSettingItem("imgOverlayCheckbox", "* 图片遮挡", false);
         if (this.settingCfg.imgOverlayCheckbox ?? false) await imgOverlayBox.onload(this);
