@@ -1,4 +1,24 @@
 .tomato-style {
+  &__bkContainer {
+    font-size: x-large;
+  }
+
+  &__bkContent {
+    padding-left: 30px;
+
+    ul {
+      padding-left: 20px;
+    }
+
+    ul ul {
+      padding-left: 40px;
+    }
+
+    ul ul ul {
+      padding-left: 60px;
+    }
+  }
+
   &__container {
     display: flex;
     justify-content: center;

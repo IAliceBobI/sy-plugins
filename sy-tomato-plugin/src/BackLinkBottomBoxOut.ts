@@ -1,10 +1,11 @@
-import { Dialog, IProtyle, Plugin, } from "siyuan";
-import { chunks, extractLinks, isValidNumber, siyuanCache } from "./libs/utils";
+import { Dialog, IProtyle, Lute, Plugin, } from "siyuan";
+import { NewLute, chunks, extractLinks, isValidNumber, siyuanCache } from "./libs/utils";
 import { BLOCK_REF, DATA_ID, DATA_TYPE } from "./libs/gconst";
 import { EventType, events } from "./libs/Events";
 import { MaxCache } from "./libs/cache";
 import { SearchEngine } from "./libs/search";
 import { SEARCH_HELP } from "./constants";
+import { marked } from "marked";
 
 const MENTION_COUTING_SPAN = "MENTION_COUTING_SPAN";
 const QUERYABLE_ELEMENT = "QUERYABLE_ELEMENT";
@@ -45,6 +46,7 @@ class BKMakerOut {
                 this.container = document.createElement("div");
                 await this.getBackLinks(); // start
                 this.container.setAttribute(BKMAKER_ADD, "1");
+                this.container.classList.add("tomato-style__bkContainer")
 
                 // put new data into cache
                 this.blBox.divCache.add(this.docID, this.container);
@@ -72,7 +74,7 @@ class BKMakerOut {
         // const scrollPosition = this.protyle.contentElement.scrollTop;
         // const winHeight = window.innerHeight;
         // if (1000 + scrollPosition + winHeight >= totalLen) {
-        //     console.log(`${1000 + scrollPosition + winHeight} > ${totalLen}`)
+        //     l(`${1000 + scrollPosition + winHeight} > ${totalLen}`)
         //     return true;
         // }
         // return false;
@@ -85,9 +87,9 @@ class BKMakerOut {
 
     private async insertBkPanel(div: HTMLElement) {
         // this.saveScrollTop();
-        this.protyle.wysiwyg.element.style.paddingBottom = '0px'
-        div.style.paddingLeft = this.protyle.wysiwyg.element.style.paddingLeft
-        div.style.paddingRight = this.protyle.wysiwyg.element.style.paddingRight
+        this.protyle.wysiwyg.element.style.paddingBottom = "0px";
+        div.style.paddingLeft = this.protyle.wysiwyg.element.style.paddingLeft;
+        div.style.paddingRight = this.protyle.wysiwyg.element.style.paddingRight;
         this.protyle.wysiwyg.element.insertAdjacentElement("afterend", div);
         // this.restoreScrollTop();
     }
@@ -114,6 +116,7 @@ class BKMakerOut {
     }
 
     private async getBackLinks() {
+        const lute = NewLute();
         const allRefs: RefCollector = new Map();
         const backlink2 = await siyuanCache.getBacklink2(6 * 1000, this.docID);
         const contentContainer = document.createElement("div");
@@ -129,7 +132,7 @@ class BKMakerOut {
             return siyuanCache.getBacklinkDoc(12 * 1000, this.docID, backlink.id);
         }))) {
             for (const backlinksInDoc of backlinkDoc.backlinks) {
-                await this.fillContent(backlinksInDoc, allRefs, contentContainer);
+                await this.fillContent(backlinksInDoc, allRefs, contentContainer, lute);
             }
         }
         if (this.mentionCount > 0) {
@@ -137,7 +140,7 @@ class BKMakerOut {
             outer: for (const mention of backlink2.backmentions) {
                 const mentionDoc = await siyuanCache.getBackmentionDoc(MENTION_CACHE_TIME, this.docID, mention.id);
                 for (const mentionItem of mentionDoc.backmentions) {
-                    await this.fillContent(mentionItem, allRefs, contentContainer);
+                    await this.fillContent(mentionItem, allRefs, contentContainer, lute);
                     ++count;
                     this.mentionCounting.innerText = `提及读取中：${count}`;
                     if (count >= this.mentionCount) break outer;
@@ -307,11 +310,14 @@ class BKMakerOut {
         }
     }
 
-    private async fillContent(backlinksInDoc: Backlink, allRefs: RefCollector, tc: HTMLElement) {
+    private async fillContent(backlinksInDoc: Backlink, allRefs: RefCollector, tc: HTMLElement, lute: Lute) {
         const temp = document.createElement("div") as HTMLDivElement;
         markQueryable(temp);
         const div = document.createElement("div") as HTMLDivElement;
-        div.innerHTML = backlinksInDoc?.dom ?? "";
+        const md = lute.BlockDOM2StdMd(backlinksInDoc?.dom ?? "");
+        div.innerHTML = await marked.parse(md);
+        div.classList.add("tomato-style__bkContent");
+        console.log(div.innerHTML);
         scanAllRef(allRefs, div, this.docID);
         temp.appendChild(await this.path2div(temp, backlinksInDoc?.blockPaths ?? [], allRefs));
         temp.appendChild(div);
