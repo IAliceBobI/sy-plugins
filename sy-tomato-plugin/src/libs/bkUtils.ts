@@ -1,6 +1,8 @@
+import { Dialog, openTab } from "siyuan";
 import { BLOCK_REF, DATA_ID, DATA_NODE_ID, DATA_TYPE } from "./gconst";
 import { SearchEngine } from "./search";
 import { chunks, extractLinks, isValidNumber, siyuanCache } from "./utils";
+import { SEARCH_HELP } from "@/constants";
 
 export function setReadonly(e: HTMLElement, all = false) {
     e.setAttribute("contenteditable", "false");
@@ -123,15 +125,110 @@ export const MENTION_CACHE_TIME = 5 * 60 * 1000;
 
 export interface IBKMaker {
     docID: string
-    freeze: Func;
-    unfreeze: Func;
     container: HTMLElement;
     label: HTMLElement;
     freezeCheckBox: HTMLInputElement;
     mentionCount: number;
+    shouldFreeze: boolean;
+    mentionCounting: HTMLSpanElement;
+    blBox: any;
 }
 
-export function searchInDiv(self: IBKMaker,query: string) {
+export function init(self: IBKMaker, docID: string, blBox: any) {
+    self.mentionCount = 1;
+    self.docID = docID;
+    self.blBox = blBox;
+    self.shouldFreeze = false;
+    self.mentionCounting = document.createElement("span");
+    self.mentionCounting.classList.add("b3-label__text");
+}
+
+export async function getBackLinks(self: IBKMaker) {
+    const allRefs: RefCollector = new Map();
+    const backlink2 = await siyuanCache.getBacklink2(6 * 1000, self.docID);
+    const contentContainer = document.createElement("div");
+    const btnDiv = document.createElement("div");
+    initBtnDiv(self, btnDiv);
+    const topDiv = document.createElement("div");
+    self.container.appendChild(btnDiv);
+    self.container.appendChild(topDiv);
+    self.container.appendChild(hr());
+    self.container.appendChild(contentContainer);
+
+    for (const backlinkDoc of await Promise.all(backlink2.backlinks.map((backlink) => {
+        return siyuanCache.getBacklinkDoc(12 * 1000, self.docID, backlink.id);
+    }))) {
+        for (const backlinksInDoc of backlinkDoc.backlinks) {
+            await fillContent(self, backlinksInDoc, allRefs, contentContainer);
+        }
+    }
+    if (self.mentionCount > 0) {
+        let count = 0;
+        outer: for (const mention of backlink2.backmentions) {
+            const mentionDoc = await siyuanCache.getBackmentionDoc(MENTION_CACHE_TIME, self.docID, mention.id);
+            for (const mentionItem of mentionDoc.backmentions) {
+                await fillContent(self, mentionItem, allRefs, contentContainer);
+                ++count;
+                self.mentionCounting.innerText = `提及读取中：${count}`;
+                if (count >= self.mentionCount) break outer;
+            }
+        }
+        self.mentionCounting.innerText = "";
+    }
+
+    refreshTopDiv(self, topDiv, allRefs);
+
+    self.container.querySelectorAll(`[${DATA_TYPE}*="${BLOCK_REF}"]`).forEach((e: HTMLElement) => {
+        const btn = document.createElement("button") as HTMLButtonElement;
+        btn.setAttribute(DATA_ID, e.getAttribute(DATA_ID));
+        btn.style.border = "transparent";
+        btn.style.background = "var(--b3-button)";
+        btn.style.color = "var(--b3-protyle-inline-blockref-color)";
+        btn.textContent = e.textContent;
+        btn.addEventListener("click", () => {
+            openTab({ app: self.blBox.plugin.app, doc: { id: e.getAttribute(DATA_ID), action: ["cb-get-all", "cb-get-focus", "cb-get-hl"] } });
+        });
+        e.parentElement.replaceChild(btn, e);
+    });
+}
+
+export async function integrateCounting(self: IBKMaker) {
+    self.container.querySelector(`[${MENTION_COUTING_SPAN}]`)?.appendChild(self.mentionCounting);
+}
+
+export function refreshTopDiv(self: IBKMaker, topDiv: HTMLDivElement, allRefs: RefCollector) {
+    topDiv.innerHTML = "";
+    for (const { lnk, id } of allRefs.values()) {
+        const d = topDiv.appendChild(document.createElement("span"));
+        markQueryable(d);
+        const btn = d.appendChild(createEyeBtn());
+        btn.addEventListener("click", () => {
+            freeze(self);
+            self.container.querySelectorAll(`[${QUERYABLE_ELEMENT}]`).forEach((e: HTMLElement) => {
+                const divs = e.querySelectorAll(`[${DATA_ID}="${id}"]`);
+                if (divs.length > 0) {
+                    e.style.display = "none";
+                }
+            });
+        });
+        d.appendChild(lnk);
+        d.appendChild(createSpan("&nbsp;".repeat(7)));
+    }
+}
+
+function freeze(self: IBKMaker) {
+    self.shouldFreeze = true;
+    self.freezeCheckBox.checked = true;
+    self.label.innerHTML = icon("Focus", 15);
+}
+
+function unfreeze(self: IBKMaker) {
+    self.shouldFreeze = false;
+    self.freezeCheckBox.checked = false;
+    self.label.innerHTML = icon("Play", 15);
+}
+
+export function searchInDiv(self: IBKMaker, query: string) {
     const se = new SearchEngine(true);
     se.setQuery(query);
     self.container.querySelectorAll(`[${QUERYABLE_ELEMENT}]`).forEach((e: HTMLElement) => {
@@ -159,7 +256,7 @@ export async function path2div(self: IBKMaker, docBlock: HTMLElement, blockPaths
     const div = document.createElement("div") as HTMLDivElement;
     const btn = div.appendChild(createEyeBtn());
     btn.addEventListener("click", () => {
-        self.freeze();
+        freeze(self);
         docBlock.style.display = "none";
     });
     const refPathList: HTMLSpanElement[] = [];
@@ -217,10 +314,10 @@ export function addRefreshCheckBox(self: IBKMaker, topDiv: HTMLDivElement) {
         self.freezeCheckBox.title = "是否自动刷新";
         self.freezeCheckBox.type = "checkbox";
         self.freezeCheckBox.classList.add("b3-switch");
-        self.unfreeze();
+        unfreeze(self);
         self.freezeCheckBox.addEventListener("change", () => {
-            if (self.freezeCheckBox.checked) self.freeze();
-            else self.unfreeze();
+            if (self.freezeCheckBox.checked) freeze(self);
+            else unfreeze(self);
         });
         topDiv.appendChild(createSpan("&nbsp;".repeat(4)));
     }
@@ -233,10 +330,10 @@ export function addMentionCheckBox(self: IBKMaker, topDiv: HTMLDivElement) {
     mentionInput.size = 1;
     mentionInput.value = String(self.mentionCount);
     mentionInput.addEventListener("focus", () => {
-        self.freeze();
+        freeze(self);
     });
     mentionInput.addEventListener("blur", () => {
-        self.unfreeze();
+        unfreeze(self);
     });
     mentionInput.addEventListener("input", () => {
         const n = Number(mentionInput.value.trim());
@@ -247,4 +344,72 @@ export function addMentionCheckBox(self: IBKMaker, topDiv: HTMLDivElement) {
         }
     });
     topDiv.appendChild(createSpan("&nbsp;".repeat(4)));
+}
+export const MENTION_COUTING_SPAN = "MENTION_COUTING_SPAN";
+
+export function initBtnDiv(self: IBKMaker, topDiv: HTMLDivElement) {
+    addRefreshCheckBox(self, topDiv);
+    addMentionCheckBox(self, topDiv);
+    {
+        const help = topDiv.appendChild(document.createElement("span"));
+        help.classList.add("b3-label__text");
+        help.title = "搜索语法";
+        help.innerHTML = icon("Help", 16);
+        help.addEventListener("click", () => { new Dialog({ title: "搜索语法", content: SEARCH_HELP }); });
+        topDiv.appendChild(createSpan("&nbsp;".repeat(1)));
+    }
+    const query = topDiv.appendChild(document.createElement("input"));
+    {
+        query.title = "必须包含AA、BB，DD与EE至少包含一个，但不能包含CC，也不能包含FF";
+        query.classList.add("b3-text-field");
+        query.size = 50;
+        query.placeholder = "AA BB !CC DD|EE !FF";
+        query.addEventListener("focus", () => { freeze(self); });
+        query.addEventListener("input", (event) => {
+            const newValue: string = (event.target as any).value;
+            searchInDiv(self, newValue.trim());
+        });
+        topDiv.appendChild(createSpan("&nbsp;".repeat(2)));
+    }
+    {
+        const btn = topDiv.appendChild(document.createElement("button")) as HTMLButtonElement;
+        btn.title = "粘贴内容到搜索框，并锁定";
+        btn.classList.add("b3-button");
+        btn.classList.add("b3-button--outline");
+        btn.addEventListener("click", () => {
+            freeze(self);
+            navigator.clipboard.readText().then(t => {
+                query.value = t;
+                searchInDiv(self, query.value);
+            });
+        });
+        btn.innerHTML = icon("Paste");
+        topDiv.appendChild(createSpan("&nbsp;".repeat(2)));
+    }
+    {
+        const btn = topDiv.appendChild(document.createElement("button")) as HTMLButtonElement;
+        btn.title = "复制搜索框内容到剪贴板";
+        btn.classList.add("b3-button");
+        btn.classList.add("b3-button--outline");
+        btn.addEventListener("click", async () => {
+            navigator.clipboard.writeText(query.value);
+        });
+        btn.innerHTML = icon("Copy");
+        topDiv.appendChild(createSpan("&nbsp;".repeat(2)));
+    }
+    {
+        const btn = topDiv.appendChild(document.createElement("button")) as HTMLButtonElement;
+        btn.title = "清空搜索框，并解除锁定";
+        btn.classList.add("b3-button");
+        btn.classList.add("b3-button--outline");
+        btn.addEventListener("click", () => {
+            unfreeze(self);
+            query.value = "";
+            searchInDiv(self, query.value);
+        });
+        btn.innerHTML = icon("Trashcan");
+        topDiv.appendChild(createSpan("&nbsp;".repeat(2)));
+    }
+    const container_mention_counting = topDiv.appendChild(document.createElement("span"));
+    container_mention_counting.setAttribute(MENTION_COUTING_SPAN, "1");
 }
