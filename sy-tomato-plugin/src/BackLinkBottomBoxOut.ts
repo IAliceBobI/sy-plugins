@@ -148,6 +148,13 @@ class BKMakerOut {
         }
 
         this.refreshTopDiv(topDiv, allRefs);
+
+        this.container.querySelectorAll(`[${DATA_TYPE}$=${BLOCK_REF}]`).forEach((e: HTMLElement) => {
+            if (e.getAttribute(DATA_ID) == this.docID) {
+                e.removeAttribute(BLOCK_REF)
+                e.removeAttribute(DATA_ID)
+            }
+        })
     }
 
     private refreshTopDiv(topDiv: HTMLDivElement, allRefs: RefCollector) {
