@@ -442,7 +442,7 @@ class BackLinkBottomBox {
                             clearInterval(this.keepAliveID);
                             this.keepAliveID = setInterval(() => {
                                 maker.findOrLoadFromCache();
-                            }, 1500);
+                            }, 2000);
                         } else {
                             const maker = this.makerCache.getOrElse(nextDocID, () => { return new BKMaker(this, nextDocID); });
                             maker.doTheWork(item);

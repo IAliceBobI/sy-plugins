@@ -103,6 +103,7 @@ class BackLinkBottomBoxOut {
     public divCache: MaxCache<HTMLElement> = new MaxCache(CACHE_LIMIT);
     private makerCache: MaxCache<BKMakerOut> = new MaxCache(CACHE_LIMIT);
     private docID: string;
+    private keepAliveID: any;
     async onload(plugin: Plugin) {
         this.plugin = plugin;
         events.addListener("BackLinkBottomBox", (eventType, detail) => {
@@ -117,11 +118,11 @@ class BackLinkBottomBoxOut {
                         maker.doTheWork(item, detail.protyle);
                         if (this.docID != nextDocID) {
                             this.docID = nextDocID;
-                            for (let i = 1; i <= 3; i++) {
-                                setTimeout(() => {
-                                    maker.findOrLoadFromCache();
-                                }, 1500 * i);
-                            }
+                            // keep
+                            clearInterval(this.keepAliveID);
+                            this.keepAliveID = setInterval(() => {
+                                maker.findOrLoadFromCache();
+                            }, 2000);
                         }
                     }
                 });
