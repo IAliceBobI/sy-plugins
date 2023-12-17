@@ -14,12 +14,13 @@ class Progressive {
     private helper: help.Helper;
     private openedTabs: ITab[];
 
-    onload(plugin: Plugin) {
+    async onload(plugin: Plugin) {
         Progressive.GLOBAL_THIS["progressive_zZmqus5PtYRi"] = { progressive: this, utils, siyuan, timeUtil, events };
         this.plugin = plugin;
         this.storage = new help.Storage(plugin);
         this.helper = new help.Helper(plugin);
         this.openedTabs = [];
+        this.storage.onLayoutReady();
         const topBarElement = this.plugin.addTopBar({
             icon: "iconABook",
             title: this.plugin.i18n.progressiveReadingMenu,
@@ -598,8 +599,6 @@ class Progressive {
             });
         }
     }
-
-    onLayoutReady() { this.storage.onLayoutReady(); }
 }
 
 export const prog = new Progressive();

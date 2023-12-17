@@ -5,15 +5,11 @@ import { events } from "../../sy-tomato-plugin/src/libs/Events";
 import { flashBox } from "./FlashBox";
 
 export default class ThePlugin extends Plugin {
-    onload() {
+    async onload() {
         this.addIcons(ICONS);
         events.onload(this);
-        prog.onload(this);
-        flashBox.onload(this);
-    }
-
-    onLayoutReady() {
-        prog.onLayoutReady();
+        await prog.onload(this);
+        await flashBox.onload(this);
     }
 
     onunload() {
