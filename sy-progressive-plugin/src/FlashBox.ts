@@ -68,16 +68,15 @@ class FlashBox {
     }
 
     private createList(markdowns: string[], cardType: CardType) {
-        markdowns = helper.tryRmIDAddLink(markdowns);
         const tmp = [];
         for (const m of markdowns) {
             tmp.push("* " + m);
         }
         const cardID = utils.NewNodeID();
-        if (cardType === CardType.B) {
-            tmp.push("* >");
-        } else {
+        if (cardType === CardType.C) {
             tmp.push("* ```");
+        } else if (cardType === CardType.B) {
+            tmp.push("* >");
         }
         tmp.push(`{: id="${cardID}"}`);
         return { cardID, "markdown": tmp.join("\n") };
@@ -113,7 +112,7 @@ class FlashBox {
                         setRef = true;
                     }
                 }
-                markdowns.push(lute.BlockDOM2Md(elem.innerHTML));
+                markdowns.push(lute.BlockDOM2Md(elem.outerHTML));
             }
         }
         return { markdowns, firstSelectedID, lastSelectedID };
