@@ -6,7 +6,6 @@ import { schedule } from "./Schedule";
 import { readingPointBox } from "./ReadingPointBox";
 import { cpBox } from "./CpBox";
 import { backLinkBottomBox } from "./BackLinkBottomBox";
-import { backLinkBottomBoxOut } from "./BackLinkBottomBoxOut";
 import { cardBox } from "./CardBox";
 import { EventType, events } from "@/libs/Events";
 import { STORAGE_SETTINGS } from "./constants";
@@ -56,16 +55,8 @@ export default class ThePlugin extends Plugin {
         this.addSettingItem("imgOverlayCheckbox", "* 图片遮挡", false);
         if (this.settingCfg.imgOverlayCheckbox ?? false) await imgOverlayBox.onload(this);
 
-        const bkIn = this.addSettingItem("backLinkBottomBoxCheckbox", "* 底部反链（编辑器里）", false);
-        const bkOut = this.addSettingItem("backLinkBottomBoxCheckboxOut", "* 底部反链（编辑器外）", false);
-        bkIn.addEventListener("change", () => {
-            if (bkIn.checked) this.settingCfg["backLinkBottomBoxCheckboxOut"] = bkOut.checked = false;
-        });
-        bkOut.addEventListener("change", () => {
-            if (bkOut.checked) this.settingCfg["backLinkBottomBoxCheckbox"] = bkIn.checked = false;
-        });
+        this.addSettingItem("backLinkBottomBoxCheckbox", "* 底部反链", false);
         if (this.settingCfg.backLinkBottomBoxCheckbox ?? false) await backLinkBottomBox.onload(this);
-        if (this.settingCfg.backLinkBottomBoxCheckboxOut ?? false) await backLinkBottomBoxOut.onload(this);
     }
 
     private addSettingItem(key: string, title: string, defaultValue: boolean) {
