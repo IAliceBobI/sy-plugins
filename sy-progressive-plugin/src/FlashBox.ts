@@ -13,7 +13,23 @@ enum CardType {
 function getDailyPath() {
     const today = utils.timeUtil.dateFormat(new Date()).split(" ")[0];
     const [y, m] = today.split("-")
-    return `daily card/${y}/${y}-${m}/${today}`;
+    return `daily card/c${y}/c${y}-${m}/c${today}`;
+}
+
+async function isInPiece(protyle: IProtyle): Promise<[string, boolean]> {
+    const docID = protyle.block?.rootID ?? "";
+    if (!docID) return [docID, false];
+    const attrs = await siyuan.getBlockAttrs(docID);
+    if (attrs[MarkKey]?.startsWith(TEMP_CONTENT)) return [docID, true];
+    return [docID, false];
+}
+
+function getBlockDOM(dom: HTMLElement): { dom: HTMLElement, blockID: string } {
+    if (!dom) return {} as any;
+    if (dom?.tagName?.toLocaleLowerCase() == "body") return {} as any;
+    const blockID: string = dom.getAttribute(gconst.DATA_NODE_ID) ?? "";
+    if (!blockID) return this.getBlockDOM(dom.parentElement);
+    return { dom, blockID };
 }
 
 class FlashBox {
@@ -96,18 +112,10 @@ class FlashBox {
         });
     }
 
-    private async isInPiece(protyle: IProtyle): Promise<[string, boolean]> {
-        const docID = protyle.block?.rootID ?? "";
-        if (!docID) return [docID, false];
-        const attrs = await siyuan.getBlockAttrs(docID);
-        if (attrs[MarkKey]?.startsWith(TEMP_CONTENT)) return [docID, true];
-        return [docID, false];
-    }
-
     private async makeCard(protyle: IProtyle, t: CardType, path?: string) {
         const { lastSelectedID, markdowns } = this.cloneSelectedLineMarkdowns(protyle);
         if (lastSelectedID) { // multilines
-            await this.insertCard(protyle, markdowns, t, lastSelectedID);
+            await this.insertCard(protyle, markdowns, t, lastSelectedID, path);
         } else {
             const blockID = events.lastBlockID;
             const range = document.getSelection()?.getRangeAt(0);
@@ -118,11 +126,18 @@ class FlashBox {
         }
     }
 
-    private async insertCard(protyle: IProtyle, markdowns: string[], t: CardType, lastSelectedID: string) {
-        const [docID, inPiece] = await this.isInPiece(protyle);
+    private async insertCard(protyle: IProtyle, markdowns: string[], t: CardType, lastSelectedID: string, path?: string) {
+        const [docID, inPiece] = await isInPiece(protyle);
         if (!docID) return;
         const { cardID, markdown } = this.createList(markdowns, t);
-        if (inPiece) {
+        if (path) {
+            const a = await siyuan.createDocWithMdIfNotExists(events.boxID, path, "")
+            console.log(a)
+            return;
+            await siyuan.appendBlock(markdown, docID);
+            await utils.sleep(100);
+            await siyuan.appendBlock("", docID);
+        } else if (inPiece) {
             await siyuan.appendBlock(markdown, docID);
             await utils.sleep(100);
             await siyuan.appendBlock("", docID);
@@ -194,18 +209,10 @@ class FlashBox {
         return [id, div, false];
     }
 
-    private getBlockDOM(dom: HTMLElement): { dom: HTMLElement, blockID: string } {
-        if (!dom) return {} as any;
-        if (dom?.tagName?.toLocaleLowerCase() == "body") return {} as any;
-        const blockID: string = dom.getAttribute(gconst.DATA_NODE_ID) ?? "";
-        if (!blockID) return this.getBlockDOM(dom.parentElement);
-        return { dom, blockID };
-    }
-
     private async blankSpaceCard(blockID: string, selected: string, range: Range, protyle: IProtyle, cardType: CardType, path?: string) {
         const lute = utils.NewLute();
         let md = "";
-        const { dom } = this.getBlockDOM(range.endContainer.parentElement);
+        const { dom } = getBlockDOM(range.endContainer.parentElement);
         if (!dom) return;
         if (selected) {
             protyle.toolbar.setInlineMark(protyle, "mark", "range");
@@ -216,7 +223,7 @@ class FlashBox {
             const [_id, div] = this.cloneDiv(dom as HTMLDivElement, true);
             md = lute.BlockDOM2Md(div.outerHTML);
         }
-        await this.insertCard(protyle, [md], cardType, blockID);
+        await this.insertCard(protyle, [md], cardType, blockID, path);
     }
 }
 
