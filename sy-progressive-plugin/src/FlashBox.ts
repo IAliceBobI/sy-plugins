@@ -16,11 +16,11 @@ class FlashBox {
 
     blockIconEvent(detail: any) {
         if (!this.plugin) return;
-        let cardType = CardType.None
+        let cardType = CardType.None;
         if (this.settings.addCodeBlock) {
-            cardType = CardType.C
+            cardType = CardType.C;
         } else if (this.settings.addQuoteBlock) {
-            cardType = CardType.B
+            cardType = CardType.B;
         }
         detail.menu.addItem({
             iconHTML: "",
@@ -34,11 +34,11 @@ class FlashBox {
     async onload(plugin: Plugin, settings: SettingCfgType) {
         this.plugin = plugin;
         this.settings = settings;
-        let cardType = CardType.None
+        let cardType = CardType.None;
         if (this.settings.addCodeBlock) {
-            cardType = CardType.C
+            cardType = CardType.C;
         } else if (this.settings.addQuoteBlock) {
-            cardType = CardType.B
+            cardType = CardType.B;
         }
         this.plugin.addCommand({
             langKey: "insertBlankSpaceCard",
@@ -67,7 +67,7 @@ class FlashBox {
     private async isInPiece(protyle: IProtyle): Promise<[string, boolean]> {
         const docID = protyle.block?.rootID ?? "";
         if (!docID) return [docID, false];
-        const attrs = await siyuan.getBlockAttrs(docID)
+        const attrs = await siyuan.getBlockAttrs(docID);
         if (attrs[MarkKey]?.startsWith(TEMP_CONTENT)) return [docID, true];
         return [docID, false];
     }
@@ -75,21 +75,7 @@ class FlashBox {
     private async makeCard(protyle: IProtyle, t: CardType) {
         const { lastSelectedID, markdowns } = this.cloneSelectedLineMarkdowns(protyle);
         if (lastSelectedID) { // multilines
-            const [docID, inPiece] = await this.isInPiece(protyle)
-            if (!docID) return;
-            const { cardID, markdown } = this.createList(markdowns, t);
-            if (inPiece) {
-                await siyuan.appendBlock(markdown, docID);
-                await utils.sleep(200);
-                await siyuan.appendBlock("", docID);
-            } else {
-                await siyuan.insertBlockAfter("", lastSelectedID);
-                await utils.sleep(200);
-                await siyuan.insertBlockAfter(markdown, lastSelectedID);
-                await utils.sleep(200);
-                await siyuan.insertBlockAfter("", lastSelectedID);
-            }
-            setTimeout(() => { siyuan.addRiffCards([cardID]); }, 1000);
+            await this.insertCard(protyle, markdowns, t, lastSelectedID);
         } else {
             const blockID = events.lastBlockID;
             const range = document.getSelection()?.getRangeAt(0);
@@ -98,6 +84,24 @@ class FlashBox {
                 this.blankSpaceCard(blockID, blank, range, protyle, t);
             }
         }
+    }
+
+    private async insertCard(protyle: IProtyle, markdowns: string[], t: CardType, lastSelectedID: string) {
+        const [docID, inPiece] = await this.isInPiece(protyle);
+        if (!docID) return;
+        const { cardID, markdown } = this.createList(markdowns, t);
+        if (inPiece) {
+            await siyuan.appendBlock(markdown, docID);
+            await utils.sleep(200);
+            await siyuan.appendBlock("", docID);
+        } else {
+            await siyuan.insertBlockAfter("", lastSelectedID);
+            await utils.sleep(200);
+            await siyuan.insertBlockAfter(markdown, lastSelectedID);
+            await utils.sleep(200);
+            await siyuan.insertBlockAfter("", lastSelectedID);
+        }
+        setTimeout(() => { siyuan.addRiffCards([cardID]); }, 1000);
     }
 
     private createList(markdowns: string[], cardType: CardType) {
@@ -143,16 +147,16 @@ class FlashBox {
         if (setRef) {
             for (const e of div.querySelectorAll(`[${gconst.DATA_TYPE}="${gconst.BLOCK_REF}"]`)) {
                 if (e.textContent.trim() == "*") {
-                    return [id, div, true]
+                    return [id, div, true];
                 }
             }
-            const span = div.querySelector(`[contenteditable="true"]`)?.appendChild(document.createElement("span"));
+            const span = div.querySelector("[contenteditable=\"true\"]")?.appendChild(document.createElement("span"));
             if (span) {
                 span.setAttribute(gconst.DATA_TYPE, BlockNodeEnum.BLOCK_REF);
                 span.setAttribute(gconst.DATA_SUBTYPE, "s");
                 span.setAttribute(gconst.DATA_ID, id);
                 span.innerText = "*";
-                return [id, div, true]
+                return [id, div, true];
             }
         }
         return [id, div, false];
@@ -167,34 +171,20 @@ class FlashBox {
     }
 
     private async blankSpaceCard(blockID: string, selected: string, range: Range, protyle: IProtyle, cardType: CardType) {
-        const [docID, inPiece] = await this.isInPiece(protyle)
-        if (!docID) return;
         const lute = utils.NewLute();
         let md = "";
-        let { dom } = this.getBlockDOM(range.endContainer.parentElement);
+        const { dom } = this.getBlockDOM(range.endContainer.parentElement);
         if (!dom) return;
         if (selected) {
             protyle.toolbar.setInlineMark(protyle, "mark", "range");
-            const [_id, div] = this.cloneDiv(dom as HTMLDivElement, true)
+            const [_id, div] = this.cloneDiv(dom as HTMLDivElement, true);
             protyle.toolbar.setInlineMark(protyle, "mark", "range");
             md = lute.BlockDOM2Md(div.outerHTML);
         } else {
-            const [_id, div] = this.cloneDiv(dom as HTMLDivElement, true)
+            const [_id, div] = this.cloneDiv(dom as HTMLDivElement, true);
             md = lute.BlockDOM2Md(div.outerHTML);
         }
-        const { cardID, markdown } = this.createList([md], cardType);
-        if (inPiece) {
-            await siyuan.appendBlock(markdown, docID);
-            await utils.sleep(200);
-            await siyuan.appendBlock("", docID);
-        } else {
-            await siyuan.insertBlockAfter("", blockID);
-            await utils.sleep(200);
-            await siyuan.insertBlockAfter(markdown, blockID);
-            await utils.sleep(200);
-            await siyuan.insertBlockAfter("", blockID);
-        }
-        await siyuan.addRiffCards([cardID]);
+        await this.insertCard(protyle, [md], cardType, blockID);
     }
 }
 

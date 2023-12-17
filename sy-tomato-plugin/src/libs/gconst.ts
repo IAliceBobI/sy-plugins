@@ -32,4 +32,4 @@ export enum BlockNodeEnum {
     NODE_LINK_TEXT = "NodeLinkText",
     NODE_LINK_DEST = "NodeLinkDest",
     NODE_TEXT_MARK = "NodeTextMark",
-};
+}

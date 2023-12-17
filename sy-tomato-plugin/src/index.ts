@@ -59,11 +59,11 @@ export default class ThePlugin extends Plugin {
         const bkIn = this.addSettingItem("backLinkBottomBoxCheckbox", "* 底部反链（编辑器里）", false);
         const bkOut = this.addSettingItem("backLinkBottomBoxCheckboxOut", "* 底部反链（编辑器外）", false);
         bkIn.addEventListener("change", () => {
-            if (bkIn.checked) this.settingCfg['backLinkBottomBoxCheckboxOut'] = bkOut.checked = false;
-        })
+            if (bkIn.checked) this.settingCfg["backLinkBottomBoxCheckboxOut"] = bkOut.checked = false;
+        });
         bkOut.addEventListener("change", () => {
-            if (bkOut.checked) this.settingCfg['backLinkBottomBoxCheckbox'] = bkIn.checked = false;
-        })
+            if (bkOut.checked) this.settingCfg["backLinkBottomBoxCheckbox"] = bkIn.checked = false;
+        });
         if (this.settingCfg.backLinkBottomBoxCheckbox ?? false) await backLinkBottomBox.onload(this);
         if (this.settingCfg.backLinkBottomBoxCheckboxOut ?? false) await backLinkBottomBoxOut.onload(this);
     }
