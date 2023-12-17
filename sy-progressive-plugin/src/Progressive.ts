@@ -13,10 +13,12 @@ class Progressive {
     private storage: help.Storage;
     private helper: help.Helper;
     private openedTabs: ITab[];
+    private settings: SettingCfgType;
 
-    async onload(plugin: Plugin) {
+    async onload(plugin: Plugin, settings: SettingCfgType) {
         Progressive.GLOBAL_THIS["progressive_zZmqus5PtYRi"] = { progressive: this, utils, siyuan, timeUtil, events };
         this.plugin = plugin;
+        this.settings = settings;
         this.storage = new help.Storage(plugin);
         this.helper = new help.Helper(plugin);
         this.openedTabs = [];

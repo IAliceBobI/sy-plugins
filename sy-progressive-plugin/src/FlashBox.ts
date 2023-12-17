@@ -11,9 +11,11 @@ enum CardType {
 
 class FlashBox {
     private plugin: Plugin;
+    private settings: SettingCfgType;
 
-    async onload(plugin: Plugin) {
+    async onload(plugin: Plugin, settings: SettingCfgType) {
         this.plugin = plugin;
+        this.settings = settings;
         this.plugin.addCommand({
             langKey: "insertBlankSpaceCardB",
             hotkey: "⌥E",
