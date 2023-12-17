@@ -142,10 +142,10 @@ class FlashBox {
         const cardID = utils.NewNodeID();
         const list = [];
         list.push(`* ${md}`);
-        if (cardType === CardType.B) {
-            list.push("* >");
-        } else {
+        if (cardType === CardType.C) {
             list.push("* ```");
+        } else if (cardType === CardType.B) {
+            list.push("* >");
         }
         list.push(`{: id="${cardID}"}`);
         await siyuan.insertBlockAfter("", blockID);
