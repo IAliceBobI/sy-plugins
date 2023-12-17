@@ -53,21 +53,26 @@ export default class ThePlugin extends Plugin {
         this.addSettingItem("linkBoxCheckbox", "* 双向互链", false);
         if (this.settingCfg.linkBoxCheckbox ?? false) await linkBox.onload(this);
 
-        this.addSettingItem("backLinkBottomBoxCheckbox", "* 底部反链（编辑器里）", false);
-        if (this.settingCfg.backLinkBottomBoxCheckbox ?? false) await backLinkBottomBox.onload(this);
-
-        this.addSettingItem("backLinkBottomBoxCheckboxOut", "* 底部反链（编辑器外）", false);
-        if (this.settingCfg.backLinkBottomBoxCheckboxOut ?? false) await backLinkBottomBoxOut.onload(this);
-
         this.addSettingItem("imgOverlayCheckbox", "* 图片遮挡", false);
         if (this.settingCfg.imgOverlayCheckbox ?? false) await imgOverlayBox.onload(this);
+
+        const bkIn = this.addSettingItem("backLinkBottomBoxCheckbox", "* 底部反链（编辑器里）", false);
+        const bkOut = this.addSettingItem("backLinkBottomBoxCheckboxOut", "* 底部反链（编辑器外）", false);
+        bkIn.addEventListener("change", () => {
+            if (bkIn.checked) this.settingCfg['backLinkBottomBoxCheckboxOut'] = bkOut.checked = false;
+        })
+        bkOut.addEventListener("change", () => {
+            if (bkOut.checked) this.settingCfg['backLinkBottomBoxCheckbox'] = bkIn.checked = false;
+        })
+        if (this.settingCfg.backLinkBottomBoxCheckbox ?? false) await backLinkBottomBox.onload(this);
+        if (this.settingCfg.backLinkBottomBoxCheckboxOut ?? false) await backLinkBottomBoxOut.onload(this);
     }
 
     private addSettingItem(key: string, title: string, defaultValue: boolean) {
+        const checkbox = document.createElement("input") as HTMLInputElement;
         this.setting.addItem({
             title: title,
             createActionElement: () => {
-                const checkbox = document.createElement("input") as HTMLInputElement;
                 checkbox.type = "checkbox";
                 checkbox.addEventListener("change", () => {
                     this.settingCfg[key] = checkbox.checked;
@@ -77,6 +82,7 @@ export default class ThePlugin extends Plugin {
                 return checkbox;
             },
         });
+        return checkbox;
     }
 
     private blockIconEvent({ detail }: any) {
