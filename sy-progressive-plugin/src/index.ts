@@ -27,7 +27,9 @@ export default class ThePlugin extends Plugin {
         });
 
         this.settingCfg = await this.loadData(STORAGE_SETTINGS);
-        if (!this.settingCfg) this.settingCfg = {} as SettingCfgType;
+        if (!this.settingCfg) {
+            this.settingCfg = { addCodeBlock: false, addQuoteBlock: true }
+        }
         await prog.onload(this, this.settingCfg);
         await flashBox.onload(this, this.settingCfg);
 
