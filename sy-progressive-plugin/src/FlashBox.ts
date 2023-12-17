@@ -73,11 +73,10 @@ class FlashBox {
     }
 
     private async makeCard(protyle: IProtyle, t: CardType) {
-        const [docID, inPiece] = await this.isInPiece(protyle)
-        if (!docID) return;
-
         const { lastSelectedID, markdowns } = this.cloneSelectedLineMarkdowns(protyle);
         if (lastSelectedID) { // multilines
+            const [docID, inPiece] = await this.isInPiece(protyle)
+            if (!docID) return;
             const { cardID, markdown } = this.createList(markdowns, t);
             if (inPiece) {
                 await siyuan.appendBlock(markdown, docID);
@@ -168,6 +167,8 @@ class FlashBox {
     }
 
     private async blankSpaceCard(blockID: string, selected: string, range: Range, protyle: IProtyle, cardType: CardType) {
+        const [docID, inPiece] = await this.isInPiece(protyle)
+        if (!docID) return;
         const lute = utils.NewLute();
         let md = "";
         let { dom } = this.getBlockDOM(range.endContainer.parentElement);
@@ -181,20 +182,18 @@ class FlashBox {
             const [_id, div] = this.cloneDiv(dom as HTMLDivElement, true)
             md = lute.BlockDOM2Md(div.outerHTML);
         }
-        const cardID = utils.NewNodeID();
-        const list = [];
-        list.push(`* ${md}`);
-        if (cardType === CardType.C) {
-            list.push("* ```");
-        } else if (cardType === CardType.B) {
-            list.push("* >");
+        const { cardID, markdown } = this.createList([md], cardType);
+        if (inPiece) {
+            await siyuan.appendBlock(markdown, docID);
+            await utils.sleep(200);
+            await siyuan.appendBlock("", docID);
+        } else {
+            await siyuan.insertBlockAfter("", blockID);
+            await utils.sleep(200);
+            await siyuan.insertBlockAfter(markdown, blockID);
+            await utils.sleep(200);
+            await siyuan.insertBlockAfter("", blockID);
         }
-        list.push(`{: id="${cardID}"}`);
-        await siyuan.insertBlockAfter("", blockID);
-        await utils.sleep(200);
-        await siyuan.insertBlockAfter(list.join("\n"), blockID);
-        await utils.sleep(200);
-        await siyuan.insertBlockAfter("", blockID);
         await siyuan.addRiffCards([cardID]);
     }
 }
