@@ -359,6 +359,9 @@ export const siyuan = {
     async insertBlockAsChildOf(data: string, parentID: string, dataType = "markdown") {
         return siyuan.call("/api/block/insertBlock", { data, dataType, parentID });
     },
+    async appendBlock(data: string, parentID: string, dataType = "markdown") {
+        return siyuan.call("/api/block/appendBlock", { data, dataType, parentID });
+    },
     async removeBookmarks(docID: string, keepBlockID: string) {
         const bookmark = "";
         const rows = await siyuan.sql(`select id from blocks where root_id='${docID}' and ial like '%bookmark=%'`);

@@ -4,6 +4,7 @@ import * as utils from "../../sy-tomato-plugin/src/libs/utils";
 import { events } from "../../sy-tomato-plugin/src/libs/Events";
 import * as gconst from "../../sy-tomato-plugin/src/libs/gconst";
 import { BlockNodeEnum } from "../../sy-tomato-plugin/src/libs/gconst";
+import { MarkKey, TEMP_CONTENT } from "./constants";
 
 enum CardType {
     B = "B", C = "C", None = "None"
@@ -63,15 +64,32 @@ class FlashBox {
         });
     }
 
-    private async makeCard(protyle: any, t: CardType) {
+    private async isInPiece(protyle: IProtyle): Promise<[string, boolean]> {
+        const docID = protyle.block?.rootID ?? "";
+        if (!docID) return [docID, false];
+        const attrs = await siyuan.getBlockAttrs(docID)
+        if (attrs[MarkKey]?.startsWith(TEMP_CONTENT)) return [docID, true];
+        return [docID, false];
+    }
+
+    private async makeCard(protyle: IProtyle, t: CardType) {
+        const [docID, inPiece] = await this.isInPiece(protyle)
+        if (!docID) return;
+
         const { lastSelectedID, markdowns } = this.cloneSelectedLineMarkdowns(protyle);
         if (lastSelectedID) { // multilines
             const { cardID, markdown } = this.createList(markdowns, t);
-            await siyuan.insertBlockAfter("", lastSelectedID);
-            await utils.sleep(200);
-            await siyuan.insertBlockAfter(markdown, lastSelectedID);
-            await utils.sleep(200);
-            await siyuan.insertBlockAfter("", lastSelectedID);
+            if (inPiece) {
+                await siyuan.appendBlock(markdown, docID);
+                await utils.sleep(200);
+                await siyuan.appendBlock("", docID);
+            } else {
+                await siyuan.insertBlockAfter("", lastSelectedID);
+                await utils.sleep(200);
+                await siyuan.insertBlockAfter(markdown, lastSelectedID);
+                await utils.sleep(200);
+                await siyuan.insertBlockAfter("", lastSelectedID);
+            }
             setTimeout(() => { siyuan.addRiffCards([cardID]); }, 1000);
         } else {
             const blockID = events.lastBlockID;
@@ -149,7 +167,7 @@ class FlashBox {
         return { dom, blockID };
     }
 
-    private async blankSpaceCard(blockID: string, selected: string, range: Range, protyle: any, cardType: CardType) {
+    private async blankSpaceCard(blockID: string, selected: string, range: Range, protyle: IProtyle, cardType: CardType) {
         const lute = utils.NewLute();
         let md = "";
         let { dom } = this.getBlockDOM(range.endContainer.parentElement);
