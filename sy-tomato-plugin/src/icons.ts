@@ -10,6 +10,12 @@ export const ICONS = `
 </a>
 </svg></symbol>
 
+<symbol id="iconStop" viewBox="0 0 32 32"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+<rect width="32" height="32" fill="white" />
+<text x="50%" y="50%" text-anchor="middle" dominant-baseline="central" font-family="Arial" font-size="16" fill="black">Fresh</text>
+<line x1="0" y1="32" x2="32" y2="0" stroke="black" stroke-width="2" />
+</svg></symbol>
+
 <symbol id="iconOverlay" viewBox="0 0 32 32"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
 <g>
   <circle cx="16" cy="16" r="12" fill="#ff0000" />

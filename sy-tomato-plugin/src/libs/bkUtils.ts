@@ -216,16 +216,19 @@ function refreshTopDiv(self: IBKMaker, topDiv: HTMLDivElement, allRefs: RefColle
     }
 }
 
+
 function freeze(self: IBKMaker) {
     self.shouldFreeze = true;
     self.freezeCheckBox.checked = false;
-    self.label.querySelector("svg").classList.remove("fn__rotate")
+    // self.label.querySelector("svg").classList.remove("fn__rotate")
+    self.label.innerHTML = icon("Focus", 15);
 }
 
 function unfreeze(self: IBKMaker) {
     self.shouldFreeze = false;
     self.freezeCheckBox.checked = true;
-    self.label.querySelector("svg").classList.add("fn__rotate")
+    // self.label.querySelector("svg").classList.add("fn__rotate")
+    self.label.innerHTML = icon("Refresh", 15);
 }
 
 function searchInDiv(self: IBKMaker, query: string) {
@@ -303,7 +306,7 @@ async function path2div(self: IBKMaker, docBlock: HTMLElement, blockPaths: Block
 function addRefreshCheckBox(self: IBKMaker, topDiv: HTMLDivElement) {
     self.label = topDiv.appendChild(document.createElement("label"));
     {
-        self.label.innerHTML = icon("Refresh", 15)
+        // self.label.innerHTML = icon("Refresh", 15)
         self.label.classList.add("b3-label");
         self.label.classList.add("b3-label__text");
         self.label.classList.add("b3-label--noborder");
