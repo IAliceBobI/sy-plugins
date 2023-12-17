@@ -92,13 +92,13 @@ class FlashBox {
         const { cardID, markdown } = this.createList(markdowns, t);
         if (inPiece) {
             await siyuan.appendBlock(markdown, docID);
-            await utils.sleep(200);
+            await utils.sleep(100);
             await siyuan.appendBlock("", docID);
         } else {
             await siyuan.insertBlockAfter("", lastSelectedID);
-            await utils.sleep(200);
+            await utils.sleep(100);
             await siyuan.insertBlockAfter(markdown, lastSelectedID);
-            await utils.sleep(200);
+            await utils.sleep(100);
             await siyuan.insertBlockAfter("", lastSelectedID);
         }
         setTimeout(() => { siyuan.addRiffCards([cardID]); }, 1000);
