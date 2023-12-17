@@ -213,7 +213,7 @@ export const siyuan = {
     async setUILayout(layout: any): Promise<any> {
         return await siyuan.call("/api/system/setUILayout", { layout });
     },
-    async createDocWithMdIfNotExists(notebookID: string, path_readable: string, markdown: string) {
+    async createDocWithMdIfNotExists(notebookID: string, path_readable: string, markdown: string): Promise<string> {
         const row = await siyuan.sqlOne(`select id from blocks where hpath="${path_readable}" and type='d' limit 1`);
         const docID = row?.id ?? "";
         if (!docID) {
@@ -562,6 +562,7 @@ export const siyuanCache = {
     getBacklink2: createCache(siyuan.getBacklink2),
     getBackmentionDoc: createCache(siyuan.getBackmentionDoc),
     getChildBlocks: createCache(siyuan.getChildBlocks),
+    createDocWithMdIfNotExists: createCache(siyuan.createDocWithMdIfNotExists),
 };
 
 export function createCache<T extends Func>(originalFunction: T): (...args: [number, ...Parameters<T>]) => Promise<ReturnType<T>> {

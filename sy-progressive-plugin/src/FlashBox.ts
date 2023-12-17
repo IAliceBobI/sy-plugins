@@ -1,4 +1,4 @@
-import { IProtyle, Plugin } from "siyuan";
+import { IProtyle, Plugin, openTab } from "siyuan";
 import { siyuan } from "../../sy-tomato-plugin/src/libs/utils";
 import * as utils from "../../sy-tomato-plugin/src/libs/utils";
 import { events } from "../../sy-tomato-plugin/src/libs/Events";
@@ -12,8 +12,8 @@ enum CardType {
 
 function getDailyPath() {
     const today = utils.timeUtil.dateFormat(new Date()).split(" ")[0];
-    const [y, m] = today.split("-")
-    return `daily card/c${y}/c${y}-${m}/c${today}`;
+    const [y, m] = today.split("-");
+    return `/daily card/c${y}/c${y}-${m}/c${today}`;
 }
 
 async function isInPiece(protyle: IProtyle): Promise<[string, boolean]> {
@@ -28,7 +28,7 @@ function getBlockDOM(dom: HTMLElement): { dom: HTMLElement, blockID: string } {
     if (!dom) return {} as any;
     if (dom?.tagName?.toLocaleLowerCase() == "body") return {} as any;
     const blockID: string = dom.getAttribute(gconst.DATA_NODE_ID) ?? "";
-    if (!blockID) return this.getBlockDOM(dom.parentElement);
+    if (!blockID) return getBlockDOM(dom.parentElement);
     return { dom, blockID };
 }
 
@@ -131,12 +131,11 @@ class FlashBox {
         if (!docID) return;
         const { cardID, markdown } = this.createList(markdowns, t);
         if (path) {
-            const a = await siyuan.createDocWithMdIfNotExists(events.boxID, path, "")
-            console.log(a)
-            return;
-            await siyuan.appendBlock(markdown, docID);
+            const targetDocID = await utils.siyuanCache.createDocWithMdIfNotExists(10000, events.boxID, path, "");
+            await siyuan.insertBlockAsChildOf(markdown, targetDocID);
             await utils.sleep(100);
-            await siyuan.appendBlock("", docID);
+            await siyuan.insertBlockAsChildOf("", targetDocID);
+            openTab({ app: this.plugin.app, doc: { id: targetDocID }, position: "right" });
         } else if (inPiece) {
             await siyuan.appendBlock(markdown, docID);
             await utils.sleep(100);
@@ -148,7 +147,7 @@ class FlashBox {
             await utils.sleep(100);
             await siyuan.insertBlockAfter("", lastSelectedID);
         }
-        setTimeout(() => { siyuan.addRiffCards([cardID]); }, 1000);
+        setTimeout(() => { siyuan.addRiffCards([cardID]); }, 500);
     }
 
     private createList(markdowns: string[], cardType: CardType) {
