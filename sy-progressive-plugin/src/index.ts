@@ -1,17 +1,23 @@
 import { Plugin, Setting } from "siyuan";
 import { ICONS } from "./icons";
 import { prog } from "./Progressive";
-import { events } from "../../sy-tomato-plugin/src/libs/Events";
+import { EventType, events } from "../../sy-tomato-plugin/src/libs/Events";
 import { flashBox } from "./FlashBox";
 
 const STORAGE_SETTINGS = "ProgressiveLearning.json";
 
 export default class ThePlugin extends Plugin {
     public settingCfg: SettingCfgType;
+    private blockIconEventBindThis = this.blockIconEvent.bind(this);
+
+    private blockIconEvent({ detail }: any) {
+        flashBox.blockIconEvent(detail);
+    }
 
     async onload() {
         this.addIcons(ICONS);
         events.onload(this);
+        this.eventBus.on(EventType.click_blockicon, this.blockIconEventBindThis);
         
         this.setting = new Setting({
             confirmCallback: () => {

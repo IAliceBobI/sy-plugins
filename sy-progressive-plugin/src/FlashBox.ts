@@ -1,4 +1,4 @@
-import { Plugin } from "siyuan";
+import { IProtyle, Plugin } from "siyuan";
 import { siyuan } from "../../sy-tomato-plugin/src/libs/utils";
 import * as utils from "../../sy-tomato-plugin/src/libs/utils";
 import { events } from "../../sy-tomato-plugin/src/libs/Events";
@@ -13,37 +13,54 @@ class FlashBox {
     private plugin: Plugin;
     private settings: SettingCfgType;
 
+    blockIconEvent(detail: any) {
+        if (!this.plugin) return;
+        let cardType = CardType.None
+        if (this.settings.addCodeBlock) {
+            cardType = CardType.C
+        } else if (this.settings.addQuoteBlock) {
+            cardType = CardType.B
+        }
+        detail.menu.addItem({
+            iconHTML: "",
+            label: this.plugin.i18n.insertBlankSpaceCard,
+            click: () => {
+                this.makeCard(detail.protyle, cardType);
+            }
+        });
+    }
+
     async onload(plugin: Plugin, settings: SettingCfgType) {
         this.plugin = plugin;
         this.settings = settings;
+        let cardType = CardType.None
+        if (this.settings.addCodeBlock) {
+            cardType = CardType.C
+        } else if (this.settings.addQuoteBlock) {
+            cardType = CardType.B
+        }
         this.plugin.addCommand({
             langKey: "insertBlankSpaceCard",
             hotkey: "⌥E",
             editorCallback: (protyle) => {
-                if (this.settings.addCodeBlock) {
-                    this.makeCard(protyle, CardType.C);
-                } else if (this.settings.addQuoteBlock) {
-                    this.makeCard(protyle, CardType.B);
-                } else {
-                    this.makeCard(protyle, CardType.None);
-                }
+                this.makeCard(protyle, cardType);
             },
         });
-        // this.plugin.eventBus.on("open-menu-content", async ({ detail }) => {
-        //     const menu = detail.menu;
-        //     menu.addItem({
-        //         label: this.plugin.i18n.insertBlankSpaceCardB,
-        //         icon: "iconFlashcard",
-        //         accelerator: "⌥E",
-        //         click: () => {
-        //             const blockID = detail?.element?.getAttribute("data-node-id") ?? "";
-        //             const blank = detail?.range?.cloneContents()?.textContent ?? "";
-        //             if (blockID) {
-        //                 this.blankSpaceCard(blockID, blank, detail?.range, detail?.protyle, CardType.B);
-        //             }
-        //         },
-        //     });
-        // });
+        this.plugin.eventBus.on("open-menu-content", async ({ detail }) => {
+            const menu = detail.menu;
+            menu.addItem({
+                label: this.plugin.i18n.insertBlankSpaceCard,
+                icon: "iconFlashcard",
+                accelerator: "⌥E",
+                click: () => {
+                    const blockID = detail?.element?.getAttribute("data-node-id") ?? "";
+                    const blank = detail?.range?.cloneContents()?.textContent ?? "";
+                    if (blockID) {
+                        this.blankSpaceCard(blockID, blank, detail?.range, detail?.protyle, cardType);
+                    }
+                },
+            });
+        });
     }
 
     private async makeCard(protyle: any, t: CardType) {
@@ -81,9 +98,9 @@ class FlashBox {
         return { cardID, "markdown": tmp.join("\n") };
     }
 
-    private cloneSelectedLineMarkdowns(protyle: any) {
+    private cloneSelectedLineMarkdowns(protyle: IProtyle) {
         const lute = utils.NewLute();
-        const multiLine = protyle?.element?.getElementsByTagName("div") as HTMLDivElement[] ?? [];
+        const multiLine = protyle?.element?.getElementsByTagName("div") as unknown as HTMLDivElement[] ?? [];
         const markdowns = [];
         let setRef = true;
         let lastSelectedID = "";
