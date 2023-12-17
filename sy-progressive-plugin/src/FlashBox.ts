@@ -86,36 +86,38 @@ class FlashBox {
         const lute = utils.NewLute();
         const multiLine = protyle?.element?.getElementsByTagName("div") as HTMLDivElement[] ?? [];
         const markdowns = [];
+        let setRef = true;
         let lastSelectedID = "";
-        let firstSelectedID = "";
-        let setRef = false;
         for (const div of multiLine) {
             if (div.classList.contains(gconst.PROTYLE_WYSIWYG_SELECT)) {
-                const id = div.getAttribute(gconst.DATA_NODE_ID);
-                if (id) {
-                    lastSelectedID = id;
-                    if (!firstSelectedID) firstSelectedID = id;
-                }
                 div.classList.remove(gconst.PROTYLE_WYSIWYG_SELECT);
-                const elem = div.cloneNode(true) as HTMLDivElement;
-                elem.removeAttribute(gconst.DATA_NODE_ID)
-                elem.querySelectorAll(`[${gconst.DATA_NODE_ID}]`).forEach((e: HTMLElement) => {
-                    e.removeAttribute(gconst.DATA_NODE_ID)
-                })
-                if (!setRef) {
-                    const span = elem.querySelector(`[contenteditable="true"]`)?.appendChild(document.createElement("span"))
-                    if (span) {
-                        span.setAttribute(gconst.DATA_TYPE, BlockNodeEnum.BLOCK_REF)
-                        span.setAttribute(gconst.DATA_SUBTYPE, "s")
-                        span.setAttribute(gconst.DATA_ID, id)
-                        span.innerText = "*"
-                        setRef = true;
-                    }
-                }
+                const [id, elem, hasRef] = this.cloneDiv(div, setRef);
+                if (hasRef) setRef = false;
+                lastSelectedID = id;
                 markdowns.push(lute.BlockDOM2Md(elem.outerHTML));
             }
         }
-        return { markdowns, firstSelectedID, lastSelectedID };
+        return { markdowns, lastSelectedID };
+    }
+
+    private cloneDiv(div: HTMLDivElement, setRef: boolean): [string, HTMLElement, boolean] {
+        div = div.cloneNode(true) as HTMLDivElement;
+        const id = div.getAttribute(gconst.DATA_NODE_ID);
+        div.removeAttribute(gconst.DATA_NODE_ID);
+        div.querySelectorAll(`[${gconst.DATA_NODE_ID}]`).forEach((e: HTMLElement) => {
+            e.removeAttribute(gconst.DATA_NODE_ID);
+        });
+        if (setRef) {
+            const span = div.querySelector(`[contenteditable="true"]`)?.appendChild(document.createElement("span"));
+            if (span) {
+                span.setAttribute(gconst.DATA_TYPE, BlockNodeEnum.BLOCK_REF);
+                span.setAttribute(gconst.DATA_SUBTYPE, "s");
+                span.setAttribute(gconst.DATA_ID, id);
+                span.innerText = "*";
+                return [id, div, true]
+            }
+        }
+        return [id, div, false];
     }
 
     private getBlockDOM(dom: Element): { dom: Element, blockID: string } {
