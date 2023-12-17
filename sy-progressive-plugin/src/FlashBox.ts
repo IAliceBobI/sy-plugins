@@ -10,6 +10,12 @@ enum CardType {
     B = "B", C = "C", None = "None"
 }
 
+function getDailyPath() {
+    const today = utils.timeUtil.dateFormat(new Date()).split(" ")[0];
+    const [y, m] = today.split("-")
+    return `daily card/${y}/${y}-${m}/${today}`;
+}
+
 class FlashBox {
     private plugin: Plugin;
     private settings: SettingCfgType;
@@ -27,6 +33,13 @@ class FlashBox {
             label: this.plugin.i18n.insertBlankSpaceCard,
             click: () => {
                 this.makeCard(detail.protyle, cardType);
+            }
+        });
+        detail.menu.addItem({
+            iconHTML: "",
+            label: this.plugin.i18n.send2dailyCard,
+            click: () => {
+                this.makeCard(detail.protyle, cardType, getDailyPath());
             }
         });
     }
@@ -47,6 +60,13 @@ class FlashBox {
                 this.makeCard(protyle, cardType);
             },
         });
+        this.plugin.addCommand({
+            langKey: "send2dailyCard",
+            hotkey: "⌘`",
+            editorCallback: (protyle) => {
+                this.makeCard(protyle, cardType, getDailyPath());
+            },
+        });
         this.plugin.eventBus.on("open-menu-content", async ({ detail }) => {
             const menu = detail.menu;
             menu.addItem({
@@ -61,6 +81,18 @@ class FlashBox {
                     }
                 },
             });
+            menu.addItem({
+                label: this.plugin.i18n.send2dailyCard,
+                icon: "iconFlashcard",
+                accelerator: "⌘`",
+                click: () => {
+                    const blockID = detail?.element?.getAttribute("data-node-id") ?? "";
+                    const blank = detail?.range?.cloneContents()?.textContent ?? "";
+                    if (blockID) {
+                        this.blankSpaceCard(blockID, blank, detail?.range, detail?.protyle, cardType, getDailyPath());
+                    }
+                },
+            });
         });
     }
 
@@ -72,7 +104,7 @@ class FlashBox {
         return [docID, false];
     }
 
-    private async makeCard(protyle: IProtyle, t: CardType) {
+    private async makeCard(protyle: IProtyle, t: CardType, path?: string) {
         const { lastSelectedID, markdowns } = this.cloneSelectedLineMarkdowns(protyle);
         if (lastSelectedID) { // multilines
             await this.insertCard(protyle, markdowns, t, lastSelectedID);
@@ -81,7 +113,7 @@ class FlashBox {
             const range = document.getSelection()?.getRangeAt(0);
             const blank = range?.cloneContents()?.textContent ?? "";
             if (blockID) {
-                this.blankSpaceCard(blockID, blank, range, protyle, t);
+                this.blankSpaceCard(blockID, blank, range, protyle, t, path);
             }
         }
     }
@@ -170,7 +202,7 @@ class FlashBox {
         return { dom, blockID };
     }
 
-    private async blankSpaceCard(blockID: string, selected: string, range: Range, protyle: IProtyle, cardType: CardType) {
+    private async blankSpaceCard(blockID: string, selected: string, range: Range, protyle: IProtyle, cardType: CardType, path?: string) {
         const lute = utils.NewLute();
         let md = "";
         const { dom } = this.getBlockDOM(range.endContainer.parentElement);
