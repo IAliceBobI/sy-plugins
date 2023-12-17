@@ -39,9 +39,9 @@ export class Storage {
         this.plugin = plugin;
     }
 
-    onLayoutReady() {
+    async onLayoutReady() {
         // load only need once, save many
-        this.plugin.loadData(constants.STORAGE_BOOKS);
+        return this.plugin.loadData(constants.STORAGE_BOOKS);
     }
 
     async updateBookInfoTime(docID: string) {

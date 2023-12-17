@@ -4,7 +4,7 @@ import { prog } from "./Progressive";
 import { events } from "../../sy-tomato-plugin/src/libs/Events";
 import { flashBox } from "./FlashBox";
 
-const STORAGE_SETTINGS = "ProgressiveLearning.json"
+const STORAGE_SETTINGS = "ProgressiveLearning.json";
 
 export default class ThePlugin extends Plugin {
     public settingCfg: SettingCfgType;
@@ -21,11 +21,12 @@ export default class ThePlugin extends Plugin {
         });
         
         this.settingCfg = await this.loadData(STORAGE_SETTINGS);
-        if (!this.settingCfg) this.settingCfg = {};
+        if (!this.settingCfg) this.settingCfg = {} as SettingCfgType;
         await prog.onload(this, this.settingCfg);
         await flashBox.onload(this, this.settingCfg);
 
-        this.addSettingItem("cardBoxCheckbox", "* 闪卡工具", false);
+        this.addSettingItem("addCodeBlock", "* 制卡时加入代码块", false);
+        this.addSettingItem("addQuoteBlock", "* 制卡时加入引述块", true);
     }
 
     private addSettingItem(key: string, title: string, defaultValue: boolean) {

@@ -1,3 +1,6 @@
 // https://app.quicktype.io/?l=ts
 
-type SettingCfgType = {}
+type SettingCfgType = {
+    addCodeBlock: string,
+    addQuoteBlock: string,
+}

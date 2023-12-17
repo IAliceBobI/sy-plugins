@@ -4,9 +4,10 @@ import * as utils from "../../sy-tomato-plugin/src/libs/utils";
 import { events } from "../../sy-tomato-plugin/src/libs/Events";
 import * as gconst from "../../sy-tomato-plugin/src/libs/gconst";
 import * as helper from "./helper";
+import { BlockNodeEnum } from "../../sy-tomato-plugin/src/libs/gconst";
 
 enum CardType {
-    B = "B", C = "C"
+    B = "B", C = "C", None = "None"
 }
 
 class FlashBox {
@@ -17,51 +18,38 @@ class FlashBox {
         this.plugin = plugin;
         this.settings = settings;
         this.plugin.addCommand({
-            langKey: "insertBlankSpaceCardB",
+            langKey: "insertBlankSpaceCard",
             hotkey: "⌥E",
             editorCallback: (protyle) => {
-                this.makeCard(protyle, CardType.B);
+                if (this.settings.addCodeBlock) {
+                    this.makeCard(protyle, CardType.C);
+                } else if (this.settings.addQuoteBlock) {
+                    this.makeCard(protyle, CardType.B);
+                } else {
+                    this.makeCard(protyle, CardType.None);
+                }
             },
         });
-        this.plugin.addCommand({
-            langKey: "insertBlankSpaceCardC",
-            hotkey: "⌘`",
-            editorCallback: (protyle) => {
-                this.makeCard(protyle, CardType.C);
-            },
-        });
-        this.plugin.eventBus.on("open-menu-content", async ({ detail }) => {
-            const menu = detail.menu;
-            menu.addItem({
-                label: this.plugin.i18n.insertBlankSpaceCardB,
-                icon: "iconFlashcard",
-                accelerator: "⌥E",
-                click: () => {
-                    const blockID = detail?.element?.getAttribute("data-node-id") ?? "";
-                    const blank = detail?.range?.cloneContents()?.textContent ?? "";
-                    if (blockID) {
-                        this.blankSpaceCard(blockID, blank, detail?.range, detail?.protyle, CardType.B);
-                    }
-                },
-            });
-            menu.addItem({
-                label: this.plugin.i18n.insertBlankSpaceCardC,
-                icon: "iconFlashcard",
-                accelerator: "⌘`",
-                click: () => {
-                    const blockID = detail?.element?.getAttribute("data-node-id") ?? "";
-                    const blank = detail?.range?.cloneContents()?.textContent ?? "";
-                    if (blockID) {
-                        this.blankSpaceCard(blockID, blank, detail?.range, detail?.protyle, CardType.C);
-                    }
-                },
-            });
-        });
+        // this.plugin.eventBus.on("open-menu-content", async ({ detail }) => {
+        //     const menu = detail.menu;
+        //     menu.addItem({
+        //         label: this.plugin.i18n.insertBlankSpaceCardB,
+        //         icon: "iconFlashcard",
+        //         accelerator: "⌥E",
+        //         click: () => {
+        //             const blockID = detail?.element?.getAttribute("data-node-id") ?? "";
+        //             const blank = detail?.range?.cloneContents()?.textContent ?? "";
+        //             if (blockID) {
+        //                 this.blankSpaceCard(blockID, blank, detail?.range, detail?.protyle, CardType.B);
+        //             }
+        //         },
+        //     });
+        // });
     }
 
     private async makeCard(protyle: any, t: CardType) {
         const { lastSelectedID, markdowns } = this.cloneSelectedLineMarkdowns(protyle);
-        if (lastSelectedID) {
+        if (lastSelectedID) { // multilines
             const { cardID, markdown } = this.createList(markdowns, t);
             await siyuan.insertBlockAfter("", lastSelectedID);
             await utils.sleep(200);
@@ -101,6 +89,7 @@ class FlashBox {
         const markdowns = [];
         let lastSelectedID = "";
         let firstSelectedID = "";
+        let setRef = false;
         for (const div of multiLine) {
             if (div.classList.contains(gconst.PROTYLE_WYSIWYG_SELECT)) {
                 const id = div.getAttribute(gconst.DATA_NODE_ID);
@@ -110,6 +99,20 @@ class FlashBox {
                 }
                 div.classList.remove(gconst.PROTYLE_WYSIWYG_SELECT);
                 const elem = div.cloneNode(true) as HTMLDivElement;
+                elem.removeAttribute(gconst.DATA_NODE_ID)
+                elem.querySelectorAll(`[${gconst.DATA_NODE_ID}]`).forEach((e: HTMLElement) => {
+                    e.removeAttribute(gconst.DATA_NODE_ID)
+                })
+                if (!setRef) {
+                    const span = elem.querySelector(`[contenteditable="true"]`)?.appendChild(document.createElement("span"))
+                    if (span) {
+                        span.setAttribute(gconst.DATA_TYPE, BlockNodeEnum.BLOCK_REF)
+                        span.setAttribute(gconst.DATA_SUBTYPE, "s")
+                        span.setAttribute(gconst.DATA_ID, id)
+                        span.innerText = "*"
+                        setRef = true;
+                    }
+                }
                 markdowns.push(lute.BlockDOM2Md(elem.innerHTML));
             }
         }

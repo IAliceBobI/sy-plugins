@@ -13,7 +13,7 @@ class Progressive {
     private storage: help.Storage;
     private helper: help.Helper;
     private openedTabs: ITab[];
-    private settings: SettingCfgType;
+    settings: SettingCfgType;
 
     async onload(plugin: Plugin, settings: SettingCfgType) {
         Progressive.GLOBAL_THIS["progressive_zZmqus5PtYRi"] = { progressive: this, utils, siyuan, timeUtil, events };
@@ -22,7 +22,7 @@ class Progressive {
         this.storage = new help.Storage(plugin);
         this.helper = new help.Helper(plugin);
         this.openedTabs = [];
-        this.storage.onLayoutReady();
+        await this.storage.onLayoutReady();
         const topBarElement = this.plugin.addTopBar({
             icon: "iconABook",
             title: this.plugin.i18n.progressiveReadingMenu,
