@@ -3,7 +3,6 @@ import { siyuan } from "../../sy-tomato-plugin/src/libs/utils";
 import * as utils from "../../sy-tomato-plugin/src/libs/utils";
 import { events } from "../../sy-tomato-plugin/src/libs/Events";
 import * as gconst from "../../sy-tomato-plugin/src/libs/gconst";
-import * as helper from "./helper";
 import { BlockNodeEnum } from "../../sy-tomato-plugin/src/libs/gconst";
 
 enum CardType {
@@ -120,7 +119,7 @@ class FlashBox {
         return [id, div, false];
     }
 
-    private getBlockDOM(dom: Element): { dom: Element, blockID: string } {
+    private getBlockDOM(dom: HTMLElement): { dom: HTMLElement, blockID: string } {
         if (!dom) return {} as any;
         if (dom?.tagName?.toLocaleLowerCase() == "body") return {} as any;
         const blockID: string = dom.getAttribute(gconst.DATA_NODE_ID) ?? "";
@@ -131,15 +130,16 @@ class FlashBox {
     private async blankSpaceCard(blockID: string, selected: string, range: Range, protyle: any, cardType: CardType) {
         const lute = utils.NewLute();
         let md = "";
+        let { dom } = this.getBlockDOM(range.endContainer.parentElement);
+        if (!dom) return;
         if (selected) {
-            const { dom } = this.getBlockDOM(range.endContainer.parentElement);
-            if (!dom) return;
             protyle.toolbar.setInlineMark(protyle, "mark", "range");
-            md = helper.tryRmIDAddLinkOne(lute.BlockDOM2Md(dom.outerHTML));
+            const [_id, div] = this.cloneDiv(dom as HTMLDivElement, true)
             protyle.toolbar.setInlineMark(protyle, "mark", "range");
+            md = lute.BlockDOM2Md(div.outerHTML);
         } else {
-            const { dom } = await siyuan.getBlockDOM(blockID);
-            md = helper.tryRmIDAddLinkOne(lute.BlockDOM2Md(dom));
+            const [_id, div] = this.cloneDiv(dom as HTMLDivElement, true)
+            md = lute.BlockDOM2Md(div.outerHTML);
         }
         const cardID = utils.NewNodeID();
         const list = [];
