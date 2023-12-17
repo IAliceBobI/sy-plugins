@@ -16,6 +16,12 @@ function getDailyPath() {
     return `/daily card/c${y}/c${y}-${m}/c${today}`;
 }
 
+function getDailyAttrValue() {
+    const today = utils.timeUtil.dateFormat(new Date()).split(" ")[0];
+    const [y, m, d] = today.split("-");
+    return y + m + d;
+}
+
 async function isInPiece(protyle: IProtyle): Promise<[string, boolean]> {
     const docID = protyle.block?.rootID ?? "";
     if (!docID) return [docID, false];
@@ -131,7 +137,10 @@ class FlashBox {
         if (!docID) return;
         const { cardID, markdown } = this.createList(markdowns, t);
         if (path) {
-            const targetDocID = await utils.siyuanCache.createDocWithMdIfNotExists(10000, events.boxID, path, "");
+            const v = getDailyAttrValue();
+            const attr = {};
+            attr[`custom-dailycard-${v}`] = v;
+            const targetDocID = await utils.siyuanCache.createDocWithMdIfNotExists(10000, events.boxID, path, "", attr);
             await siyuan.insertBlockAsChildOf(markdown, targetDocID);
             await utils.sleep(100);
             await siyuan.insertBlockAsChildOf("", targetDocID);

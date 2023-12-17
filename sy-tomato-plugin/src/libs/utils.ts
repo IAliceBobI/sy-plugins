@@ -213,20 +213,22 @@ export const siyuan = {
     async setUILayout(layout: any): Promise<any> {
         return await siyuan.call("/api/system/setUILayout", { layout });
     },
-    async createDocWithMdIfNotExists(notebookID: string, path_readable: string, markdown: string): Promise<string> {
+    async createDocWithMdIfNotExists(notebookID: string, path_readable: string, markdown: string, attr?: any): Promise<string> {
         const row = await siyuan.sqlOne(`select id from blocks where hpath="${path_readable}" and type='d' limit 1`);
         const docID = row?.id ?? "";
         if (!docID) {
-            return siyuan.createDocWithMd(notebookID, path_readable, markdown);
+            return siyuan.createDocWithMd(notebookID, path_readable, markdown, "", attr);
         }
         return docID;
     },
-    async createDocWithMd(notebookID: string, path_readable: string, markdown: string, id = "") {
+    async createDocWithMd(notebookID: string, path_readable: string, markdown: string, id = "", attr?: any) {
         const notebook = notebookID;
         const path = path_readable;
         const params = { notebook, path, markdown, id };
         if (!id) delete params["id"];
-        return siyuan.call("/api/filetree/createDocWithMd", params);
+        id = await siyuan.call("/api/filetree/createDocWithMd", params);
+        if (attr) await siyuan.setBlockAttrs(id, attr);
+        return id;
     },
     async removeDoc(notebookID: string, path_not_readable: string) {
         return siyuan.call("/api/filetree/removeDoc", { notebook: notebookID, path: path_not_readable });
