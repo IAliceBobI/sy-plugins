@@ -218,14 +218,14 @@ function refreshTopDiv(self: IBKMaker, topDiv: HTMLDivElement, allRefs: RefColle
 
 function freeze(self: IBKMaker) {
     self.shouldFreeze = true;
-    self.freezeCheckBox.checked = true;
-    self.label.innerHTML = icon("Focus", 15);
+    self.freezeCheckBox.checked = false;
+    self.label.querySelector("svg").classList.remove("fn__rotate")
 }
 
 function unfreeze(self: IBKMaker) {
     self.shouldFreeze = false;
-    self.freezeCheckBox.checked = false;
-    self.label.innerHTML = icon("Play", 15);
+    self.freezeCheckBox.checked = true;
+    self.label.querySelector("svg").classList.add("fn__rotate")
 }
 
 function searchInDiv(self: IBKMaker, query: string) {
@@ -303,6 +303,7 @@ async function path2div(self: IBKMaker, docBlock: HTMLElement, blockPaths: Block
 function addRefreshCheckBox(self: IBKMaker, topDiv: HTMLDivElement) {
     self.label = topDiv.appendChild(document.createElement("label"));
     {
+        self.label.innerHTML = icon("Refresh", 15)
         self.label.classList.add("b3-label");
         self.label.classList.add("b3-label__text");
         self.label.classList.add("b3-label--noborder");
@@ -316,7 +317,7 @@ function addRefreshCheckBox(self: IBKMaker, topDiv: HTMLDivElement) {
         self.freezeCheckBox.classList.add("b3-switch");
         unfreeze(self);
         self.freezeCheckBox.addEventListener("change", () => {
-            if (self.freezeCheckBox.checked) freeze(self);
+            if (!self.freezeCheckBox.checked) freeze(self);
             else unfreeze(self);
         });
         topDiv.appendChild(createSpan("&nbsp;".repeat(4)));
