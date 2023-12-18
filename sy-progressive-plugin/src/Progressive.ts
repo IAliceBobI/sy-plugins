@@ -534,8 +534,8 @@ class Progressive {
         tempDiv.innerHTML = dom;
         tempDiv = tempDiv.firstElementChild as HTMLDivElement;
         utils.cleanDiv(tempDiv, true);
-        let md = lute.BlockDOM2Md(tempDiv.innerHTML);
-        md = `${md}\n{: ${constants.RefIDKey}="${id}"}`;
+        let md = lute.BlockDOM2Md(tempDiv.outerHTML);
+        md = md + "\n" + `{: ${constants.RefIDKey}="${id}"}`;
         await siyuan.insertBlockAsChildOf(md, noteID);
     }
 

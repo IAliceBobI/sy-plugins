@@ -1,6 +1,6 @@
 import { App, Constants, IOperation, Lute, fetchSyncPost, openTab } from "siyuan";
 import { v4 as uuid } from "uuid";
-import * as gconst from "./gconst"
+import * as gconst from "./gconst";
 
 export function cleanDiv(div: HTMLDivElement, setRef: boolean): [string, HTMLElement, boolean] {
     const id = div.getAttribute(gconst.DATA_NODE_ID);
@@ -503,12 +503,11 @@ export const siyuan = {
         for (const id of ids) {
             if (copy) {
                 const { dom } = await siyuan.getBlockDOM(id);
-                let md = lute.BlockDOM2Md(dom);
-                const list = md.trim().split("\n");
-                if (list[list.length - 1].trim().startsWith("{: ")) {
-                    list.pop();
-                }
-                md = list.join("\n");
+                let tempDiv = document.createElement("div") as HTMLDivElement;
+                tempDiv.innerHTML = dom;
+                tempDiv = tempDiv.firstElementChild as HTMLDivElement;
+                cleanDiv(tempDiv, false);
+                const md = lute.BlockDOM2Md(tempDiv.outerHTML);
                 await siyuan.insertBlockAfter(md, insertPoint["id"]);
             } else {
                 await siyuan.safeMoveBlockAfter(id, insertPoint["id"]);
