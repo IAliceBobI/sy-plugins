@@ -371,6 +371,7 @@ class Progressive {
             await siyuan.pushMsg(this.plugin.i18n.thisIsFirstPage);
             return;
         }
+        const piecePre = bookIndex[point - 1] ?? [];
         const piece = bookIndex[point];
         noteID = await this.findDoc(bookInfo.bookID, point);
         if (noteID) {
@@ -381,7 +382,7 @@ class Progressive {
         if (noteID) {
             await this.addReadingBtns(bookID, noteID, point);
             await siyuan.insertBlockAsChildOf(help.tempContent("---"), noteID);
-            await this.fullfilContent(bookInfo.bookID, piece, noteID);
+            await this.fullfilContent(bookInfo.bookID, piecePre, piece, noteID);
             this.addAndClose(await openTab({
                 app: this.plugin.app, doc: { id: noteID },
                 afterOpen: () => {
@@ -452,9 +453,10 @@ class Progressive {
             case HtmlCBType.fullfilContent:
                 {
                     const index = await this.storage.loadBookIndexIfNeeded(bookID);
+                    const piecePre = index[point - 1] ?? [];
                     const piece = index[point] ?? [];
                     await siyuan.insertBlockAsChildOf(help.tempContent("---"), noteID);
-                    await this.fullfilContent(bookID, piece, noteID);
+                    await this.fullfilContent(bookID, piecePre, piece, noteID);
                 }
                 break;
             case HtmlCBType.cleanUnchanged:
@@ -513,15 +515,21 @@ class Progressive {
         return siyuan.insertBlockAsChildOf(help.tempContent(this.helper.getReadingBtns(bookID, noteID, point)), noteID);
     }
 
-    private async fullfilContent(bookID: string, piece: string[], noteID: string) {
+    private async fullfilContent(bookID: string, piecePre: string[], piece: string[], noteID: string) {
         const lute = utils.NewLute();
         this.storage.updateBookInfoTime(bookID);
         for (const id of piece.slice().reverse()) {
             const { dom } = await siyuan.getBlockDOM(id);
-            let md = lute.BlockDOM2Md(dom);
-            md = help.tryRmIDAddLinkOne(md, id);
+            const tempDiv = document.createElement("div")
+            tempDiv.innerHTML = dom
+            utils.cleanDiv(tempDiv.firstElementChild as HTMLDivElement, true);
+            let md = lute.BlockDOM2Md(tempDiv.innerHTML);
             md = `${md}\n{: ${constants.RefIDKey}="${id}"}`;
+            console.log(md)
             await siyuan.insertBlockAsChildOf(md, noteID);
+        }
+        for (const id of piecePre.slice().reverse()) {
+
         }
     }
 

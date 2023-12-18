@@ -3,7 +3,6 @@ import { siyuan } from "../../sy-tomato-plugin/src/libs/utils";
 import * as utils from "../../sy-tomato-plugin/src/libs/utils";
 import { events } from "../../sy-tomato-plugin/src/libs/Events";
 import * as gconst from "../../sy-tomato-plugin/src/libs/gconst";
-import { BlockNodeEnum } from "../../sy-tomato-plugin/src/libs/gconst";
 import { MarkKey, TEMP_CONTENT } from "./constants";
 
 enum CardType {
@@ -195,27 +194,7 @@ class FlashBox {
 
     private cloneDiv(div: HTMLDivElement, setRef: boolean): [string, HTMLElement, boolean] {
         div = div.cloneNode(true) as HTMLDivElement;
-        const id = div.getAttribute(gconst.DATA_NODE_ID);
-        div.removeAttribute(gconst.DATA_NODE_ID);
-        div.querySelectorAll(`[${gconst.DATA_NODE_ID}]`).forEach((e: HTMLElement) => {
-            e.removeAttribute(gconst.DATA_NODE_ID);
-        });
-        if (setRef) {
-            for (const e of div.querySelectorAll(`[${gconst.DATA_TYPE}="${gconst.BLOCK_REF}"]`)) {
-                if (e.textContent.trim() == "*") {
-                    return [id, div, true];
-                }
-            }
-            const span = div.querySelector("[contenteditable=\"true\"]")?.appendChild(document.createElement("span"));
-            if (span) {
-                span.setAttribute(gconst.DATA_TYPE, BlockNodeEnum.BLOCK_REF);
-                span.setAttribute(gconst.DATA_SUBTYPE, "s");
-                span.setAttribute(gconst.DATA_ID, id);
-                span.innerText = "*";
-                return [id, div, true];
-            }
-        }
-        return [id, div, false];
+        return utils.cleanDiv(div, setRef);
     }
 
     private async blankSpaceCard(blockID: string, selected: string, range: Range, protyle: IProtyle, cardType: CardType, path?: string) {

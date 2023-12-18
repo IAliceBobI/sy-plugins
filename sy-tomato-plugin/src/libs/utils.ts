@@ -1,5 +1,30 @@
 import { App, Constants, IOperation, Lute, fetchSyncPost, openTab } from "siyuan";
 import { v4 as uuid } from "uuid";
+import * as gconst from "./gconst"
+
+export function cleanDiv(div: HTMLDivElement, setRef: boolean): [string, HTMLElement, boolean] {
+    const id = div.getAttribute(gconst.DATA_NODE_ID);
+    div.removeAttribute(gconst.DATA_NODE_ID);
+    div.querySelectorAll(`[${gconst.DATA_NODE_ID}]`).forEach((e: HTMLElement) => {
+        e.removeAttribute(gconst.DATA_NODE_ID);
+    });
+    if (setRef) {
+        for (const e of div.querySelectorAll(`[${gconst.DATA_TYPE}="${gconst.BLOCK_REF}"]`)) {
+            if (e.textContent.trim() == "*") {
+                return [id, div, true];
+            }
+        }
+        const span = div.querySelector("[contenteditable=\"true\"]")?.appendChild(document.createElement("span"));
+        if (span) {
+            span.setAttribute(gconst.DATA_TYPE, gconst.BlockNodeEnum.BLOCK_REF);
+            span.setAttribute(gconst.DATA_SUBTYPE, "s");
+            span.setAttribute(gconst.DATA_ID, id);
+            span.innerText = "*";
+            return [id, div, true];
+        }
+    }
+    return [id, div, false];
+}
 
 export function getID(e: Element) {
     const tn = e?.tagName?.toLocaleLowerCase() ?? "";
