@@ -131,19 +131,43 @@ class FlashBox {
         }
     }
 
+    private async getHPathByDocID(docID: string, inPiece: boolean) {
+        const row = await siyuan.sqlOne(`select hpath from blocks where id = "${docID}"`)
+        let path = row?.hpath ?? "";
+        if (!path) return "";
+        const parts = path.split("/");
+        if (inPiece) {
+            parts.pop();
+        }
+        const docName = parts.pop();
+        const cardDocName = docName + "-card";
+        parts.push(docName);
+        parts.push(cardDocName);
+        path = parts.join("/")
+        return path;
+    }
+
     private async insertCard(protyle: IProtyle, markdowns: string[], t: CardType, lastSelectedID: string, path?: string) {
+        const boxID = events.boxID;
         const [docID, inPiece] = await isInPiece(protyle);
         if (!docID) return;
         const { cardID, markdown } = this.createList(markdowns, t);
         if (path) {
-            const v = getDailyAttrValue();
-            const attr = {};
-            attr[`custom-dailycard-${v}`] = v;
-            const targetDocID = await utils.siyuanCache.createDocWithMdIfNotExists(10000, events.boxID, path, "", attr);
-            await siyuan.insertBlockAsChildOf(markdown, targetDocID);
-            await utils.sleep(100);
-            await siyuan.insertBlockAsChildOf("", targetDocID);
-            openTab({ app: this.plugin.app, doc: { id: targetDocID }, position: "right" });
+            {
+                const v = getDailyAttrValue();
+                const attr = {};
+                attr[`custom-dailycard-${v}`] = v;
+                const targetDocID = await utils.siyuanCache.createDocWithMdIfNotExists(10000, boxID, path, "", attr);
+                await siyuan.insertBlockAsChildOf(markdown, targetDocID);
+                await utils.sleep(100);
+                await siyuan.insertBlockAsChildOf("", targetDocID);
+                openTab({ app: this.plugin.app, doc: { id: targetDocID }, position: "right" });
+            } {
+                const emPath = await this.getHPathByDocID(docID, inPiece);
+                const targetDocID = await utils.siyuanCache.createDocWithMdIfNotExists(10000, boxID, emPath, "");
+                await siyuan.insertBlockAsChildOf(`{{select * from blocks where id = "${cardID}"}}`, targetDocID);
+                await siyuan.insertBlockAsChildOf("", targetDocID);
+            }
         } else if (inPiece) {
             await siyuan.appendBlock(markdown, docID);
             await utils.sleep(100);
