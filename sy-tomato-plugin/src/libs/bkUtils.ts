@@ -121,7 +121,7 @@ export function createEyeBtn() {
     return btn;
 }
 
-export const MENTION_CACHE_TIME = 5 * 60 * 1000;
+export const MENTION_CACHE_TIME = 1 * 60 * 1000;
 
 export interface IBKMaker {
     docID: string
