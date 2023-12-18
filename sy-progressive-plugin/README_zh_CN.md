@@ -12,6 +12,9 @@
 
 > **提示** 闪卡才是核心，本插件只是帮助我们从资料中提取高质量的闪卡。
 
+> [请填写：反馈表单](https://awx9773btw.feishu.cn/share/base/form/shrcnO85H3V1iNvfEAc2JoQyXeh)
+> 或者 [看看大家反馈了什么](https://awx9773btw.feishu.cn/share/base/view/shrcniyck0JM6yJS3rnj2xXGQ9f)
+
 ## 添加文档
 
 **选择一篇较长文档，进行渐进学习。打开插件菜单，点`添加当前文档`**
