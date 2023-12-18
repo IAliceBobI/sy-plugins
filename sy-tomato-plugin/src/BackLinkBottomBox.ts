@@ -110,12 +110,15 @@ class BackLinkBottomBox {
             if (eventType == EventType.loaded_protyle_static || eventType == EventType.switch_protyle) {
                 navigator.locks.request("BackLinkBottomBoxLock", { ifAvailable: true }, async (lock) => {
                     if (lock) {
-                        const item = detail.protyle?.wysiwyg?.element;
+                        const protyle = detail.protyle as IProtyle;
+                        if (!protyle || !protyle.element) return;
+                        if (protyle.element.classList.contains("card__block")) return;
+                        const item = protyle.wysiwyg?.element;
                         if (!item) return;
-                        const nextDocID = detail.protyle?.block.rootID ?? "";
+                        const nextDocID = protyle.block.rootID ?? "";
                         if (!nextDocID) return;
                         const maker = this.makerCache.getOrElse(nextDocID, () => { return new BKMaker(this, nextDocID); });
-                        maker.doTheWork(item, detail.protyle);
+                        maker.doTheWork(item, protyle);
                         if (this.docID != nextDocID) {
                             this.docID = nextDocID;
                             // keep
