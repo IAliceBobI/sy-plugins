@@ -338,7 +338,8 @@ class Progressive {
     }
 
     private async findDoc(bookID: string, point: number) {
-        const row = await siyuan.sqlOne(`select id, path, box from blocks where type='d' and ial like '%${help.getDocIalMark(bookID, point)}%'`);
+        const row = await siyuan.sqlOne(`select id, path, box from blocks where type='d' and 
+            ial like '%${constants.MarkKey}="${help.getDocIalMark(bookID, point)}"%'`);
         if (row?.id && row?.path) {
             const [dirStr, file] = utils.dir(row["path"]);
             const dir = await siyuan.readDir(`/data/${row["box"]}${dirStr}`);
