@@ -79,6 +79,8 @@ export class Storage {
     }
 
     private async updateBookInfo(docID: string, opt: BookInfo) {
+        if (!docID) return;
+        if (docID.length != "20231218000645-9aaaltd".length) return;
         const info = await this.booksInfo(docID);
         info.time = await siyuan.currentTimeMs();
         if (opt.autoCard) info.autoCard = opt.autoCard;
