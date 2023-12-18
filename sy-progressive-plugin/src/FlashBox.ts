@@ -156,7 +156,8 @@ class FlashBox {
             await utils.sleep(100);
             await siyuan.insertBlockAfter("", lastSelectedID);
         }
-        setTimeout(() => { siyuan.addRiffCards([cardID]); }, 500);
+        await siyuan.addRiffCards([cardID]);
+        await siyuan.pushMsg("⚡🗃" + markdown.split("(")[0], 1234);
     }
 
     private createList(markdowns: string[], cardType: CardType) {
