@@ -1,4 +1,4 @@
-import { Dialog, Menu, Plugin, openTab, confirm, ITab } from "siyuan";
+import { Dialog, Menu, Plugin, openTab, confirm, ITab, Lute } from "siyuan";
 import "./index.scss";
 import { events } from "../../sy-tomato-plugin/src/libs/Events";
 import { siyuan, timeUtil } from "../../sy-tomato-plugin/src/libs/utils";
@@ -519,18 +519,24 @@ class Progressive {
         const lute = utils.NewLute();
         this.storage.updateBookInfoTime(bookID);
         for (const id of piece.slice().reverse()) {
-            const { dom } = await siyuan.getBlockDOM(id);
-            const tempDiv = document.createElement("div")
-            tempDiv.innerHTML = dom
-            utils.cleanDiv(tempDiv.firstElementChild as HTMLDivElement, true);
-            let md = lute.BlockDOM2Md(tempDiv.innerHTML);
-            md = `${md}\n{: ${constants.RefIDKey}="${id}"}`;
-            console.log(md)
-            await siyuan.insertBlockAsChildOf(md, noteID);
+            await this.copyAndInsertBlock(id, lute, noteID);
         }
+        await siyuan.insertBlockAsChildOf(help.tempContent("---"), noteID);
         for (const id of piecePre.slice().reverse()) {
-
+            await this.copyAndInsertBlock(id, lute, noteID);
+            break;
         }
+    }
+
+    private async copyAndInsertBlock(id: string, lute: Lute, noteID: string) {
+        const { dom } = await siyuan.getBlockDOM(id);
+        let tempDiv = document.createElement("div");
+        tempDiv.innerHTML = dom;
+        tempDiv = tempDiv.firstElementChild as HTMLDivElement;
+        utils.cleanDiv(tempDiv, true);
+        let md = lute.BlockDOM2Md(tempDiv.innerHTML);
+        md = `${md}\n{: ${constants.RefIDKey}="${id}"}`;
+        await siyuan.insertBlockAsChildOf(md, noteID);
     }
 
     private async getBook2Learn(bookID?: string): Promise<help.BookInfo> {
