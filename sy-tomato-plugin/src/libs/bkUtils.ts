@@ -152,13 +152,13 @@ export async function getBackLinks(self: IBKMaker) {
     const topDiv = document.createElement("div");
     self.container.appendChild(btnDiv);
     self.container.appendChild(topDiv);
-    self.container.appendChild(hr());
     self.container.appendChild(contentContainer);
 
     for (const backlinkDoc of await Promise.all(backlink2.backlinks.map((backlink) => {
         return siyuanCache.getBacklinkDoc(12 * 1000, self.docID, backlink.id);
     }))) {
         for (const backlinksInDoc of backlinkDoc.backlinks) {
+            contentContainer.appendChild(hr());
             await fillContent(self, backlinksInDoc, allRefs, contentContainer);
         }
     }
@@ -167,6 +167,7 @@ export async function getBackLinks(self: IBKMaker) {
         outer: for (const mention of backlink2.backmentions) {
             const mentionDoc = await siyuanCache.getBackmentionDoc(MENTION_CACHE_TIME, self.docID, mention.id);
             for (const mentionItem of mentionDoc.backmentions) {
+                contentContainer.appendChild(hr());
                 await fillContent(self, mentionItem, allRefs, contentContainer);
                 ++count;
                 self.mentionCounting.innerText = `提及读取中：${count}`;
