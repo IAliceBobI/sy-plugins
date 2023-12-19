@@ -8,6 +8,7 @@ class DailyNoteBox {
     private lute: Lute;
 
     blockIconEvent(detail: any) {
+        if (!this.plugin) return;
         const protyle: IProtyle = detail.protyle;
         detail.menu.addItem({
             iconHTML: "",
