@@ -117,6 +117,7 @@ class BackLinkBottomBox {
                         if (!item) return;
                         const nextDocID = protyle.block.rootID ?? "";
                         if (!nextDocID) return;
+                        // if (await isDailyCard(nextDocID)) return;
                         const maker = this.makerCache.getOrElse(nextDocID, () => { return new BKMaker(this, nextDocID); });
                         maker.doTheWork(item, protyle);
                         if (this.docID != nextDocID) {
@@ -133,5 +134,12 @@ class BackLinkBottomBox {
         });
     }
 }
+
+// async function isDailyCard(docID: string) {
+//     const row = await siyuanCache.sqlOne(60 * 1000, `select hpath from blocks where id = "${docID}"`);
+//     const hpath = row?.hpath ?? "";
+//     if (hpath.startsWith("/daily card")) return true;
+//     return false;
+// }
 
 export const backLinkBottomBox = new BackLinkBottomBox();

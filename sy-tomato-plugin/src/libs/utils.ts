@@ -589,11 +589,15 @@ export const siyuanCache = {
     getBackmentionDoc: createCache(siyuan.getBackmentionDoc),
     getChildBlocks: createCache(siyuan.getChildBlocks),
     createDocWithMdIfNotExists: createCache(siyuan.createDocWithMdIfNotExists),
+    sqlOne: createCache(siyuan.sqlOne),
+    sql: createCache(siyuan.sql),
 };
 
-export function createCache<T extends Func>(originalFunction: T): (...args: [number, ...Parameters<T>]) => Promise<ReturnType<T>> {
-    const cache = new Map<string, { value: ReturnType<T>; timestamp: number }>();
-    return async function cachedFunction(cacheTime: number, ...args: Parameters<T>): Promise<ReturnType<T>> {
+export function createCache
+    <T extends Func, R extends Awaited<ReturnType<T>>, P extends Parameters<T>>
+    (originalFunction: T): (...args: [number, ...P]) => Promise<R> {
+    const cache = new Map<string, { value: R; timestamp: number }>();
+    return async function cachedFunction(cacheTime: number, ...args: P): Promise<R> {
         const currentTime = Date.now();
         for (const [k, v] of cache.entries()) {
             if (currentTime - v.timestamp > cacheTime) {
@@ -607,7 +611,7 @@ export function createCache<T extends Func>(originalFunction: T): (...args: [num
             return value;
         }
 
-        const result = await originalFunction(...args);
+        const result: R = await originalFunction(...args);
         cache.set(key, { value: result, timestamp: Date.now() });
         return result;
     };

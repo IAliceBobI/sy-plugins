@@ -132,7 +132,7 @@ class FlashBox {
     }
 
     private async getHPathByDocID(docID: string, inPiece: boolean) {
-        const row = await siyuan.sqlOne(`select hpath from blocks where id = "${docID}"`)
+        const row = await siyuan.sqlOne(`select hpath from blocks where id = "${docID}"`);
         let path = row?.hpath ?? "";
         if (!path) return "";
         const parts = path.split("/");
@@ -143,7 +143,7 @@ class FlashBox {
         const cardDocName = docName + "-card";
         parts.push(docName);
         parts.push(cardDocName);
-        path = parts.join("/")
+        path = parts.join("/");
         return path;
     }
 
