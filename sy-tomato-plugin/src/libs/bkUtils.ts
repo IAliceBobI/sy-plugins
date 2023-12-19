@@ -353,6 +353,7 @@ function addMentionCheckBox(self: IBKMaker, topDiv: HTMLDivElement) {
 const MENTION_COUTING_SPAN = "MENTION_COUTING_SPAN";
 
 function initBtnDiv(self: IBKMaker, topDiv: HTMLDivElement) {
+    topDiv.appendChild(hr());
     addRefreshCheckBox(self, topDiv);
     addMentionCheckBox(self, topDiv);
     {
