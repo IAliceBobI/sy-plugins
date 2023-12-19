@@ -11,6 +11,7 @@ import { EventType, events } from "@/libs/Events";
 import { STORAGE_SETTINGS } from "./constants";
 import { siyuan } from "@/libs/utils";
 import { imgOverlayBox } from "./ImgOverlayBox";
+import { dailyNoteBox } from "./DailyNoteBox";
 
 export default class ThePlugin extends Plugin {
     private static readonly GLOBAL_THIS: Record<string, any> = globalThis;
@@ -52,6 +53,9 @@ export default class ThePlugin extends Plugin {
         this.addSettingItem("linkBoxCheckbox", "* 双向互链", false);
         if (this.settingCfg.linkBoxCheckbox ?? false) await linkBox.onload(this);
 
+        this.addSettingItem("dailyNoteBoxCheckbox", "* 移动内容到 daily note", false);
+        if (this.settingCfg.dailyNoteBoxCheckbox ?? false) await dailyNoteBox.onload(this);
+
         this.addSettingItem("imgOverlayCheckbox", "* 图片遮挡", false);
         if (this.settingCfg.imgOverlayCheckbox ?? false) await imgOverlayBox.onload(this);
 
@@ -82,5 +86,6 @@ export default class ThePlugin extends Plugin {
         linkBox.blockIconEvent(detail);
         cardBox.blockIconEvent(detail);
         imgOverlayBox.blockIconEvent(detail);
+        dailyNoteBox.blockIconEvent(detail);
     }
 }

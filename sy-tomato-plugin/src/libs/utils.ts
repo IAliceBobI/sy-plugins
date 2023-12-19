@@ -345,6 +345,9 @@ export const siyuan = {
         if (await siyuan.checkBlockExist(id))
             return siyuan.call("/api/block/moveBlock", { id, previousID });
     },
+    async getTailChildBlocks(id: string, n: number): Promise<[{ id: string, type: string }]> {
+        return siyuan.call("/api/block/getTailChildBlocks", { id, n });
+    },
     async getBlockKramdown(id: string): Promise<GetBlockKramdown> {
         return siyuan.call("/api/block/getBlockKramdown", { id });
     },
@@ -588,6 +591,7 @@ export const siyuanCache = {
     getBacklink2: createCache(siyuan.getBacklink2),
     getBackmentionDoc: createCache(siyuan.getBackmentionDoc),
     getChildBlocks: createCache(siyuan.getChildBlocks),
+    getTailChildBlocks: createCache(siyuan.getTailChildBlocks),
     createDocWithMdIfNotExists: createCache(siyuan.createDocWithMdIfNotExists),
     sqlOne: createCache(siyuan.sqlOne),
     sql: createCache(siyuan.sql),

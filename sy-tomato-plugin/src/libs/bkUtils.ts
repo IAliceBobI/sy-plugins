@@ -91,8 +91,8 @@ export async function shouldInsertDiv(lastID: string, docID: string) {
     //     return true;
     // }
     // return false;
-    const allIDs = await siyuanCache.getChildBlocks(3 * 1000, docID);
-    for (const { id } of allIDs.slice(-5)) {
+    const allIDs = await siyuanCache.getTailChildBlocks(2500, docID, 5);
+    for (const { id } of allIDs) {
         if (id === lastID) {
             return true;
         }
