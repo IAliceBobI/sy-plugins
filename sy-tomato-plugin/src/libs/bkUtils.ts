@@ -222,14 +222,14 @@ function freeze(self: IBKMaker) {
     self.shouldFreeze = true;
     self.freezeCheckBox.checked = false;
     // self.label.querySelector("svg").classList.remove("fn__rotate")
-    self.label.innerHTML = icon("Focus", 15);
+    self.label.innerHTML = `<span>${icon("Focus", 15)} 停止</span>`;
 }
 
 function unfreeze(self: IBKMaker) {
     self.shouldFreeze = false;
     self.freezeCheckBox.checked = true;
     // self.label.querySelector("svg").classList.add("fn__rotate")
-    self.label.innerHTML = icon("Refresh", 15);
+    self.label.innerHTML = `<span>${icon("Refresh", 15)} 自动</span>`;
 }
 
 function searchInDiv(self: IBKMaker, query: string) {
