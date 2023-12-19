@@ -21,7 +21,6 @@ class DailyNoteBox {
 
     async onload(plugin: Plugin) {
         this.plugin = plugin;
-        globalThis.dailyNoteBox = this;
         this.lute = NewLute();
         this.plugin.addCommand({
             langKey: "moveBlock2today",
