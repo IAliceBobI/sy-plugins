@@ -1,7 +1,8 @@
-import { Plugin, confirm } from "siyuan";
+import { IProtyle, Plugin, confirm } from "siyuan";
 import { getID, siyuan, sleep } from "@/libs/utils";
 import "./index.scss";
-import { events } from "@/libs/Events";
+import { EventType, events } from "@/libs/Events";
+import { icon } from "./libs/bkUtils";
 
 class CardBox {
     private plugin: Plugin;
@@ -42,6 +43,30 @@ class CardBox {
                     }
                 },
             });
+        });
+        events.addListener("CardBox", (eventType, detail) => {
+            if (eventType == EventType.loaded_protyle_static || eventType == EventType.switch_protyle) {
+                const protyle = detail.protyle as IProtyle;
+                if (protyle?.element?.classList?.contains("card__block")) {
+                    const id = protyle.block.id;
+                    if (!id) return;
+                    const bottomBtns = Array.from(document.querySelectorAll(".fn__flex.card__action.fn__none")).filter(e => {
+                        return e.classList.length == 3;
+                    })?.pop();
+                    if (!bottomBtns) return;
+                    bottomBtns.querySelectorAll("[TomatoCardDelBtn]").forEach(e => e?.parentElement?.removeChild(e));
+                    const btn = bottomBtns.insertBefore(document.createElement("button"), bottomBtns.firstChild) as HTMLButtonElement;
+                    btn.setAttribute("TomatoCardDelBtn", "1");
+                    // btn.classList.add("b3-button") conflict with siyuan
+                    btn.innerHTML = icon("Trashcan", 15);
+                    btn.title = "删除闪卡：" + id;
+                    btn.addEventListener("click", () => {
+                        confirm(btn.title, "删除：" + protyle.contentElement.textContent, () => {
+                            siyuan.removeRiffCards([id]);
+                        });
+                    });
+                }
+            }
         });
     }
 
