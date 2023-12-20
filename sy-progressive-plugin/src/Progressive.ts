@@ -199,7 +199,7 @@ class Progressive {
         });
 
         const autoCardBox = dialog.element.querySelector("#" + autoCardID) as HTMLInputElement;
-        autoCardBox.checked = true;
+        autoCardBox.checked = false;
         autoCardBox.addEventListener("change", () => {
             if (autoCardBox.checked) {
                 autoCardBox.checked = true;
