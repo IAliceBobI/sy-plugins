@@ -189,6 +189,7 @@ class Progressive {
             平均每个块有：${Math.ceil(wordCount / contentBlocks.length)}字`;
 
         const titleCheckBox = dialog.element.querySelector("#" + titleSplitID) as HTMLInputElement;
+        titleCheckBox.title = "1~6级标题，都被切分。";
         titleCheckBox.checked = true;
         titleCheckBox.addEventListener("change", () => {
             if (titleCheckBox.checked) {
@@ -200,6 +201,7 @@ class Progressive {
 
         const autoCardBox = dialog.element.querySelector("#" + autoCardID) as HTMLInputElement;
         autoCardBox.checked = false;
+        autoCardBox.title = "把阅读到的分片设置为闪卡";
         autoCardBox.addEventListener("change", () => {
             if (autoCardBox.checked) {
                 autoCardBox.checked = true;
