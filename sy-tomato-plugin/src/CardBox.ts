@@ -2,7 +2,6 @@ import { IProtyle, Plugin, confirm } from "siyuan";
 import { getID, siyuan, sleep } from "@/libs/utils";
 import "./index.scss";
 import { EventType, events } from "@/libs/Events";
-import { icon } from "./libs/bkUtils";
 
 class CardBox {
     private plugin: Plugin;
@@ -55,11 +54,18 @@ class CardBox {
                     })?.pop();
                     if (!bottomBtns) return;
                     bottomBtns.querySelectorAll("[TomatoCardDelBtn]").forEach(e => e?.parentElement?.removeChild(e));
-                    const btn = bottomBtns.insertBefore(document.createElement("button"), bottomBtns.firstChild) as HTMLButtonElement;
-                    btn.setAttribute("TomatoCardDelBtn", "1");
-                    // btn.classList.add("b3-button") conflict with siyuan
-                    btn.innerHTML = icon("Trashcan", 15);
+                    const div = bottomBtns.appendChild(document.createElement("div")) as HTMLDivElement;
+                    div.setAttribute("TomatoCardDelBtn", "1");
+                    div.appendChild(document.createElement("span")) as HTMLSpanElement;
+                    const btn = div.appendChild(document.createElement("button")) as HTMLButtonElement;
+                    btn.innerHTML = "<div>🗑</div> 删除";
                     btn.title = "仅删除闪卡，保留原文";
+                    btn.setAttribute("data-type", "-100");
+                    btn.setAttribute("aria-label", "无");
+                    btn.classList.add("b3-button");
+                    btn.classList.add("b3-button--error");
+                    btn.classList.add("b3-tooltips__n");
+                    btn.classList.add("b3-tooltips");
                     btn.addEventListener("click", () => {
                         confirm(btn.title, `原文ID：${id}<br>请确认原文内容：<br>` + protyle.contentElement.textContent, () => {
                             siyuan.removeRiffCards([id]);
