@@ -59,9 +59,9 @@ class CardBox {
                     btn.setAttribute("TomatoCardDelBtn", "1");
                     // btn.classList.add("b3-button") conflict with siyuan
                     btn.innerHTML = icon("Trashcan", 15);
-                    btn.title = "删除闪卡：" + id;
+                    btn.title = "仅删除闪卡，保留原文";
                     btn.addEventListener("click", () => {
-                        confirm(btn.title, "删除：" + protyle.contentElement.textContent, () => {
+                        confirm(btn.title, `原文ID：${id}<br>请确认原文内容：<br>` + protyle.contentElement.textContent, () => {
                             siyuan.removeRiffCards([id]);
                         });
                     });
