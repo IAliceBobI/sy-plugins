@@ -185,7 +185,7 @@ class Progressive {
             总字数：${wordCount}<br>
             各级标题数：${headCount}<br>
             总块数：${contentBlocks.length}<br>
-            平均每个标题下有：${Math.ceil(contentBlocks.length / headCount)}块<br>
+            平均每个标题下有：${Math.ceil(contentBlocks.length / (headCount == 0 ? 1 : headCount))}块<br>
             平均每个块有：${Math.ceil(wordCount / contentBlocks.length)}字`;
 
         const titleCheckBox = dialog.element.querySelector("#" + titleSplitID) as HTMLInputElement;
