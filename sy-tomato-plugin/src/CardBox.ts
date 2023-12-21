@@ -5,6 +5,7 @@ import { EventType, events } from "@/libs/Events";
 
 class CardBox {
     private plugin: Plugin;
+    private delCardFunc: Func;
 
     async onload(plugin: Plugin) {
         this.plugin = plugin;
@@ -30,6 +31,17 @@ class CardBox {
                 await this.addFlashCard();
             },
         });
+        this.plugin.addCommand({
+            langKey: "delCard",
+            hotkey: "⌘0",
+            globalCallback: async () => {
+                if (this.delCardFunc) {
+                    this.delCardFunc();
+                } else {
+                    siyuan.pushMsg("复习闪卡时，才能使用此功能。");
+                }
+            },
+        });
         this.plugin.eventBus.on("open-menu-content", async ({ detail }) => {
             const menu = detail.menu;
             menu.addItem({
@@ -48,11 +60,17 @@ class CardBox {
                 const protyle = detail.protyle as IProtyle;
                 if (protyle?.element?.classList?.contains("card__block")) {
                     const id = protyle.block.id;
-                    if (!id) return;
+                    if (!id) {
+                        this.delCardFunc = null;
+                        return;
+                    }
                     const bottomBtns = Array.from(document.querySelectorAll(".fn__flex.card__action.fn__none")).filter(e => {
                         return e.classList.length == 3;
                     })?.pop();
-                    if (!bottomBtns?.parentElement) return;
+                    if (!bottomBtns?.parentElement) {
+                        this.delCardFunc = null;
+                        return;
+                    }
                     bottomBtns.parentElement.querySelectorAll("[TomatoCardDelBtn]").forEach(e => e?.parentElement?.removeChild(e));
                     const div = bottomBtns.appendChild(document.createElement("div")) as HTMLDivElement;
                     div.setAttribute("TomatoCardDelBtn", "1");
@@ -61,16 +79,23 @@ class CardBox {
                     btn.innerHTML = "<div>🗑</div> 删除";
                     btn.title = "仅删除闪卡，保留原文";
                     btn.setAttribute("data-type", "-100");
-                    btn.setAttribute("aria-label", "无");
+                    btn.setAttribute("aria-label", "默认ctrl+0仅参考");
                     btn.classList.add("b3-button");
                     btn.classList.add("b3-button--error");
                     btn.classList.add("b3-tooltips__n");
                     btn.classList.add("b3-tooltips");
+                    const msg = `原文ID：${id}<br>请确认原文内容：<br>` + protyle.contentElement.textContent.slice(0, 100);
+                    this.delCardFunc = async () => {
+                        await siyuan.removeRiffCards([id]);
+                        await siyuan.pushMsg(msg);
+                    };
                     btn.addEventListener("click", () => {
-                        confirm(btn.title, `原文ID：${id}<br>请确认原文内容：<br>` + protyle.contentElement.textContent, () => {
+                        confirm(btn.title, msg, () => {
                             siyuan.removeRiffCards([id]);
                         });
                     });
+                } else {
+                    this.delCardFunc = null;
                 }
             }
         });
