@@ -52,8 +52,8 @@ class CardBox {
                     const bottomBtns = Array.from(document.querySelectorAll(".fn__flex.card__action.fn__none")).filter(e => {
                         return e.classList.length == 3;
                     })?.pop();
-                    if (!bottomBtns) return;
-                    bottomBtns.querySelectorAll("[TomatoCardDelBtn]").forEach(e => e?.parentElement?.removeChild(e));
+                    if (!bottomBtns?.parentElement) return;
+                    bottomBtns.parentElement.querySelectorAll("[TomatoCardDelBtn]").forEach(e => e?.parentElement?.removeChild(e));
                     const div = bottomBtns.appendChild(document.createElement("div")) as HTMLDivElement;
                     div.setAttribute("TomatoCardDelBtn", "1");
                     div.appendChild(document.createElement("span")) as HTMLSpanElement;
