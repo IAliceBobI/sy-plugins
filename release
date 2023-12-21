@@ -20,10 +20,10 @@ plugins_new_version="${new_version}-${projName}"
 sed -i "s/\"version\": \"$current_version\"/\"version\": \"$new_version\"/" plugin.json
 git add -A
 git commit -m "auto"
-# git tag v${plugins_new_version}
-# git push origin v${plugins_new_version}
+git tag v${plugins_new_version}
+git push origin v${plugins_new_version}
 git push origin main
-# git push -f gitee v${plugins_new_version}
+git push -f gitee v${plugins_new_version}
 git push -f gitee main
 
 rsync -ru \
@@ -38,8 +38,8 @@ rsync -ru \
 cd ${deployDir}
 git add -A
 git commit -m "auto"
-# git tag v${new_version}
-# git push -f origin v${new_version}
+git tag v${new_version}
+git push -f origin v${new_version}
 git push -f origin main
 
 cd ${projDir}
