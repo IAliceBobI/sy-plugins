@@ -573,13 +573,15 @@ export const siyuan = {
         let row = await siyuan.sqlOne(
             `select root_id from blocks where id="${blockID}"`,
         );
-        if (row["root_id"]) {
+        if (row?.root_id) {
             row = await siyuan.sqlOne(
-                `select content from blocks where id="${row["root_id"]}"`,
+                `select content from blocks where id="${row.root_id}"`,
             );
+            if (row?.content) {
+                return row.content;
+            }
         }
-        const docName = row["content"] ?? "";
-        return docName;
+        return "";
     }
 };
 

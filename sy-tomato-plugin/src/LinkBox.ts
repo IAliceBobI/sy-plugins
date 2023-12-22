@@ -4,8 +4,12 @@ import * as gconst from "@/libs/gconst";
 import { siyuan } from "@/libs/utils";
 import * as utils from "@/libs/utils";
 
-function getDocNameFromProtyle(protyle?: IProtyle) {
-    return protyle?.title?.editElement?.textContent ?? "";
+async function getDocNameFromProtyle(protyle: IProtyle, blockID: string) {
+    let docName = protyle?.title?.editElement?.textContent ?? "";
+    if (!docName) {
+        docName = await siyuan.getDocNameByBlockID(blockID);
+    }
+    return docName;
 }
 
 const LinkBoxDocLinkIAL = "custom-linkboxdoclinkial";
@@ -27,8 +31,9 @@ class LinkBox {
             hotkey: "⌥/",
             editorCallback: async (protyle) => {
                 const ids = this.getSelectedIDs(protyle);
+                const blockID = events.lastBlockID;
                 if (ids.length == 0) ids.push(events.lastBlockID);
-                const docName = getDocNameFromProtyle(protyle);
+                const docName = await getDocNameFromProtyle(protyle, blockID);
                 for (const id of ids)
                     await this.addLink(id, docName, protyle?.wysiwyg?.element);
             },
@@ -39,9 +44,9 @@ class LinkBox {
                 label: this.plugin.i18n.bilink,
                 icon: "iconLink",
                 accelerator: "⌥/",
-                click: () => {
+                click: async () => {
                     const blockID = detail?.element?.getAttribute("data-node-id") ?? "";
-                    if (blockID) this.addLink(blockID, getDocNameFromProtyle(detail?.protyle), detail?.protyle?.wysiwyg?.element);
+                    if (blockID) this.addLink(blockID, await getDocNameFromProtyle(detail?.protyle, blockID), detail?.protyle?.wysiwyg?.element);
                 },
             });
         });
@@ -52,10 +57,11 @@ class LinkBox {
         detail.menu.addItem({
             iconHTML: "",
             label: this.plugin.i18n.bilink,
-            click: () => {
-                const docName = getDocNameFromProtyle(detail?.protyle);
+            click: async () => {
+                let docName = "";
                 for (const element of detail.blockElements) {
                     const blockID = utils.getID(element);
+                    if (!docName) docName = await getDocNameFromProtyle(detail?.protyle, blockID);
                     if (blockID) {
                         this.addLink(blockID, docName, detail?.protyle?.wysiwyg?.element);
                     }
