@@ -1,16 +1,7 @@
 import { SearchEngine } from "./search"
+import * as test from "./utils4test"
 
-const tests: any[] = [];
-
-function assertTrue(b: boolean, msg: string) {
-    if (!b) throw Error(msg);
-}
-
-function assertNotTrue(b: boolean, msg: string) {
-    if (b) throw Error(msg);
-}
-
-tests.push(() => {
+test.add(false, "test11", () => {
     const a = new SearchEngine(true);
     a.setQuery("啊是 我是 !!！吧是|的是|人是 　　 ！!！网是   　 懂是 !! ! ！ ！！")
     const b = JSON.stringify([
@@ -48,28 +39,28 @@ tests.push(() => {
             "value": "懂是"
         }
     ])
-    assertTrue(a.jsonCon() == b, "incorrect condition parsing")
+    test.assertEqual(a.jsonCon(), b, "incorrect condition parsing")
 })
 
-tests.push(() => {
+test.add(false, "test22", () => {
     let txt;
     const a = new SearchEngine(true);
     a.setQuery("!aa bb cc|dd !yy")
 
     txt = "奥赛房东bb大房cc东"
-    assertTrue(a.match(txt), txt)
+    test.assertTrue(a.match(txt), txt)
     txt = "奥赛房东bb大房dd东"
-    assertTrue(a.match(txt), txt)
+    test.assertTrue(a.match(txt), txt)
     txt = "奥赛房东bb大cc房dd东"
-    assertTrue(a.match(txt), txt)
+    test.assertTrue(a.match(txt), txt)
     txt = "奥赛房东bb大房东"
 
-    assertNotTrue(a.match(txt), txt)
+    test.assertNotTrue(a.match(txt), txt)
     txt = "奥赛房东bb大房cc东aa"
-    assertNotTrue(a.match(txt), txt)
+    test.assertNotTrue(a.match(txt), txt)
     txt = "奥赛房东bb大房cc东yy"
-    assertNotTrue(a.match(txt), txt)
+    test.assertNotTrue(a.match(txt), txt)
 })
 
-tests.forEach(t => t());
+test.run();
 

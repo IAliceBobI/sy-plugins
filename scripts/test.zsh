@@ -1,8 +1,14 @@
 #!/bin/env zsh
 
+
 projDir=${0:a:h:h}
 cd ${projDir}
 
-rm -f tests/search.ts
-ln ${projDir}/sy-tomato-plugin/src/libs/search.ts tests/search.ts
-npx ts-node tests/test-search.ts
+for file in ./tests/test-*.ts; do
+    target=$(echo ${file} | sed -n 's/.*-\(.*\)\.ts/\1/p').ts
+    rm -f tests/${target}
+    ln ${projDir}/sy-tomato-plugin/src/libs/${target} tests/${target}
+    echo npx ts-node tests/test-${target}
+    npx ts-node tests/test-${target}
+done
+

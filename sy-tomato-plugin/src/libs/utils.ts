@@ -564,6 +564,8 @@ export const siyuan = {
                 }
             }
         }
+        const cardExists = await Promise.all(invalidCardIDs.map((card)=> siyuan.checkBlockExist(card)))
+        
         if (invalidCardIDs.length) {
             await siyuan.removeRiffCards(invalidCardIDs);
         }
