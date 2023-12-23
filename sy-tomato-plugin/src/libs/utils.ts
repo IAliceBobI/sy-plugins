@@ -1,6 +1,7 @@
 import { App, Constants, IOperation, Lute, fetchSyncPost, openTab } from "siyuan";
 import { v4 as uuid } from "uuid";
 import * as gconst from "./gconst";
+import { zipAnyArrays } from "./functional";
 
 export function cleanDiv(div: HTMLDivElement, setRef: boolean): [string, HTMLElement, boolean] {
     const id = div.getAttribute(gconst.DATA_NODE_ID);
@@ -551,7 +552,7 @@ export const siyuan = {
         return lines.join("\n");
     },
     async removeBrokenCards() {
-        const invalidCardIDs = [];
+        let invalidCardIDs = [];
         for (let page = 1; page < Number.MAX_SAFE_INTEGER; page++) {
             const resp = await siyuan.getRiffCards(page);
             const cards = resp["blocks"];
@@ -564,9 +565,11 @@ export const siyuan = {
                 }
             }
         }
-        const cardExists = await Promise.all(invalidCardIDs.map((card)=> siyuan.checkBlockExist(card)))
-        
-        if (invalidCardIDs.length) {
+        invalidCardIDs = zipAnyArrays(
+            await Promise.all(invalidCardIDs.map((card) => siyuan.checkBlockExist(card))),
+            invalidCardIDs,
+        ).filter(e => !e[0]).map(e => e[1]);
+        if (invalidCardIDs.length > 0) {
             await siyuan.removeRiffCards(invalidCardIDs);
         }
         return invalidCardIDs;
