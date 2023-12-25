@@ -329,8 +329,13 @@ function addRefreshCheckBox(self: IBKMaker, topDiv: HTMLDivElement) {
 }
 
 function addMentionCheckBox(self: IBKMaker, topDiv: HTMLDivElement) {
+    const label = topDiv.appendChild(document.createElement("label"));
+    label.innerText = "提及数上限："
+    label.classList.add("b3-label");
+    label.classList.add("b3-label__text");
+    label.classList.add("b3-label--noborder");
     const mentionInput = topDiv.appendChild(document.createElement("input"));
-    mentionInput.title = "展开的提及数";
+    mentionInput.title = "设置至多显示的提及数";
     mentionInput.classList.add("b3-text-field");
     mentionInput.size = 1;
     mentionInput.value = String(self.mentionCount);
@@ -368,7 +373,7 @@ function initBtnDiv(self: IBKMaker, topDiv: HTMLDivElement) {
     {
         query.title = "必须包含AA、BB，DD与EE至少包含一个，但不能包含CC，也不能包含FF";
         query.classList.add("b3-text-field");
-        query.size = 50;
+        query.size = 40;
         query.placeholder = "AA BB !CC DD|EE !FF";
         query.addEventListener("focus", () => { freeze(self); });
         query.addEventListener("input", (event) => {
