@@ -1,4 +1,5 @@
 {
+  "tipViewContents": "打开目录，从感兴趣的部分开始蚕食本书。",
   "tipFullfilContent": "插入原文对应的分片内容。",
   "tipCleanUnchanged": "被修改过的原文会保留，没被修改过的，会被删除。",
   "tipPrevious": "当前段的笔记保留，看上一个分片的内容。",
@@ -22,6 +23,7 @@
   "previousPiece": "⬅",
   "cleanUnchangedOriginDoc": "🧹",
   "insertOriginDoc": "⬇",
+  "viewContents": "🗂",
   "send2dailyCard": "制卡并发到DailyCard",
   "insertBlankSpaceCard": "插入写作式闪卡",
   "insertBlankSpaceCardB": "插入写作式闪卡B",

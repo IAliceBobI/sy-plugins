@@ -30,6 +30,7 @@ export enum HtmlCBType {
     deleteAndExit = 11,
     openFlashcardTab = 12,
     deleteAndBack = 13,
+    viewContents = 14,
 }
 
 export class Storage {
@@ -188,6 +189,21 @@ export class Helper {
 
     constructor(plugin: Plugin) {
         this.plugin = plugin;
+    }
+
+    btnViewContents(bookID: string, noteID: string, point: number) {
+        const btnID = utils.newID().slice(0, IDLen);
+        return `<div>
+            ${styleColor("var(--b3-card-success-background)", "var(--b3-card-success-color)")}
+            <div>
+                <button title="${this.plugin.i18n.tipViewContents}" onclick="${btnID}()" id="btn${btnID}">${this.plugin.i18n.viewContents}</button>
+            </div>
+            <script>
+                function ${btnID}() {
+                    globalThis.progressive_zZmqus5PtYRi.progressive.htmlBlockReadNextPeice("${bookID}","${noteID}",${HtmlCBType.viewContents},${point})
+                }
+            </script>
+        </div>`;
     }
 
     btnFullfilContent(bookID: string, noteID: string, point: number) {
@@ -387,7 +403,7 @@ export class Helper {
 
     getReadingBtns(bookID: string, noteID: string, point: number) {
         return `{{{col
-[${point}]
+${this.btnViewContents(bookID, noteID, point)}
 
 ${this.btnPrevious(bookID, noteID, point)}
 
