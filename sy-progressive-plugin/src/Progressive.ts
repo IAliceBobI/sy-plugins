@@ -326,10 +326,11 @@ class Progressive {
         }
         if (!content) content = `[${point}]`;
         else content = `[${point}]` + content;
-        const row = await siyuan.sqlOne(`select hpath from blocks where id='${bookID}'`);
+        const row = await siyuan.sqlOne(`select hpath,content from blocks where type='d' and id='${bookID}'`);
         let dir = row?.hpath ?? "";
+        let bookName = row?.content ?? "";
         if (dir) {
-            dir = dir + "/pieces/" + content;
+            dir = dir + `/${bookName}-pieces/` + content;
             const docID = await siyuan.createDocWithMd(boxID, dir, "");
             const attr = {};
             attr[constants.MarkKey] = help.getDocIalMark(bookID, point);
