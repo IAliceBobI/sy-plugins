@@ -329,7 +329,7 @@ class Progressive {
         const row = await siyuan.sqlOne(`select hpath from blocks where id='${bookID}'`);
         let dir = row?.hpath ?? "";
         if (dir) {
-            dir = dir + "/" + content;
+            dir = dir + "/pieces/" + content;
             const docID = await siyuan.createDocWithMd(boxID, dir, "");
             const attr = {};
             attr[constants.MarkKey] = help.getDocIalMark(bookID, point);
@@ -468,6 +468,9 @@ class Progressive {
                 break;
             case HtmlCBType.openFlashcardTab:
                 openTab({ app: this.plugin.app, card: { type: "all" } });
+                break;
+            case HtmlCBType.viewContents:
+                // openTab({ app: this.plugin.app, card: { type: "all" } });
                 break;
             default:
                 throw "Invalid HtmlCBType " + cbType;
