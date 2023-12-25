@@ -268,7 +268,7 @@ class Progressive {
         });
     }
 
-    private async readThisPiece(blockID?: string) {
+    async readThisPiece(blockID?: string) {
         if (!blockID) {
             blockID = events.lastBlockID;
         }

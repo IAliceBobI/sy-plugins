@@ -190,7 +190,7 @@ export class Helper {
             </div>
             <script>
                 function ${btnID}() {
-                    globalThis.progressive_zZmqus5PtYRi.progressive.htmlBlockReadNextPeice(blockID)
+                    globalThis.progressive_zZmqus5PtYRi.progressive.readThisPiece("${blockID}")
                 }
             </script>
         </div>`;
