@@ -342,9 +342,30 @@ class Progressive {
     private async openContents(bookID: string) {
         let contentID = await this.findContents(bookID);
         if (!contentID) {
-
+            const rows = await Promise.all((await siyuan.getChildBlocks(bookID))
+                .filter(i => i.type == "h")
+                .map(i => siyuan.sqlOne(`select id,content,subtype,box,hpath from blocks where id="${i.id}"`)));
+            if (rows.length == 0) return;
+            const hpath = rows[0].hpath;
+            const boxID = rows[0].box;
+            if (!boxID || !hpath) return;
+            const c = rows.reduce<string[]>((list, block) => {
+                let level = Number(block.subtype[1]);
+                if (!utils.isValidNumber(level) || level < 1) level = 1;
+                let title = "{{{col\n"
+                    + this.helper.getContentPrefix(level) + block.content
+                    + "\n"
+                    + this.helper.btnReadThisPiece(block.id, block.content)
+                    + "\n}}}\n"
+                list.push(title);
+                return list;
+            }, []);
+            const attr = {};
+            attr[constants.MarkKey] = help.getDocIalContent(bookID);
+            attr["custom-sy-readonly"] = "true";
+            contentID = await siyuan.createDocWithMdIfNotExists(boxID, `${hpath}/contents`, c.join("\n"), attr)
         }
-        await openTab({ app: this.plugin.app, doc: { id: contentID } });
+        if (contentID) await openTab({ app: this.plugin.app, doc: { id: contentID } });
     }
 
     private async findContents(bookID: string) {

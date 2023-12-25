@@ -174,6 +174,28 @@ export class Helper {
         this.plugin = plugin;
     }
 
+    getContentPrefix(level: number) {
+        const h = level > 1 ? "🇮" : ""
+        const s = "　　".repeat(level - 1);
+        const d = ["0⃣", "1⃣", "2⃣", "3⃣", "4⃣", "5⃣", "6⃣", "7⃣"][level];
+        return h + s + d
+    }
+
+    btnReadThisPiece(blockID: string, text: string) {
+        const btnID = utils.newID().slice(0, IDLen);
+        return `<div>
+            ${styleColor("var(--b3-card-success-background)", "var(--b3-card-success-color)")}
+            <div>
+                <button onclick="${btnID}()" id="btn${btnID}">${text}</button>
+            </div>
+            <script>
+                function ${btnID}() {
+                    globalThis.progressive_zZmqus5PtYRi.progressive.htmlBlockReadNextPeice(blockID)
+                }
+            </script>
+        </div>`;
+    }
+
     btnViewContents(bookID: string, noteID: string, point: number) {
         const btnID = utils.newID().slice(0, IDLen);
         return `<div>
