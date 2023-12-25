@@ -163,26 +163,9 @@ export function getDocIalMark(bookID: string, point: number) {
     return `${constants.TEMP_CONTENT}#${bookID},${point}`;
 }
 
-// export function tryRmIDAddLinkOne(md: string, lnkID: string = "") {
-//     let list = [md];
-//     list = tryRmIDAddLink(list, lnkID);
-//     return list[0];
-// }
-// export function tryRmIDAddLink(mds: string[], lnkID: string = "") {
-//     for (let i = 0; i < mds.length; i++) {
-//         const parts = mds[i].trim().split("\n");
-//         if (parts.length >= 2) {
-//             if (parts[parts.length - 1].trim().startsWith("{: ")) {
-//                 parts.pop();
-//             }
-//         }
-//         if (lnkID && !parts[0].endsWith(" \"*\"))") && i == 0) {
-//             parts[0] = parts[0] + `((${lnkID} "*"))`;
-//         }
-//         mds[i] = parts.join("\n");
-//     }
-//     return mds;
-// }
+export function getDocIalContent(bookID: string) {
+    return `${constants.TEMP_CONTENT}#${bookID}#contents`;
+}
 
 export class Helper {
     private plugin: Plugin;

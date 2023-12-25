@@ -339,6 +339,31 @@ class Progressive {
         return "";
     }
 
+    private async openContents(bookID: string) {
+        let contentID = await this.findContents(bookID);
+        if (!contentID) {
+
+        }
+        await openTab({ app: this.plugin.app, doc: { id: contentID } });
+    }
+
+    private async findContents(bookID: string) {
+        const row = await siyuan.sqlOne(`select id, path, box from blocks where type='d' and 
+            ial like '%${constants.MarkKey}="${help.getDocIalContent(bookID)}"%'`);
+        if (row?.id && row?.path) {
+            const [dirStr, file] = utils.dir(row["path"]);
+            const dir = await siyuan.readDir(`/data/${row["box"]}${dirStr}`);
+            if (dir) {
+                for (const f of dir) {
+                    if (f.name === file) {
+                        return row["id"];
+                    }
+                }
+            }
+        }
+        return "";
+    }
+
     private async findDoc(bookID: string, point: number) {
         const row = await siyuan.sqlOne(`select id, path, box from blocks where type='d' and 
             ial like '%${constants.MarkKey}="${help.getDocIalMark(bookID, point)}"%'`);
@@ -467,10 +492,10 @@ class Progressive {
                 await this.addReadingBtns(bookID, noteID, point);
                 break;
             case HtmlCBType.openFlashcardTab:
-                openTab({ app: this.plugin.app, card: { type: "all" } });
+                openTab({ app: this.plugin.app, card: { type: "doc", id: bookID } });
                 break;
             case HtmlCBType.viewContents:
-                // openTab({ app: this.plugin.app, card: { type: "all" } });
+                await this.openContents(bookID);
                 break;
             default:
                 throw "Invalid HtmlCBType " + cbType;
