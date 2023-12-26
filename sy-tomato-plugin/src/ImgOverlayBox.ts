@@ -22,7 +22,7 @@ class ImgOverlayBox {
                     const overlays: Overlays = JSON.parse(tryFromOldFormat(element.getAttribute(ATTR_PIC_OVERLAY)));
                     const img = element.querySelector("img");
                     if (!img) continue;
-                    if (img.parentElement.querySelector(`[${OVERLAY_DIV}="1"]`)) continue;
+                    // if (img.parentElement.querySelector(`[${OVERLAY_DIV}="1"]`)) continue;
                     showOverlayStyle(overlays, img);
                 }
             }
