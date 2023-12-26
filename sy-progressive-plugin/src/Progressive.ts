@@ -340,6 +340,16 @@ class Progressive {
         return "";
     }
 
+    private async openContentsLock(bookID: string) {
+        navigator.locks.request(constants.BuildContentsLock, { ifAvailable: true }, async (lock) => {
+            if (lock) {
+                await this.openContents(bookID);
+            } else {
+                siyuan.pushMsg("构建/打开目录中，请稍后片刻……");
+            }
+        })
+    }
+
     private async openContents(bookID: string) {
         let contentID = await this.findContents(bookID);
         if (!contentID) {
@@ -522,7 +532,7 @@ class Progressive {
                 else openTab({ app: this.plugin.app, card: { type: "all" } });
                 break;
             case HtmlCBType.viewContents:
-                await this.openContents(bookID);
+                await this.openContentsLock(bookID);
                 break;
             default:
                 throw "Invalid HtmlCBType " + cbType;

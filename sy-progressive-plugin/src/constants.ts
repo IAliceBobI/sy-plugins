@@ -1,5 +1,6 @@
 export const STORAGE_BOOKS = "books.json";
 export const AddProgressiveReadingLock = "AddProgressiveReadingLock";
+export const BuildContentsLock = "BuildContentsLock";
 export const StartToLearnLock = "StartToLearnLock";
 export const TEMP_CONTENT = "插件管理勿改managedByPluginDoNotModify";
 export const IndexTime2Wait = 400;
