@@ -19,7 +19,7 @@ class ImgOverlayBox {
             if (eventType == EventType.loaded_protyle_static) {
                 const elements = detail?.protyle?.element?.querySelectorAll(`[${ATTR_PIC_OVERLAY}]`) ?? [];
                 for (const element of elements) {
-                    const overlays: Overlay[] = JSON.parse(element.getAttribute(ATTR_PIC_OVERLAY));
+                    const overlays: Overlays = JSON.parse(tryFromOldFormat(element.getAttribute(ATTR_PIC_OVERLAY)));
                     const img = element.querySelector("img");
                     if (!img) continue;
                     if (img.parentElement.querySelector(`[${OVERLAY_DIV}="1"]`)) continue;
@@ -46,7 +46,7 @@ class ImgOverlayBox {
     async overlayEditor(imgSpan: HTMLSpanElement) {
         const id = newID();
         let editor: ImgOverlayEditor = null;
-        const nextOverlays: Overlay[] = [];
+        const nextOverlays: Overlays = { originWidth: 0, overlays: [] };
         const imgID = getID(imgSpan);
         const dialog = new Dialog({
             title: "图片制卡",
@@ -62,7 +62,8 @@ class ImgOverlayBox {
             },
         });
         const attr = await siyuan.getBlockAttrs(imgID);
-        const originOverlays: Overlay[] = JSON.parse(attr[ATTR_PIC_OVERLAY] ?? "[]");
+        const fm = tryFromOldFormat(attr[ATTR_PIC_OVERLAY]);
+        const originOverlays: Overlays = JSON.parse(fm);
         editor = new ImgOverlayEditor({
             target: dialog.element.querySelector("#" + id),
             props: {
@@ -72,14 +73,25 @@ class ImgOverlayBox {
             }
         });
     }
+
 }
 
-function showOverlayStyle(overlays: Overlay[], img: HTMLElement) {
+function tryFromOldFormat(overlayJson: string) {
+    let v = overlayJson ?? "{}";
+    if (v.startsWith("[")) { // compatible with old format.
+        v = `{"overlays":${v}}`;
+    }
+    return v;
+}
+
+function showOverlayStyle(overlays: Overlays, img: HTMLElement) {
     const p = img.parentElement;
     p.querySelectorAll(`[${OVERLAY_DIV}="1"]`).forEach(e => {
         e.parentElement.removeChild(e);
     });
-    for (const o of overlays) {
+    const currentWidth = img.style.width?.replace("px", "")?.trim() ?? "";
+    console.log(`currentWidth: ${currentWidth}, old:${overlays.originWidth}`)
+    for (const o of overlays.overlays) {
         const divElement = document.createElement("div");
         img.parentElement.appendChild(divElement);
 

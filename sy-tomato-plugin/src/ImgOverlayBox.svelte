@@ -4,8 +4,8 @@
     import { getID } from "./libs/utils";
 
     export let imgSpan: HTMLSpanElement;
-    export let nextOverlays: Overlay[];
-    export let originOverlays: Overlay[];
+    export let nextOverlays: Overlays;
+    export let originOverlays: Overlays;
     let canvas: fabric.Canvas;
 
     onMount(async () => {
@@ -27,7 +27,8 @@
                     scaleX: 1,
                     scaleY: 1,
                 });
-                originOverlays?.forEach((o) => {
+                originOverlays.originWidth = img.width;
+                originOverlays.overlays?.forEach((o) => {
                     canvas.add(
                         createOverlay(
                             o.cID,
@@ -46,7 +47,7 @@
 
     onDestroy(() => {
         canvas.getObjects().forEach((obj) => {
-            nextOverlays.push({
+            nextOverlays.overlays.push({
                 left: obj.left,
                 top: obj.top,
                 width: obj.getScaledWidth(),
