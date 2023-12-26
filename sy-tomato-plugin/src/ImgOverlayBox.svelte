@@ -27,19 +27,22 @@
                     scaleX: 1,
                     scaleY: 1,
                 });
-                originOverlays.originWidth = img.width;
-                originOverlays.overlays?.forEach((o) => {
-                    canvas.add(
-                        createOverlay(
-                            o.cID,
-                            o.left,
-                            o.top,
-                            o.width,
-                            o.height,
-                            o.angle,
-                        ),
-                    );
-                });
+                nextOverlays.originWidth = img.width;
+                if (originOverlays?.originWidth) {
+                    originOverlays.originWidth = img.width;
+                    originOverlays.overlays?.forEach((o) => {
+                        canvas.add(
+                            createOverlay(
+                                o.cID,
+                                o.left,
+                                o.top,
+                                o.width,
+                                o.height,
+                                o.angle,
+                            ),
+                        );
+                    });
+                }
                 canvas.renderAll();
             };
         }

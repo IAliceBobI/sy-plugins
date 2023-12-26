@@ -1,7 +1,7 @@
 import { Dialog, Plugin } from "siyuan";
 import ImgOverlayEditor from "./ImgOverlayBox.svelte";
 import { EventType, events } from "@/libs/Events";
-import { getID, newID, siyuan } from "@/libs/utils";
+import { getID, isValidNumber, newID, siyuan } from "@/libs/utils";
 import { ATTR_PIC_OVERLAY, OVERLAY_DIV } from "./constants";
 
 class ImgOverlayBox {
@@ -73,7 +73,6 @@ class ImgOverlayBox {
             }
         });
     }
-
 }
 
 function tryFromOldFormat(overlayJson: string) {
@@ -84,23 +83,31 @@ function tryFromOldFormat(overlayJson: string) {
     return v;
 }
 
-function showOverlayStyle(overlays: Overlays, img: HTMLElement) {
+function getCoefficient(currentWidth: number, originalWidth: number): number {
+    if (!isValidNumber(currentWidth)) currentWidth = 0;
+    if (!isValidNumber(originalWidth)) originalWidth = 0;
+    if (currentWidth > 0 && originalWidth > 0) {
+        return currentWidth / originalWidth;
+    }
+    return 1;
+}
+
+function showOverlayStyle(overlays: Overlays, img: HTMLImageElement) {
     const p = img.parentElement;
     p.querySelectorAll(`[${OVERLAY_DIV}="1"]`).forEach(e => {
         e.parentElement.removeChild(e);
     });
-    const currentWidth = img.style.width?.replace("px", "")?.trim() ?? "";
-    console.log(`currentWidth: ${currentWidth}, old:${overlays.originWidth}`)
+    const co = getCoefficient(img.width, overlays.originWidth);
     for (const o of overlays.overlays) {
         const divElement = document.createElement("div");
         img.parentElement.appendChild(divElement);
 
         divElement.setAttribute(OVERLAY_DIV, "1");
         divElement.style.position = "absolute";
-        divElement.style.top = `${o.top - o.height / 2}px`;
-        divElement.style.left = `${o.left - o.width / 2}px`;
-        divElement.style.width = `${o.width}px`;
-        divElement.style.height = `${o.height}px`;
+        divElement.style.top = `${(o.top - o.height / 2) * co}px`;
+        divElement.style.left = `${(o.left - o.width / 2) * co}px`;
+        divElement.style.width = `${o.width * co}px`;
+        divElement.style.height = `${o.height * co}px`;
         divElement.style.background = "var(--b3-font-background8)";
 
         const textElement = document.createElement("span");
