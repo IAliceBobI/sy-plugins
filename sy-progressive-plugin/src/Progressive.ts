@@ -347,7 +347,7 @@ class Progressive {
             } else {
                 siyuan.pushMsg("构建/打开目录中，请稍后片刻……");
             }
-        })
+        });
     }
 
     private async openContents(bookID: string) {

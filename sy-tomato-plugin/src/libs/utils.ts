@@ -602,6 +602,7 @@ export const siyuanCache = {
     createDocWithMdIfNotExists: createCache(siyuan.createDocWithMdIfNotExists),
     sqlOne: createCache(siyuan.sqlOne),
     sql: createCache(siyuan.sql),
+    getBlockAttrs: createCache(siyuan.getBlockAttrs),
 };
 
 export function createCache

@@ -8,6 +8,7 @@ import {
     integrateCounting,
     shouldInsertDiv
 } from "./libs/bkUtils";
+import { siyuanCache } from "./libs/utils";
 
 const BKMAKER_ADD = "BKMAKER_ADD";
 const CACHE_LIMIT = 100;
@@ -117,7 +118,7 @@ class BackLinkBottomBox {
                         if (!item) return;
                         const nextDocID = protyle.block.rootID ?? "";
                         if (!nextDocID) return;
-                        // if (await isDailyCard(nextDocID)) return;
+                        if (await isBookCard(nextDocID)) return;
                         const maker = this.makerCache.getOrElse(nextDocID, () => { return new BKMaker(this, nextDocID); });
                         maker.doTheWork(item, protyle);
                         if (this.docID != nextDocID) {
@@ -133,6 +134,14 @@ class BackLinkBottomBox {
             }
         });
     }
+}
+
+async function isBookCard(docID: string): Promise<boolean> {
+    const MarkKey = "custom-progmark"; // for doc
+    const TEMP_CONTENT = "插件管理勿改managedByPluginDoNotModify";
+    const attrs = await siyuanCache.getBlockAttrs(60000, docID);
+    const v = attrs[MarkKey] ?? "";
+    return v.includes(TEMP_CONTENT);
 }
 
 // async function isDailyCard(docID: string) {
