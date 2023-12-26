@@ -4,6 +4,7 @@ import * as utils from "../../sy-tomato-plugin/src/libs/utils";
 import { events } from "../../sy-tomato-plugin/src/libs/Events";
 import * as gconst from "../../sy-tomato-plugin/src/libs/gconst";
 import { MarkKey, TEMP_CONTENT } from "./constants";
+import { getDocIalCards } from "./helper";
 
 enum CardType {
     B = "B", C = "C", None = "None"
@@ -168,7 +169,9 @@ class FlashBox {
             {
                 const hpath = await this.getHPathByDocID(bookID)
                 if (!hpath) return;
-                const targetDocID = await utils.siyuanCache.createDocWithMdIfNotExists(10000, boxID, hpath, "");
+                const attr = {};
+                attr[MarkKey] = getDocIalCards(bookID);
+                const targetDocID = await utils.siyuanCache.createDocWithMdIfNotExists(10000, boxID, hpath, "", attr);
                 await siyuan.insertBlockAsChildOf(markdown, targetDocID);
                 await utils.sleep(100);
                 await siyuan.insertBlockAsChildOf("", targetDocID);

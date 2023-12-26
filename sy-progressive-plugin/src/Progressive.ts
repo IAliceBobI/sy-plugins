@@ -365,7 +365,7 @@ class Progressive {
                 return list;
             }, []);
             const attr = {};
-            attr[constants.MarkKey] = help.getDocIalContent(bookID);
+            attr[constants.MarkKey] = help.getDocIalContents(bookID);
             attr["custom-sy-readonly"] = "true";
             contentID = await siyuan.createDocWithMdIfNotExists(boxID, `${hpath}/${bookName}-contents`, c.join("\n"), attr)
         }
@@ -374,7 +374,7 @@ class Progressive {
 
     private async findContents(bookID: string) {
         const row = await siyuan.sqlOne(`select id, path, box from blocks where type='d' and 
-            ial like '%${constants.MarkKey}="${help.getDocIalContent(bookID)}"%'`);
+            ial like '%${constants.MarkKey}="${help.getDocIalContents(bookID)}"%'`);
         if (row?.id && row?.path) {
             const [dirStr, file] = utils.dir(row["path"]);
             const dir = await siyuan.readDir(`/data/${row["box"]}${dirStr}`);
@@ -555,10 +555,10 @@ class Progressive {
                         const oriMarkdown = origin?.markdown ?? "";
                         const markdownWithoutStar = markdown.replace(`((${originalID} "*"))`, "");
                         if (this.rmBadThings(oriMarkdown) == this.rmBadThings(markdownWithoutStar)) {
-                            await siyuan.safeDeleteBlock(child.id);
+                            await siyuan.safeDeleteBlock(child.id); // delete the same content
                         } else {
                             const attrs: { [key: string]: string } = {};
-                            attrs[constants.RefIDKey] = "";
+                            attrs[constants.RefIDKey] = ""; // keep the content
                             await siyuan.setBlockAttrs(child.id, attrs);
                         }
                         break;

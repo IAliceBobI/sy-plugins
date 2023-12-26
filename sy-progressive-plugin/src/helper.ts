@@ -155,7 +155,7 @@ export function bookCacheKey(bookID: string) {
     return bookID + "_cache";
 }
 
-export function tempContent(content: string) {
+export function tempContent(content: string) { // for btns and split lines
     return content + `\n{: ${constants.MarkKey}="${constants.TEMP_CONTENT}"}`;
 }
 
@@ -163,8 +163,12 @@ export function getDocIalMark(bookID: string, point: number) {
     return `${constants.TEMP_CONTENT}#${bookID},${point}`;
 }
 
-export function getDocIalContent(bookID: string) {
-    return `${constants.TEMP_CONTENT}#${bookID}#contents`;
+export function getDocIalContents(bookID: string) {
+    return `contents#${constants.TEMP_CONTENT}#${bookID}`;
+}
+
+export function getDocIalCards(bookID: string) {
+    return `cards#${constants.TEMP_CONTENT}#${bookID}`;
 }
 
 export class Helper {
