@@ -59,7 +59,7 @@ class Schedule {
         const dialog = new Dialog({
             title: "⏰ " + this.plugin.i18n.setDateTitle,
             content: `<div id="${id}"></div>`,
-            width: events.isMobile ? "92vw" : "560px",
+            width: events.isMobile ? "92vw" : "580px",
             height: "540px",
             destroyCallback() {
                 if (d) d.$destroy();
