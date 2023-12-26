@@ -102,9 +102,13 @@
 
 ![Alt text](assets/card.png)
 
+> 使用快捷键： `Alt+E`
+
 ### 单行选择二
 
 直接把光标放在内容中，不做选择，用菜单或者快捷键制作闪卡即可。
+
+> 使用快捷键： `Alt+E`
 
 ### 多行选择
 
@@ -112,13 +116,13 @@
 
 ![Alt text](assets/multilines.png)
 
-> 使用快捷键： Ctrl+` 或者 Alt+E
+> 使用快捷键： `Alt+E`
 
 则生成并且插入闪卡于下方，如图：
 
 ![Alt text](assets/multilinesCard.png)
 
-> **提示** 写作式闪卡B，就是写作部分是引述块，C则是代码块。
+> **提示** 如果是在分片中制卡，则卡片会放到书籍的子文件里。比如书籍名为ABC，则卡都收集到ABC-cards文件中。
 
 ## Daily Card
 
@@ -146,9 +150,12 @@
 
 **感谢所有慷慨的支持者，你们的打赏对我的插件开发意义重大。**
 
-* 2023-12-13 [没头脑和不高兴](https://afdian.net/u/25e08b1eb1a511edbb3d5254001e7c00)
-* 2023-12-11 [爱发电用户_EbBe](https://afdian.net/u/d11e3c741bc711ee95eb52540025c377)
-* 2023-12-10 [爱发电用户_b2864](https://afdian.net/u/b286492496af11eea38752540025c377)
+* 2023-12 [爱发电用户_Pv38](https://afdian.net/u/3911fecaa3ad11ee8fa95254001e7c00)
+* 2023-12 [赐我一胖](https://afdian.net/u/74d98cf66f0711eda8ca52540025c377)
+* 2023-12 [QQQOrange](https://afdian.net/u/2c73a3c6a1f011eeb98a52540025c377)
+* 2023-12 [没头脑和不高兴](https://afdian.net/u/25e08b1eb1a511edbb3d5254001e7c00)
+* 2023-12 [爱发电用户_EbBe](https://afdian.net/u/d11e3c741bc711ee95eb52540025c377)
+* 2023-12 [爱发电用户_b2864](https://afdian.net/u/b286492496af11eea38752540025c377)
 
 # BUG反馈、建议
 
