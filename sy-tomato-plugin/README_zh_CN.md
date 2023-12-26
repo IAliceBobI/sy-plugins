@@ -238,6 +238,10 @@ aacc3
 
 **新版本，支持图片缩放，缩放图片后，需要F5刷新，或者关闭后，重新打开文档。老版本做的遮挡，需要重新编辑一下，才会生效。**
 
+> 为什么缩放后需要F5刷新？
+>
+> 不想监听变化后刷新，会浪费性能。用的人多，有强烈的需求再考虑。
+
 > 为什么做此功能？
 > 
 > 我的需求与 [siyuan-plugin-flash-enhance](https://github.com/zxhd863943427/siyuan-plugin-flash-enhance) 的`图片遮挡`功能有点差异。希望图片一直处于遮挡，无论是否在闪卡复习中，除非鼠标悬浮其上，才会撤销遮挡。对于一个图片有多个遮挡层的情况，只有鼠标悬浮的那个遮挡层才消失。（部分代码参考了：[siyuan-plugin-flash-enhance](https://github.com/zxhd863943427/siyuan-plugin-flash-enhance)，感谢：[zxhd863943427](https://github.com/zxhd863943427)）
