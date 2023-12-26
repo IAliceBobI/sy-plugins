@@ -517,7 +517,8 @@ class Progressive {
                 await this.addReadingBtns(bookID, noteID, point);
                 break;
             case HtmlCBType.openFlashcardTab:
-                openTab({ app: this.plugin.app, card: { type: "doc", id: bookID } });
+                if (bookID) openTab({ app: this.plugin.app, card: { type: "doc", id: bookID } });
+                else openTab({ app: this.plugin.app, card: { type: "all" } });
                 break;
             case HtmlCBType.viewContents:
                 await this.openContents(bookID);
