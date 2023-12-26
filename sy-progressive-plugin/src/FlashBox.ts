@@ -21,12 +21,18 @@ function getDailyAttrValue() {
     return y + m + d;
 }
 
-async function isInPiece(protyle: IProtyle): Promise<[string, boolean]> {
-    const docID = protyle.block?.rootID ?? "";
-    if (!docID) return [docID, false];
-    const attrs = await siyuan.getBlockAttrs(docID);
-    if (attrs[MarkKey]?.startsWith(TEMP_CONTENT)) return [docID, true];
-    return [docID, false];
+async function isInPiece(protyle: IProtyle): Promise<{ bookID: string, pieceID: string, isPiece: boolean }> {
+    const ret = {} as any;
+    ret.pieceID = protyle.block?.rootID ?? "";
+    ret.isPiece = false;
+    if (ret.pieceID) {
+        const attrs = await siyuan.getBlockAttrs(ret.pieceID);
+        if (attrs[MarkKey]?.startsWith(TEMP_CONTENT)) {
+            ret.isPiece = true;
+            ret.bookID = attrs[MarkKey].split("#")[1]?.split(",")[0] ?? "";
+        }
+    }
+    return ret;
 }
 
 function getBlockDOM(dom: HTMLElement): { dom: HTMLElement, blockID: string } {
@@ -131,16 +137,13 @@ class FlashBox {
         }
     }
 
-    private async getHPathByDocID(docID: string, inPiece: boolean) {
+    private async getHPathByDocID(docID: string) {
         const row = await siyuan.sqlOne(`select hpath from blocks where id = "${docID}"`);
         let path = row?.hpath ?? "";
         if (!path) return "";
         const parts = path.split("/");
-        if (inPiece) {
-            parts.pop();
-        }
         const docName = parts.pop();
-        const cardDocName = docName + "-card";
+        const cardDocName = docName + "-cards";
         parts.push(docName);
         parts.push(cardDocName);
         path = parts.join("/");
@@ -149,8 +152,8 @@ class FlashBox {
 
     private async insertCard(protyle: IProtyle, markdowns: string[], t: CardType, lastSelectedID: string, path?: string) {
         const boxID = events.boxID;
-        const [docID, inPiece] = await isInPiece(protyle);
-        if (!docID) return;
+        const { bookID, pieceID, isPiece } = await isInPiece(protyle);
+        if (!pieceID) return;
         const { cardID, markdown } = this.createList(markdowns, t);
         if (path) {
             const v = getDailyAttrValue();
@@ -161,18 +164,26 @@ class FlashBox {
             await utils.sleep(100);
             await siyuan.insertBlockAsChildOf("", targetDocID);
             openTab({ app: this.plugin.app, doc: { id: targetDocID }, position: "right" });
-        } else {
-            if (inPiece) {
-                await siyuan.appendBlock(markdown, docID);
+        } else if (isPiece) {
+            {
+                const hpath = await this.getHPathByDocID(bookID)
+                if (!hpath) return;
+                const targetDocID = await utils.siyuanCache.createDocWithMdIfNotExists(10000, boxID, hpath, "");
+                await siyuan.insertBlockAsChildOf(markdown, targetDocID);
                 await utils.sleep(100);
-                await siyuan.appendBlock("", docID);
-            } else {
-                await siyuan.insertBlockAfter("", lastSelectedID);
-                await utils.sleep(100);
-                await siyuan.insertBlockAfter(markdown, lastSelectedID);
-                await utils.sleep(100);
-                await siyuan.insertBlockAfter("", lastSelectedID);
+                await siyuan.insertBlockAsChildOf("", targetDocID);
             }
+            {
+                await siyuan.appendBlock(`⚡🗃 ((${cardID} '${markdown.split("(")[0]}'))`, pieceID);
+                await utils.sleep(100);
+                await siyuan.appendBlock("", pieceID);
+            }
+        } else {
+            await siyuan.insertBlockAfter("", lastSelectedID);
+            await utils.sleep(100);
+            await siyuan.insertBlockAfter(markdown, lastSelectedID);
+            await utils.sleep(100);
+            await siyuan.insertBlockAfter("", lastSelectedID);
         }
         await siyuan.addRiffCards([cardID]);
         await siyuan.pushMsg("⚡🗃" + markdown.split("(")[0], 1234);
