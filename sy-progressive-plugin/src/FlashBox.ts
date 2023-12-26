@@ -166,6 +166,7 @@ class FlashBox {
             await siyuan.insertBlockAsChildOf("", targetDocID);
             openTab({ app: this.plugin.app, doc: { id: targetDocID }, position: "right" });
         } else if (isPiece) {
+            if (!bookID) return;
             {
                 const hpath = await this.getHPathByDocID(bookID)
                 if (!hpath) return;
