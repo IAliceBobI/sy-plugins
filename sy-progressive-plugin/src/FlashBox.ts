@@ -153,31 +153,26 @@ class FlashBox {
         if (!docID) return;
         const { cardID, markdown } = this.createList(markdowns, t);
         if (path) {
-            {
-                const v = getDailyAttrValue();
-                const attr = {};
-                attr[`custom-dailycard-${v}`] = v;
-                const targetDocID = await utils.siyuanCache.createDocWithMdIfNotExists(10000, boxID, path, "", attr);
-                await siyuan.insertBlockAsChildOf(markdown, targetDocID);
-                await utils.sleep(100);
-                await siyuan.insertBlockAsChildOf("", targetDocID);
-                openTab({ app: this.plugin.app, doc: { id: targetDocID }, position: "right" });
-            } {
-                const emPath = await this.getHPathByDocID(docID, inPiece);
-                const targetDocID = await utils.siyuanCache.createDocWithMdIfNotExists(10000, boxID, emPath, "");
-                await siyuan.insertBlockAsChildOf(`{{select * from blocks where id = "${cardID}"}}`, targetDocID);
-                await siyuan.insertBlockAsChildOf("", targetDocID);
-            }
-        } else if (inPiece) {
-            await siyuan.appendBlock(markdown, docID);
+            const v = getDailyAttrValue();
+            const attr = {};
+            attr[`custom-dailycard-${v}`] = v;
+            const targetDocID = await utils.siyuanCache.createDocWithMdIfNotExists(10000, boxID, path, "", attr);
+            await siyuan.insertBlockAsChildOf(markdown, targetDocID);
             await utils.sleep(100);
-            await siyuan.appendBlock("", docID);
+            await siyuan.insertBlockAsChildOf("", targetDocID);
+            openTab({ app: this.plugin.app, doc: { id: targetDocID }, position: "right" });
         } else {
-            await siyuan.insertBlockAfter("", lastSelectedID);
-            await utils.sleep(100);
-            await siyuan.insertBlockAfter(markdown, lastSelectedID);
-            await utils.sleep(100);
-            await siyuan.insertBlockAfter("", lastSelectedID);
+            if (inPiece) {
+                await siyuan.appendBlock(markdown, docID);
+                await utils.sleep(100);
+                await siyuan.appendBlock("", docID);
+            } else {
+                await siyuan.insertBlockAfter("", lastSelectedID);
+                await utils.sleep(100);
+                await siyuan.insertBlockAfter(markdown, lastSelectedID);
+                await utils.sleep(100);
+                await siyuan.insertBlockAfter("", lastSelectedID);
+            }
         }
         await siyuan.addRiffCards([cardID]);
         await siyuan.pushMsg("⚡🗃" + markdown.split("(")[0], 1234);
