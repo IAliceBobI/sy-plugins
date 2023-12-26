@@ -328,7 +328,7 @@ class Progressive {
         else content = `[${point}]` + content;
         const row = await siyuan.sqlOne(`select hpath,content from blocks where type='d' and id='${bookID}'`);
         let dir = row?.hpath ?? "";
-        let bookName = row?.content ?? "";
+        const bookName = row?.content ?? "";
         if (dir) {
             dir = dir + `/${bookName}-pieces/` + content;
             const docID = await siyuan.createDocWithMd(boxID, dir, "");
@@ -343,7 +343,8 @@ class Progressive {
     private async openContents(bookID: string) {
         let contentID = await this.findContents(bookID);
         if (!contentID) {
-            const row = await siyuan.sqlOne(`select box,hpath,content from blocks where id='${bookID}' and type='d'`)
+            siyuan.pushMsg("首次，构建目录，请稍后片刻……");
+            const row = await siyuan.sqlOne(`select box,hpath,content from blocks where id='${bookID}' and type='d'`);
             const hpath = row.hpath;
             const boxID = row.box;
             const bookName = row.content;
@@ -356,18 +357,18 @@ class Progressive {
             const c = rows.reduce<string[]>((list, block) => {
                 let level = Number(block.subtype[1]);
                 if (!utils.isValidNumber(level) || level < 1) level = 1;
-                let title = "{{{col\n"
+                const title = "{{{col\n"
                     + this.helper.getContentPrefix(level) + block.content
                     + "\n"
                     + this.helper.btnReadThisPiece(block.id, block.content)
-                    + "\n}}}\n"
+                    + "\n}}}\n";
                 list.push(title);
                 return list;
             }, []);
             const attr = {};
             attr[constants.MarkKey] = help.getDocIalContents(bookID);
             attr["custom-sy-readonly"] = "true";
-            contentID = await siyuan.createDocWithMdIfNotExists(boxID, `${hpath}/${bookName}-contents`, c.join("\n"), attr)
+            contentID = await siyuan.createDocWithMdIfNotExists(boxID, `${hpath}/${bookName}-contents`, c.join("\n"), attr);
         }
         if (contentID) await openTab({ app: this.plugin.app, doc: { id: contentID } });
     }

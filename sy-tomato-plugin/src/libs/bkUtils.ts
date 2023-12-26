@@ -330,7 +330,7 @@ function addRefreshCheckBox(self: IBKMaker, topDiv: HTMLDivElement) {
 
 function addMentionCheckBox(self: IBKMaker, topDiv: HTMLDivElement) {
     const label = topDiv.appendChild(document.createElement("label"));
-    label.innerText = "提及数上限："
+    label.innerText = "提及数上限：";
     label.classList.add("b3-label");
     label.classList.add("b3-label__text");
     label.classList.add("b3-label--noborder");

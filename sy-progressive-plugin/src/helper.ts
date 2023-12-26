@@ -179,10 +179,10 @@ export class Helper {
     }
 
     getContentPrefix(level: number) {
-        const h = level > 1 ? "🇮" : ""
+        const h = level > 1 ? "🇮" : "";
         const s = "　　".repeat(level - 1);
         const d = ["0⃣", "1⃣", "2⃣", "3⃣", "4⃣", "5⃣", "6⃣", "7⃣"][level];
-        return h + s + d
+        return h + s + d;
     }
 
     btnReadThisPiece(blockID: string, text: string) {

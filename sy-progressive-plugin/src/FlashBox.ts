@@ -168,7 +168,7 @@ class FlashBox {
         } else if (isPiece) {
             if (!bookID) return;
             {
-                const hpath = await this.getHPathByDocID(bookID)
+                const hpath = await this.getHPathByDocID(bookID);
                 if (!hpath) return;
                 const attr = {};
                 attr[MarkKey] = getDocIalCards(bookID);
