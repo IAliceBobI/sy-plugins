@@ -22,17 +22,19 @@
             });
 
             canvas.on("mouse:down", function (o) {
-                drawingRect = new fabric.Rect({
-                    left: 0,
-                    top: 0,
-                    fill: "transparent",
-                    stroke: "red",
-                    strokeWidth: 2,
-                });
-
-                canvas.add(drawingRect);
                 const pointer = canvas.getPointer(o.e);
-                drawingRect.set({ left: pointer.x, top: pointer.y });
+                const target = canvas.findTarget(o.e, false);
+                if (!target) {
+                    drawingRect = new fabric.Rect({
+                        left: 0,
+                        top: 0,
+                        fill: "transparent",
+                        stroke: "red",
+                        strokeWidth: 2,
+                    });
+                    canvas.add(drawingRect);
+                    drawingRect.set({ left: pointer.x, top: pointer.y });
+                }
             });
 
             canvas.on("mouse:move", function (o) {
@@ -46,6 +48,7 @@
             });
 
             canvas.on("mouse:up", function () {
+                if (!drawingRect) return;
                 canvas.remove(drawingRect);
                 addRect(drawingRect);
                 drawingRect = null;
@@ -142,18 +145,10 @@
         return group;
     }
 
-    function addRect(rect?: fabric.Rect) {
+    function addRect(rect: fabric.Rect) {
         const c = String(canvas.getObjects().length + 1);
-        if (rect) {
-            canvas.add(createOverlayFromRect(rect, c));
-        } else {
-            canvas.add(createOverlay(c));
-        }
+        canvas.add(createOverlayFromRect(rect, c));
         canvas.renderAll();
-    }
-
-    function add() {
-        addRect();
     }
 
     function remove() {
@@ -169,6 +164,5 @@
 <!-- https://learn.svelte.dev/tutorial/if-blocks -->
 <div class="b3-dialog__content">
     <canvas id="imgOverlayBoxCanvas"></canvas>
-    <button class="b3-button" on:click={add}>添加一个层</button>
     <button class="b3-button" on:click={remove}>删除最后一个层</button>
 </div>
