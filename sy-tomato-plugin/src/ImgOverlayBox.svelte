@@ -7,6 +7,7 @@
     export let nextOverlays: Overlays;
     export let originOverlays: Overlays;
     let canvas: fabric.Canvas;
+    let drawingRect: fabric.Rect = null;
 
     onMount(async () => {
         const imgID = getID(imgSpan);
@@ -19,6 +20,37 @@
                 selection: false,
                 uniformScaling: false,
             });
+
+            canvas.on("mouse:down", function (o) {
+                drawingRect = new fabric.Rect({
+                    left: 0,
+                    top: 0,
+                    fill: "transparent",
+                    stroke: "red",
+                    strokeWidth: 2,
+                });
+
+                canvas.add(drawingRect);
+                const pointer = canvas.getPointer(o.e);
+                drawingRect.set({ left: pointer.x, top: pointer.y });
+            });
+
+            canvas.on("mouse:move", function (o) {
+                if (!drawingRect) return;
+                var pointer = canvas.getPointer(o.e);
+                drawingRect.set({
+                    width: pointer.x - drawingRect.left,
+                    height: pointer.y - drawingRect.top,
+                });
+                canvas.renderAll();
+            });
+
+            canvas.on("mouse:up", function () {
+                canvas.remove(drawingRect);
+                addRect(drawingRect);
+                drawingRect = null;
+            });
+
             imgTag.onload = (_e) => {
                 const img = new fabric.Image(imgTag);
                 canvas.setWidth(imgTag.width);
@@ -62,6 +94,17 @@
         canvas.dispose();
     });
 
+    function createOverlayFromRect(rect: fabric.Rect, text: string) {
+        return createOverlay(
+            text,
+            rect.left + rect.width / 2,
+            rect.top + rect.height / 2,
+            rect.width,
+            rect.height,
+            rect.angle,
+        );
+    }
+
     function createOverlay(
         cID = "1",
         left = 40,
@@ -99,10 +142,18 @@
         return group;
     }
 
-    function add() {
-        const c = canvas.getObjects().length + 1;
-        canvas.add(createOverlay(String(c)));
+    function addRect(rect?: fabric.Rect) {
+        const c = String(canvas.getObjects().length + 1);
+        if (rect) {
+            canvas.add(createOverlayFromRect(rect, c));
+        } else {
+            canvas.add(createOverlay(c));
+        }
         canvas.renderAll();
+    }
+
+    function add() {
+        addRect();
     }
 
     function remove() {

@@ -49,7 +49,7 @@ class ImgOverlayBox {
         const nextOverlays: Overlays = { originWidth: 0, overlays: [] };
         const imgID = getID(imgSpan);
         const dialog = new Dialog({
-            title: "图片制卡",
+            title: "图片制卡（支持拖拽画矩形）",
             content: `<div id="${id}"></div>`,
             destroyCallback() {
                 if (editor) editor.$destroy();
