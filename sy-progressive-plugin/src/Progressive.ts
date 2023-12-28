@@ -262,10 +262,7 @@ class Progressive {
             } else {
                 await this.storage.toggleAutoCard(bookID, "yes");
             }
-            await this.startToLearn(bookID);
-            // setTimeout(async () => {
-            //     await this.viewAllProgressiveBooks();
-            // }, constants.IndexTime2Wait);
+            this.startToLearnWithLock(bookID);
         });
     }
 
