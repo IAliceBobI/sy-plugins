@@ -241,7 +241,7 @@ class FlashBox {
             const [_id, div] = this.cloneDiv(dom as HTMLDivElement, true);
             protyle.toolbar.setInlineMark(protyle, "mark", "range");
             protyle.toolbar.setInlineMark(protyle, "prog-marked", "range", { type: "backgroundColor", color: "var(--b3-font-background9)" });
-            div.querySelectorAll('[data-type*="prog-marked"]').forEach(e => {
+            div.querySelectorAll('[data-type~="prog-marked"]').forEach(e => {
                 const v = e.getAttribute("data-type").replace("prog-marked", "");
                 e.setAttribute("data-type", v);
                 e.removeAttribute("style");

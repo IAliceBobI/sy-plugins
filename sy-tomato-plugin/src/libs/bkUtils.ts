@@ -50,7 +50,7 @@ export function refTag(id: string, text: string, count: number, len?: number): H
 }
 
 export function scanAllRef(allRefs: RefCollector, div: HTMLDivElement, docID: string) {
-    for (const element of div.querySelectorAll(`[${DATA_TYPE}*="${BLOCK_REF}"]`)) {
+    for (const element of div.querySelectorAll(`[${DATA_TYPE}~="${BLOCK_REF}"]`)) {
         const id = element.getAttribute(DATA_ID);
         const txt = element.textContent;
         addRef(txt, id, allRefs, docID);
@@ -179,7 +179,7 @@ export async function getBackLinks(self: IBKMaker) {
 
     refreshTopDiv(self, topDiv, allRefs);
 
-    self.container.querySelectorAll(`[${DATA_TYPE}*="${BLOCK_REF}"]`).forEach((e: HTMLElement) => {
+    self.container.querySelectorAll(`[${DATA_TYPE}~="${BLOCK_REF}"]`).forEach((e: HTMLElement) => {
         const btn = document.createElement("button") as HTMLButtonElement;
         btn.setAttribute(DATA_ID, e.getAttribute(DATA_ID));
         btn.style.border = "transparent";

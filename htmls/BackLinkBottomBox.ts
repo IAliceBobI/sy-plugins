@@ -507,7 +507,7 @@ function refTag(id: string, text: string, count: number, len?: number): HTMLSpan
 }
 
 function scanAllRef(allRefs: RefCollector, div: HTMLDivElement, docID: string) {
-    for (const element of div.querySelectorAll(`[${DATA_TYPE}*="${BLOCK_REF}"]`)) {
+    for (const element of div.querySelectorAll(`[${DATA_TYPE}~="${BLOCK_REF}"]`)) {
         const id = element.getAttribute(DATA_ID);
         const txt = element.textContent;
         addRef(txt, id, allRefs, docID);

@@ -10,7 +10,7 @@ export function cleanDiv(div: HTMLDivElement, setRef: boolean): [string, HTMLEle
         e.removeAttribute(gconst.DATA_NODE_ID);
     });
     if (setRef) {
-        for (const e of div.querySelectorAll(`[${gconst.DATA_TYPE}="${gconst.BLOCK_REF}"]`)) {
+        for (const e of div.querySelectorAll(`[${gconst.DATA_TYPE}~="${gconst.BLOCK_REF}"]`)) {
             if (e.textContent.trim() == "*") {
                 return [id, div, true];
             }
