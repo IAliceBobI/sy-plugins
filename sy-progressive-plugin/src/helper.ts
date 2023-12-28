@@ -522,6 +522,7 @@ export class ContentLenGroup {
         if (this.list.length > 0) {
             this.collect.push(this.list);
             this.list = [];
+            this.accCount = 0;
         }
     }
     private add(wc: WordCountType) {
@@ -529,7 +530,6 @@ export class ContentLenGroup {
         if (wc.type !== "h") this.accCount += wc.count;
         if (this.accCount >= this.maxCount) {
             this.newList();
-            this.accCount = 0;
         }
     }
     private splitPiece(wc: WordCountType[]): WordCountType[][] {

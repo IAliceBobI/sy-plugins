@@ -676,7 +676,7 @@ class Progressive {
                 dialog.destroy();
             });
             help.appendChild(subDiv, "button", this.plugin.i18n.Delete, ["prog-style__button"], () => {
-                confirm("⚠️", this.plugin.i18n.Delete + " : " + name, async () => {
+                confirm("⚠️", "只删除记录与辅助数据，不删除分片，不删除闪卡等。<br>删除：" + name, async () => {
                     await this.storage.removeIndex(bookID);
                     div.removeChild(subDiv);
                 });
