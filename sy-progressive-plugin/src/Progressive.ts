@@ -264,6 +264,7 @@ class Progressive {
             }
             setTimeout(async () => {
                 await this.viewAllProgressiveBooks();
+                await this.startToLearn(bookID);
             }, constants.IndexTime2Wait);
         });
     }
@@ -367,9 +368,9 @@ class Progressive {
             const c = rows.reduce<string[]>((list, block) => {
                 let level = Number(block.subtype[1]);
                 if (!utils.isValidNumber(level) || level < 1) level = 1;
-                if (level == 1) {
-                    list.push("###### " + block.content);
-                }
+                // if (level == 1) {
+                //     list.push("###### " + block.content);
+                // }
                 list.push("{{{col\n"
                     + this.helper.getContentPrefix(level) + block.content
                     + "\n"
@@ -652,7 +653,7 @@ class Progressive {
             return [bookID, bookInfo, idx, row];
         }).flat();
         const books = utils.chunks(await Promise.all(tasks), 4) as [string, help.BookInfo, string[][], Block][];
-        for (const [bookID, bookInfo, idx, row] of books) {
+        for (const [bookID, bookInfo, idx, row] of books.reverse()) {
             const subDiv = help.appendChild(div, "div", "", ["prog-style__container_div"]);
             let name = bookID;
             if (row) name = row["content"];
