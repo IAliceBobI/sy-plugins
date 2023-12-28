@@ -97,9 +97,15 @@
         canvas.dispose();
     });
 
-    function createOverlayFromRect(rect: fabric.Rect, text: string) {
+    function createOverlayFromRect(rect: fabric.Rect, id: number) {
+        let txt = "#";
+        if (id < 10) {
+            txt = String(id);
+        } else if (id >= 10 && id < 10 + 26) {
+            txt = String.fromCharCode(65 + id - 10);
+        }
         return createOverlay(
-            text,
+            txt,
             rect.left + rect.width / 2,
             rect.top + rect.height / 2,
             rect.width,
@@ -109,7 +115,7 @@
     }
 
     function createOverlay(
-        cID = "1",
+        cID = "@",
         left = 40,
         top = 40,
         width = 80,
@@ -146,7 +152,7 @@
     }
 
     function addRect(rect: fabric.Rect) {
-        const c = String(canvas.getObjects().length + 1);
+        const c = canvas.getObjects().length + 1;
         canvas.add(createOverlayFromRect(rect, c));
         canvas.renderAll();
     }
