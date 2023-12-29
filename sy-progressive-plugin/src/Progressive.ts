@@ -79,7 +79,7 @@ class Progressive {
                         if (lock) {
                             for (let i = 0; i < 5; i++) {
                                 await utils.sleep(2000);
-                                await this.tryAddStars(noteID);
+                                await this.tryAddRefAttr(noteID);
                             }
                         }
                     });
@@ -88,25 +88,36 @@ class Progressive {
         });
     }
 
-    private async tryAddStars(_noteID: string) {
-        // const blocks = await siyuan.getChildBlocks(noteID);
-        // const findSibling = (id: string) => {
-        //     let preID = "";
-        //     if (id) {
-        //         for (let i = 0; i < blocks.length; i++) {
-        //             const b = blocks[i];
-        //             if (id == b.id && preID) { // id not at first line
-        //                 break;
-        //             }
-        //             if (id == preID) { // id at first line
-        //                 preID = b.id;
-        //                 break;
-        //             }
-        //             preID = b.id;
-        //         }
-        //     }
-        //     return preID;
-        // }
+    private async tryAddRefAttr(noteID: string) {
+        const rows: Block[] = [];
+        {
+            const [rs, blocks] = await Promise.all([
+                siyuan.sql(`select * from blocks where root_id="${noteID}" and type='p'`),
+                siyuan.getChildBlocks(noteID),
+            ]);
+            blocks.forEach(c => {
+                const r = rs.find(row => row.id == c.id);
+                if (r) rows.push(r);
+            });
+        }
+        const findSibling = (block: Block) => {
+            let preBlock: Block;
+            if (block) {
+                for (let i = 0; i < rows.length; i++) {
+                    if (i == 0 && block.id == rows[i].id) {
+                        preBlock = rows[i + 1];
+                        break;
+                    }
+                    if (i > 0 && block.id == rows[i].id) {
+                        preBlock = rows[i - 1];
+                        break;
+                    }
+                }
+            }
+            return preBlock;
+        }
+
+
         // let rows = await siyuan.sql(`select * from blocks 
         //     where root_id="${noteID}" 
         //     and type='p' and content IS NOT NULL AND content != ''
