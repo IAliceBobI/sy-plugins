@@ -210,9 +210,8 @@ class Progressive {
             }
         });
 
-        const suggestBlockNum = `${Math.ceil(600 / (wordCount / contentBlocks.length))}`;
         const BlockNumInput = dialog.element.querySelector("#" + BlockNumID) as HTMLInputElement;
-        BlockNumInput.value = suggestBlockNum;
+        BlockNumInput.value = "0";
 
         const LengthSplitInput = dialog.element.querySelector("#" + LengthSplitID) as HTMLInputElement;
         LengthSplitInput.value = "0";
@@ -227,7 +226,7 @@ class Progressive {
 
             const blockNumber = Number(BlockNumInput.value.trim());
             if (!utils.isValidNumber(blockNumber)) {
-                BlockNumInput.value = suggestBlockNum;
+                BlockNumInput.value = "0";
                 return;
             }
 
