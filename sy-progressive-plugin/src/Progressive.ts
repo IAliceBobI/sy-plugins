@@ -1,6 +1,6 @@
-import { Dialog, Menu, Plugin, openTab, confirm, ITab, Lute } from "siyuan";
+import { Dialog, Menu, Plugin, openTab, confirm, ITab, Lute, IProtyle } from "siyuan";
 import "./index.scss";
-import { events } from "../../sy-tomato-plugin/src/libs/Events";
+import { EventType, events } from "../../sy-tomato-plugin/src/libs/Events";
 import { siyuan, timeUtil } from "../../sy-tomato-plugin/src/libs/utils";
 import { HtmlCBType } from "./helper";
 import * as utils from "../../sy-tomato-plugin/src/libs/utils";
@@ -61,6 +61,18 @@ class Progressive {
                     }
                 },
             });
+        });
+        events.addListener("ProgressiveBox", (eventType, detail) => {
+            if (eventType == EventType.loaded_protyle_static) {
+                const protyle: IProtyle = detail.protyle;
+                const div = protyle.element.querySelector(`[${constants.MarkKey}]`) as HTMLDivElement;
+                const attr = div?.getAttribute(constants.MarkKey) ?? "";
+                const pieceLen = constants.TEMP_CONTENT.length + 1 + "20231229160401-0lfc8qj".length + 1 + 1;
+                if (attr.startsWith(constants.TEMP_CONTENT + "#") && attr.length >= pieceLen) {
+                    // we found a piece.
+                    console.log(attr)
+                }
+            }
         });
     }
 
