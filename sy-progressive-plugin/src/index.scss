@@ -1,7 +1,11 @@
 .protyle-wysiwyg div[custom-prog-piece-previous] {
   transform: scale(0.6);
   transform-origin: 0 0;
-  // background-color: var(--b3-font-background5);
+}
+
+.protyle-wysiwyg div[custom-progref] ::first-letter {
+  content: "*";
+  color: var(--b3-font-color5);
 }
 
 .prog-style {

@@ -77,7 +77,7 @@ class Progressive {
                     const noteID = protyle.block.rootID;
                     navigator.locks.request(constants.TryAddStarsLock, { ifAvailable: true }, async (lock) => {
                         if (lock) {
-                            for (let i = 0; i < 5; i++) {
+                            for (let i = 0; i < 6; i++) {
                                 await utils.sleep(2000);
                                 await this.tryAddRefAttr(noteID);
                             }
