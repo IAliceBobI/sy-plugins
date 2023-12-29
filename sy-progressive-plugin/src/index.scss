@@ -1,3 +1,9 @@
+.protyle-wysiwyg div[custom-prog-piece-previous] {
+  transform: scale(0.6);
+  transform-origin: 0 0;
+  // background-color: var(--b3-font-background5);
+}
+
 .prog-style {
   &__p {
     margin: 0;

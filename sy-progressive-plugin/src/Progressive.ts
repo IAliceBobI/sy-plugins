@@ -572,21 +572,24 @@ class Progressive {
         for (const id of piece.slice().reverse()) {
             await this.copyAndInsertBlock(id, lute, noteID);
         }
-        await siyuan.insertBlockAsChildOf(help.tempContent("---"), noteID);
         for (const id of piecePre.slice().reverse()) {
-            await this.copyAndInsertBlock(id, lute, noteID);
+            await this.copyAndInsertBlock(id, lute, noteID, "custom-prog-piece-previous");
             break;
         }
     }
 
-    private async copyAndInsertBlock(id: string, lute: Lute, noteID: string) {
+    private async copyAndInsertBlock(id: string, lute: Lute, noteID: string, mark?: string) {
         const { dom } = await siyuan.getBlockDOM(id);
         let tempDiv = document.createElement("div");
         tempDiv.innerHTML = dom;
         tempDiv = tempDiv.firstElementChild as HTMLDivElement;
         utils.cleanDiv(tempDiv, true);
         let md = lute.BlockDOM2Md(tempDiv.outerHTML);
-        md = md + "\n" + `{: ${constants.RefIDKey}="${id}"}`;
+        if (mark) {
+            md = md + "\n" + `{: ${constants.RefIDKey}="${id}" ${mark}="1" }`;
+        } else {
+            md = md + "\n" + `{: ${constants.RefIDKey}="${id}" }`;
+        }
         await siyuan.insertBlockAsChildOf(md, noteID);
     }
 
