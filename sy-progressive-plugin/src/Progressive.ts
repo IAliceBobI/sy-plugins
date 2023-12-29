@@ -92,7 +92,7 @@ class Progressive {
         const rows: Block[] = [];
         {
             const [rs, blocks] = await Promise.all([
-                siyuan.sql(`select * from blocks where root_id="${noteID}" and type='p'`),
+                siyuan.sql(`select id,ial from blocks where root_id="${noteID}" and type='p'`),
                 siyuan.getChildBlocks(noteID),
             ]);
             blocks.forEach(c => {
@@ -115,39 +115,18 @@ class Progressive {
                 }
             }
             return preBlock;
-        }
-
-
-        // let rows = await siyuan.sql(`select * from blocks 
-        //     where root_id="${noteID}" 
-        //     and type='p' and content IS NOT NULL AND content != ''
-        //     and ial not like "%${constants.RefIDKey}%"
-        // `);
-        // const doOperations: IOperation[] = [];
-        // detail.blockElements.forEach((item: HTMLElement) => {
-        //     const editElement = item.querySelector('[contenteditable="true"]');
-        //     if (editElement) {
-        //         editElement.textContent = editElement.textContent.replace(/ /g, "");
-        //         doOperations.push({
-        //             id: item.dataset.nodeId,
-        //             data: item.outerHTML,
-        //             action: "update"
-        //         });
-        //     }
-        // });
-        // detail.protyle.getInstance().transaction(doOperations);
-        // rows = zip2ways(
-        //     await Promise.all(rows.map(i => siyuan.checkBlockExist(i.id))),
-        //     rows,
-        // ).filter(i => i[0]).map(i => i[1]);
-        // for (const row of rows.filter(i => i.content.trim().length > 0)) {
-        //     const div = await utils.getBlockDiv(row.id)
-        //     if (div.textContent.trim().length == 0) continue;
-        //     const ref = findSibling(row.id);
-        //     utils.tryAddRef2Div(div, ref)
-        //     let md = this.lute.BlockDOM2Md(div.outerHTML)
-        //     try { await siyuan.safeUpdateBlock(row.id, md); } catch (_e) { };
-        // }
+        };
+        rows.filter(row => !row.ial.includes(RefIDKey)).forEach(async row => {
+            const s = findSibling(row);
+            if (s) {
+                const attr = (await siyuan.getBlockAttrs(s.id))[RefIDKey] ?? "";
+                if (attr) {
+                    const newAttr = {};
+                    newAttr[RefIDKey] = attr;
+                    await siyuan.setBlockAttrs(row.id, newAttr);
+                }
+            }
+        });
     }
 
     private addMenu(rect?: DOMRect) {

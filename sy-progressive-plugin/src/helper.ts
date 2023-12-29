@@ -1,4 +1,4 @@
-import { IDLen } from "../../sy-tomato-plugin/src/libs/gconst";
+import { IDLen, MarkKey, TEMP_CONTENT } from "../../sy-tomato-plugin/src/libs/gconst";
 import { siyuan, styleColor } from "../../sy-tomato-plugin/src/libs/utils";
 import * as utils from "../../sy-tomato-plugin/src/libs/utils";
 import * as constants from "./constants";
@@ -156,19 +156,19 @@ export function bookCacheKey(bookID: string) {
 }
 
 export function tempContent(content: string) { // for btns and split lines
-    return content + `\n{: ${constants.MarkKey}="${constants.TEMP_CONTENT}"}`;
+    return content + `\n{: ${MarkKey}="${TEMP_CONTENT}"}`;
 }
 
 export function getDocIalMark(bookID: string, point: number) {
-    return `${constants.TEMP_CONTENT}#${bookID},${point}`;
+    return `${TEMP_CONTENT}#${bookID},${point}`;
 }
 
 export function getDocIalContents(bookID: string) {
-    return `contents#${constants.TEMP_CONTENT}#${bookID}`;
+    return `contents#${TEMP_CONTENT}#${bookID}`;
 }
 
 export function getDocIalCards(bookID: string) {
-    return `cards#${constants.TEMP_CONTENT}#${bookID}`;
+    return `cards#${TEMP_CONTENT}#${bookID}`;
 }
 
 export class Helper {
