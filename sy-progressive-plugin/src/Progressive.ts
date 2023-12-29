@@ -75,10 +75,10 @@ class Progressive {
                     const noteID = protyle.block.rootID;
                     navigator.locks.request(constants.TryAddStarsLock, { ifAvailable: true }, async (lock) => {
                         if (lock) {
-                            for (let i = 0; i < 3; i++) {
-                                await utils.sleep(1000);
-                                await this.tryAddStars(noteID);
-                            }
+                            // for (let i = 0; i < 3; i++) {
+                            //     await utils.sleep(1000);
+                            await this.tryAddStars(noteID);
+                            // }
                         }
                     });
                 }
@@ -86,39 +86,55 @@ class Progressive {
         });
     }
 
-    private async tryAddStars(noteID: string) {
-        const blocks = await siyuan.getChildBlocks(noteID);
-        const findSibling = (id: string) => {
-            let preID = "";
-            if (id) {
-                for (let i = 0; i < blocks.length; i++) {
-                    const b = blocks[i];
-                    if (id == b.id && preID) { // id not at first line
-                        break;
-                    }
-                    if (id == preID) { // id at first line
-                        preID = b.id;
-                        break;
-                    }
-                    preID = b.id;
-                }
-            }
-            return preID;
-        }
-        let rows = await siyuan.sql(`select * from blocks 
-            where root_id="${noteID}" 
-            and type='p' and content IS NOT NULL AND content != ''
-            and ial not like "%${constants.RefIDKey}%"
-        `);
-
+    private async tryAddStars(_noteID: string) {
+        // const blocks = await siyuan.getChildBlocks(noteID);
+        // const findSibling = (id: string) => {
+        //     let preID = "";
+        //     if (id) {
+        //         for (let i = 0; i < blocks.length; i++) {
+        //             const b = blocks[i];
+        //             if (id == b.id && preID) { // id not at first line
+        //                 break;
+        //             }
+        //             if (id == preID) { // id at first line
+        //                 preID = b.id;
+        //                 break;
+        //             }
+        //             preID = b.id;
+        //         }
+        //     }
+        //     return preID;
+        // }
+        // let rows = await siyuan.sql(`select * from blocks 
+        //     where root_id="${noteID}" 
+        //     and type='p' and content IS NOT NULL AND content != ''
+        //     and ial not like "%${constants.RefIDKey}%"
+        // `);
+        // const doOperations: IOperation[] = [];
+        // detail.blockElements.forEach((item: HTMLElement) => {
+        //     const editElement = item.querySelector('[contenteditable="true"]');
+        //     if (editElement) {
+        //         editElement.textContent = editElement.textContent.replace(/ /g, "");
+        //         doOperations.push({
+        //             id: item.dataset.nodeId,
+        //             data: item.outerHTML,
+        //             action: "update"
+        //         });
+        //     }
+        // });
+        // detail.protyle.getInstance().transaction(doOperations);
         // rows = zip2ways(
         //     await Promise.all(rows.map(i => siyuan.checkBlockExist(i.id))),
         //     rows,
         // ).filter(i => i[0]).map(i => i[1]);
-        for (const row of rows.filter(i => i.content.trim().length > 0)) {
-            await copyAndInsertBlock(row.id, this.lute)
-            console.log(row)
-        }
+        // for (const row of rows.filter(i => i.content.trim().length > 0)) {
+        //     const div = await utils.getBlockDiv(row.id)
+        //     if (div.textContent.trim().length == 0) continue;
+        //     const ref = findSibling(row.id);
+        //     utils.tryAddRef2Div(div, ref)
+        //     let md = this.lute.BlockDOM2Md(div.outerHTML)
+        //     try { await siyuan.safeUpdateBlock(row.id, md); } catch (_e) { };
+        // }
     }
 
     private addMenu(rect?: DOMRect) {
@@ -625,7 +641,7 @@ function splitByBlockCount(groups: help.WordCountType[][], blockNumber: number) 
         const headings: help.WordCountType[] = [];
         const rest: help.WordCountType[] = [];
         for (const i of group) {
-            if (i.type == 'h' && rest.length == 0) headings.push(i);
+            if (i.type == "h" && rest.length == 0) headings.push(i);
             else rest.push(i);
         }
         const newPieces = utils.chunks(rest, blockNumber);
@@ -636,10 +652,7 @@ function splitByBlockCount(groups: help.WordCountType[][], blockNumber: number) 
 }
 
 async function copyAndInsertBlock(id: string, lute: Lute, noteID: string, mark?: string) {
-    const { dom } = await siyuan.getBlockDOM(id);
-    let tempDiv = document.createElement("div");
-    tempDiv.innerHTML = dom;
-    tempDiv = tempDiv.firstElementChild as HTMLDivElement;
+    const tempDiv = await utils.getBlockDiv(id);
     utils.cleanDiv(tempDiv, true);
     let md = lute.BlockDOM2Md(tempDiv.outerHTML);
     if (mark) {

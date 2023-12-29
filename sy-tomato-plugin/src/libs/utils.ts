@@ -28,19 +28,29 @@ export function cleanDiv(div: HTMLDivElement, setRef: boolean): [string, HTMLEle
 }
 
 export function tryAddRef2Div(div: HTMLDivElement, id: string): HTMLDivElement {
-    for (const e of div.querySelectorAll(`[${gconst.DATA_TYPE}~="${gconst.BLOCK_REF}"]`)) {
-        if (e.textContent.trim() == "*") {
-            return div;
+    if (id) {
+        for (const e of div.querySelectorAll(`[${gconst.DATA_TYPE}~="${gconst.BLOCK_REF}"]`)) {
+            if (e.textContent.trim() == "*") {
+                return div;
+            }
+        }
+        const span = div.querySelector("[contenteditable=\"true\"]")?.appendChild(document.createElement("span"));
+        if (span) {
+            span.setAttribute(gconst.DATA_TYPE, gconst.BlockNodeEnum.BLOCK_REF);
+            span.setAttribute(gconst.DATA_SUBTYPE, "s");
+            span.setAttribute(gconst.DATA_ID, id);
+            span.innerText = "*";
         }
     }
-    const span = div.querySelector("[contenteditable=\"true\"]")?.appendChild(document.createElement("span"));
-    if (span) {
-        span.setAttribute(gconst.DATA_TYPE, gconst.BlockNodeEnum.BLOCK_REF);
-        span.setAttribute(gconst.DATA_SUBTYPE, "s");
-        span.setAttribute(gconst.DATA_ID, id);
-        span.innerText = "*";
-    }
     return div;
+}
+
+export async function getBlockDiv(id: string) {
+    const { dom } = await siyuan.getBlockDOM(id);
+    let tempDiv = document.createElement("div");
+    tempDiv.innerHTML = dom;
+    tempDiv = tempDiv.firstElementChild as HTMLDivElement;
+    return tempDiv;
 }
 
 export function getID(e: Element) {
