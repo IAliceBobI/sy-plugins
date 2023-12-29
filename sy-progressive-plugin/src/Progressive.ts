@@ -68,19 +68,19 @@ class Progressive {
         events.addListener("ProgressiveBox", (eventType, detail) => {
             if (eventType == EventType.loaded_protyle_static) {
                 const protyle: IProtyle = detail.protyle;
-                if (!protyle) return;
-                const div = protyle.element.querySelector(`[${MarkKey}]`) as HTMLDivElement;
+                const div = protyle?.element?.querySelector(`[${MarkKey}]`) as HTMLDivElement;
                 const attr = div?.getAttribute(MarkKey) ?? "";
+                if (!attr) return;
                 const pieceLen = TEMP_CONTENT.length + 1 + "20231229160401-0lfc8qj".length + 1 + 1;
                 if (attr.startsWith(TEMP_CONTENT + "#") && attr.length >= pieceLen) {
                     // we found a piece.
                     const noteID = protyle.block.rootID;
                     navigator.locks.request(constants.TryAddStarsLock, { ifAvailable: true }, async (lock) => {
                         if (lock) {
-                            // for (let i = 0; i < 3; i++) {
-                            //     await utils.sleep(1000);
-                            await this.tryAddStars(noteID);
-                            // }
+                            for (let i = 0; i < 5; i++) {
+                                await utils.sleep(2000);
+                                await this.tryAddStars(noteID);
+                            }
                         }
                     });
                 }
