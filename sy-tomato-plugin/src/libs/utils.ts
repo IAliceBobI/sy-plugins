@@ -275,7 +275,7 @@ export const siyuan = {
     async createDailyNote(notebook: string): Promise<{ id: string }> {
         return siyuan.call("/api/filetree/createDailyNote", { notebook });
     },
-    async checkBlockExist(id: string) {
+    async checkBlockExist(id: string):Promise<boolean> {
         return siyuan.call("/api/block/checkBlockExist", { id });
     },
     async getBlockDOM(id: string): Promise<{ dom: string, id: string }> {

@@ -6,6 +6,7 @@ import { HtmlCBType } from "./helper";
 import * as utils from "../../sy-tomato-plugin/src/libs/utils";
 import * as help from "./helper";
 import * as constants from "./constants";
+import { zipAnyArrays } from "../../sy-tomato-plugin/src/libs/functional";
 
 class Progressive {
     private static readonly GLOBAL_THIS: Record<string, any> = globalThis;
@@ -73,7 +74,7 @@ class Progressive {
                     const noteID = protyle.block.rootID;
                     navigator.locks.request(constants.TryAddStarsLock, { ifAvailable: true }, async (lock) => {
                         if (lock) {
-                            for (let i = 0; i < 8; i++) {
+                            for (let i = 0; i < 3; i++) {
                                 await utils.sleep(1000);
                                 await this.tryAddStars(noteID);
                             }
@@ -103,8 +104,16 @@ class Progressive {
             }
             return preID;
         }
-        const rows = await siyuan.sql(`select * from blocks where root_id="${noteID}" and type='p'`);
+        let rows = await siyuan.sql(`select * from blocks 
+            where root_id="${noteID}" 
+            and type='p' and content IS NOT NULL AND content != ''
+            and ial not like "%${constants.RefIDKey}%"
+        `);
+        rows = zipAnyArrays(await Promise.all(rows.map(i => siyuan.checkBlockExist(i.id))), rows).filter(i=>i[0])
+        for (const row of rows) {
 
+            console.log(row)
+        }
     }
 
     private addMenu(rect?: DOMRect) {
