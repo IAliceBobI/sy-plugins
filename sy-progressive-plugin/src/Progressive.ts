@@ -70,10 +70,22 @@ class Progressive {
                 const pieceLen = constants.TEMP_CONTENT.length + 1 + "20231229160401-0lfc8qj".length + 1 + 1;
                 if (attr.startsWith(constants.TEMP_CONTENT + "#") && attr.length >= pieceLen) {
                     // we found a piece.
-                    console.log(attr)
+                    const noteID = protyle.block.rootID;
+                    navigator.locks.request(constants.TryAddStarsLock, { ifAvailable: true }, async (lock) => {
+                        if (lock) {
+                            for (let i = 0; i < 8; i++) {
+                                await utils.sleep(1000);
+                                await this.tryAddStars(noteID);
+                            }
+                        }
+                    });
                 }
             }
         });
+    }
+
+    private async tryAddStars(noteID) {
+
     }
 
     private addMenu(rect?: DOMRect) {
