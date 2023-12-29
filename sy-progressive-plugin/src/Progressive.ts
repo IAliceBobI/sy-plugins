@@ -233,14 +233,7 @@ class Progressive {
 
             await siyuan.pushMsg(this.plugin.i18n.splitByHeadings);
             let groups = new help.HeadingGroup(contentBlocks).split();
-
-            if (blockNumber > 0) {
-                const tmp: help.WordCountType[][] = [];
-                for (const group of groups) {
-                    tmp.push(...utils.chunks(group, blockNumber));
-                }
-                groups = tmp;
-            }
+            groups = splitByBlockCount(groups, blockNumber);
             if (splitLen > 0) {
                 await siyuan.pushMsg(this.plugin.i18n.splitByWordCount + ":" + splitLen);
                 groups = new help.ContentLenGroup(groups, splitLen).split();
@@ -676,3 +669,21 @@ class Progressive {
 }
 
 export const prog = new Progressive();
+
+function splitByBlockCount(groups: help.WordCountType[][], blockNumber: number) {
+    if (blockNumber <= 0) return groups;
+    const tmp: help.WordCountType[][] = [];
+    for (const group of groups) {
+        const headings: help.WordCountType[] = [];
+        const rest: help.WordCountType[] = [];
+        for (const i of group) {
+            if (i.type == 'h' && rest.length == 0) headings.push(i);
+            else rest.push(i);
+        }
+        const newPieces = utils.chunks(rest, blockNumber);
+        if (newPieces.length > 0) newPieces[0].splice(0, 0, ...headings);
+        tmp.push(...newPieces);
+    }
+    return tmp;
+}
+
