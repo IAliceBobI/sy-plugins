@@ -3,7 +3,6 @@ import { siyuan } from "../../sy-tomato-plugin/src/libs/utils";
 import * as utils from "../../sy-tomato-plugin/src/libs/utils";
 import { events } from "../../sy-tomato-plugin/src/libs/Events";
 import * as gconst from "../../sy-tomato-plugin/src/libs/gconst";
-import { MarkKey, TEMP_CONTENT } from "./constants";
 import { getDocIalCards } from "./helper";
 
 enum CardType {
@@ -28,9 +27,9 @@ async function isInPiece(protyle: IProtyle): Promise<{ bookID: string, pieceID: 
     ret.isPiece = false;
     if (ret.pieceID) {
         const attrs = await siyuan.getBlockAttrs(ret.pieceID);
-        if (attrs[MarkKey]?.startsWith(TEMP_CONTENT)) {
+        if (attrs[gconst.MarkKey]?.startsWith(gconst.TEMP_CONTENT)) {
             ret.isPiece = true;
-            ret.bookID = attrs[MarkKey].split("#")[1]?.split(",")[0] ?? "";
+            ret.bookID = attrs[gconst.MarkKey].split("#")[1]?.split(",")[0] ?? "";
         }
     }
     return ret;
@@ -171,7 +170,7 @@ class FlashBox {
                 const hpath = await this.getHPathByDocID(bookID);
                 if (!hpath) return;
                 const attr = {};
-                attr[MarkKey] = getDocIalCards(bookID);
+                attr[gconst.MarkKey] = getDocIalCards(bookID);
                 const targetDocID = await utils.siyuanCache.createDocWithMdIfNotExists(10000, boxID, hpath, "", attr);
                 await siyuan.insertBlockAsChildOf(markdown, targetDocID);
                 await utils.sleep(100);

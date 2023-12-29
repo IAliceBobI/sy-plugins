@@ -9,6 +9,7 @@ import {
     shouldInsertDiv
 } from "./libs/bkUtils";
 import { siyuanCache } from "./libs/utils";
+import { MarkKey, TEMP_CONTENT } from "./libs/gconst";
 
 const BKMAKER_ADD = "BKMAKER_ADD";
 const CACHE_LIMIT = 100;
@@ -137,8 +138,6 @@ class BackLinkBottomBox {
 }
 
 async function isBookCard(docID: string): Promise<boolean> {
-    const MarkKey = "custom-progmark"; // for doc
-    const TEMP_CONTENT = "插件管理勿改managedByPluginDoNotModify";
     const attrs = await siyuanCache.getBlockAttrs(60000, docID);
     const v = attrs[MarkKey] ?? "";
     return v.includes(TEMP_CONTENT);

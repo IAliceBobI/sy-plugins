@@ -3,7 +3,4 @@ export const TryAddStarsLock = "TryAddStarsLock";
 export const AddProgressiveReadingLock = "AddProgressiveReadingLock";
 export const BuildContentsLock = "BuildContentsLock";
 export const StartToLearnLock = "StartToLearnLock";
-export const TEMP_CONTENT = "插件管理勿改managedByPluginDoNotModify";
 export const IndexTime2Wait = 400;
-export const MarkKey = "custom-progmark"; // for doc
-export const RefIDKey = "custom-progref"; // for content

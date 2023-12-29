@@ -33,3 +33,7 @@ export enum BlockNodeEnum {
     NODE_LINK_DEST = "NodeLinkDest",
     NODE_TEXT_MARK = "NodeTextMark",
 }
+
+export const MarkKey = "custom-progmark"; // for doc
+export const RefIDKey = "custom-progref"; // for content
+export const TEMP_CONTENT = "插件管理勿改managedByPluginDoNotModify";

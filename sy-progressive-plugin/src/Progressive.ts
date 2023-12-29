@@ -6,6 +6,7 @@ import { HtmlCBType } from "./helper";
 import * as utils from "../../sy-tomato-plugin/src/libs/utils";
 import * as help from "./helper";
 import * as constants from "./constants";
+import { MarkKey, RefIDKey, TEMP_CONTENT } from "../../sy-tomato-plugin/src/libs/gconst";
 
 class Progressive {
     private static readonly GLOBAL_THIS: Record<string, any> = globalThis;
@@ -68,10 +69,10 @@ class Progressive {
             if (eventType == EventType.loaded_protyle_static) {
                 const protyle: IProtyle = detail.protyle;
                 if (!protyle) return;
-                const div = protyle.element.querySelector(`[${constants.MarkKey}]`) as HTMLDivElement;
-                const attr = div?.getAttribute(constants.MarkKey) ?? "";
-                const pieceLen = constants.TEMP_CONTENT.length + 1 + "20231229160401-0lfc8qj".length + 1 + 1;
-                if (attr.startsWith(constants.TEMP_CONTENT + "#") && attr.length >= pieceLen) {
+                const div = protyle.element.querySelector(`[${MarkKey}]`) as HTMLDivElement;
+                const attr = div?.getAttribute(MarkKey) ?? "";
+                const pieceLen = TEMP_CONTENT.length + 1 + "20231229160401-0lfc8qj".length + 1 + 1;
+                if (attr.startsWith(TEMP_CONTENT + "#") && attr.length >= pieceLen) {
                     // we found a piece.
                     const noteID = protyle.block.rootID;
                     navigator.locks.request(constants.TryAddStarsLock, { ifAvailable: true }, async (lock) => {
@@ -404,7 +405,7 @@ class Progressive {
                 return list;
             }, []);
             const attr = {};
-            attr[constants.MarkKey] = help.getDocIalContents(bookID);
+            attr[MarkKey] = help.getDocIalContents(bookID);
             attr["custom-sy-readonly"] = "true";
             contentID = await siyuan.createDocWithMdIfNotExists(boxID, `${hpath}/${bookName}-contents`, c.join("\n"), attr);
         }
@@ -657,9 +658,9 @@ async function copyAndInsertBlock(id: string, lute: Lute, noteID: string, mark?:
     utils.cleanDiv(tempDiv, true);
     let md = lute.BlockDOM2Md(tempDiv.outerHTML);
     if (mark) {
-        md = md + "\n" + `{: ${constants.RefIDKey}="${id}" ${mark}="1" }`;
+        md = md + "\n" + `{: ${RefIDKey}="${id}" ${mark}="1" }`;
     } else {
-        md = md + "\n" + `{: ${constants.RefIDKey}="${id}" }`;
+        md = md + "\n" + `{: ${RefIDKey}="${id}" }`;
     }
     await siyuan.insertBlockAsChildOf(md, noteID);
 }
@@ -673,13 +674,13 @@ async function cleanNote(noteID: string) {
     for (const row of await Promise.all(blocks.map(i => siyuan.sqlOne(`select id, ial, markdown from blocks where id="${i.id}"`)))) {
         const ial: string = row?.ial ?? "";
         const markdown: string = row?.markdown ?? "";
-        if (ial.includes(constants.TEMP_CONTENT)) {
+        if (ial.includes(TEMP_CONTENT)) {
             await siyuan.safeDeleteBlock(row.id);
-        } else if (ial.includes(constants.RefIDKey)) {
+        } else if (ial.includes(RefIDKey)) {
             if (!markdown) continue;
             if (!markdown.includes("*")) continue;
             for (const attr of ial.split(" ")) {
-                if (attr.includes(constants.RefIDKey)) {
+                if (attr.includes(RefIDKey)) {
                     const originalID = attr.split("\"")[1]; // custom-progref="20231119150726-2xxypwa"
                     const origin = await siyuan.sqlOne(`select markdown from blocks where id="${originalID}"`);
                     const oriMarkdown = origin?.markdown ?? "";
@@ -701,7 +702,7 @@ async function cleanNote(noteID: string) {
 
 async function findDoc(bookID: string, point: number) {
     const row = await siyuan.sqlOne(`select id, path, box from blocks where type='d' and 
-        ial like '%${constants.MarkKey}="${help.getDocIalMark(bookID, point)}"%'`);
+        ial like '%${MarkKey}="${help.getDocIalMark(bookID, point)}"%'`);
     if (row?.id && row?.path) {
         const [dirStr, file] = utils.dir(row["path"]);
         const dir = await siyuan.readDir(`/data/${row["box"]}${dirStr}`);
@@ -719,12 +720,12 @@ async function findDoc(bookID: string, point: number) {
 async function isPiece(id: string) {
     const row = await siyuan.sqlOne(`select ial from blocks where id="${id}"`);
     const ial: string = row?.ial ?? "";
-    return ial.includes(constants.TEMP_CONTENT);
+    return ial.includes(TEMP_CONTENT);
 }
 
 async function findContents(bookID: string) {
     const row = await siyuan.sqlOne(`select id, path, box from blocks where type='d' and 
-        ial like '%${constants.MarkKey}="${help.getDocIalContents(bookID)}"%'`);
+        ial like '%${MarkKey}="${help.getDocIalContents(bookID)}"%'`);
     if (row?.id && row?.path) {
         const [dirStr, file] = utils.dir(row["path"]);
         const dir = await siyuan.readDir(`/data/${row["box"]}${dirStr}`);
@@ -755,7 +756,7 @@ async function createNote(boxID: string, bookID: string, piece: string[], point:
         dir = dir + `/${bookName}-pieces/` + content;
         const docID = await siyuan.createDocWithMd(boxID, dir, "");
         const attr = {};
-        attr[constants.MarkKey] = help.getDocIalMark(bookID, point);
+        attr[MarkKey] = help.getDocIalMark(bookID, point);
         await siyuan.setBlockAttrs(docID, attr);
         return docID;
     }

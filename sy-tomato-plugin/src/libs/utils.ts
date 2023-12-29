@@ -17,9 +17,14 @@ export function cleanDiv(div: HTMLDivElement, setRef: boolean): [string, HTMLEle
         }
         const span = div.querySelector("[contenteditable=\"true\"]")?.appendChild(document.createElement("span"));
         if (span) {
+            const originID = div.getAttribute(gconst.RefIDKey) ?? "";
             span.setAttribute(gconst.DATA_TYPE, gconst.BlockNodeEnum.BLOCK_REF);
             span.setAttribute(gconst.DATA_SUBTYPE, "s");
-            span.setAttribute(gconst.DATA_ID, id);
+            if (originID) {
+                span.setAttribute(gconst.DATA_ID, originID);
+            } else {
+                span.setAttribute(gconst.DATA_ID, id);
+            }
             span.innerText = "*";
             return [id, div, true];
         }
