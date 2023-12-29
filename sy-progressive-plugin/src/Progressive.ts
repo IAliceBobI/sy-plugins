@@ -191,13 +191,7 @@ class Progressive {
         const titleCheckBox = dialog.element.querySelector("#" + titleSplitID) as HTMLInputElement;
         titleCheckBox.title = "1~6级标题，都被切分。";
         titleCheckBox.checked = true;
-        titleCheckBox.addEventListener("change", () => {
-            if (titleCheckBox.checked) {
-                titleCheckBox.checked = true;
-            } else {
-                titleCheckBox.checked = false;
-            }
-        });
+        titleCheckBox.disabled = true;
 
         const autoCardBox = dialog.element.querySelector("#" + autoCardID) as HTMLInputElement;
         autoCardBox.checked = false;
@@ -236,13 +230,10 @@ class Progressive {
             if (splitLen > 0) {
                 contentBlocks = await this.helper.getDocWordCount(contentBlocks);
             }
-            let groups: help.WordCountType[][];
-            if (titleCheckBox.checked) {
-                await siyuan.pushMsg(this.plugin.i18n.splitByHeadings);
-                groups = new help.HeadingGroup(contentBlocks).split();
-            } else {
-                groups = [contentBlocks];
-            }
+
+            await siyuan.pushMsg(this.plugin.i18n.splitByHeadings);
+            let groups = new help.HeadingGroup(contentBlocks).split();
+
             if (blockNumber > 0) {
                 const tmp: help.WordCountType[][] = [];
                 for (const group of groups) {
