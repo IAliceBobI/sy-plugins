@@ -27,6 +27,22 @@ export function cleanDiv(div: HTMLDivElement, setRef: boolean): [string, HTMLEle
     return [id, div, false];
 }
 
+export function tryAddRef2Div(div: HTMLDivElement, id: string): HTMLDivElement {
+    for (const e of div.querySelectorAll(`[${gconst.DATA_TYPE}~="${gconst.BLOCK_REF}"]`)) {
+        if (e.textContent.trim() == "*") {
+            return div;
+        }
+    }
+    const span = div.querySelector("[contenteditable=\"true\"]")?.appendChild(document.createElement("span"));
+    if (span) {
+        span.setAttribute(gconst.DATA_TYPE, gconst.BlockNodeEnum.BLOCK_REF);
+        span.setAttribute(gconst.DATA_SUBTYPE, "s");
+        span.setAttribute(gconst.DATA_ID, id);
+        span.innerText = "*";
+    }
+    return div;
+}
+
 export function getID(e: Element) {
     const tn = e?.tagName?.toLocaleLowerCase() ?? "";
     if (!tn) return "";
@@ -275,7 +291,7 @@ export const siyuan = {
     async createDailyNote(notebook: string): Promise<{ id: string }> {
         return siyuan.call("/api/filetree/createDailyNote", { notebook });
     },
-    async checkBlockExist(id: string):Promise<boolean> {
+    async checkBlockExist(id: string): Promise<boolean> {
         return siyuan.call("/api/block/checkBlockExist", { id });
     },
     async getBlockDOM(id: string): Promise<{ dom: string, id: string }> {

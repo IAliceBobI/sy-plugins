@@ -6,7 +6,6 @@ import { HtmlCBType } from "./helper";
 import * as utils from "../../sy-tomato-plugin/src/libs/utils";
 import * as help from "./helper";
 import * as constants from "./constants";
-import { zipAnyArrays } from "../../sy-tomato-plugin/src/libs/functional";
 
 class Progressive {
     private static readonly GLOBAL_THIS: Record<string, any> = globalThis;
@@ -15,10 +14,12 @@ class Progressive {
     private helper: help.Helper;
     private openedTabs: ITab[];
     settings: SettingCfgType;
+    private lute: Lute;
 
     async onload(plugin: Plugin, settings: SettingCfgType) {
         Progressive.GLOBAL_THIS["progressive_zZmqus5PtYRi"] = { progressive: this, utils, siyuan, timeUtil, events };
         this.plugin = plugin;
+        this.lute = utils.NewLute();
         this.settings = settings;
         this.storage = new help.Storage(plugin);
         this.helper = new help.Helper(plugin);
@@ -109,9 +110,13 @@ class Progressive {
             and type='p' and content IS NOT NULL AND content != ''
             and ial not like "%${constants.RefIDKey}%"
         `);
-        rows = zipAnyArrays(await Promise.all(rows.map(i => siyuan.checkBlockExist(i.id))), rows).filter(i=>i[0])
-        for (const row of rows) {
 
+        // rows = zip2ways(
+        //     await Promise.all(rows.map(i => siyuan.checkBlockExist(i.id))),
+        //     rows,
+        // ).filter(i => i[0]).map(i => i[1]);
+        for (const row of rows.filter(i => i.content.trim().length > 0)) {
+            await copyAndInsertBlock(row.id, this.lute)
             console.log(row)
         }
     }
@@ -185,7 +190,7 @@ class Progressive {
             siyuan.pushMsg(this.plugin.i18n.maybeBookRemoved.replace("{bookID}", bookID));
             return;
         }
-        if (await this.isPiece(bookID)) {
+        if (await isPiece(bookID)) {
             siyuan.pushMsg(this.plugin.i18n.youFoundAPiece);
             return;
         }
@@ -305,7 +310,7 @@ class Progressive {
         if (!blockID) {
             blockID = events.lastBlockID;
         }
-        if (await this.isPiece(blockID)) {
+        if (await isPiece(blockID)) {
             await siyuan.pushMsg(this.plugin.i18n.opsInOriDoc);
             return;
         }
@@ -344,35 +349,6 @@ class Progressive {
         });
     }
 
-    private async isPiece(id: string) {
-        const row = await siyuan.sqlOne(`select ial from blocks where id="${id}"`);
-        const ial: string = row?.ial ?? "";
-        return ial.includes(constants.TEMP_CONTENT);
-    }
-
-    private async createNote(boxID: string, bookID: string, piece: string[], point: number) {
-        let content: string;
-        for (const blockID of piece) {
-            content = (await siyuan.getBlockMarkdownAndContent(blockID))?.content ?? "";
-            content = content.slice(0, 15).replace(/[　\/ ​]+/g, "").trim();
-            if (content) break;
-        }
-        if (!content) content = `[${point}]`;
-        else content = `[${point}]` + content;
-        const row = await siyuan.sqlOne(`select hpath,content from blocks where type='d' and id='${bookID}'`);
-        let dir = row?.hpath ?? "";
-        const bookName = row?.content ?? "";
-        if (dir) {
-            dir = dir + `/${bookName}-pieces/` + content;
-            const docID = await siyuan.createDocWithMd(boxID, dir, "");
-            const attr = {};
-            attr[constants.MarkKey] = help.getDocIalMark(bookID, point);
-            await siyuan.setBlockAttrs(docID, attr);
-            return docID;
-        }
-        return "";
-    }
-
     private async openContentsLock(bookID: string) {
         navigator.locks.request(constants.BuildContentsLock, { ifAvailable: true }, async (lock) => {
             if (lock) {
@@ -384,7 +360,7 @@ class Progressive {
     }
 
     private async openContents(bookID: string) {
-        let contentID = await this.findContents(bookID);
+        let contentID = await findContents(bookID);
         if (!contentID) {
             siyuan.pushMsg("首次，构建目录，请稍后片刻……");
             const row = await siyuan.sqlOne(`select box,hpath,content from blocks where id='${bookID}' and type='d'`);
@@ -418,40 +394,6 @@ class Progressive {
         if (contentID) await openTab({ app: this.plugin.app, doc: { id: contentID } });
     }
 
-    private async findContents(bookID: string) {
-        const row = await siyuan.sqlOne(`select id, path, box from blocks where type='d' and 
-            ial like '%${constants.MarkKey}="${help.getDocIalContents(bookID)}"%'`);
-        if (row?.id && row?.path) {
-            const [dirStr, file] = utils.dir(row["path"]);
-            const dir = await siyuan.readDir(`/data/${row["box"]}${dirStr}`);
-            if (dir) {
-                for (const f of dir) {
-                    if (f.name === file) {
-                        return row["id"];
-                    }
-                }
-            }
-        }
-        return "";
-    }
-
-    private async findDoc(bookID: string, point: number) {
-        const row = await siyuan.sqlOne(`select id, path, box from blocks where type='d' and 
-            ial like '%${constants.MarkKey}="${help.getDocIalMark(bookID, point)}"%'`);
-        if (row?.id && row?.path) {
-            const [dirStr, file] = utils.dir(row["path"]);
-            const dir = await siyuan.readDir(`/data/${row["box"]}${dirStr}`);
-            if (dir) {
-                for (const f of dir) {
-                    if (f.name === file) {
-                        return row["id"];
-                    }
-                }
-            }
-        }
-        return "";
-    }
-
     private async startToLearn(bookID?: string) {
         let noteID = "";
         const bookInfo = await this.getBook2Learn(bookID);
@@ -472,12 +414,12 @@ class Progressive {
         }
         const piecePre = bookIndex[point - 1] ?? [];
         const piece = bookIndex[point];
-        noteID = await this.findDoc(bookInfo.bookID, point);
+        noteID = await findDoc(bookInfo.bookID, point);
         if (noteID) {
             this.addAndClose(await openTab({ app: this.plugin.app, doc: { id: noteID } }));
             return;
         }
-        noteID = await this.createNote(bookInfo.boxID, bookInfo.bookID, piece, point);
+        noteID = await createNote(bookInfo.boxID, bookInfo.bookID, piece, point);
         if (noteID) {
             await this.addReadingBtns(bookID, noteID, point);
             await siyuan.insertBlockAsChildOf(help.tempContent("---"), noteID);
@@ -559,7 +501,7 @@ class Progressive {
                 }
                 break;
             case HtmlCBType.cleanUnchanged:
-                await this.cleanNote(noteID);
+                await cleanNote(noteID);
                 await this.addReadingBtns(bookID, noteID, point);
                 break;
             case HtmlCBType.openFlashcardTab:
@@ -581,68 +523,19 @@ class Progressive {
         });
     }
 
-    private rmBadThings(s: string) {
-        return s.replace(/[​]+/g, "").trim();
-    }
-
-    private async cleanNote(noteID: string) {
-        const blocks = await siyuan.getChildBlocks(noteID) ?? [];
-        for (const child of blocks) {
-            const row = await siyuan.sqlOne(`select ial, markdown from blocks where id="${child.id}"`);
-            const ial: string = row?.ial ?? "";
-            const markdown: string = row?.markdown ?? "";
-            if (ial.includes(constants.TEMP_CONTENT)) {
-                await siyuan.safeDeleteBlock(child.id);
-            } else if (ial.includes(constants.RefIDKey)) {
-                for (const attr of ial.split(" ")) {
-                    if (attr.includes(constants.RefIDKey)) {
-                        const originalID = attr.split("\"")[1]; // custom-progref="20231119150726-2xxypwa"
-                        const origin = await siyuan.sqlOne(`select markdown from blocks where id="${originalID}"`);
-                        const oriMarkdown = origin?.markdown ?? "";
-                        const markdownWithoutStar = markdown.replace(`((${originalID} "*"))`, "");
-                        if (this.rmBadThings(oriMarkdown) == this.rmBadThings(markdownWithoutStar)) {
-                            await siyuan.safeDeleteBlock(child.id); // delete the same content
-                        } else {
-                            const attrs: { [key: string]: string } = {};
-                            attrs[constants.RefIDKey] = ""; // keep the content
-                            await siyuan.setBlockAttrs(child.id, attrs);
-                        }
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
     private addReadingBtns(bookID: string, noteID: string, point: number) {
         return siyuan.insertBlockAsChildOf(help.tempContent(this.helper.getReadingBtns(bookID, noteID, point)), noteID);
     }
 
     private async fullfilContent(bookID: string, piecePre: string[], piece: string[], noteID: string) {
-        const lute = utils.NewLute();
         this.storage.updateBookInfoTime(bookID);
         for (const id of piece.slice().reverse()) {
-            await this.copyAndInsertBlock(id, lute, noteID);
+            await copyAndInsertBlock(id, this.lute, noteID);
         }
         for (const id of piecePre.slice().reverse()) {
-            await this.copyAndInsertBlock(id, lute, noteID, "custom-prog-piece-previous");
+            await copyAndInsertBlock(id, this.lute, noteID, "custom-prog-piece-previous");
             break;
         }
-    }
-
-    private async copyAndInsertBlock(id: string, lute: Lute, noteID: string, mark?: string) {
-        const { dom } = await siyuan.getBlockDOM(id);
-        let tempDiv = document.createElement("div");
-        tempDiv.innerHTML = dom;
-        tempDiv = tempDiv.firstElementChild as HTMLDivElement;
-        utils.cleanDiv(tempDiv, true);
-        let md = lute.BlockDOM2Md(tempDiv.outerHTML);
-        if (mark) {
-            md = md + "\n" + `{: ${constants.RefIDKey}="${id}" ${mark}="1" }`;
-        } else {
-            md = md + "\n" + `{: ${constants.RefIDKey}="${id}" }`;
-        }
-        await siyuan.insertBlockAsChildOf(md, noteID);
     }
 
     private async getBook2Learn(bookID?: string): Promise<help.BookInfo> {
@@ -742,3 +635,113 @@ function splitByBlockCount(groups: help.WordCountType[][], blockNumber: number) 
     return tmp;
 }
 
+async function copyAndInsertBlock(id: string, lute: Lute, noteID: string, mark?: string) {
+    const { dom } = await siyuan.getBlockDOM(id);
+    let tempDiv = document.createElement("div");
+    tempDiv.innerHTML = dom;
+    tempDiv = tempDiv.firstElementChild as HTMLDivElement;
+    utils.cleanDiv(tempDiv, true);
+    let md = lute.BlockDOM2Md(tempDiv.outerHTML);
+    if (mark) {
+        md = md + "\n" + `{: ${constants.RefIDKey}="${id}" ${mark}="1" }`;
+    } else {
+        md = md + "\n" + `{: ${constants.RefIDKey}="${id}" }`;
+    }
+    await siyuan.insertBlockAsChildOf(md, noteID);
+}
+
+function rmBadThings(s: string) {
+    return s.replace(/[​]+/g, "").trim();
+}
+
+async function cleanNote(noteID: string) {
+    const blocks = await siyuan.getChildBlocks(noteID) ?? [];
+    for (const child of blocks) {
+        const row = await siyuan.sqlOne(`select ial, markdown from blocks where id="${child.id}"`);
+        const ial: string = row?.ial ?? "";
+        const markdown: string = row?.markdown ?? "";
+        if (ial.includes(constants.TEMP_CONTENT)) {
+            await siyuan.safeDeleteBlock(child.id);
+        } else if (ial.includes(constants.RefIDKey)) {
+            for (const attr of ial.split(" ")) {
+                if (attr.includes(constants.RefIDKey)) {
+                    const originalID = attr.split("\"")[1]; // custom-progref="20231119150726-2xxypwa"
+                    const origin = await siyuan.sqlOne(`select markdown from blocks where id="${originalID}"`);
+                    const oriMarkdown = origin?.markdown ?? "";
+                    const markdownWithoutStar = markdown.replace(`((${originalID} "*"))`, "");
+                    if (rmBadThings(oriMarkdown) == rmBadThings(markdownWithoutStar)) {
+                        await siyuan.safeDeleteBlock(child.id); // delete the same content
+                    } else {
+                        const attrs: { [key: string]: string } = {};
+                        attrs[constants.RefIDKey] = ""; // keep the content
+                        await siyuan.setBlockAttrs(child.id, attrs);
+                    }
+                    break;
+                }
+            }
+        }
+    }
+}
+
+async function findDoc(bookID: string, point: number) {
+    const row = await siyuan.sqlOne(`select id, path, box from blocks where type='d' and 
+        ial like '%${constants.MarkKey}="${help.getDocIalMark(bookID, point)}"%'`);
+    if (row?.id && row?.path) {
+        const [dirStr, file] = utils.dir(row["path"]);
+        const dir = await siyuan.readDir(`/data/${row["box"]}${dirStr}`);
+        if (dir) {
+            for (const f of dir) {
+                if (f.name === file) {
+                    return row["id"];
+                }
+            }
+        }
+    }
+    return "";
+}
+
+async function isPiece(id: string) {
+    const row = await siyuan.sqlOne(`select ial from blocks where id="${id}"`);
+    const ial: string = row?.ial ?? "";
+    return ial.includes(constants.TEMP_CONTENT);
+}
+
+async function findContents(bookID: string) {
+    const row = await siyuan.sqlOne(`select id, path, box from blocks where type='d' and 
+        ial like '%${constants.MarkKey}="${help.getDocIalContents(bookID)}"%'`);
+    if (row?.id && row?.path) {
+        const [dirStr, file] = utils.dir(row["path"]);
+        const dir = await siyuan.readDir(`/data/${row["box"]}${dirStr}`);
+        if (dir) {
+            for (const f of dir) {
+                if (f.name === file) {
+                    return row["id"];
+                }
+            }
+        }
+    }
+    return "";
+}
+
+async function createNote(boxID: string, bookID: string, piece: string[], point: number) {
+    let content: string;
+    for (const blockID of piece) {
+        content = (await siyuan.getBlockMarkdownAndContent(blockID))?.content ?? "";
+        content = content.slice(0, 15).replace(/[　\/ ​]+/g, "").trim();
+        if (content) break;
+    }
+    if (!content) content = `[${point}]`;
+    else content = `[${point}]` + content;
+    const row = await siyuan.sqlOne(`select hpath,content from blocks where type='d' and id='${bookID}'`);
+    let dir = row?.hpath ?? "";
+    const bookName = row?.content ?? "";
+    if (dir) {
+        dir = dir + `/${bookName}-pieces/` + content;
+        const docID = await siyuan.createDocWithMd(boxID, dir, "");
+        const attr = {};
+        attr[constants.MarkKey] = help.getDocIalMark(bookID, point);
+        await siyuan.setBlockAttrs(docID, attr);
+        return docID;
+    }
+    return "";
+}
