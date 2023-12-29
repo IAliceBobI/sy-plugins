@@ -84,7 +84,26 @@ class Progressive {
         });
     }
 
-    private async tryAddStars(noteID) {
+    private async tryAddStars(noteID: string) {
+        const blocks = await siyuan.getChildBlocks(noteID);
+        const findSibling = (id: string) => {
+            let preID = "";
+            if (id) {
+                for (let i = 0; i < blocks.length; i++) {
+                    const b = blocks[i];
+                    if (id == b.id && preID) { // id not at first line
+                        break;
+                    }
+                    if (id == preID) { // id at first line
+                        preID = b.id;
+                        break;
+                    }
+                    preID = b.id;
+                }
+            }
+            return preID;
+        }
+        const rows = await siyuan.sql(`select * from blocks where root_id="${noteID}" and type='p'`);
 
     }
 
