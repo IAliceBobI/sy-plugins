@@ -670,13 +670,14 @@ function rmBadThings(s: string) {
 
 async function cleanNote(noteID: string) {
     const blocks = await siyuan.getChildBlocks(noteID) ?? [];
-    for (const child of blocks) {
-        const row = await siyuan.sqlOne(`select ial, markdown from blocks where id="${child.id}"`);
+    for (const row of await Promise.all(blocks.map(i => siyuan.sqlOne(`select id, ial, markdown from blocks where id="${i.id}"`)))) {
         const ial: string = row?.ial ?? "";
         const markdown: string = row?.markdown ?? "";
         if (ial.includes(constants.TEMP_CONTENT)) {
-            await siyuan.safeDeleteBlock(child.id);
+            await siyuan.safeDeleteBlock(row.id);
         } else if (ial.includes(constants.RefIDKey)) {
+            if (!markdown) continue;
+            if (!markdown.includes("*")) continue;
             for (const attr of ial.split(" ")) {
                 if (attr.includes(constants.RefIDKey)) {
                     const originalID = attr.split("\"")[1]; // custom-progref="20231119150726-2xxypwa"
@@ -684,12 +685,13 @@ async function cleanNote(noteID: string) {
                     const oriMarkdown = origin?.markdown ?? "";
                     const markdownWithoutStar = markdown.replace(`((${originalID} "*"))`, "");
                     if (rmBadThings(oriMarkdown) == rmBadThings(markdownWithoutStar)) {
-                        await siyuan.safeDeleteBlock(child.id); // delete the same content
-                    } else {
-                        const attrs: { [key: string]: string } = {};
-                        attrs[constants.RefIDKey] = ""; // keep the content
-                        await siyuan.setBlockAttrs(child.id, attrs);
+                        await siyuan.safeDeleteBlock(row.id); // delete the same content
                     }
+                    // else {
+                    //     const attrs: { [key: string]: string } = {};
+                    //     attrs[constants.RefIDKey] = ""; // keep the content
+                    //     await siyuan.setBlockAttrs(child.id, attrs);
+                    // }
                     break;
                 }
             }
