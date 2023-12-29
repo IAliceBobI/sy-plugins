@@ -67,6 +67,7 @@ class Progressive {
         events.addListener("ProgressiveBox", (eventType, detail) => {
             if (eventType == EventType.loaded_protyle_static) {
                 const protyle: IProtyle = detail.protyle;
+                if (!protyle) return;
                 const div = protyle.element.querySelector(`[${constants.MarkKey}]`) as HTMLDivElement;
                 const attr = div?.getAttribute(constants.MarkKey) ?? "";
                 const pieceLen = constants.TEMP_CONTENT.length + 1 + "20231229160401-0lfc8qj".length + 1 + 1;
