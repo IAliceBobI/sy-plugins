@@ -37,26 +37,28 @@ class PieceMovingBox {
                     label: "移动到上一分片内",
                     icon: "iconMove",
                     click: () => {
-                        // const blockID = detail?.element?.getAttribute("data-node-id") ?? "";
-                        // const blank = detail?.range?.cloneContents()?.textContent ?? "";
-                        // if (blockID) {
-                        //     this.blankSpaceCard(blockID, blank, detail?.range, detail?.protyle, cardType);
-                        // }
+                        const blockID = detail?.element?.getAttribute("data-node-id") ?? "";
+                        if (blockID) {
+                            this.moveBlock(blockID, -1);
+                        }
                     },
                 });
                 menu.addItem({
                     label: "移动到下一分片内",
                     icon: "iconMove",
                     click: () => {
-                        // const blockID = detail?.element?.getAttribute("data-node-id") ?? "";
-                        // const blank = detail?.range?.cloneContents()?.textContent ?? "";
-                        // if (blockID) {
-                        //     this.blankSpaceCard(blockID, blank, detail?.range, detail?.protyle, cardType, getDailyPath());
-                        // }
+                        const blockID = detail?.element?.getAttribute("data-node-id") ?? "";
+                        if (blockID) {
+                            this.moveBlock(blockID, 1);
+                        }
                     },
                 });
             }
         });
+    }
+
+    private async moveBlock(blockID: string, delta: number) {
+
     }
 
     private async move(protyle: IProtyle, delta: number) {
