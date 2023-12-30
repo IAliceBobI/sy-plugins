@@ -349,7 +349,7 @@ class Progressive {
         if (!blockID) {
             blockID = events.lastBlockID;
         }
-        if (await isPiece(blockID)) {
+        if (await help.isPiece(blockID)) {
             await siyuan.pushMsg(this.plugin.i18n.opsInOriDoc);
             return;
         }
@@ -736,12 +736,6 @@ async function findDoc(bookID: string, point: number) {
         }
     }
     return "";
-}
-
-async function isPiece(id: string) {
-    const row = await siyuan.sqlOne(`select ial from blocks where id="${id}"`);
-    const ial: string = row?.ial ?? "";
-    return ial.includes(TEMP_CONTENT);
 }
 
 async function findContents(bookID: string) {

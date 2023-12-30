@@ -171,6 +171,12 @@ export function getDocIalCards(bookID: string) {
     return `cards#${TEMP_CONTENT}#${bookID}`;
 }
 
+export async function isPiece(id: string) {
+    const row = await siyuan.sqlOne(`select ial from blocks where id="${id}"`);
+    const ial: string = row?.ial ?? "";
+    return ial.includes(TEMP_CONTENT);
+}
+
 export class Helper {
     private plugin: Plugin;
 
