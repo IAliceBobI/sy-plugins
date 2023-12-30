@@ -6,7 +6,7 @@ import { HtmlCBType } from "./helper";
 import * as utils from "../../sy-tomato-plugin/src/libs/utils";
 import * as help from "./helper";
 import * as constants from "./constants";
-import { MarkKey, RefIDKey, TEMP_CONTENT } from "../../sy-tomato-plugin/src/libs/gconst";
+import { MarkKey, RefIDKey } from "../../sy-tomato-plugin/src/libs/gconst";
 
 class Progressive {
     private static readonly GLOBAL_THIS: Record<string, any> = globalThis;
@@ -68,12 +68,7 @@ class Progressive {
         events.addListener("ProgressiveBox", (eventType, detail) => {
             if (eventType == EventType.loaded_protyle_static) {
                 const protyle: IProtyle = detail.protyle;
-                const div = protyle?.element?.querySelector(`[${MarkKey}]`) as HTMLDivElement;
-                const attr = div?.getAttribute(MarkKey) ?? "";
-                if (!attr) return;
-                const pieceLen = TEMP_CONTENT.length + 1 + "20231229160401-0lfc8qj".length + 1 + 1;
-                if (attr.startsWith(TEMP_CONTENT + "#") && attr.length >= pieceLen) {
-                    // we found a piece.
+                if (help.isProtylePiece(protyle)) {
                     const noteID = protyle.block.rootID;
                     navigator.locks.request(constants.TryAddStarsLock, { ifAvailable: true }, async (lock) => {
                         if (lock) {

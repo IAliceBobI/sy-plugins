@@ -1,4 +1,5 @@
 import { IProtyle, Plugin } from "siyuan";
+import { isProtylePiece } from "./helper";
 
 class PieceMovingBox {
     private plugin: Plugin;
@@ -7,20 +8,22 @@ class PieceMovingBox {
     blockIconEvent(detail: any) {
         if (!this.plugin) return;
         const protyle: IProtyle = detail.protyle;
-        detail.menu.addItem({
-            iconHTML: "",
-            label: "移动到上一分片内",
-            click: () => {
-                this.move(detail.protyle, -1);
-            }
-        });
-        detail.menu.addItem({
-            iconHTML: "",
-            label: "移动到下一分片内",
-            click: () => {
-                this.move(detail.protyle, 1);
-            }
-        });
+        if (isProtylePiece(protyle)) {
+            detail.menu.addItem({
+                iconHTML: "",
+                label: "移动到上一分片内",
+                click: () => {
+                    this.move(protyle, -1);
+                }
+            });
+            detail.menu.addItem({
+                iconHTML: "",
+                label: "移动到下一分片内",
+                click: () => {
+                    this.move(protyle, 1);
+                }
+            });
+        }
     }
 
     async onload(plugin: Plugin, settings: SettingCfgType) {

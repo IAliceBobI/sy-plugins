@@ -2,7 +2,7 @@ import { IDLen, MarkKey, RefIDKey, TEMP_CONTENT } from "../../sy-tomato-plugin/s
 import { siyuan, styleColor } from "../../sy-tomato-plugin/src/libs/utils";
 import * as utils from "../../sy-tomato-plugin/src/libs/utils";
 import * as constants from "./constants";
-import { Lute, Plugin } from "siyuan";
+import { IProtyle, Lute, Plugin } from "siyuan";
 
 export type WordCountType = { id: string; count: number; type: string; };
 export type BookInfo = {
@@ -728,65 +728,9 @@ export function appendChild(parent: HTMLElement, type: string, textContent: stri
     return elem;
 }
 
-//-----------------------------------------------------------------------------------------
-
-export async function AddRef(noteID: string, startID: string, endID: string) {
-    // ((${startID} "[..]"))
-    // \{\{select \* from blocks where id\='${startID}'\}\}
-    await siyuan.insertBlockAsChildOf(tempContent(`{{{col
-((${startID} "[..]"))
-
-...
-
-((${endID} "[..]"))
-}}}`), noteID);
-}
-
-export function setBtnsSetStyleLoop() {
-    const interval = setInterval(setBtnsSetStyle, 1000);
-    setTimeout(() => {
-        clearInterval(interval);
-    }, 1000 * 30);
-}
-
-function setBtnsSetStyle() {
-    for (const protyle of document.querySelectorAll("protyle-html")) {
-        const button = protyle?.shadowRoot?.querySelector("button");
-        if (button) {
-            const id = button.id ?? "";
-            if (id.length === IDLen + 3 && id.startsWith("btnID")) {
-                // Add the styles to the button
-                button.style.display = "inline-block";
-                button.style.padding = "10px 20px";
-                button.style.backgroundColor = "#4CAF50";
-                button.style.color = "white";
-                button.style.textAlign = "center";
-                button.style.textDecoration = "none";
-                button.style.fontSize = "16px";
-                button.style.border = "none";
-                button.style.borderRadius = "4px";
-                button.style.cursor = "pointer";
-
-                // Add hover styles
-                button.addEventListener("mouseover", function () {
-                    button.style.backgroundColor = "#45a049";
-                });
-
-                // Add active styles
-                button.addEventListener("mousedown", function () {
-                    button.style.backgroundColor = "#3e8e41";
-                });
-
-                // Add the "large" class styles
-                button.classList.add("large");
-                button.style.padding = "12px 24px";
-                button.style.fontSize = "24px";
-
-                // Add the "small" class styles
-                button.classList.add("small");
-                button.style.padding = "8px 16px";
-                button.style.fontSize = "14px";
-            }
-        }
-    }
+export function isProtylePiece(protyle: IProtyle) {
+    const div = protyle?.element?.querySelector(`[${MarkKey}]`) as HTMLDivElement;
+    const attr = div?.getAttribute(MarkKey) ?? "";
+    const pieceLen = TEMP_CONTENT.length + 1 + "20231229160401-0lfc8qj".length + 1 + 1;
+    return attr.startsWith(TEMP_CONTENT + "#") && attr.length >= pieceLen;
 }
