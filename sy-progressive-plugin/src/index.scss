@@ -3,8 +3,9 @@
   transform-origin: 0 0;
 }
 
-.protyle-wysiwyg div[custom-progref] ::first-letter {
+.protyle-wysiwyg div[custom-progref] ::after {
   content: "*";
+  font-size: xx-small;
   color: var(--b3-font-color12);
 }
 
