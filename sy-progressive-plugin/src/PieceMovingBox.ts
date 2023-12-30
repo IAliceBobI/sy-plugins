@@ -6,7 +6,7 @@ class PieceMovingBox {
 
     blockIconEvent(detail: any) {
         if (!this.plugin) return;
-
+        const protyle: IProtyle = detail.protyle;
         detail.menu.addItem({
             iconHTML: "",
             label: "移动到上一分片内",

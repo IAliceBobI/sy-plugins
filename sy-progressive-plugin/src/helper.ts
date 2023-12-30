@@ -1,8 +1,8 @@
-import { IDLen, MarkKey, TEMP_CONTENT } from "../../sy-tomato-plugin/src/libs/gconst";
+import { IDLen, MarkKey, RefIDKey, TEMP_CONTENT } from "../../sy-tomato-plugin/src/libs/gconst";
 import { siyuan, styleColor } from "../../sy-tomato-plugin/src/libs/utils";
 import * as utils from "../../sy-tomato-plugin/src/libs/utils";
 import * as constants from "./constants";
-import { Plugin } from "siyuan";
+import { Lute, Plugin } from "siyuan";
 
 export type WordCountType = { id: string; count: number; type: string; };
 export type BookInfo = {
@@ -175,6 +175,129 @@ export async function isPiece(id: string) {
     const row = await siyuan.sqlOne(`select ial from blocks where id="${id}"`);
     const ial: string = row?.ial ?? "";
     return ial.includes(TEMP_CONTENT);
+}
+
+
+export function splitByBlockCount(groups: WordCountType[][], blockNumber: number) {
+    if (blockNumber <= 0) return groups;
+    const tmp: WordCountType[][] = [];
+    for (const group of groups) {
+        const headings: WordCountType[] = [];
+        const rest: WordCountType[] = [];
+        for (const i of group) {
+            if (i.type == "h" && rest.length == 0) headings.push(i);
+            else rest.push(i);
+        }
+        const newPieces = utils.chunks(rest, blockNumber);
+        if (newPieces.length > 0) newPieces[0].splice(0, 0, ...headings);
+        tmp.push(...newPieces);
+    }
+    return tmp;
+}
+
+export async function copyAndInsertBlock(id: string, lute: Lute, noteID: string, mark?: string) {
+    const tempDiv = await utils.getBlockDiv(id);
+    utils.cleanDiv(tempDiv, true);
+    let md = lute.BlockDOM2Md(tempDiv.outerHTML);
+    if (mark) {
+        md = md + "\n" + `{: ${RefIDKey}="${id}" ${mark}="1" }`;
+    } else {
+        md = md + "\n" + `{: ${RefIDKey}="${id}" }`;
+    }
+    await siyuan.insertBlockAsChildOf(md, noteID);
+}
+
+export function rmBadThings(s: string) {
+    return s.replace(/[​]+/g, "").trim();
+}
+
+export async function cleanNote(noteID: string) {
+    const blocks = await siyuan.getChildBlocks(noteID) ?? [];
+    for (const row of await Promise.all(blocks.map(i => siyuan.sqlOne(`select id, ial, markdown from blocks where id="${i.id}"`)))) {
+        const ial: string = row?.ial ?? "";
+        const markdown: string = row?.markdown ?? "";
+        if (ial.includes(TEMP_CONTENT)) {
+            await siyuan.safeDeleteBlock(row.id);
+        } else if (ial.includes(RefIDKey)) {
+            if (!markdown) continue;
+            if (!markdown.includes("*")) continue;
+            for (const attr of ial.split(" ")) {
+                if (attr.includes(RefIDKey)) {
+                    const originalID = attr.split("\"")[1]; // custom-progref="20231119150726-2xxypwa"
+                    const origin = await siyuan.sqlOne(`select markdown from blocks where id="${originalID}"`);
+                    const oriMarkdown = origin?.markdown ?? "";
+                    const markdownWithoutStar = markdown.replace(`((${originalID} "*"))`, "");
+                    if (rmBadThings(oriMarkdown) == rmBadThings(markdownWithoutStar)) {
+                        await siyuan.safeDeleteBlock(row.id); // delete the same content
+                    }
+                    // else {
+                    //     const attrs: { [key: string]: string } = {};
+                    //     attrs[constants.RefIDKey] = ""; // keep the content
+                    //     await siyuan.setBlockAttrs(child.id, attrs);
+                    // }
+                    break;
+                }
+            }
+        }
+    }
+}
+
+export async function findDoc(bookID: string, point: number) {
+    const row = await siyuan.sqlOne(`select id, path, box from blocks where type='d' and 
+        ial like '%${MarkKey}="${getDocIalMark(bookID, point)}"%'`);
+    if (row?.id && row?.path) {
+        const [dirStr, file] = utils.dir(row["path"]);
+        const dir = await siyuan.readDir(`/data/${row["box"]}${dirStr}`);
+        if (dir) {
+            for (const f of dir) {
+                if (f.name === file) {
+                    return row["id"];
+                }
+            }
+        }
+    }
+    return "";
+}
+
+export async function findContents(bookID: string) {
+    const row = await siyuan.sqlOne(`select id, path, box from blocks where type='d' and 
+        ial like '%${MarkKey}="${getDocIalContents(bookID)}"%'`);
+    if (row?.id && row?.path) {
+        const [dirStr, file] = utils.dir(row["path"]);
+        const dir = await siyuan.readDir(`/data/${row["box"]}${dirStr}`);
+        if (dir) {
+            for (const f of dir) {
+                if (f.name === file) {
+                    return row["id"];
+                }
+            }
+        }
+    }
+    return "";
+}
+
+export async function createNote(boxID: string, bookID: string, piece: string[], point: number) {
+    let content: string;
+    for (const blockID of piece) {
+        content = (await siyuan.getBlockMarkdownAndContent(blockID))?.content ?? "";
+        content = content.slice(0, 15).replace(/[　\/ ​]+/g, "").trim();
+        if (content) break;
+    }
+    if (!content) content = `[${point}]`;
+    else content = `[${point}]` + content;
+    const row = await siyuan.sqlOne(`select hpath,content from blocks where type='d' and id='${bookID}'`);
+    let dir = row?.hpath ?? "";
+    const bookName = row?.content ?? "";
+    if (dir) {
+        dir = dir + `/${bookName}-pieces/` + content;
+        const docID = await siyuan.createDocWithMd(boxID, dir, "");
+        const attr = {};
+        attr[MarkKey] = getDocIalMark(bookID, point);
+        attr["alias"] = bookName;
+        await siyuan.setBlockAttrs(docID, attr);
+        return docID;
+    }
+    return "";
 }
 
 export class Helper {
