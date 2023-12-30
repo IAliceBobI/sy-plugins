@@ -177,7 +177,7 @@ class Progressive {
     private addProgressiveReadingWithLock(bookID?: string) {
         navigator.locks.request(constants.AddProgressiveReadingLock, { ifAvailable: true }, async (lock) => {
             if (lock) {
-                await this.addProgressiveReading(bookID);
+                await this.addProgressiveReading(bookID, events.boxID);
                 await utils.sleep(constants.IndexTime2Wait);
             } else {
                 siyuan.pushMsg(this.plugin.i18n.slowDownALittleBit);
@@ -185,7 +185,7 @@ class Progressive {
         });
     }
 
-    private async addProgressiveReading(bookID?: string) {
+    private async addProgressiveReading(bookID: string = "", boxID: string = "") {
         if (!bookID) {
             bookID = events.docID;
         }
@@ -198,10 +198,10 @@ class Progressive {
             siyuan.pushMsg(this.plugin.i18n.maybeBookRemoved.replace("{bookID}", bookID));
             return;
         }
-        await this.addProgressiveReadingDialog(bookID, row["content"], await isPiece(bookID));
+        await this.addProgressiveReadingDialog(bookID, row["content"], boxID);
     }
 
-    private async addProgressiveReadingDialog(bookID: string, bookName: string, inPiece: boolean) {
+    private async addProgressiveReadingDialog(bookID: string, bookName: string, _boxID: string) {
         const autoCardID = utils.newID();
         const titleSplitID = utils.newID();
         const BlockNumID = utils.newID();
@@ -306,10 +306,20 @@ class Progressive {
             } else {
                 await this.storage.toggleAutoCard(bookID, "yes");
             }
-            if (inPiece) {
-                // move to xx-parts
-                
-            }
+            // if (await isPiece(bookID)) {
+            //     const row = await siyuan.sqlOne(`select ial,path,hpath from blocks where id="${bookID}"`);
+            //     const bookHPath = row?.hpath;
+            //     const bookPath = row?.path;
+            //     if (!bookHPath || !bookPath) return;
+            //     const dirID = await siyuan.createDocWithMdIfNotExists(boxID, `${bookHPath}/${bookName}-parts`, "");
+            //     const dirRow = await siyuan.sqlOne(`select ial,path,hpath from blocks where id="${dirID}"`);
+            //     const dirPath = dirRow?.path;
+            //     if (!dirPath) return;
+            //     // move to xx-parts
+            //     const { path } = await siyuan.duplicateDoc(bookID);
+            //     await siyuan.renameDoc(bookID, path, bookName);
+            //     await siyuan.moveDocs([bookPath], dirPath, boxID);
+            // }
             this.startToLearnWithLock(bookID);
         });
     }
