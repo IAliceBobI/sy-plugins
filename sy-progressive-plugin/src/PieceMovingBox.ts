@@ -30,29 +30,32 @@ class PieceMovingBox {
         this.plugin = plugin;
         this.settings = settings;
         this.plugin.eventBus.on("open-menu-content", async ({ detail }) => {
-            const menu = detail.menu;
-            menu.addItem({
-                label: "移动到上一分片内",
-                icon: "iconMove",
-                click: () => {
-                    // const blockID = detail?.element?.getAttribute("data-node-id") ?? "";
-                    // const blank = detail?.range?.cloneContents()?.textContent ?? "";
-                    // if (blockID) {
-                    //     this.blankSpaceCard(blockID, blank, detail?.range, detail?.protyle, cardType);
-                    // }
-                },
-            });
-            menu.addItem({
-                label: "移动到下一分片内",
-                icon: "iconMove",
-                click: () => {
-                    // const blockID = detail?.element?.getAttribute("data-node-id") ?? "";
-                    // const blank = detail?.range?.cloneContents()?.textContent ?? "";
-                    // if (blockID) {
-                    //     this.blankSpaceCard(blockID, blank, detail?.range, detail?.protyle, cardType, getDailyPath());
-                    // }
-                },
-            });
+            const protyle: IProtyle = detail.protyle;
+            if (isProtylePiece(protyle)) {
+                const menu = detail.menu;
+                menu.addItem({
+                    label: "移动到上一分片内",
+                    icon: "iconMove",
+                    click: () => {
+                        // const blockID = detail?.element?.getAttribute("data-node-id") ?? "";
+                        // const blank = detail?.range?.cloneContents()?.textContent ?? "";
+                        // if (blockID) {
+                        //     this.blankSpaceCard(blockID, blank, detail?.range, detail?.protyle, cardType);
+                        // }
+                    },
+                });
+                menu.addItem({
+                    label: "移动到下一分片内",
+                    icon: "iconMove",
+                    click: () => {
+                        // const blockID = detail?.element?.getAttribute("data-node-id") ?? "";
+                        // const blank = detail?.range?.cloneContents()?.textContent ?? "";
+                        // if (blockID) {
+                        //     this.blankSpaceCard(blockID, blank, detail?.range, detail?.protyle, cardType, getDailyPath());
+                        // }
+                    },
+                });
+            }
         });
     }
 
