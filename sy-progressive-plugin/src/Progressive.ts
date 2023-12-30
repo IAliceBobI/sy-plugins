@@ -747,6 +747,7 @@ async function createNote(boxID: string, bookID: string, piece: string[], point:
         const docID = await siyuan.createDocWithMd(boxID, dir, "");
         const attr = {};
         attr[MarkKey] = help.getDocIalMark(bookID, point);
+        attr['alias'] = bookName;
         await siyuan.setBlockAttrs(docID, attr);
         return docID;
     }
