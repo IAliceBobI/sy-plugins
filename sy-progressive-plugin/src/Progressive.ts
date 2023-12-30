@@ -198,14 +198,10 @@ class Progressive {
             siyuan.pushMsg(this.plugin.i18n.maybeBookRemoved.replace("{bookID}", bookID));
             return;
         }
-        if (await isPiece(bookID)) {
-            siyuan.pushMsg(this.plugin.i18n.youFoundAPiece);
-            return;
-        }
-        await this.addProgressiveReadingDialog(bookID, row["content"]);
+        await this.addProgressiveReadingDialog(bookID, row["content"], await isPiece(bookID));
     }
 
-    private async addProgressiveReadingDialog(bookID: string, bookName: string) {
+    private async addProgressiveReadingDialog(bookID: string, bookName: string, inPiece: boolean) {
         const autoCardID = utils.newID();
         const titleSplitID = utils.newID();
         const BlockNumID = utils.newID();
