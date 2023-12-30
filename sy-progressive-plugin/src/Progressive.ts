@@ -306,6 +306,10 @@ class Progressive {
             } else {
                 await this.storage.toggleAutoCard(bookID, "yes");
             }
+            if (inPiece) {
+                // move to xx-parts
+                
+            }
             this.startToLearnWithLock(bookID);
         });
     }

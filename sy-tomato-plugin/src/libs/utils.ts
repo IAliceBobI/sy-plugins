@@ -290,6 +290,15 @@ export const siyuan = {
     async removeDoc(notebookID: string, path_not_readable: string) {
         return siyuan.call("/api/filetree/removeDoc", { notebook: notebookID, path: path_not_readable });
     },
+    async renameDoc(notebookID: string, path_not_readable: string, title: string) {
+        return siyuan.call("/api/filetree/renameDoc", { notebook: notebookID, title, path: path_not_readable });
+    },
+    async moveDocs(fromPaths: string[], toPath: string, toNotebook: string, callback?: string) {
+        return siyuan.call("/api/filetree/moveDocs", { fromPaths, toPath, toNotebook, callback });
+    },
+    async duplicateDoc(id: string): Promise<{ "id": string, "notebook": string, "path": string, "hPath": string }> {
+        return siyuan.call("/api/filetree/duplicateDoc", { id });
+    },
     async removeDocByID(docID: string) {
         let count = 10;
         while (count-- > 0) {
