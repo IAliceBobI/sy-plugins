@@ -86,6 +86,12 @@ class Progressive {
                 }
             }
         });
+        this.plugin.eventBus.on("ws-main", async ({ detail }) => {
+            console.log(detail)
+            if (detail.cmd == "transactions") {
+                // (detail)
+            }
+        })
     }
 
     private async tryAddRefAttr(noteID: string) {
@@ -286,7 +292,7 @@ class Progressive {
             }
 
             dialog.destroy();
-            await siyuan.setBlockAttrs(bookID, { "custom-sy-readonly": "true" });
+            // await siyuan.setBlockAttrs(bookID, { "custom-sy-readonly": "true" });
 
             if (splitLen > 0) {
                 contentBlocks = await this.helper.getDocWordCount(contentBlocks);
