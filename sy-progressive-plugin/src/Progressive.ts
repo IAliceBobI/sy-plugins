@@ -86,12 +86,27 @@ class Progressive {
                 }
             }
         });
-        this.plugin.eventBus.on("ws-main", async ({ detail }) => {
-            console.log(detail)
-            if (detail.cmd == "transactions") {
-                // (detail)
-            }
-        })
+        // this.plugin.eventBus.on("ws-main", async ({ detail }) => {
+        //     if (detail?.cmd == WsActionTypes.transactions) {
+        //         for (const element of detail.data as TransactionData[]) {
+        //             for (const ops of element?.doOperations) {
+        //                 if (ops.action == "update" && ops.id) {
+        //                     const row = await siyuan.getDocRowByBlockID(ops.id);
+        //                     if (row) {
+        //                         const attr = (await siyuan.getBlockAttrs(row.id))[MarkKey] ?? "";
+        //                         const pieceLen = TEMP_CONTENT.length + 1 + "20231229160401-0lfc8qj".length + 1 + 1;
+        //                         if (attr.startsWith(TEMP_CONTENT + "#") && attr.length >= pieceLen) {
+        //                             navigator.locks.request(constants.TryAddStarsLock, { ifAvailable: true }, async (lock) => {
+        //                                 if(lock) await this.tryAddRefAttr(row.id);
+        //                                 else console.log("111")
+        //                             });
+        //                         }
+        //                     }
+        //                 }
+        //             }
+        //         };
+        //     }
+        // })
     }
 
     private async tryAddRefAttr(noteID: string) {
@@ -763,7 +778,7 @@ async function createNote(boxID: string, bookID: string, piece: string[], point:
         const docID = await siyuan.createDocWithMd(boxID, dir, "");
         const attr = {};
         attr[MarkKey] = help.getDocIalMark(bookID, point);
-        attr['alias'] = bookName;
+        attr["alias"] = bookName;
         await siyuan.setBlockAttrs(docID, attr);
         return docID;
     }

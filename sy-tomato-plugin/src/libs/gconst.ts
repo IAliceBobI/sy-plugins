@@ -1,3 +1,5 @@
+import { TOperation } from "siyuan";
+
 export const DATA_NODE_ID = "data-node-id";
 export const BLOCK_REF = "block-ref";
 export const DATA_ID = "data-id";
@@ -37,3 +39,50 @@ export enum BlockNodeEnum {
 export const MarkKey = "custom-progmark"; // for doc
 export const RefIDKey = "custom-progref"; // for content
 export const TEMP_CONTENT = "插件管理勿改managedByPluginDoNotModify";
+
+export enum WsActionTypes {
+    transactions = "transactions",
+    syncMergeResult = "syncMergeResult",
+    readonly = "readonly",
+    setConf = "setConf",
+    progress = "progress",
+    setLocalStorageVal = "setLocalStorageVal",
+    rename = "rename",
+    unmount = "unmount",
+    removeDoc = "removeDoc",
+    statusbar = "statusbar",
+    downloadProgress = "downloadProgress",
+    txerr = "txerr",
+    syncing = "syncing",
+    backgroundtask = "backgroundtask",
+    refreshtheme = "refreshtheme",
+    openFileById = "openFileById"
+}
+
+export interface TransactionData {
+    timestamp: number;
+    doOperations: DoOperation[];
+    undoOperations: DoOperation[];
+}
+
+export interface DoOperation {
+    action: TOperation;
+    data: string;
+    id: string;
+    parentID: string;
+    previousID: string;
+    nextID: string;
+    retData: any;
+    blockIDs: any;
+    deckID: string;
+    avID: string;
+    srcIDs: any;
+    isDetached: boolean;
+    name: string;
+    type: string;
+    format: string;
+    keyID: string;
+    rowID: string;
+    isTwoWay: boolean;
+    backRelationKeyID: string;
+}

@@ -287,6 +287,9 @@ export const siyuan = {
         if (attr) await siyuan.setBlockAttrs(id, attr);
         return id;
     },
+    async getDocRowByBlockID(id: string) {
+        return siyuan.sqlOne(`select * from blocks where id in (select root_id from blocks where id="${id}") limit 1`);
+    },
     async removeDoc(notebookID: string, path_not_readable: string) {
         return siyuan.call("/api/filetree/removeDoc", { notebook: notebookID, path: path_not_readable });
     },
