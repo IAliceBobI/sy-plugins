@@ -14,7 +14,7 @@ class CardBox {
             title: "间隔重复",
             position: "left",
             callback: () => {
-                openTab({ app: this.plugin.app, card: { type: "all" } })
+                openTab({ app: this.plugin.app, card: { type: "all" } });
             }
         });
         this.plugin.addCommand({

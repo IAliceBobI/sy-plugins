@@ -247,8 +247,11 @@ export const siyuan = {
         const notebook = notebookID;
         return siyuan.call("/api/notebook/openNotebook", { notebook });
     },
-    async lsNotebooks(closed: boolean) {
+    async lsNotebooks(closed?: boolean) {
         const resp = await siyuan.call("/api/notebook/lsNotebooks", {});
+        if (closed === null || closed === undefined) {
+            return resp["notebooks"];
+        }
         const l = [];
         for (const book of resp["notebooks"]) {
             if (book.closed === closed) {

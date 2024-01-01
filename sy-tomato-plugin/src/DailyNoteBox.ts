@@ -106,8 +106,11 @@ class DailyNoteBox {
     }
 
     async openDailyNote(deltaMs: number) {
-        const boxID = events.boxID;
+        let boxID = this.move2BoxID;
+        if (!boxID) boxID = events.boxID;
+        if (!boxID) boxID = (await siyuan.lsNotebooks(false))[0];
         if (!boxID) {
+            await siyuan.pushMsg("请先打开笔记本");
             return;
         }
         if (deltaMs == 0) return;
