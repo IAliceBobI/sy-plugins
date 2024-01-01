@@ -40,7 +40,7 @@ class ReadingPointBox {
         });
         if (!events.isMobile) {
             this.plugin.addTopBar({
-                icon: "iconContents",
+                icon: "iconBookmark",
                 title: this.plugin.i18n.topBarTitleShowContents,
                 position: "right",
                 callback: async () => {
