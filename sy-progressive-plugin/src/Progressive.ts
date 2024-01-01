@@ -26,25 +26,27 @@ class Progressive {
         this.helper = new help.Helper(plugin);
         this.openedTabs = [];
         await this.storage.onLayoutReady();
-        const topBarElement = this.plugin.addTopBar({
-            icon: "iconABook",
-            title: this.plugin.i18n.progressiveReadingMenu,
-            position: "right",
-            callback: () => {
-                if (events.isMobile) {
-                    this.addMenu();
-                } else {
-                    let rect = topBarElement.getBoundingClientRect();
-                    if (rect.width === 0) {
-                        rect = document.querySelector("#barMore").getBoundingClientRect();
+        if (!events.isMobile) {
+            const topBarElement = this.plugin.addTopBar({
+                icon: "iconABook",
+                title: this.plugin.i18n.progressiveReadingMenu,
+                position: "right",
+                callback: () => {
+                    if (events.isMobile) {
+                        this.addMenu();
+                    } else {
+                        let rect = topBarElement.getBoundingClientRect();
+                        if (rect.width === 0) {
+                            rect = document.querySelector("#barMore").getBoundingClientRect();
+                        }
+                        if (rect.width === 0) {
+                            rect = document.querySelector("#barPlugins").getBoundingClientRect();
+                        }
+                        this.addMenu(rect);
                     }
-                    if (rect.width === 0) {
-                        rect = document.querySelector("#barPlugins").getBoundingClientRect();
-                    }
-                    this.addMenu(rect);
                 }
-            }
-        });
+            });
+        }
         this.plugin.addCommand({
             langKey: "startToLearn",
             hotkey: "⌥-",

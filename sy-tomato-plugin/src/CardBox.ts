@@ -9,14 +9,16 @@ class CardBox {
 
     async onload(plugin: Plugin) {
         this.plugin = plugin;
-        this.plugin.addTopBar({
-            icon: "iconRiffCard",
-            title: "间隔重复",
-            position: "left",
-            callback: () => {
-                openTab({ app: this.plugin.app, card: { type: "all" } });
-            }
-        });
+        if (!events.isMobile) {
+            this.plugin.addTopBar({
+                icon: "iconRiffCard",
+                title: "间隔重复",
+                position: "left",
+                callback: () => {
+                    openTab({ app: this.plugin.app, card: { type: "all" } });
+                }
+            });
+        }
         this.plugin.addCommand({
             langKey: "removeBrokenCards",
             hotkey: "",

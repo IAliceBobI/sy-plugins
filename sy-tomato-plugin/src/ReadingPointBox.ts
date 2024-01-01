@@ -38,14 +38,16 @@ class ReadingPointBox {
                 await this.showContentsWithLock();
             },
         });
-        this.plugin.addTopBar({
-            icon: "iconContents",
-            title: this.plugin.i18n.topBarTitleShowContents,
-            position: "right",
-            callback: async () => {
-                await this.showContentsWithLock();
-            }
-        });
+        if (!events.isMobile) {
+            this.plugin.addTopBar({
+                icon: "iconContents",
+                title: this.plugin.i18n.topBarTitleShowContents,
+                position: "right",
+                callback: async () => {
+                    await this.showContentsWithLock();
+                }
+            });
+        }
     }
 
     blockIconEvent(detail: any) {

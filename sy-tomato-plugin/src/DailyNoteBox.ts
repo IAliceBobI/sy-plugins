@@ -25,22 +25,24 @@ class DailyNoteBox {
     async onload(plugin: Plugin) {
         this.plugin = plugin;
         this.lute = NewLute();
-        this.plugin.addTopBar({
-            icon: "iconLeft",
-            title: "上一个日志",
-            position: "left",
-            callback: () => {
-                this.openDailyNote(-1000 * 60 * 60 * 24);
-            }
-        });
-        this.plugin.addTopBar({
-            icon: "iconRight",
-            title: "下一个日志",
-            position: "left",
-            callback: () => {
-                this.openDailyNote(1000 * 60 * 60 * 24);
-            }
-        });
+        if (!events.isMobile) {
+            this.plugin.addTopBar({
+                icon: "iconLeft",
+                title: "上一个日志",
+                position: "left",
+                callback: () => {
+                    this.openDailyNote(-1000 * 60 * 60 * 24);
+                }
+            });
+            this.plugin.addTopBar({
+                icon: "iconRight",
+                title: "下一个日志",
+                position: "left",
+                callback: () => {
+                    this.openDailyNote(1000 * 60 * 60 * 24);
+                }
+            });
+        }
         this.plugin.addCommand({
             langKey: "moveBlock2today",
             hotkey: "⌘6",
