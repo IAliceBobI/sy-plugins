@@ -84,22 +84,19 @@ class DailyNoteBox {
     }
 
     async findDailyNote(boxID: string, currentDocName: string, deltaMs: number) {
-        const rows = await siyuan.sql(`select ial,id,content from blocks where 
-            type = "d" and ial like "%custom-dailynote%"`);
-        rows.sort((a, b) => {
-            return a.content.localeCompare(b.content);
-        });
+        currentDocName = currentDocName.trim();
+        if (currentDocName.length != "2024-01-01".length) return "";
         if (deltaMs < 0) {
-            for (const d of rows.reverse()) {
-                if (d.content < currentDocName) {
-                    return d.id;
-                }
+            const rows = await siyuan.sql(`select ial,id,content from blocks where 
+            type = "d" and content < "${currentDocName}" and ial like "%custom-dailynote%" order by content desc limit 1`);
+            for (const d of rows) {
+                return d.id;
             }
         } else {
+            const rows = await siyuan.sql(`select ial,id,content from blocks where 
+            type = "d" and content > "${currentDocName}" and ial like "%custom-dailynote%" order by content asc  limit 1`);
             for (const d of rows) {
-                if (d.content > currentDocName) {
-                    return d.id;
-                }
+                return d.id;
             }
         }
         if (deltaMs > 0)
