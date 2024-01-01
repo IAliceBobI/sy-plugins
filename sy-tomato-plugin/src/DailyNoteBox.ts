@@ -1,4 +1,4 @@
-import { IProtyle, Lute, Plugin } from "siyuan";
+import { IProtyle, ITab, Lute, Plugin, openTab } from "siyuan";
 import { events } from "./libs/Events";
 import { NewLute, cleanDiv, siyuan } from "./libs/utils";
 import { DATA_NODE_ID, PROTYLE_WYSIWYG_SELECT } from "./libs/gconst";
@@ -8,6 +8,7 @@ class DailyNoteBox {
     private plugin: Plugin;
     private lute: Lute;
     private move2BoxID: string;
+    private lastOpen: ITab;
 
     blockIconEvent(detail: any) {
         if (!this.plugin) return;
@@ -24,6 +25,22 @@ class DailyNoteBox {
     async onload(plugin: Plugin) {
         this.plugin = plugin;
         this.lute = NewLute();
+        this.plugin.addTopBar({
+            icon: "iconLeft",
+            title: "上一个日志",
+            position: "left",
+            callback: () => {
+                this.openDailyNote(-1000 * 60 * 60 * 24);
+            }
+        });
+        this.plugin.addTopBar({
+            icon: "iconRight",
+            title: "下一个日志",
+            position: "left",
+            callback: () => {
+                this.openDailyNote(1000 * 60 * 60 * 24);
+            }
+        });
         this.plugin.addCommand({
             langKey: "moveBlock2today",
             hotkey: "⌘6",
@@ -62,6 +79,52 @@ class DailyNoteBox {
                 return input;
             },
         });
+    }
+
+    async findDailyNote(boxID: string, currentDocName: string, deltaMs: number) {
+        const rows = await siyuan.sql(`select ial,id,content from blocks where 
+            type = "d" and ial like "%custom-dailynote%"`);
+        rows.sort((a, b) => {
+            return a.content.localeCompare(b.content);
+        });
+        if (deltaMs < 0) {
+            for (const d of rows.reverse()) {
+                if (d.content < currentDocName) {
+                    return d.id;
+                }
+            }
+        } else {
+            for (const d of rows) {
+                if (d.content > currentDocName) {
+                    return d.id;
+                }
+            }
+        }
+        if (deltaMs > 0)
+            return (await siyuan.createDailyNote(boxID)).id;
+        return "";
+    }
+
+    async openDailyNote(deltaMs: number) {
+        const boxID = events.boxID;
+        if (!boxID) {
+            return;
+        }
+        if (deltaMs == 0) return;
+        const currentDocID = events.docID;
+        let targetDocID: string;
+        if (!currentDocID && boxID) {
+            targetDocID = (await siyuan.createDailyNote(boxID)).id;
+        } else {
+            const currentDocName = await siyuan.getDocNameByBlockID(currentDocID);
+            targetDocID = await this.findDailyNote(boxID, currentDocName, deltaMs);
+            if (currentDocID == targetDocID || !targetDocID) {
+                await siyuan.pushMsg("没了！");
+                return;
+            }
+        }
+        this.lastOpen?.close();
+        if (targetDocID) this.lastOpen = await openTab({ app: this.plugin.app, doc: { id: targetDocID } });
     }
 
     async moveBlock2today(blockID: string) {
