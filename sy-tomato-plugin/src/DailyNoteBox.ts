@@ -163,15 +163,13 @@ class DailyNoteBox {
     }
 
     async findDivs(protyle: IProtyle) {
-        const multiLine = protyle.element.getElementsByTagName("div") as unknown as HTMLDivElement[] ?? [];
+        const multiLine = protyle.element.querySelectorAll(`.${PROTYLE_WYSIWYG_SELECT}`);
         let flag = false;
         for (const div of multiLine) {
-            if (div.classList.contains(PROTYLE_WYSIWYG_SELECT)) {
-                div.classList.remove(PROTYLE_WYSIWYG_SELECT);
-                const id = div.getAttribute(DATA_NODE_ID);
-                await this.moveBlock2today(id);
-                flag = true;
-            }
+            div.classList.remove(PROTYLE_WYSIWYG_SELECT);
+            const id = div.getAttribute(DATA_NODE_ID);
+            await this.moveBlock2today(id);
+            flag = true;
         }
         if (!flag) {
             await this.moveBlock2today(events.lastBlockID);

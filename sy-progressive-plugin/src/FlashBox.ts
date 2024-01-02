@@ -236,7 +236,7 @@ class FlashBox {
 
     private cloneSelectedLineMarkdowns(protyle: IProtyle, del?: boolean) {
         const lute = utils.NewLute();
-        const multiLine = protyle?.element?.querySelectorAll(`[${gconst.PROTYLE_WYSIWYG_SELECT}]`);
+        const multiLine = protyle?.element?.querySelectorAll(`.${gconst.PROTYLE_WYSIWYG_SELECT}`);
         const markdowns = [];
         let setRef = !del;
         const ids = [];

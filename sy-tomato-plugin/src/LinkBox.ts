@@ -138,14 +138,12 @@ class LinkBox {
     }
 
     private getSelectedIDs(protyle: any) {
-        const multiLine = protyle?.element?.getElementsByTagName("div") as HTMLDivElement[] ?? [];
+        const multiLine = protyle?.element?.querySelectorAll(`.${gconst.PROTYLE_WYSIWYG_SELECT}`);
         const ids = [];
         for (const div of multiLine) {
-            if (div.classList.contains(gconst.PROTYLE_WYSIWYG_SELECT)) {
-                const id = div.getAttribute(gconst.DATA_NODE_ID);
-                div.classList.remove(gconst.PROTYLE_WYSIWYG_SELECT);
-                ids.push(id);
-            }
+            const id = div.getAttribute(gconst.DATA_NODE_ID);
+            div.classList.remove(gconst.PROTYLE_WYSIWYG_SELECT);
+            ids.push(id);
         }
         return ids;
     }
