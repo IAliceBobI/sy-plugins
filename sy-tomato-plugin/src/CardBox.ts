@@ -43,7 +43,7 @@ class CardBox {
         });
         this.plugin.addCommand({
             langKey: "delCard",
-            hotkey: "⌘0",
+            hotkey: "⌘9",
             callback: async () => {
                 if (this.delCardFunc) {
                     this.delCardFunc();
@@ -89,7 +89,7 @@ class CardBox {
                     btn.innerHTML = "<div>🗑</div> 删除";
                     btn.title = "仅删除闪卡，保留原文";
                     btn.setAttribute("data-type", "-100");
-                    btn.setAttribute("aria-label", "默认ctrl+0仅参考");
+                    btn.setAttribute("aria-label", "默认ctrl+9仅参考");
                     btn.classList.add("b3-button");
                     btn.classList.add("b3-button--error");
                     btn.classList.add("b3-tooltips__n");
