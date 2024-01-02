@@ -17,7 +17,7 @@ class Schedule {
         this.plugin.addCommand({
             langKey: "schedule",
             hotkey: "⌘3",
-            globalCallback: async () => {
+            callback: async () => {
                 await this.showScheduleDialog();
             },
         });

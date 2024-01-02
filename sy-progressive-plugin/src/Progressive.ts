@@ -50,7 +50,7 @@ class Progressive {
         this.plugin.addCommand({
             langKey: "startToLearn",
             hotkey: "⌥-",
-            globalCallback: () => {
+            callback: () => {
                 this.startToLearnWithLock();
             },
         });

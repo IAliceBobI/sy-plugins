@@ -12,7 +12,7 @@ class CpBox {
         this.plugin.addCommand({
             langKey: "deleteBlocks",
             hotkey: "",
-            globalCallback: async () => {
+            callback: async () => {
                 navigator.locks.request(LongContentOpsLock, { ifAvailable: true }, async (lock) => {
                     if (lock) {
                         await this.deleteBlocks();
@@ -25,7 +25,7 @@ class CpBox {
         this.plugin.addCommand({
             langKey: "moveBlocks",
             hotkey: "",
-            globalCallback: async () => {
+            callback: async () => {
                 navigator.locks.request(LongContentOpsLock, { ifAvailable: true }, async (lock) => {
                     if (lock) {
                         await this.moveBlocks(false);
@@ -38,7 +38,7 @@ class CpBox {
         this.plugin.addCommand({
             langKey: "copyBlocks",
             hotkey: "",
-            globalCallback: async () => {
+            callback: async () => {
                 navigator.locks.request(LongContentOpsLock, { ifAvailable: true }, async (lock) => {
                     if (lock) {
                         await this.moveBlocks(true);

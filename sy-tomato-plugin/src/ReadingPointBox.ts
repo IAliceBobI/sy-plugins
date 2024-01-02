@@ -14,7 +14,7 @@ class ReadingPointBox {
         this.plugin.addCommand({
             langKey: "addBookmark",
             hotkey: "⌘2",
-            globalCallback: async () => {
+            callback: async () => {
                 this.addReadPointLock();
             },
         });
@@ -34,7 +34,7 @@ class ReadingPointBox {
         this.plugin.addCommand({
             langKey: "showBookmarks",
             hotkey: "⌘4",
-            globalCallback: async () => {
+            callback: async () => {
                 await this.showContentsWithLock();
             },
         });
