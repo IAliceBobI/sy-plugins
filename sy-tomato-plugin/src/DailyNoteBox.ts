@@ -44,6 +44,20 @@ class DailyNoteBox {
             });
         }
         this.plugin.addCommand({
+            langKey: "previousNote",
+            hotkey: "⌥Q",
+            callback: () => {
+                this.openDailyNote(-1000 * 60 * 60 * 24);
+            },
+        });
+        this.plugin.addCommand({
+            langKey: "nextNote",
+            hotkey: "⌥W",
+            callback: () => {
+                this.openDailyNote(1000 * 60 * 60 * 24);
+            },
+        });
+        this.plugin.addCommand({
             langKey: "moveBlock2today",
             hotkey: "⌘6",
             editorCallback: (protyle) => {

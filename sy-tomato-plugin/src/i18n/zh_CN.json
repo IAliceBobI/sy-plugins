@@ -36,5 +36,7 @@
   "bottomMention": "插入底部提及#bottomMention",
   "addPicOverlay": "添加图片遮挡层",
   "delCard": "复习时删除当前闪卡delete current card",
-  "moveBlock2today": "移动内容到 daily note"
+  "moveBlock2today": "移动内容到 daily note",
+  "previousNote": "上一个日志",
+  "nextNote": "下一个日志"
 }
