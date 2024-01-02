@@ -611,6 +611,7 @@ export const siyuan = {
                 }
             }
         }
+        if(invalidCardIDs.length>0) await siyuan.pushMsg("正在确认无效闪卡，请耐心等待……");
         invalidCardIDs = zipAnyArrays(
             await Promise.all(invalidCardIDs.map((card) => siyuan.checkBlockExist(card))),
             invalidCardIDs,
