@@ -69,6 +69,13 @@ class FlashBox {
                 this.makeCard(detail.protyle, cardType, getDailyPath());
             }
         });
+        detail.menu.addItem({
+            iconHTML: "",
+            label: this.plugin.i18n.send2dailyCardRemove,
+            click: () => {
+                this.makeCard(detail.protyle, cardType, getDailyPath(), true);
+            }
+        });
     }
 
     async onload(plugin: Plugin, settings: SettingCfgType) {
@@ -92,6 +99,13 @@ class FlashBox {
             hotkey: "⌘`",
             editorCallback: (protyle) => {
                 this.makeCard(protyle, cardType, getDailyPath());
+            },
+        });
+        this.plugin.addCommand({
+            langKey: "send2dailyCardRemove",
+            hotkey: "⌥S",
+            editorCallback: (protyle) => {
+                this.makeCard(protyle, cardType, getDailyPath(), true);
             },
         });
         this.plugin.eventBus.on("open-menu-content", async ({ detail }) => {
@@ -120,19 +134,32 @@ class FlashBox {
                     }
                 },
             });
+            menu.addItem({
+                label: this.plugin.i18n.send2dailyCardRemove,
+                icon: "iconFlashcard",
+                accelerator: "⌥S",
+                click: () => {
+                    const blockID = detail?.element?.getAttribute("data-node-id") ?? "";
+                    const blank = detail?.range?.cloneContents()?.textContent ?? "";
+                    if (blockID) {
+                        this.blankSpaceCard(blockID, blank, detail?.range, detail?.protyle, cardType, getDailyPath(), true);
+                    }
+                },
+            });
         });
     }
 
-    private async makeCard(protyle: IProtyle, t: CardType, path?: string) {
-        const { lastSelectedID, markdowns } = this.cloneSelectedLineMarkdowns(protyle);
-        if (lastSelectedID) { // multilines
-            await this.insertCard(protyle, markdowns, t, lastSelectedID, path);
+    private async makeCard(protyle: IProtyle, t: CardType, path?: string, del?: boolean) {
+        const { ids, markdowns } = this.cloneSelectedLineMarkdowns(protyle, del);
+        if (ids.length > 0) { // multilines
+            await this.insertCard(protyle, markdowns, t, ids[ids.length - 1], path);
+            if (del) await siyuan.safeDeleteBlocks(ids);
         } else {
             const blockID = events.lastBlockID;
             const range = document.getSelection()?.getRangeAt(0);
             const blank = range?.cloneContents()?.textContent ?? "";
             if (blockID) {
-                this.blankSpaceCard(blockID, blank, range, protyle, t, path);
+                this.blankSpaceCard(blockID, blank, range, protyle, t, path, del);
             }
         }
     }
@@ -207,22 +234,20 @@ class FlashBox {
         return { cardID, "markdown": tmp.join("\n") };
     }
 
-    private cloneSelectedLineMarkdowns(protyle: IProtyle) {
+    private cloneSelectedLineMarkdowns(protyle: IProtyle, del?: boolean) {
         const lute = utils.NewLute();
-        const multiLine = protyle?.element?.getElementsByTagName("div") as unknown as HTMLDivElement[] ?? [];
+        const multiLine = protyle?.element?.querySelectorAll(`[${gconst.PROTYLE_WYSIWYG_SELECT}]`);
         const markdowns = [];
-        let setRef = true;
-        let lastSelectedID = "";
+        let setRef = !del;
+        const ids = [];
         for (const div of multiLine) {
-            if (div.classList.contains(gconst.PROTYLE_WYSIWYG_SELECT)) {
-                div.classList.remove(gconst.PROTYLE_WYSIWYG_SELECT);
-                const [id, elem, hasRef] = this.cloneDiv(div, setRef);
-                if (hasRef) setRef = false;
-                lastSelectedID = id;
-                markdowns.push(lute.BlockDOM2Md(elem.outerHTML));
-            }
+            div.classList.remove(gconst.PROTYLE_WYSIWYG_SELECT);
+            const [id, elem, hasRef] = this.cloneDiv(div as any, setRef);
+            if (hasRef) setRef = false;
+            ids.push(id);
+            markdowns.push(lute.BlockDOM2Md(elem.outerHTML));
         }
-        return { markdowns, lastSelectedID };
+        return { markdowns, ids };
     }
 
     private cloneDiv(div: HTMLDivElement, setRef: boolean): [string, HTMLElement, boolean] {
@@ -230,14 +255,14 @@ class FlashBox {
         return utils.cleanDiv(div, setRef);
     }
 
-    private async blankSpaceCard(blockID: string, selected: string, range: Range, protyle: IProtyle, cardType: CardType, path?: string) {
+    private async blankSpaceCard(blockID: string, selected: string, range: Range, protyle: IProtyle, cardType: CardType, path?: string, del?: boolean) {
         const lute = utils.NewLute();
         let md = "";
         const { dom } = getBlockDOM(range.endContainer.parentElement);
         if (!dom) return;
         if (selected) {
             protyle.toolbar.setInlineMark(protyle, "mark", "range");
-            const [_id, div] = this.cloneDiv(dom as HTMLDivElement, true);
+            const [_id, div] = this.cloneDiv(dom as HTMLDivElement, !del);
             protyle.toolbar.setInlineMark(protyle, "mark", "range");
             protyle.toolbar.setInlineMark(protyle, "prog-marked", "range", { type: "backgroundColor", color: "var(--b3-font-background9)" });
             div.querySelectorAll('[data-type~="prog-marked"]').forEach(e => {
@@ -247,10 +272,13 @@ class FlashBox {
             });
             md = lute.BlockDOM2Md(div.outerHTML);
         } else {
-            const [_id, div] = this.cloneDiv(dom as HTMLDivElement, true);
+            const [_id, div] = this.cloneDiv(dom as HTMLDivElement, !del);
             md = lute.BlockDOM2Md(div.outerHTML);
         }
         await this.insertCard(protyle, [md], cardType, blockID, path);
+        if (del) {
+            await siyuan.safeDeleteBlock(blockID);
+        }
     }
 }
 
