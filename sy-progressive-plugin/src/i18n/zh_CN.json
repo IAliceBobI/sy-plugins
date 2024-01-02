@@ -24,7 +24,7 @@
   "cleanUnchangedOriginDoc": "🧹",
   "insertOriginDoc": "⬇",
   "viewContents": "🗂",
-  "send2dailyCardRemove": "制卡并发到 daily card，并删除制卡用的内容块",
+  "send2dailyCardNoRef": "制卡并发到 daily card（不引用原文）",
   "send2dailyCard": "制卡并发到 daily card",
   "insertBlankSpaceCard": "插入写作式闪卡",
   "insertBlankSpaceCardB": "插入写作式闪卡B",
