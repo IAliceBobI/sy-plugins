@@ -99,25 +99,24 @@ class DailyNoteBox {
 
     async findDailyNote(boxID: string, currentDocName: string, deltaMs: number) {
         currentDocName = currentDocName.trim();
-        if (currentDocName.length != "2024-01-01".length) return "";
-        if (deltaMs < 0) {
-            const rows = await siyuan.sql(`select id from blocks where type = "d" 
+        if (isValidDate(currentDocName)) {
+            if (deltaMs < 0) {
+                const rows = await siyuan.sql(`select id from blocks where type = "d" 
                 and content < "${currentDocName}" and ial like "%custom-dailynote-%" 
                 order by content desc limit 1`);
-            for (const d of rows) {
-                return d.id;
-            }
-        } else {
-            const rows = await siyuan.sql(`select id from blocks where type = "d" 
+                for (const d of rows) {
+                    return d.id;
+                }
+            } else {
+                const rows = await siyuan.sql(`select id from blocks where type = "d" 
                 and content > "${currentDocName}" and ial like "%custom-dailynote-%" 
                 order by content asc limit 1`);
-            for (const d of rows) {
-                return d.id;
+                for (const d of rows) {
+                    return d.id;
+                }
             }
         }
-        if (deltaMs > 0)
-            return (await siyuan.createDailyNote(boxID)).id;
-        return "";
+        return (await siyuan.createDailyNote(boxID)).id;
     }
 
     async openDailyNote(deltaMs: number) {
@@ -181,3 +180,9 @@ class DailyNoteBox {
 }
 
 export const dailyNoteBox = new DailyNoteBox();
+
+function isValidDate(str: string): boolean {
+    const regex = /^\d{4}-\d{2}-\d{2}$/;
+    return regex.test(str);
+}
+
