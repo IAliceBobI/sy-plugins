@@ -3,10 +3,20 @@
   transform-origin: 0 0;
 }
 
-.protyle-wysiwyg div[custom-progref] ::after {
-  content: "*";
-  font-size: xx-small;
-  color: var(--b3-font-color12);
+@keyframes progFadeIn {
+  from {
+    opacity: 0.5;
+    color: var(--b3-font-color1);
+    background-color: var(--b3-font-background7);
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.protyle-wysiwyg div[custom-progref] {
+  animation: progFadeIn 3s forwards;
 }
 
 .prog-style {
