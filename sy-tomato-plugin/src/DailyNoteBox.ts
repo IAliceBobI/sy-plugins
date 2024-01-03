@@ -135,12 +135,12 @@ class DailyNoteBox {
         } else {
             const currentDocName = await siyuan.getDocNameByBlockID(currentDocID);
             targetDocID = await this.findDailyNote(boxID, currentDocName, deltaMs);
-            if (currentDocID == targetDocID || !targetDocID) {
+            if (!targetDocID) {
                 await siyuan.pushMsg("没了！");
                 return;
             }
         }
-        this.lastOpen?.close();
+        if (currentDocID != targetDocID) this.lastOpen?.close();
         if (targetDocID) this.lastOpen = await openTab({ app: this.plugin.app, doc: { id: targetDocID } });
     }
 
