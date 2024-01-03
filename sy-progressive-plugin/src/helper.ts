@@ -539,6 +539,54 @@ export class Helper {
         </div>`;
     }
 
+    btnSplitByPunctuations(bookID: string, noteID: string, point: number) {
+        const btnID = utils.newID().slice(0, IDLen);
+        return `<div>
+            ${styleColor("var(--b3-font-background11)", "#000000")}
+            <div>
+                <button title="按标点断句" onclick="${btnID}()" id="btn${btnID}">✂📜</button>
+            </div>
+            <script>
+                function ${btnID}() {
+                    globalThis.progressive_zZmqus5PtYRi.progressive.htmlBlockReadNextPeice("${bookID}","${noteID}",${HtmlCBType.openFlashcardTab},${point})
+                }
+            </script>
+        </div>`;
+    }
+
+    btnSplitByPunctuationsList(bookID: string, noteID: string, point: number) {
+        const btnID = utils.newID().slice(0, IDLen);
+        return `<div>
+            ${styleColor("var(--b3-font-background11)", "#000000")}
+            <div>
+                <button title="按标点断句，形成列表" onclick="${btnID}()" id="btn${btnID}">✂📜📌</button>
+            </div>
+            <script>
+                function ${btnID}() {
+                    globalThis.progressive_zZmqus5PtYRi.progressive.htmlBlockReadNextPeice("${bookID}","${noteID}",${HtmlCBType.openFlashcardTab},${point})
+                }
+            </script>
+        </div>`;
+    }
+
+    getReadingBtns3(bookID: string, noteID: string, point: number) {
+        return `{{{col
+${this.btnSplitByPunctuations(bookID, noteID, point)}
+
+${this.btnSplitByPunctuationsList(bookID, noteID, point)}
+
+　
+
+　
+
+　
+
+　
+
+　
+}}}`;
+    }
+
     getReadingBtns2(bookID: string, noteID: string, point: number) {
         return `{{{col
 ${this.btnOpenFlashcardTab(bookID, noteID, point)}

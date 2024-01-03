@@ -562,6 +562,7 @@ class Progressive {
     }
 
     private async addReadingBtns(bookID: string, noteID: string, point: number) {
+        await siyuan.insertBlockAsChildOf(help.tempContent(this.helper.getReadingBtns3(bookID, noteID, point)), noteID);
         await siyuan.insertBlockAsChildOf(help.tempContent(this.helper.getReadingBtns2(bookID, noteID, point)), noteID);
         await siyuan.insertBlockAsChildOf(help.tempContent(this.helper.getReadingBtns1(bookID, noteID, point)), noteID);
     }
