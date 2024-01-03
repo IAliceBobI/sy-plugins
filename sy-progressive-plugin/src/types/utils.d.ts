@@ -3,4 +3,5 @@
 type SettingCfgType = {
     addCodeBlock: boolean,
     addQuoteBlock: boolean,
+    showLastBlock: boolean,
 }

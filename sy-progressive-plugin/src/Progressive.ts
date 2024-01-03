@@ -14,7 +14,7 @@ class Progressive {
     private storage: help.Storage;
     private helper: help.Helper;
     private openedTabs: ITab[];
-    settings: SettingCfgType;
+    private settings: SettingCfgType;
     private lute: Lute;
 
     async onload(plugin: Plugin, settings: SettingCfgType) {
@@ -568,9 +568,11 @@ class Progressive {
         for (const id of piece.slice().reverse()) {
             await help.copyAndInsertBlock(id, this.lute, noteID);
         }
-        for (const id of piecePre.slice().reverse()) {
-            await help.copyAndInsertBlock(id, this.lute, noteID, "custom-prog-piece-previous");
-            break;
+        if (this.settings.showLastBlock) {
+            for (const id of piecePre.slice().reverse()) {
+                await help.copyAndInsertBlock(id, this.lute, noteID, "custom-prog-piece-previous");
+                break;
+            }
         }
     }
 
