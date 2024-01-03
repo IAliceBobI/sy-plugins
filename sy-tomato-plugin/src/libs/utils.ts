@@ -604,28 +604,34 @@ export const siyuan = {
         return lines.join("\n");
     },
     async removeBrokenCards() {
-        let invalidCardIDs = [];
-        for (let page = 1; page < Number.MAX_SAFE_INTEGER; page++) {
-            const resp = await siyuan.getRiffCards(page);
-            const cards = resp["blocks"];
-            if (!cards.length) break;
-            for (const i in cards) {
-                const card = cards[i];
-                const valid = card["box"];
-                if (!valid) {
-                    invalidCardIDs.push(card["id"]);
+        const handle = setInterval(() => {
+            siyuan.pushMsg("正在确认无效闪卡，请耐心等待……", 2000);
+        }, 3500);
+        try {
+            let invalidCardIDs = [];
+            for (let page = 1; page < Number.MAX_SAFE_INTEGER; page++) {
+                const resp = await siyuan.getRiffCards(page);
+                const cards = resp["blocks"];
+                if (!cards.length) break;
+                for (const i in cards) {
+                    const card = cards[i];
+                    const valid = card["box"];
+                    if (!valid) {
+                        invalidCardIDs.push(card["id"]);
+                    }
                 }
             }
+            invalidCardIDs = zipAnyArrays(
+                await Promise.all(invalidCardIDs.map((card) => siyuan.checkBlockExist(card))),
+                invalidCardIDs,
+            ).filter(e => !e[0]).map(e => e[1]);
+            if (invalidCardIDs.length > 0) {
+                await siyuan.removeRiffCards(invalidCardIDs);
+            }
+            return invalidCardIDs;
+        } finally {
+            clearInterval(handle);
         }
-        if (invalidCardIDs.length > 0) await siyuan.pushMsg("正在确认无效闪卡，请耐心等待……");
-        invalidCardIDs = zipAnyArrays(
-            await Promise.all(invalidCardIDs.map((card) => siyuan.checkBlockExist(card))),
-            invalidCardIDs,
-        ).filter(e => !e[0]).map(e => e[1]);
-        if (invalidCardIDs.length > 0) {
-            await siyuan.removeRiffCards(invalidCardIDs);
-        }
-        return invalidCardIDs;
     },
     async getDocNameByBlockID(blockID: string) {
         let row = await siyuan.sqlOne(
