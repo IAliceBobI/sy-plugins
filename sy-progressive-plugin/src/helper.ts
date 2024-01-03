@@ -539,7 +539,39 @@ export class Helper {
         </div>`;
     }
 
-    getReadingBtns(bookID: string, noteID: string, point: number) {
+    getReadingBtns1(bookID: string, noteID: string, point: number) {
+        return `{{{col
+${this.btnViewContents(bookID, noteID, point)}
+
+${this.btnPrevious(bookID, noteID, point)}
+
+${this.btnNext(bookID, noteID, point)}
+
+${this.btnFullfilContent(bookID, noteID, point)}
+
+${this.btnCleanUnchanged(bookID, noteID, point)}
+
+${this.btnDeleteBack(bookID, noteID, point)}
+
+${this.btnDeleteNext(bookID, noteID, point)}
+
+${this.btnDeleteExit(bookID, noteID, point)}
+
+${this.btnSaveCard(bookID, noteID, point)}
+
+${this.btnDelCard(bookID, noteID, point)}
+
+${this.btnStop(bookID, noteID, point)}
+
+${this.btnNextBook(bookID, noteID, point)}
+
+${this.btnIgnoreBook(bookID, noteID, point)}
+
+${this.btnOpenFlashcardTab(bookID, noteID, point)}
+}}}`;
+    }
+
+    getReadingBtns2(bookID: string, noteID: string, point: number) {
         return `{{{col
 ${this.btnViewContents(bookID, noteID, point)}
 
