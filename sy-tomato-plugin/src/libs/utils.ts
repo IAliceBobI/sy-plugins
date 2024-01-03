@@ -273,13 +273,19 @@ export const siyuan = {
     async setUILayout(layout: any): Promise<any> {
         return await siyuan.call("/api/system/setUILayout", { layout });
     },
+    async flushTransaction(): Promise<any> {
+        return await siyuan.call("/api/sqlite/flushTransaction", {});
+    },
     async createDocWithMdIfNotExists(notebookID: string, path_readable: string, markdown: string, attr?: any): Promise<string> {
-        const row = await siyuan.sqlOne(`select id from blocks where hpath="${path_readable}" and type='d' limit 1`);
-        const docID = row?.id ?? "";
-        if (!docID) {
-            return siyuan.createDocWithMd(notebookID, path_readable, markdown, "", attr);
-        }
-        return docID;
+        return navigator.locks.request("tomato.siyuan.createDocWithMdIfNotExists", { mode: "exclusive" }, async (_lock) => {
+            await siyuan.flushTransaction();
+            const row = await siyuan.sqlOne(`select id from blocks where hpath="${path_readable}" and type='d' limit 1`);
+            const docID = row?.id ?? "";
+            if (!docID) {
+                return siyuan.createDocWithMd(notebookID, path_readable, markdown, "", attr);
+            }
+            return docID;
+        });
     },
     async createDocWithMd(notebookID: string, path_readable: string, markdown: string, id = "", attr?: any) {
         const notebook = notebookID;
@@ -611,7 +617,7 @@ export const siyuan = {
                 }
             }
         }
-        if(invalidCardIDs.length>0) await siyuan.pushMsg("正在确认无效闪卡，请耐心等待……");
+        if (invalidCardIDs.length > 0) await siyuan.pushMsg("正在确认无效闪卡，请耐心等待……");
         invalidCardIDs = zipAnyArrays(
             await Promise.all(invalidCardIDs.map((card) => siyuan.checkBlockExist(card))),
             invalidCardIDs,

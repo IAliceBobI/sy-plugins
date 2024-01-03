@@ -177,6 +177,12 @@ class FlashBox {
     }
 
     private async insertCard(protyle: IProtyle, markdowns: string[], t: CardType, lastSelectedID: string, path?: string) {
+        return navigator.locks.request("prog-FlashBox-insertCard", { mode: "exclusive" }, async (_lock) => {
+            return this.doInsertCard(protyle, markdowns, t, lastSelectedID, path);
+        });
+    }
+
+    private async doInsertCard(protyle: IProtyle, markdowns: string[], t: CardType, lastSelectedID: string, path?: string) {
         const boxID = events.boxID;
         const { bookID, pieceID, isPiece } = await isInPiece(protyle);
         if (!pieceID) return;
