@@ -515,9 +515,12 @@ class Progressive {
             case HtmlCBType.nextBook:
                 await this.startToLearn();
                 break;
-            case HtmlCBType.quit:
-                this.addAndClose();
+            case HtmlCBType.quit: {
+                const t = await openTab({ app: this.plugin.app, doc: { id: noteID } });
+                await utils.sleep(200);
+                t.close();
                 break;
+            }
             case HtmlCBType.AddDocCard:
                 await siyuan.addRiffCards([noteID]);
                 break;
@@ -527,15 +530,14 @@ class Progressive {
             case HtmlCBType.ignoreBook:
                 await this.storage.toggleIgnoreBook(bookID);
                 break;
-            case HtmlCBType.fullfilContent:
-                {
-                    const index = await this.storage.loadBookIndexIfNeeded(bookID);
-                    const piecePre = index[point - 1] ?? [];
-                    const piece = index[point] ?? [];
-                    await siyuan.insertBlockAsChildOf(help.tempContent("---"), noteID);
-                    await this.fullfilContent(bookID, piecePre, piece, noteID);
-                }
+            case HtmlCBType.fullfilContent: {
+                const index = await this.storage.loadBookIndexIfNeeded(bookID);
+                const piecePre = index[point - 1] ?? [];
+                const piece = index[point] ?? [];
+                await siyuan.insertBlockAsChildOf(help.tempContent("---"), noteID);
+                await this.fullfilContent(bookID, piecePre, piece, noteID);
                 break;
+            }
             case HtmlCBType.cleanUnchanged:
                 await help.cleanNote(noteID);
                 await this.addReadingBtns(bookID, noteID, point);
