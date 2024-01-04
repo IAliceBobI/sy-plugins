@@ -554,18 +554,20 @@ export const siyuan = {
             }
         }
         if (!await siyuan.checkAllBlocks(ids)) return ["", ""];
-        ids.reverse();
         const lute = NewLute();
-        for (const id of ids) {
-            if (copy) {
+        const mds = [];
+        if (copy) {
+            for (const id of ids) {
                 const { dom } = await siyuan.getBlockDOM(id);
                 let tempDiv = document.createElement("div") as HTMLDivElement;
                 tempDiv.innerHTML = dom;
                 tempDiv = tempDiv.firstElementChild as HTMLDivElement;
                 cleanDiv(tempDiv, false);
-                const md = lute.BlockDOM2Md(tempDiv.outerHTML);
-                await siyuan.insertBlockAfter(md, insertPoint["id"]);
-            } else {
+                mds.push(lute.BlockDOM2Md(tempDiv.outerHTML));
+            }
+            if (mds.length > 0) await siyuan.insertBlockAfter(mds.join("\n\n"), insertPoint["id"]);
+        } else {
+            for (const id of ids.reverse()) {
                 await siyuan.safeMoveBlockAfter(id, insertPoint["id"]);
             }
         }

@@ -54,39 +54,39 @@ export class SplitSentence {
 }
 
 function shouldMove(s: string) {
-    return s.startsWith(`”`)
-        || s.startsWith(`’`)
-        || s.startsWith(`"`)
-        || s.startsWith(`'`)
-        || s.startsWith(`】`)
-        || s.startsWith(`]`)
-        || s.startsWith(`}`)
-        || s.startsWith(`)`)
-        || s.startsWith(`）`)
-        || s.startsWith(`』`) //『』
-        || s.startsWith(`」`) //「」
+    return s.startsWith("”")
+        || s.startsWith("’")
+        || s.startsWith("\"")
+        || s.startsWith("'")
+        || s.startsWith("】")
+        || s.startsWith("]")
+        || s.startsWith("}")
+        || s.startsWith(")")
+        || s.startsWith("）")
+        || s.startsWith("』") //『』
+        || s.startsWith("」"); //「」
 }
 
 function movePunctuations(a: string, b: string) {
     while (shouldMove(b)) {
         a += b[0];
-        b = b.slice(1)
+        b = b.slice(1);
     }
-    return [a, b]
+    return [a, b];
 }
 
 function spliyBy(content: string[], s: string) {
     const sentences = [];
-    for (let c of content.filter(i => i.length > 0)) {
+    for (const c of content.filter(i => i.length > 0)) {
         const parts = c.split(new RegExp("\\" + s, "g"));
         for (let i = 0; i < parts.length; i++) {
             if (i < parts.length - 1) {
-                parts[i] += s
+                parts[i] += s;
             }
             if (i > 0) {
-                const [a, b] = movePunctuations(parts[i - 1], parts[i])
-                parts[i - 1] = a
-                parts[i] = b
+                const [a, b] = movePunctuations(parts[i - 1], parts[i]);
+                parts[i - 1] = a;
+                parts[i] = b;
             }
         }
         sentences.push(...parts);

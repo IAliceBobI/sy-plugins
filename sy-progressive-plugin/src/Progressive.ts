@@ -579,11 +579,11 @@ class Progressive {
         const allContent = [];
         if (this.settings.showLastBlock && piecePre.length > 0) {
             const lastID = piecePre[piecePre.length - 1];
-            const md = await help.copyAndInsertBlock(lastID, this.lute, "custom-prog-piece-previous");
+            const md = await help.copyBlock(lastID, this.lute, "custom-prog-piece-previous");
             allContent.push(md);
         }
         for (const id of piece) {
-            allContent.push(await help.copyAndInsertBlock(id, this.lute));
+            allContent.push(await help.copyBlock(id, this.lute));
         }
         await siyuan.insertBlockAsChildOf(allContent.join("\n\n"), noteID);
     }
