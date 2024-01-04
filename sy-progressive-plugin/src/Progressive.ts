@@ -7,6 +7,7 @@ import * as utils from "../../sy-tomato-plugin/src/libs/utils";
 import * as help from "./helper";
 import * as constants from "./constants";
 import { MarkKey, RefIDKey } from "../../sy-tomato-plugin/src/libs/gconst";
+import { SplitSentence } from "./SplitSentence";
 
 class Progressive {
     private static readonly GLOBAL_THIS: Record<string, any> = globalThis;
@@ -535,10 +536,14 @@ class Progressive {
             case HtmlCBType.viewContents:
                 await this.openContentsLock(bookID);
                 break;
-            case HtmlCBType.splitByPunctuations:
+            case HtmlCBType.splitByPunctuations: {
+                const s = new SplitSentence(noteID);
+                s.split();
                 break;
-            case HtmlCBType.splitByPunctuationsList:
+            }
+            case HtmlCBType.splitByPunctuationsList: {
                 break;
+            }
             default:
                 throw "Invalid HtmlCBType " + cbType;
         }
