@@ -18,7 +18,7 @@ export class SplitSentence {
             if (lock) {
                 if (!this.lastID) return;
                 if (this.asList == "p") {
-                    for (const line of this.sentences.slice().reverse()) await siyuan.insertBlockAfter(line, this.lastID);
+                    await siyuan.insertBlockAfter(this.sentences.join("\n"), this.lastID);
                 } else {
                     await siyuan.insertBlockAfter("* " + this.sentences.join("\n* "), this.lastID);
                 }
@@ -43,63 +43,56 @@ export class SplitSentence {
                 let ps = [row.content];
                 for (const s of "\n。！!？?；;") ps = spliyBy(ps, s);
                 ps = spliyBy(ps, "……");
-                if (this.asList == "l")
-                    this.sentences.push(...ps.map(i => i + ` ((${ref} "*"))`));
-                else
+                if (this.asList == "p")
                     this.sentences.push(...ps.map(i => i + ` ((${ref} "*"))\n{: ${RefIDKey}="${ref}" }`));
+                else if (this.asList == "ls")
+                    this.sentences.push(...ps.map(i => i + ` ((${ref} "*"))\n\t{: ${RefIDKey}="${ref}" }\n{: ${RefIDKey}="${ref}" }`));
+                else
+                    this.sentences.push(...ps.map(i => i + ` ((${ref} "*"))\n\t{: ${RefIDKey}="${ref}" }\t{: ${RefIDKey}="${ref}" }`));
             }
         }
     }
 }
 
-const escapeMagic = "JZzvQcXQgCnlRZ7NpbRCWfjkirZUoBtMShXPRrDLAszJvbd";
-
-const escapeMagicList = [
-    ["。”", escapeMagic + 11],
-    ['。"', escapeMagic + 12],
-    ['!"', escapeMagic + 31],
-    ["!”", escapeMagic + 32],
-    ["！”", escapeMagic + 41],
-    ['！"', escapeMagic + 42],
-    ["……”", escapeMagic + 51],
-    ['……"', escapeMagic + 52],
-    ["?”", escapeMagic + 61],
-    ['?"', escapeMagic + 62],
-    ["？”", escapeMagic + 71],
-    ['？"', escapeMagic + 72],
-];
-
-function escape(data: string) {
-    for (const e of escapeMagicList) {
-        data = data.replace(new RegExp("\\" + e[0], "g"), e[1]);
-    }
-    return data;
+function shouldMove(s: string) {
+    return s.startsWith(`”`)
+        || s.startsWith(`’`)
+        || s.startsWith(`"`)
+        || s.startsWith(`'`)
+        || s.startsWith(`】`)
+        || s.startsWith(`]`)
+        || s.startsWith(`}`)
+        || s.startsWith(`)`)
+        || s.startsWith(`）`)
+        || s.startsWith(`』`) //『』
+        || s.startsWith(`」`) //「」
 }
 
-function unescape(data: string) {
-    for (const e of escapeMagicList) {
-        data = data.replace(new RegExp(e[1], "g"), e[0]);
+function movePunctuations(a: string, b: string) {
+    while (shouldMove(b)) {
+        a += b[0];
+        b = b.slice(1)
     }
-    return data;
+    return [a, b]
 }
 
 function spliyBy(content: string[], s: string) {
     const sentences = [];
     for (let c of content) {
-        c = escape(c);
         const parts = c.split(new RegExp("\\" + s, "g"));
         for (let i = 0; i < parts.length; i++) {
-            if (i == parts.length - 1) {
-                sentences.push(parts[i]);
-            } else {
-                sentences.push(parts[i] + s);
+            if (i < parts.length - 1) {
+                parts[i] += s
+            }
+            if (i > 0) {
+                const [a, b] = movePunctuations(parts[i - 1], parts[i])
+                parts[i - 1] = a
+                parts[i] = b
             }
         }
+        sentences.push(...parts);
     }
-    return sentences.map(i => i.trim())
-        .filter(i => i != "*")
-        .filter(i => i.length > 0)
-        .map(i => unescape(i));
+    return sentences.map(i => i.trim()).filter(i => i != "*");
 }
 
 function getIDFromIAL(ial: string) {
