@@ -64,7 +64,15 @@ function shouldMove(s: string) {
         || s.startsWith(")")
         || s.startsWith("）")
         || s.startsWith("』") //『』
-        || s.startsWith("」"); //「」
+        || s.startsWith("」") //「」
+        || s.startsWith("!")
+        || s.startsWith("！")
+        || s.startsWith("。")
+        || s.startsWith("?")
+        || s.startsWith("？")
+        || s.startsWith(";")
+        || s.startsWith("；")
+        || s.startsWith("…");
 }
 
 function movePunctuations(a: string, b: string) {
@@ -83,10 +91,12 @@ function spliyBy(content: string[], s: string) {
             if (i < parts.length - 1) {
                 parts[i] += s;
             }
-            if (i > 0) {
-                const [a, b] = movePunctuations(parts[i - 1], parts[i]);
-                parts[i - 1] = a;
-                parts[i] = b;
+            let j = i;
+            while (j > 0) {
+                const [a, b] = movePunctuations(parts[j - 1], parts[j]);
+                parts[j - 1] = a;
+                parts[j] = b;
+                j--;
             }
         }
         sentences.push(...parts);
