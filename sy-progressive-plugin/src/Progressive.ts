@@ -111,7 +111,7 @@ class Progressive {
         const rows: Block[] = [];
         {
             const [rs, blocks] = await Promise.all([
-                siyuan.sql(`select id,ial from blocks where root_id="${noteID}" and type='p'`),
+                siyuan.sql(`select id,ial from blocks where root_id="${noteID}" and (type='p' or type='l' or type='h')`),
                 siyuan.getChildBlocks(noteID),
             ]);
             blocks.forEach(c => {
