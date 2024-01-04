@@ -537,12 +537,21 @@ class Progressive {
                 await this.openContentsLock(bookID);
                 break;
             case HtmlCBType.splitByPunctuations: {
-                const s = new SplitSentence(noteID);
+                const s = new SplitSentence(noteID, "p");
                 await s.split();
                 await s.insert();
                 break;
             }
             case HtmlCBType.splitByPunctuationsList: {
+                const s = new SplitSentence(noteID, "l");
+                await s.split();
+                await s.insert();
+                break;
+            }
+            case HtmlCBType.splitByPunctuationsListSeparate: {
+                const s = new SplitSentence(noteID, "ls");
+                await s.split();
+                await s.insert();
                 break;
             }
             default:

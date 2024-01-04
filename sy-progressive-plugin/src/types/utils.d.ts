@@ -5,3 +5,5 @@ type SettingCfgType = {
     addQuoteBlock: boolean,
     showLastBlock: boolean,
 }
+
+type AsList = "p" | "l" | "ls";
