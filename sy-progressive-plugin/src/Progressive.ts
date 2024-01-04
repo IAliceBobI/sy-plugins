@@ -538,7 +538,8 @@ class Progressive {
                 break;
             case HtmlCBType.splitByPunctuations: {
                 const s = new SplitSentence(noteID);
-                s.split();
+                await s.split();
+                await s.insert();
                 break;
             }
             case HtmlCBType.splitByPunctuationsList: {

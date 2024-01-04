@@ -10,6 +10,18 @@ export class SplitSentence {
         this.noteID = noteID;
     }
 
+    async insert() {
+        return navigator.locks.request("prog.SplitSentence.insert", { ifAvailable: true }, async (lock) => {
+            if (lock) {
+                for (const line of this.sentences.slice().reverse()) {
+                    await siyuan.insertBlockAfter(line, this.lastID);
+                }
+                await siyuan.insertBlockAfter("", this.lastID);
+                await siyuan.insertBlockAfter("", this.lastID);
+            }
+        })
+    }
+
     async split() {
         const rows = (await Promise.all((await siyuan.getChildBlocks(this.noteID))
             .filter(i => i.type == "p")
@@ -25,7 +37,7 @@ export class SplitSentence {
                 let ps = [row.content];
                 for (const s of "\n。！!？?；;") ps = spliyBy(ps, s);
                 ps = spliyBy(ps, "……");
-                this.sentences.push(...ps);
+                this.sentences.push(...ps.map(i => i + `\n{: ${RefIDKey}="${row.id}" }`));
             }
         }
     }
