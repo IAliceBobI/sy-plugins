@@ -567,22 +567,25 @@ class Progressive {
     }
 
     private async addReadingBtns(bookID: string, noteID: string, point: number) {
-        await siyuan.insertBlockAsChildOf(help.tempContent(this.helper.getReadingBtns3(bookID, noteID, point)), noteID);
-        await siyuan.insertBlockAsChildOf(help.tempContent(this.helper.getReadingBtns2(bookID, noteID, point)), noteID);
-        await siyuan.insertBlockAsChildOf(help.tempContent(this.helper.getReadingBtns1(bookID, noteID, point)), noteID);
+        const btns = [];
+        btns.push(help.tempContent(this.helper.getReadingBtns1(bookID, noteID, point)));
+        btns.push(help.tempContent(this.helper.getReadingBtns2(bookID, noteID, point)));
+        btns.push(help.tempContent(this.helper.getReadingBtns3(bookID, noteID, point)));
+        await siyuan.insertBlockAsChildOf(btns.join("\n\n"), noteID);
     }
 
     private async fullfilContent(bookID: string, piecePre: string[], piece: string[], noteID: string) {
         this.storage.updateBookInfoTime(bookID);
-        for (const id of piece.slice().reverse()) {
-            await help.copyAndInsertBlock(id, this.lute, noteID);
+        const allContent = [];
+        if (this.settings.showLastBlock && piecePre.length > 0) {
+            const lastID = piecePre[piecePre.length - 1];
+            const md = await help.copyAndInsertBlock(lastID, this.lute, "custom-prog-piece-previous");
+            allContent.push(md);
         }
-        if (this.settings.showLastBlock) {
-            for (const id of piecePre.slice().reverse()) {
-                await help.copyAndInsertBlock(id, this.lute, noteID, "custom-prog-piece-previous");
-                break;
-            }
+        for (const id of piece) {
+            allContent.push(await help.copyAndInsertBlock(id, this.lute));
         }
+        await siyuan.insertBlockAsChildOf(allContent.join("\n\n"), noteID);
     }
 
     private async getBook2Learn(bookID?: string): Promise<help.BookInfo> {

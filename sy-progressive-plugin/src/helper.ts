@@ -198,7 +198,7 @@ export function splitByBlockCount(groups: WordCountType[][], blockNumber: number
     return tmp;
 }
 
-export async function copyAndInsertBlock(id: string, lute: Lute, noteID: string, mark?: string) {
+export async function copyAndInsertBlock(id: string, lute: Lute, mark?: string) {
     const tempDiv = await utils.getBlockDiv(id);
     utils.cleanDiv(tempDiv, true);
     let md = lute.BlockDOM2Md(tempDiv.outerHTML);
@@ -207,7 +207,7 @@ export async function copyAndInsertBlock(id: string, lute: Lute, noteID: string,
     } else {
         md = md + "\n" + `{: ${RefIDKey}="${id}" }`;
     }
-    await siyuan.insertBlockAsChildOf(md, noteID);
+    return md;
 }
 
 export function rmBadThings(s: string) {
