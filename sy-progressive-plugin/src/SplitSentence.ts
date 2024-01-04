@@ -15,8 +15,7 @@ export class SplitSentence {
 
     async insert() {
         return navigator.locks.request("prog.SplitSentence.insert", { ifAvailable: true }, async (lock) => {
-            if (lock) {
-                if (!this.lastID) return;
+            if (lock && this.lastID) {
                 if (this.asList == "p") {
                     await siyuan.insertBlockAfter(this.sentences.join("\n"), this.lastID);
                 } else {
@@ -44,11 +43,11 @@ export class SplitSentence {
                 for (const s of "\n。！!？?；;") ps = spliyBy(ps, s);
                 ps = spliyBy(ps, "……");
                 if (this.asList == "p")
-                    this.sentences.push(...ps.map(i => i + ` ((${ref} "*"))\n{: ${RefIDKey}="${ref}" }`));
+                    this.sentences.push(...ps.map(i => i + ` ((${ref} "*"))\n{: ${RefIDKey}="${ref}"}`));
                 else if (this.asList == "ls")
-                    this.sentences.push(...ps.map(i => i + ` ((${ref} "*"))\n\t{: ${RefIDKey}="${ref}" }\n{: ${RefIDKey}="${ref}" }`));
+                    this.sentences.push(...ps.map(i => i + ` ((${ref} "*"))\n\t{: ${RefIDKey}="${ref}"}\n{: ${RefIDKey}="${ref}"}`));
                 else
-                    this.sentences.push(...ps.map(i => i + ` ((${ref} "*"))\n\t{: ${RefIDKey}="${ref}" }\t{: ${RefIDKey}="${ref}" }`));
+                    this.sentences.push(...ps.map(i => `{: ${RefIDKey}="${ref}"} ` + i + ` ((${ref} "*"))\n\t{: ${RefIDKey}="${ref}"}`));
             }
         }
     }
@@ -78,7 +77,7 @@ function movePunctuations(a: string, b: string) {
 
 function spliyBy(content: string[], s: string) {
     const sentences = [];
-    for (let c of content) {
+    for (let c of content.filter(i => i.length > 0)) {
         const parts = c.split(new RegExp("\\" + s, "g"));
         for (let i = 0; i < parts.length; i++) {
             if (i < parts.length - 1) {
@@ -92,7 +91,11 @@ function spliyBy(content: string[], s: string) {
         }
         sentences.push(...parts);
     }
-    return sentences.map(i => i.trim()).filter(i => i != "*");
+    return sentences
+        .map(i => i.trim())
+        .map(i => i.trim().replace(/\*+$/g, ""))
+        .filter(i => i.length > 0)
+        .filter(i => i != "*");
 }
 
 function getIDFromIAL(ial: string) {

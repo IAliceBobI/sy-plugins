@@ -591,9 +591,9 @@ export class Helper {
         return `{{{col
 ${this.btnSplitByPunctuations(bookID, noteID, point)}
 
-${this.btnSplitByPunctuationsList(bookID, noteID, point)}
-
 ${this.btnSplitByPunctuationsListSeparate(bookID, noteID, point)}
+
+${this.btnSplitByPunctuationsList(bookID, noteID, point)}
 
 　
 
