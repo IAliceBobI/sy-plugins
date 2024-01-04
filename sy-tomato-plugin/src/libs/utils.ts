@@ -10,24 +10,34 @@ export function cleanDiv(div: HTMLDivElement, setRef: boolean): [string, HTMLEle
         e.removeAttribute(gconst.DATA_NODE_ID);
     });
     if (setRef) {
-        for (const e of div.querySelectorAll(`[${gconst.DATA_TYPE}~="${gconst.BLOCK_REF}"]`)) {
-            if (e.textContent.trim() == "*") {
-                return [id, div, true];
+        let setTheRef = false;
+        const originID = div.getAttribute(gconst.RefIDKey) ?? "";
+        if (originID) {
+            const all = div.querySelectorAll(`[${gconst.DATA_ID}="${originID}"]`) ?? [];
+            if (all.length == 0) {
+                const spanOri = div.querySelector("[contenteditable=\"true\"]")?.appendChild(document.createElement("span"));
+                if (spanOri) {
+                    spanOri.setAttribute(gconst.DATA_TYPE, gconst.BlockNodeEnum.BLOCK_REF);
+                    spanOri.setAttribute(gconst.DATA_SUBTYPE, "s");
+                    spanOri.setAttribute(gconst.DATA_ID, originID);
+                    spanOri.innerText = "@";
+                    setTheRef = true;
+                }
+            } else {
+                all.forEach((e: HTMLElement) => {
+                    if (e.innerText == "*") e.innerText = "@";
+                });
             }
         }
         const span = div.querySelector("[contenteditable=\"true\"]")?.appendChild(document.createElement("span"));
         if (span) {
-            const originID = div.getAttribute(gconst.RefIDKey) ?? "";
             span.setAttribute(gconst.DATA_TYPE, gconst.BlockNodeEnum.BLOCK_REF);
             span.setAttribute(gconst.DATA_SUBTYPE, "s");
-            if (originID) {
-                span.setAttribute(gconst.DATA_ID, originID);
-            } else {
-                span.setAttribute(gconst.DATA_ID, id);
-            }
+            span.setAttribute(gconst.DATA_ID, id);
             span.innerText = "*";
-            return [id, div, true];
+            setTheRef = true;
         }
+        if (setTheRef) return [id, div, true];
     }
     return [id, div, false];
 }
