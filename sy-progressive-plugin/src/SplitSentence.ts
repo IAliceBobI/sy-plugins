@@ -4,6 +4,7 @@ import { siyuan } from "../../sy-tomato-plugin/src/libs/utils";
 export class SplitSentence {
     private noteID: string;
     private lastID: string;
+    private sentences: string[];
 
     constructor(noteID: string) {
         this.noteID = noteID;
@@ -16,14 +17,68 @@ export class SplitSentence {
             where id="${b.id}"
             and content != "" and content is not null
             and ial like "%${RefIDKey}=%"`)))).filter(i => i.content);
+        this.sentences = [];
         for (const row of rows) {
             this.lastID = row.id;
             const ref = getIDFromIAL(row.ial)
             if (ref) {
-                row.content
+                let ps = [row.content];
+                for (const s of "\n。！!？?；;") ps = spliyBy(ps, s);
+                ps = spliyBy(ps, "……");
+                this.sentences.push(...ps);
             }
         }
     }
+}
+
+const escapeMagic = "JZzvQcXQgCnlRZ7NpbRCWfjkirZUoBtMShXPRrDLAszJvbd";
+
+const escapeMagicList = [
+    ["。”", escapeMagic + 11],
+    ['。"', escapeMagic + 12],
+    ['!"', escapeMagic + 31],
+    ["!”", escapeMagic + 32],
+    ["！”", escapeMagic + 41],
+    ['！"', escapeMagic + 42],
+    ["……”", escapeMagic + 51],
+    ['……"', escapeMagic + 52],
+    ["?”", escapeMagic + 61],
+    ['?"', escapeMagic + 62],
+    ["？”", escapeMagic + 71],
+    ['？"', escapeMagic + 72],
+]
+
+function escape(data: string) {
+    for (const e of escapeMagicList) {
+        data = data.replace(new RegExp("\\" + e[0], "g"), e[1])
+    }
+    return data;
+}
+
+function unescape(data: string) {
+    for (const e of escapeMagicList) {
+        data = data.replace(new RegExp(e[1], "g"), e[0])
+    }
+    return data;
+}
+
+function spliyBy(content: string[], s: string) {
+    const sentences = [];
+    for (let c of content) {
+        c = escape(c);
+        const parts = c.split(new RegExp("\\" + s, "g"));
+        for (let i = 0; i < parts.length; i++) {
+            if (i == parts.length - 1) {
+                sentences.push(parts[i]);
+            } else {
+                sentences.push(parts[i] + s);
+            }
+        }
+    }
+    return sentences.map(i => i.trim())
+        .filter(i => i != "*")
+        .filter(i => i.length > 0)
+        .map(i => unescape(i))
 }
 
 function getIDFromIAL(ial: string) {
