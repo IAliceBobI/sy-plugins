@@ -31,6 +31,8 @@ export enum HtmlCBType {
     openFlashcardTab = 12,
     deleteAndBack = 13,
     viewContents = 14,
+    splitByPunctuations = 15,
+    splitByPunctuationsList = 16,
 }
 
 export class Storage {
@@ -548,7 +550,7 @@ export class Helper {
             </div>
             <script>
                 function ${btnID}() {
-                    globalThis.progressive_zZmqus5PtYRi.progressive.htmlBlockReadNextPeice("${bookID}","${noteID}",${HtmlCBType.openFlashcardTab},${point})
+                    globalThis.progressive_zZmqus5PtYRi.progressive.htmlBlockReadNextPeice("${bookID}","${noteID}",${HtmlCBType.splitByPunctuations},${point})
                 }
             </script>
         </div>`;
@@ -563,7 +565,7 @@ export class Helper {
             </div>
             <script>
                 function ${btnID}() {
-                    globalThis.progressive_zZmqus5PtYRi.progressive.htmlBlockReadNextPeice("${bookID}","${noteID}",${HtmlCBType.openFlashcardTab},${point})
+                    globalThis.progressive_zZmqus5PtYRi.progressive.htmlBlockReadNextPeice("${bookID}","${noteID}",${HtmlCBType.splitByPunctuationsList},${point})
                 }
             </script>
         </div>`;

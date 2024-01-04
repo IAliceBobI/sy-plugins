@@ -324,20 +324,6 @@ class Progressive {
             } else {
                 await this.storage.toggleAutoCard(bookID, "yes");
             }
-            // if (await isPiece(bookID)) {
-            //     const row = await siyuan.sqlOne(`select ial,path,hpath from blocks where id="${bookID}"`);
-            //     const bookHPath = row?.hpath;
-            //     const bookPath = row?.path;
-            //     if (!bookHPath || !bookPath) return;
-            //     const dirID = await siyuan.createDocWithMdIfNotExists(boxID, `${bookHPath}/${bookName}-parts`, "");
-            //     const dirRow = await siyuan.sqlOne(`select ial,path,hpath from blocks where id="${dirID}"`);
-            //     const dirPath = dirRow?.path;
-            //     if (!dirPath) return;
-            //     // move to xx-parts
-            //     const { path } = await siyuan.duplicateDoc(bookID);
-            //     await siyuan.renameDoc(bookID, path, bookName);
-            //     await siyuan.moveDocs([bookPath], dirPath, boxID);
-            // }
             this.startToLearnWithLock(bookID);
         });
     }
@@ -548,6 +534,10 @@ class Progressive {
                 break;
             case HtmlCBType.viewContents:
                 await this.openContentsLock(bookID);
+                break;
+            case HtmlCBType.splitByPunctuations:
+                break;
+            case HtmlCBType.splitByPunctuationsList:
                 break;
             default:
                 throw "Invalid HtmlCBType " + cbType;
