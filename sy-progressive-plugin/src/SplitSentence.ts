@@ -1,4 +1,4 @@
-import { RefIDKey } from "../../sy-tomato-plugin/src/libs/gconst";
+import { PROG_ORIGIN_TEXT, RefIDKey } from "../../sy-tomato-plugin/src/libs/gconst";
 import { siyuan } from "../../sy-tomato-plugin/src/libs/utils";
 
 
@@ -36,7 +36,7 @@ export class SplitSentence {
             .map(b => siyuan.sqlOne(`select id,content,ial from blocks 
             where id="${b.id}"
             and content != "" and content is not null
-            and ial like "%${RefIDKey}=%"`)))).filter(i => i.content);
+            and ial like '%${PROG_ORIGIN_TEXT}="1"%'`)))).filter(i => i.content);
         this.textAreas = [];
         for (const row of rows) {
             this.lastID = row.id;

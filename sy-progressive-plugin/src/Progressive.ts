@@ -6,7 +6,7 @@ import { HtmlCBType } from "./helper";
 import * as utils from "../../sy-tomato-plugin/src/libs/utils";
 import * as help from "./helper";
 import * as constants from "./constants";
-import { IN_PIECE_REF, MarkKey, RefIDKey } from "../../sy-tomato-plugin/src/libs/gconst";
+import { IN_PIECE_REF, MarkKey, PROG_ORIGIN_TEXT, RefIDKey } from "../../sy-tomato-plugin/src/libs/gconst";
 import { SplitSentence } from "./SplitSentence";
 
 class Progressive {
@@ -577,11 +577,10 @@ class Progressive {
         const allContent = [];
         if (this.settings.showLastBlock && piecePre.length > 0) {
             const lastID = piecePre[piecePre.length - 1];
-            const md = await help.copyBlock(lastID, this.lute, "custom-prog-piece-previous");
-            allContent.push(md);
+            allContent.push(await help.copyBlock(lastID, this.lute, "custom-prog-piece-previous"));
         }
         for (const id of piece) {
-            allContent.push(await help.copyBlock(id, this.lute));
+            allContent.push(await help.copyBlock(id, this.lute, PROG_ORIGIN_TEXT));
         }
         await siyuan.insertBlockAsChildOf(allContent.join("\n\n"), noteID);
     }
