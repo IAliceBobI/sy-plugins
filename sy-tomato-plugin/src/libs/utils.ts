@@ -27,15 +27,23 @@ export function cleanDiv(div: HTMLDivElement, setRef: boolean): [string, HTMLEle
                 all.forEach((e: HTMLElement) => {
                     if (e.innerText == "*") e.innerText = "@";
                 });
+                setTheRef = true;
             }
         }
-        const span = div.querySelector("[contenteditable=\"true\"]")?.appendChild(document.createElement("span"));
-        if (span) {
-            span.setAttribute(gconst.DATA_TYPE, gconst.BlockNodeEnum.BLOCK_REF);
-            span.setAttribute(gconst.DATA_SUBTYPE, "s");
-            span.setAttribute(gconst.DATA_ID, id);
-            span.innerText = "*";
-            setTheRef = true;
+        {
+            const all = div.querySelectorAll(`[${gconst.DATA_ID}="${id}"]`) ?? [];
+            if (all.length == 0) {
+                const span = div.querySelector("[contenteditable=\"true\"]")?.appendChild(document.createElement("span"));
+                if (span) {
+                    span.setAttribute(gconst.DATA_TYPE, gconst.BlockNodeEnum.BLOCK_REF);
+                    span.setAttribute(gconst.DATA_SUBTYPE, "s");
+                    span.setAttribute(gconst.DATA_ID, id);
+                    span.innerText = "*";
+                    setTheRef = true;
+                }
+            } else {
+                setTheRef = true;
+            }
         }
         if (setTheRef) return [id, div, true];
     }
