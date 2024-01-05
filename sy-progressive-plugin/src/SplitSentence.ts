@@ -1,12 +1,12 @@
 import { RefIDKey } from "../../sy-tomato-plugin/src/libs/gconst";
-import { siyuan } from "../../sy-tomato-plugin/src/libs/utils";
+import { NewNodeID, siyuan } from "../../sy-tomato-plugin/src/libs/utils";
 
 
 export class SplitSentence {
     private asList: AsList;
     private noteID: string;
     private lastID: string;
-    private sentences: string[];
+    private textAreas: string[][];
 
     constructor(noteID: string, asList: AsList) {
         this.noteID = noteID;
@@ -17,11 +17,10 @@ export class SplitSentence {
         return navigator.locks.request("prog.SplitSentence.insert", { ifAvailable: true }, async (lock) => {
             if (lock && this.lastID) {
                 if (this.asList == "p") {
-                    await siyuan.insertBlockAfter(this.sentences.join("\n"), this.lastID);
+                    await siyuan.insertBlockAfter(this.textAreas.join("\n"), this.lastID);
                 } else {
-                    await siyuan.insertBlockAfter("* " + this.sentences.join("\n* "), this.lastID);
+                    await siyuan.insertBlockAfter("* " + this.textAreas.join("\n* "), this.lastID);
                 }
-                await siyuan.insertBlockAfter("", this.lastID);
                 await siyuan.insertBlockAfter("", this.lastID);
             }
         });
@@ -34,20 +33,23 @@ export class SplitSentence {
             where id="${b.id}"
             and content != "" and content is not null
             and ial like "%${RefIDKey}=%"`)))).filter(i => i.content);
-        this.sentences = [];
+        this.textAreas = [];
         for (const row of rows) {
+            const sentences: string[] = [];
             this.lastID = row.id;
             const ref = getIDFromIAL(row.ial);
             if (ref) {
                 let ps = [row.content];
                 for (const s of "\n。！!？?；;:：") ps = spliyBy(ps, s);
                 ps = spliyBy(ps, "……");
-                if (this.asList == "p")
-                    this.sentences.push(...ps.map(i => i + ` ((${ref} "*"))\n{: ${RefIDKey}="${ref}"}`));
-                else if (this.asList == "ls")
-                    this.sentences.push(...ps.map(i => i + ` ((${ref} "*"))\n\t{: ${RefIDKey}="${ref}"}\n{: ${RefIDKey}="${ref}"}`));
-                else
-                    this.sentences.push(...ps.map(i => `{: ${RefIDKey}="${ref}"} ` + i + ` ((${ref} "*"))\n\t{: ${RefIDKey}="${ref}"}`));
+                if (this.asList == "p") {
+                    sentences.push(...ps.map(i => i + ` ((${ref} "*"))\n{: ${RefIDKey}="${ref}"}`));
+                } else if (this.asList == "ls") {
+                    sentences.push(...ps.map(i => i + ` ((${ref} "*"))\n\t{: ${RefIDKey}="${ref}"}\n{: ${RefIDKey}="${ref}"}`));
+                } else {
+                    sentences.push(...ps.map(i => `{: ${RefIDKey}="${ref}"} ` + i + ` ((${ref} "*"))\n\t{: ${RefIDKey}="${ref}"}`));
+                }
+                this.textAreas.push(sentences);
             }
         }
     }
@@ -105,7 +107,6 @@ function spliyBy(content: string[], s: string) {
             .map(i => i.trim().replace(/\*+$/g, ""))
             .filter(i => i.length > 0)
             .filter(i => i != "*"));
-        sentences.push("");
     }
     return sentences;
 }
