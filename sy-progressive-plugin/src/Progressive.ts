@@ -445,7 +445,6 @@ class Progressive {
         noteID = await help.createNote(bookInfo.boxID, bookInfo.bookID, piece, point);
         if (noteID) {
             await this.addReadingBtns(bookID, noteID, point);
-            await siyuan.insertBlockAsChildOf(help.tempContent("---"), noteID);
             await this.fullfilContent(bookInfo.bookID, piecePre, piece, noteID);
             this.addAndClose(await openTab({
                 app: this.plugin.app, doc: { id: noteID },
@@ -521,7 +520,6 @@ class Progressive {
                 const index = await this.storage.loadBookIndexIfNeeded(bookID);
                 const piecePre = index[point - 1] ?? [];
                 const piece = index[point] ?? [];
-                await siyuan.insertBlockAsChildOf(help.tempContent("---"), noteID);
                 await this.fullfilContent(bookID, piecePre, piece, noteID);
                 break;
             }
@@ -562,10 +560,11 @@ class Progressive {
 
     private async addReadingBtns(bookID: string, noteID: string, point: number) {
         const btns = [];
+        btns.push(help.tempContent("---"));
         btns.push(help.tempContent(this.helper.getReadingBtns1(bookID, noteID, point)));
         btns.push(help.tempContent(this.helper.getReadingBtns2(bookID, noteID, point)));
         btns.push(help.tempContent(this.helper.getReadingBtns3(bookID, noteID, point)));
-        await siyuan.insertBlockAsChildOf(btns.join("\n\n"), noteID);
+        await siyuan.insertBlockAsChildOf(btns.join("\n"), noteID);
     }
 
     private async fullfilContent(bookID: string, piecePre: string[], piece: string[], noteID: string) {
