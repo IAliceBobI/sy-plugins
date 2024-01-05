@@ -1,4 +1,4 @@
-import { IDLen, MarkKey, RefIDKey, TEMP_CONTENT } from "../../sy-tomato-plugin/src/libs/gconst";
+import { IDLen, MarkKey, PROG_ORIGIN_TEXT, RefIDKey, TEMP_CONTENT } from "../../sy-tomato-plugin/src/libs/gconst";
 import { siyuan, styleColor } from "../../sy-tomato-plugin/src/libs/utils";
 import * as utils from "../../sy-tomato-plugin/src/libs/utils";
 import * as constants from "./constants";
@@ -215,8 +215,7 @@ export function rmBadThings(s: string) {
 }
 
 export async function cleanNote(noteID: string) {
-    const blocks = await siyuan.getChildBlocks(noteID) ?? [];
-    for (const row of await Promise.all(blocks.map(i => siyuan.sqlOne(`select id, ial, markdown from blocks where id="${i.id}"`)))) {
+    for (const row of await siyuan.sql(`select ial,markdown,id from blocks where root_id="${noteID}" and ial like '%${PROG_ORIGIN_TEXT}="1"%'`)) {
         const ial: string = row?.ial ?? "";
         const markdown: string = row?.markdown ?? "";
         if (ial.includes(TEMP_CONTENT)) {
@@ -233,11 +232,6 @@ export async function cleanNote(noteID: string) {
                     if (rmBadThings(oriMarkdown) == rmBadThings(markdownWithoutStar)) {
                         await siyuan.safeDeleteBlock(row.id); // delete the same content
                     }
-                    // else {
-                    //     const attrs: { [key: string]: string } = {};
-                    //     attrs[constants.RefIDKey] = ""; // keep the content
-                    //     await siyuan.setBlockAttrs(child.id, attrs);
-                    // }
                     break;
                 }
             }

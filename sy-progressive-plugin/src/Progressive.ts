@@ -6,7 +6,7 @@ import { HtmlCBType } from "./helper";
 import * as utils from "../../sy-tomato-plugin/src/libs/utils";
 import * as help from "./helper";
 import * as constants from "./constants";
-import { IN_PIECE_REF, MarkKey, PROG_ORIGIN_TEXT, RefIDKey } from "../../sy-tomato-plugin/src/libs/gconst";
+import { MarkKey, PROG_ORIGIN_TEXT, RefIDKey } from "../../sy-tomato-plugin/src/libs/gconst";
 import { SplitSentence } from "./SplitSentence";
 
 class Progressive {
@@ -525,7 +525,6 @@ class Progressive {
             }
             case HtmlCBType.cleanUnchanged:
                 await help.cleanNote(noteID);
-                await this.addReadingBtns(bookID, noteID, point);
                 break;
             case HtmlCBType.openFlashcardTab:
                 if (bookID) openTab({ app: this.plugin.app, card: { type: "doc", id: bookID } });
@@ -566,10 +565,10 @@ class Progressive {
         btns.push(help.tempContent(this.helper.getReadingBtns2(bookID, noteID, point)));
         btns.push(help.tempContent(this.helper.getReadingBtns3(bookID, noteID, point), id));
         await siyuan.appendBlock(btns.join("\n"), noteID);
-        const rows = await siyuan.sql(`select id from blocks where ial like '%${IN_PIECE_REF}="1"%' and root_id="${noteID}"`);
-        for (const row of rows.reverse()) {
-            try { await siyuan.safeMoveBlockAfter(row.id, id); } catch (_e) { }
-        }
+        // const rows = await siyuan.sql(`select id from blocks where ial like '%${IN_PIECE_REF}="1"%' and root_id="${noteID}"`);
+        // for (const row of rows.reverse()) {
+        //     try { await siyuan.safeMoveBlockAfter(row.id, id); } catch (_e) { }
+        // }
     }
 
     private async fullfilContent(bookID: string, piecePre: string[], piece: string[], noteID: string) {
