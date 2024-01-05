@@ -629,7 +629,7 @@ export const siyuan = {
     async removeBrokenCards() {
         const handle = setInterval(() => {
             siyuan.pushMsg("正在确认无效闪卡，请耐心等待……", 2000);
-        }, 3500);
+        }, 2400);
         try {
             let invalidCardIDs = [];
             for (let page = 1; page < Number.MAX_SAFE_INTEGER; page++) {

@@ -32,8 +32,8 @@ export class SplitSentence {
 
     async split() {
         const rows = (await Promise.all((await siyuan.getChildBlocks(this.noteID))
-            .filter(i => i.type == "p")
-            .map(b => siyuan.sqlOne(`select id,content,ial from blocks 
+            .filter(i => i.type == "p" || i.type == "h")
+            .map(b => siyuan.sqlOne(`select id,content,ial,type,markdown from blocks 
             where id="${b.id}"
             and content != "" and content is not null
             and ial like '%${PROG_ORIGIN_TEXT}="1"%'`)))).filter(i => i.content);
@@ -42,19 +42,34 @@ export class SplitSentence {
             this.lastID = row.id;
             const ref = getIDFromIAL(row.ial);
             if (ref) {
-                let ps = [row.content];
-                for (const s of "\n。！!？?；;:：") ps = spliyBy(ps, s);
-                ps = spliyBy(ps, "……");
-                if (this.asList == "p") {
-                    this.textAreas.push({
-                        blocks: ps.map(i => i + ` ((${ref} "*"))\n{: ${RefIDKey}="${ref}"}`),
-                        ref,
-                    });
+                if (row.type == 'h') {
+                    const ps = [row.markdown];
+                    if (this.asList == "p") {
+                        this.textAreas.push({
+                            blocks: ps.map(i => i + `\n{: ${RefIDKey}="${ref}"}`),
+                            ref,
+                        });
+                    } else {
+                        this.textAreas.push({
+                            blocks: ps.map(i => `{: ${RefIDKey}="${ref}"} ` + i + `\n\t{: ${RefIDKey}="${ref}"}`),
+                            ref,
+                        });
+                    }
                 } else {
-                    this.textAreas.push({
-                        blocks: ps.map(i => `{: ${RefIDKey}="${ref}"} ` + i + ` ((${ref} "*"))\n\t{: ${RefIDKey}="${ref}"}`),
-                        ref,
-                    });
+                    let ps = [row.content];
+                    for (const s of "\n。！!？?；;:：") ps = spliyBy(ps, s);
+                    ps = spliyBy(ps, "……");
+                    if (this.asList == "p") {
+                        this.textAreas.push({
+                            blocks: ps.map(i => i + ` ((${ref} "*"))\n{: ${RefIDKey}="${ref}"}`),
+                            ref,
+                        });
+                    } else {
+                        this.textAreas.push({
+                            blocks: ps.map(i => `{: ${RefIDKey}="${ref}"} ` + i + ` ((${ref} "*"))\n\t{: ${RefIDKey}="${ref}"}`),
+                            ref,
+                        });
+                    }
                 }
             }
         }
