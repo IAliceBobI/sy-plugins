@@ -274,27 +274,32 @@ export async function findContents(bookID: string) {
 }
 
 export async function createNote(boxID: string, bookID: string, piece: string[], point: number) {
+    const attr = {};
+    const row = await siyuan.sqlOne(`select hpath,content from blocks where type='d' and id='${bookID}'`);
+    let dir = row?.hpath ?? "";
+    const bookName = row?.content ?? "";
+    if (!dir || !bookName) return "";
+
     let content: string;
     for (const blockID of piece) {
         content = (await siyuan.getBlockMarkdownAndContent(blockID))?.content ?? "";
         content = content.slice(0, 15).replace(/[　\/ ​]+/g, "").trim();
         if (content) break;
     }
-    if (!content) content = `[${point}]`;
-    else content = `[${point}]` + content;
-    const row = await siyuan.sqlOne(`select hpath,content from blocks where type='d' and id='${bookID}'`);
-    let dir = row?.hpath ?? "";
-    const bookName = row?.content ?? "";
-    if (dir) {
-        dir = dir + `/${bookName}-pieces/` + content;
-        const docID = await siyuan.createDocWithMd(boxID, dir, "");
-        const attr = {};
-        attr[MarkKey] = getDocIalMark(bookID, point);
+
+    if (!content) {
         attr["alias"] = bookName;
-        await siyuan.setBlockAttrs(docID, attr);
-        return docID;
+        content = `[${point}]${bookName}`;
+    } else {
+        attr["alias"] = content;
+        content = `[${point}]${content}`;
     }
-    return "";
+
+    dir = dir + `/${bookName}-pieces/` + content;
+    const docID = await siyuan.createDocWithMd(boxID, dir, "");
+    attr[MarkKey] = getDocIalMark(bookID, point);
+    await siyuan.setBlockAttrs(docID, attr);
+    return docID;
 }
 
 export class Helper {
