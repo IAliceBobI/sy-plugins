@@ -40,7 +40,7 @@ export class SplitSentence {
             const ref = getIDFromIAL(row.ial);
             if (ref) {
                 let ps = [row.content];
-                for (const s of "\n。！!？?；;") ps = spliyBy(ps, s);
+                for (const s of "\n。！!？?；;:：") ps = spliyBy(ps, s);
                 ps = spliyBy(ps, "……");
                 if (this.asList == "p")
                     this.sentences.push(...ps.map(i => i + ` ((${ref} "*"))\n{: ${RefIDKey}="${ref}"}`));
@@ -72,6 +72,8 @@ function shouldMove(s: string) {
         || s.startsWith("？")
         || s.startsWith(";")
         || s.startsWith("；")
+        || s.startsWith(":")
+        || s.startsWith("：")
         || s.startsWith("…");
 }
 
@@ -84,7 +86,7 @@ function movePunctuations(a: string, b: string) {
 }
 
 function spliyBy(content: string[], s: string) {
-    const sentences = [];
+    const sentences: string[] = [];
     for (const c of content.filter(i => i.length > 0)) {
         const parts = c.split(new RegExp("\\" + s, "g"));
         for (let i = 0; i < parts.length; i++) {
@@ -99,13 +101,13 @@ function spliyBy(content: string[], s: string) {
                 j--;
             }
         }
-        sentences.push(...parts);
+        sentences.push(...parts.map(i => i.trim())
+            .map(i => i.trim().replace(/\*+$/g, ""))
+            .filter(i => i.length > 0)
+            .filter(i => i != "*"));
+        sentences.push("");
     }
-    return sentences
-        .map(i => i.trim())
-        .map(i => i.trim().replace(/\*+$/g, ""))
-        .filter(i => i.length > 0)
-        .filter(i => i != "*");
+    return sentences;
 }
 
 function getIDFromIAL(ial: string) {
