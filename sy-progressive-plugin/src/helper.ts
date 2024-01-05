@@ -157,8 +157,9 @@ export function bookCacheKey(bookID: string) {
     return bookID + "_cache";
 }
 
-export function tempContent(content: string) { // for btns and split lines
-    return content + `\n{: ${MarkKey}="${TEMP_CONTENT}"}`;
+export function tempContent(content: string, id?: string) { // for btns and split lines
+    if (!id) return content + `\n{: ${MarkKey}="${TEMP_CONTENT}"}`;
+    else return content + `\n{: id="${id}" ${MarkKey}="${TEMP_CONTENT}"}`;
 }
 
 export function getDocIalMark(bookID: string, point: number) {
