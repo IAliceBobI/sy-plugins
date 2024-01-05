@@ -31,15 +31,23 @@ export class SplitSentence {
     }
 
     async split() {
+        const msg = "请重新插入原文";
+        {
+            const rows = await siyuan.sql(`select id from blocks where ial like '%${PROG_ORIGIN_TEXT}="1"%' and root_id="${this.noteID}" limit 1`);
+            if (rows.length == 0) {
+                await siyuan.pushMsg(msg);
+                return;
+            }
+        }
         const rows = (await Promise.all((await siyuan.getChildBlocks(this.noteID))
-            .filter(i => i.type == "p" || i.type == "h")
+            .filter(i => i.type != "html" && i.type != "t" && i.type != "s")
             .map(b => siyuan.sqlOne(`select id,content,ial,type,markdown from blocks 
             where id="${b.id}"
             and content != "" and content is not null
             and ial like '%${PROG_ORIGIN_TEXT}="1"%'`)))).filter(i => i.content);
         this.textAreas = [];
         if (rows.length == 0) {
-            await siyuan.pushMsg("请重新插入原文");
+            await siyuan.pushMsg(msg);
         }
         for (const row of rows) {
             this.lastID = row.id;
