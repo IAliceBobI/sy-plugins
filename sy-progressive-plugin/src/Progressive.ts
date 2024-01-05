@@ -75,7 +75,7 @@ class Progressive {
                     const noteID = protyle.block.rootID;
                     navigator.locks.request(constants.TryAddStarsLock, { ifAvailable: true }, async (lock) => {
                         if (lock) {
-                            for (let i = 0; i < 6; i++) {
+                            for (let i = 0; i < 2; i++) {
                                 await utils.sleep(2000);
                                 await this.tryAddRefAttr(noteID);
                             }
@@ -108,17 +108,13 @@ class Progressive {
     }
 
     private async tryAddRefAttr(noteID: string) {
-        const rows: Block[] = [];
-        {
-            const [rs, blocks] = await Promise.all([
-                siyuan.sql(`select id,ial from blocks where root_id="${noteID}" and (type='p' or type='l' or type='h')`),
-                siyuan.getChildBlocks(noteID),
-            ]);
-            blocks.forEach(c => {
-                const r = rs.find(row => row.id == c.id);
-                if (r) rows.push(r);
-            });
-        }
+        const children = await siyuan.getChildBlocks(noteID);
+        const ids = children.filter(c => {
+            return c.type == "h" || c.type == "p" || c.type == "l";
+        }).map(c => {
+            return `"${c.id}"`
+        });
+        const rows = await siyuan.sql(`select id,ial from blocks where id in (${ids.join(",")})`); // TODO: too many?
         const findSibling = (block: Block) => {
             let preBlock: Block;
             if (block) {
@@ -537,12 +533,14 @@ class Progressive {
                 const s = new SplitSentence(noteID, "p");
                 await s.split();
                 await s.insert();
+                await help.cleanNote(noteID);
                 break;
             }
             case HtmlCBType.splitByPunctuationsList: {
                 const s = new SplitSentence(noteID, "l");
                 await s.split();
                 await s.insert();
+                await help.cleanNote(noteID);
                 break;
             }
             default:
