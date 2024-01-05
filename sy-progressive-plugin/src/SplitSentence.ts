@@ -38,11 +38,14 @@ export class SplitSentence {
             and content != "" and content is not null
             and ial like '%${PROG_ORIGIN_TEXT}="1"%'`)))).filter(i => i.content);
         this.textAreas = [];
+        if (rows.length == 0) {
+            await siyuan.pushMsg("请重新插入原文");
+        }
         for (const row of rows) {
             this.lastID = row.id;
             const ref = getIDFromIAL(row.ial);
             if (ref) {
-                if (row.type == 'h') {
+                if (row.type == "h") {
                     const ps = [row.markdown];
                     if (this.asList == "p") {
                         this.textAreas.push({

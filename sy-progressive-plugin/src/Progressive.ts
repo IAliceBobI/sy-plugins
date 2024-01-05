@@ -87,7 +87,7 @@ class Progressive {
         this.plugin.eventBus.on("ws-main", async ({ detail }) => {
             if (detail?.cmd == WsActionTypes.transactions) {
                 for (const element of detail.data as TransactionData[]) {
-                    for (const ops of element?.doOperations) {
+                    for (const ops of element?.doOperations ?? []) {
                         if (ops?.action == "update" && ops.id) {
                             const row = await siyuan.getDocRowByBlockID(ops.id);
                             if (row?.id) {
@@ -106,9 +106,9 @@ class Progressive {
                             }
                         }
                     }
-                };
+                }
             }
-        })
+        });
     }
 
     private async tryAddRefAttr(noteID: string) {
@@ -116,7 +116,7 @@ class Progressive {
         const ids = children.filter(c => {
             return c.type == "h" || c.type == "p" || c.type == "l";
         }).map(c => {
-            return `"${c.id}"`
+            return `"${c.id}"`;
         });
         const rows = await siyuan.sql(`select id,ial from blocks where id in (${ids.join(",")})`); // TODO: too many?
         const findSibling = (block: Block) => {
