@@ -564,7 +564,7 @@ class Progressive {
         btns.push(help.tempContent(this.helper.getReadingBtns1(bookID, noteID, point)));
         btns.push(help.tempContent(this.helper.getReadingBtns2(bookID, noteID, point)));
         btns.push(help.tempContent(this.helper.getReadingBtns3(bookID, noteID, point)));
-        await siyuan.insertBlockAsChildOf(btns.join("\n"), noteID);
+        await siyuan.appendBlock(btns.join("\n"), noteID);
     }
 
     private async fullfilContent(bookID: string, piecePre: string[], piece: string[], noteID: string) {

@@ -288,6 +288,9 @@ export const siyuan = {
         }
         return {} as Block;
     },
+    async getBlockIndex(id: string): Promise<number> {
+        return await siyuan.call("/api/block/getBlockIndex", { id });
+    },
     async setUILayout(layout: any): Promise<any> {
         return await siyuan.call("/api/system/setUILayout", { layout });
     },
