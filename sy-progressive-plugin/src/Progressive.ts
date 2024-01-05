@@ -548,12 +548,6 @@ class Progressive {
                 await s.insert();
                 break;
             }
-            case HtmlCBType.splitByPunctuationsListSeparate: {
-                const s = new SplitSentence(noteID, "ls");
-                await s.split();
-                await s.insert();
-                break;
-            }
             default:
                 throw "Invalid HtmlCBType " + cbType;
         }

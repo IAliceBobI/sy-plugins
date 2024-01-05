@@ -6,4 +6,4 @@ type SettingCfgType = {
     showLastBlock: boolean,
 }
 
-type AsList = "p" | "l" | "ls";
+type AsList = "p" | "l";
