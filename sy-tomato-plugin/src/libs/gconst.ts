@@ -40,6 +40,7 @@ export enum BlockNodeEnum {
 export const MarkKey = "custom-progmark"; // for doc
 export const RefIDKey = "custom-progref"; // for content
 export const TEMP_CONTENT = "插件管理勿改managedByPluginDoNotModify";
+export const IN_PIECE_REF = "custom-in-piece-ref";
 
 export enum WsActionTypes {
     transactions = "transactions",
