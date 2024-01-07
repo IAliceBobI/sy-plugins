@@ -202,7 +202,7 @@ class FlashBox {
             attr[gconst.MarkKey] = getDocIalCards(bookID);
             const targetDocID = await utils.siyuanCache.createDocWithMdIfNotExists(10000, boxID, hpath, "", attr);
             await siyuan.insertBlockAsChildOf(`{: id=${utils.NewNodeID()}}\n${markdown}`, targetDocID);
-            await siyuan.appendBlock(`⚡🗃 ((${cardID} '${markdown.split("(")[0]}'))\n{: ${gconst.IN_PIECE_REF}="1"}`, pieceID);
+            openTab({ app: this.plugin.app, doc: { id: targetDocID }, position: "right" });
         } else {
             await siyuan.insertBlockAfter(`{: id=${utils.NewNodeID()}}\n${markdown}\n{: id=${utils.NewNodeID()}}`, lastSelectedID);
         }

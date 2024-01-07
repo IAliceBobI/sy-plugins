@@ -102,7 +102,7 @@ class CardBox {
                                 siyuan.removeRiffCards([id]);
                             });
                         });
-                    })
+                    });
                 } else {
                     this.delCardFunc = null;
                 }
