@@ -25,7 +25,6 @@ export class SplitSentence {
                         await siyuan.insertBlockAfter("* " + b.blocks.join("\n* ") + `\n{: ${RefIDKey}="${b.ref}"}`, this.lastID);
                     }
                 }
-                await siyuan.insertBlockAfter("", this.lastID);
             }
         });
     }
