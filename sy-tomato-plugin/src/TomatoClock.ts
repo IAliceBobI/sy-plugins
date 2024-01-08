@@ -20,13 +20,15 @@ class TomatoClock {
     private timeoutID: number;
     private lastDelayMinute: number;
     private lastStartTime: number;
+    private settingCfg: TomatoSettings;
 
     async onload(plugin: Plugin) {
         this.plugin = plugin;
         this.lastDelayMinute = 0;
         this.timeoutID = 0;
+        this.settingCfg = (plugin as any).settingCfg;
 
-        let clocks: string = (this.plugin as any).settingCfg[STORAGE_TOMATO_CLOCKS] ?? "5,10,15,25";
+        let clocks: string = this.settingCfg[STORAGE_TOMATO_CLOCKS] ?? "5,10,15,25";
         const washed = [0];
         for (const clock of clocks.split(/[,，]/g)) {
             const n = Number(clock.trim());
@@ -40,7 +42,7 @@ class TomatoClock {
             this.addTomatoClock(i);
             return String(i);
         }).join(",");
-        (this.plugin as any).settingCfg[STORAGE_TOMATO_CLOCKS] = clocks;
+        this.settingCfg[STORAGE_TOMATO_CLOCKS] = clocks;
 
         this.plugin.setting.addItem({
             title: "** 番茄钟时长(中英文逗号隔开，半角数字)",
@@ -51,7 +53,7 @@ class TomatoClock {
                 input.value = clocks;
                 input.className = "b3-text-field fn__flex-center";
                 input.addEventListener("input", () => {
-                    (this.plugin as any).settingCfg[STORAGE_TOMATO_CLOCKS] = input.value;
+                    this.settingCfg[STORAGE_TOMATO_CLOCKS] = input.value;
                 });
                 return input;
             },

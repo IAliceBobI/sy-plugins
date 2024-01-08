@@ -17,17 +17,7 @@ import { cmdBlockBox } from "./CmdBlockBox";
 export default class ThePlugin extends Plugin {
     private static readonly GLOBAL_THIS: Record<string, any> = globalThis;
 
-    private settingCfg: {
-        tomatoClockCheckbox: boolean,
-        scheduleCheckbox: boolean,
-        readingPointBoxCheckbox: boolean,
-        cardBoxCheckbox: boolean,
-        cpBoxCheckbox: boolean,
-        linkBoxCheckbox: boolean,
-        dailyNoteBoxCheckbox: boolean,
-        imgOverlayCheckbox: boolean,
-        backLinkBottomBoxCheckbox: boolean,
-    };
+    private settingCfg: TomatoSettings;
     private blockIconEventBindThis = this.blockIconEvent.bind(this);
 
     async onload() {

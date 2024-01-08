@@ -200,7 +200,7 @@ class FlashBox {
         let idx = 0;
         let star = "* ";
         if (this.settings.cardIndent) {
-            star = "  * "
+            star = "  * ";
         }
         for (const m of markdowns) {
             if (idx++ == 0) tmp.push("* " + m);

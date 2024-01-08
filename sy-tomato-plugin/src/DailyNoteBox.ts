@@ -9,6 +9,7 @@ class DailyNoteBox {
     private lute: Lute;
     private move2BoxID: string;
     private lastOpen: ITab;
+    private settingCfg: TomatoSettings;
 
     blockIconEvent(detail: any) {
         if (!this.plugin) return;
@@ -24,6 +25,7 @@ class DailyNoteBox {
 
     async onload(plugin: Plugin) {
         this.plugin = plugin;
+        this.settingCfg = (plugin as any).settingCfg;
         this.lute = NewLute();
         if (!events.isMobile) {
             this.plugin.addTopBar({
@@ -76,7 +78,7 @@ class DailyNoteBox {
             });
         });
 
-        this.move2BoxID = (this.plugin as any).settingCfg[STORAGE_DAILY_NOTE_BOX_ID] ?? "";
+        this.move2BoxID = this.settingCfg[STORAGE_DAILY_NOTE_BOX_ID] ?? "";
         this.move2BoxID = this.move2BoxID.trim();
         if (this.move2BoxID.length != "20231225101829-mx2rjtv".length)
             this.move2BoxID = "";
@@ -90,7 +92,7 @@ class DailyNoteBox {
                 input.className = "b3-text-field fn__flex-center";
                 input.addEventListener("input", () => {
                     this.move2BoxID = input.value.trim();
-                    (this.plugin as any).settingCfg[STORAGE_DAILY_NOTE_BOX_ID] = this.move2BoxID;
+                    this.settingCfg[STORAGE_DAILY_NOTE_BOX_ID] = this.move2BoxID;
                 });
                 return input;
             },
