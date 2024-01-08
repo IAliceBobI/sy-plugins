@@ -12,11 +12,22 @@ import { STORAGE_SETTINGS } from "./constants";
 import { siyuan } from "@/libs/utils";
 import { imgOverlayBox } from "./ImgOverlayBox";
 import { dailyNoteBox } from "./DailyNoteBox";
+import { cmdBlockBox } from "./CmdBlockBox";
 
 export default class ThePlugin extends Plugin {
     private static readonly GLOBAL_THIS: Record<string, any> = globalThis;
 
-    private settingCfg: { [key: string]: boolean };
+    private settingCfg: {
+        tomatoClockCheckbox: boolean,
+        scheduleCheckbox: boolean,
+        readingPointBoxCheckbox: boolean,
+        cardBoxCheckbox: boolean,
+        cpBoxCheckbox: boolean,
+        linkBoxCheckbox: boolean,
+        dailyNoteBoxCheckbox: boolean,
+        imgOverlayCheckbox: boolean,
+        backLinkBottomBoxCheckbox: boolean,
+    };
     private blockIconEventBindThis = this.blockIconEvent.bind(this);
 
     async onload() {
@@ -33,7 +44,7 @@ export default class ThePlugin extends Plugin {
         });
 
         this.settingCfg = await this.loadData(STORAGE_SETTINGS);
-        if (!this.settingCfg) this.settingCfg = {};
+        if (!this.settingCfg) this.settingCfg = {} as any;
 
         this.addSettingItem("tomatoClockCheckbox", "* 状态栏番茄钟", true);
         if (this.settingCfg.tomatoClockCheckbox ?? true) await tomatoClock.onload(this);
@@ -61,6 +72,9 @@ export default class ThePlugin extends Plugin {
 
         this.addSettingItem("backLinkBottomBoxCheckbox", "* 底部反链", false);
         if (this.settingCfg.backLinkBottomBoxCheckbox ?? false) await backLinkBottomBox.onload(this);
+
+        // this.addSettingItem("backLinkBottomBoxCheckbox", "* 底部反链", false);
+        // if (this.settingCfg.backLinkBottomBoxCheckbox ?? false) await cmdBlockBox.onload(this);
     }
 
     private addSettingItem(key: string, title: string, defaultValue: boolean) {
@@ -87,5 +101,6 @@ export default class ThePlugin extends Plugin {
         cardBox.blockIconEvent(detail);
         imgOverlayBox.blockIconEvent(detail);
         dailyNoteBox.blockIconEvent(detail);
+        cmdBlockBox.blockIconEvent(detail);
     }
 }
