@@ -77,20 +77,38 @@ export async function getBlockDiv(id: string) {
 }
 
 export function getID(e: Element) {
-    const tn = e?.tagName?.toLocaleLowerCase() ?? "";
-    if (!tn) return "";
-    if (tn == "body") return "";
-    const id = e?.getAttribute("data-node-id") ?? "";
-    if (!id) return getID(e?.parentElement);
-    return id;
+    const s = getSyElement(e);
+    if (s) {
+        return s.getAttribute(gconst.DATA_NODE_ID);
+    }
+    return "";
 }
+
+export function getSyElement(e: Node) {
+    if (!e) return;
+    if (e instanceof Element) {
+        const id = e.getAttribute(gconst.DATA_NODE_ID);
+        if (id) return e;
+    }
+    return getSyElement(e.parentElement)
+}
+
+export const getContenteditableElement = (element: Element) => {
+    if (!element || (element.getAttribute("contenteditable") === "true") && !element.classList.contains("protyle-wysiwyg")) {
+        return element;
+    }
+    return element.querySelector('[contenteditable="true"]');
+};
+
 export async function closeTab(app: App, noteID: string) {
     const tab: any = openTab({ app, doc: { id: noteID } });
     tab.then((tab: any) => tab.close());
 }
+
 export function styleColor(bgcolor: string, color: string) {
     return `<style>button{display: inline-block; padding: 10px 20px; background-color: ${bgcolor}; color: ${color}; text-align: center; text-decoration: none; font-size: 16px; border: none; border-radius: 4px; cursor: pointer;}button.large { padding: 12px 24px; font-size: 24px; }button.small { padding: 8px 16px; font-size: 14px; }</style>`;
 }
+
 export function extractLinks(txt: string) {
     const RefRegex = /\(\(([0-9\-a-z]{22}) (("[^"]*?")|('[^']*?'))\)\)/g;
     const ids: string[] = [];
