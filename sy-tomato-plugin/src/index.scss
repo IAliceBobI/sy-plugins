@@ -1,3 +1,19 @@
+@keyframes tomatoFadeIn {
+  from {
+    opacity: 0.1;
+    color: var(--b3-font-color2);
+    background-color: var(--b3-font-background1);
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.tomato-cmd-box {
+  animation: tomatoFadeIn 0.3s forwards 3;
+}
+
 .tomato-style {
   &__bkContainer {
     font-size: larger;
