@@ -23,13 +23,19 @@ class CardBox {
             langKey: "removeBrokenCards",
             hotkey: "",
             callback: async () => {
-                // todo: instead of query the db, scan all .sy files for safty.
-                confirm(this.plugin.i18n.removeBrokenCards, "<strong>务必，请先看说明，或者备份好。</strong><a href=\"https://gitee.com/TokenzQdBN/sy-plugins/blob/main/sy-tomato-plugin/README_zh_CN.md#%E6%B8%85%E7%90%86%E5%A4%B1%E6%95%88%E9%97%AA%E5%8D%A1\">说明</a>", async () => {
-                    const ids = await siyuan.removeBrokenCards();
-                    if (ids.length) {
-                        siyuan.pushMsg(`${this.plugin.i18n.removedBrokenCards}${ids}`);
+                return navigator.locks.request("removeBrokenCardsLock", { ifAvailable: true }, async (lock) => {
+                    if (lock) {
+                        // todo: instead of query the db, scan all .sy files for safty.
+                        confirm(this.plugin.i18n.removeBrokenCards, "<strong>务必，请先看说明，或者备份好。</strong><a href=\"https://gitee.com/TokenzQdBN/sy-plugins/blob/main/sy-tomato-plugin/README_zh_CN.md#%E6%B8%85%E7%90%86%E5%A4%B1%E6%95%88%E9%97%AA%E5%8D%A1\">说明</a>", async () => {
+                            const ids = await siyuan.removeBrokenCards();
+                            if (ids.length) {
+                                siyuan.pushMsg(`${this.plugin.i18n.removedBrokenCards}：${ids.length}个`);
+                            } else {
+                                siyuan.pushMsg(this.plugin.i18n.thereIsNoInvalidCards);
+                            }
+                        });
                     } else {
-                        siyuan.pushMsg(this.plugin.i18n.thereIsNoInvalidCards);
+                        siyuan.pushMsg("正在删除，请耐心等候……");
                     }
                 });
             },
