@@ -20,20 +20,43 @@ class CmdBlockBox {
                 const range = protyle.getRange(protyle.protyle.element);
                 const blockDiv = getSyElement(range.commonAncestorContainer);
                 blockDiv.classList.remove(BLINKCLASS)
-                const id = getID(blockDiv);
-                const es = Array
+                const docIDs = Array
                     .from(blockDiv.querySelectorAll(`[${DATA_TYPE}~="${BLOCK_REF}"]`))
                     .map(e => e.getAttribute(DATA_ID))
-                if (es.length == 2) {
+                if (docIDs.length == 2) {
+                    const attrs0 = await siyuan.getBlockAttrs(docIDs[0]);
+                    const alias0 = attrs0.alias ?? "";
+                    const title0 = attrs0.title ?? "";
 
+                    const attrs1 = await siyuan.getBlockAttrs(docIDs[1]);
+                    let alias1 = attrs1.alias ?? "";
+
+                    if (title0) {
+                        if (!alias1) {
+                            alias1 = title0;
+                        } else {
+                            alias1 = `${alias1},${title0}`;
+                        }
+                    }
+
+                    if (alias0) {
+                        if (!alias1) {
+                            alias1 = alias0;
+                        } else {
+                            alias1 = `${alias1},${alias0}`;
+                        }
+                    }
+
+                    const newAttrs = {} as any;
+                    newAttrs.alias = alias1;
+                    await siyuan.setBlockAttrs(docIDs[1], newAttrs);
+                    // await siyuan.transferBlockRef(es[0], es[1]);
                 } else {
-                    const oldHTML = blockDiv.outerHTML;
-                    const contentDiv = getContenteditableElement(blockDiv);
-                    contentDiv.innerHTML = `请分别粘贴两个文档的引用大致于括号中央，再用'/'触发一次此功能。
-文档1引用（         ），文档2引用（         ）`;
-                    protyle.updateTransaction(id, blockDiv.outerHTML, oldHTML);
-                    protyle.focusBlock(blockDiv, false);
-                    blockDiv.classList.add(BLINKCLASS);
+                    const id = getID(blockDiv);
+                    const txt = `请分别粘贴两个文档的引用大致于括号中央，再用'/'触发一次此功能。
+对文档1（              ）的引用将转移到文档2（              ），
+文档1的名字作为文档2的别名，文档1的内容转移到文档2，最后删除文档1。`
+                    insertText(blockDiv, txt, protyle, id);
                 }
             }
         }];
@@ -45,6 +68,12 @@ class CmdBlockBox {
 }
 
 export const cmdBlockBox = new CmdBlockBox();
+
+function insertText(blockDiv: Element, txt: string, protyle: Protyle, id: string) {
+    protyle.insert(txt)
+    protyle.focusBlock(blockDiv, false);
+    blockDiv.classList.add(BLINKCLASS);
+}
 
 // const newDiv = blockDiv.cloneNode(true) as HTMLElement;
 // const editable = getContenteditableElement(newDiv);
