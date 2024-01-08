@@ -63,8 +63,8 @@ export default class ThePlugin extends Plugin {
         this.addSettingItem("backLinkBottomBoxCheckbox", "* 底部反链", false);
         if (this.settingCfg.backLinkBottomBoxCheckbox ?? false) await backLinkBottomBox.onload(this);
 
-        // this.addSettingItem("backLinkBottomBoxCheckbox", "* 底部反链", false);
-        // if (this.settingCfg.backLinkBottomBoxCheckbox ?? false) await cmdBlockBox.onload(this);
+        this.addSettingItem("cmdBlockBoxCheckbox", "* 命令块", false);
+        if (this.settingCfg.cmdBlockBoxCheckbox ?? false) await cmdBlockBox.onload(this);
     }
 
     private addSettingItem(key: string, title: string, defaultValue: boolean) {
