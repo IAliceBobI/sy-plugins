@@ -197,14 +197,20 @@ class FlashBox {
 
     private createList(markdowns: string[], cardType: CardType) {
         const tmp = [];
+        let idx = 0;
+        let star = "* ";
+        if (this.settings.cardIndent) {
+            star = "  * "
+        }
         for (const m of markdowns) {
-            tmp.push("* " + m);
+            if (idx++ == 0) tmp.push("* " + m);
+            else tmp.push(star + m);
         }
         const cardID = utils.NewNodeID();
         if (cardType === CardType.C) {
-            tmp.push("* ```");
+            tmp.push(star + "```");
         } else if (cardType === CardType.B) {
-            tmp.push("* >");
+            tmp.push(star + ">");
         }
         tmp.push(`{: id="${cardID}"}`);
         return { cardID, "markdown": tmp.join("\n") };

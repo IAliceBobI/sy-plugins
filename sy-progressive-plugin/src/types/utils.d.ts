@@ -5,6 +5,7 @@ type SettingCfgType = {
     addQuoteBlock: boolean,
     showLastBlock: boolean,
     openCardsOnOpenPiece: boolean,
+    cardIndent: boolean,
 }
 
 type AsList = "p" | "l";

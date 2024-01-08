@@ -30,7 +30,13 @@ export default class ThePlugin extends Plugin {
 
         this.settingCfg = await this.loadData(STORAGE_SETTINGS);
         if (!this.settingCfg) {
-            this.settingCfg = { addCodeBlock: false, addQuoteBlock: true, showLastBlock: false, openCardsOnOpenPiece: false };
+            this.settingCfg = {
+                addCodeBlock: false,
+                addQuoteBlock: true,
+                showLastBlock: false,
+                openCardsOnOpenPiece: false,
+                cardIndent: false,
+            };
         }
         await prog.onload(this, this.settingCfg);
         await flashBox.onload(this, this.settingCfg);
@@ -40,6 +46,7 @@ export default class ThePlugin extends Plugin {
         this.addSettingItem("addQuoteBlock", "* 制卡时加入引述块", true, "与代码块二选一");
         this.addSettingItem("showLastBlock", "* 显示上一分片最后一个块", false, "当前分片显示上一分片最后一个块内容");
         this.addSettingItem("openCardsOnOpenPiece", "* 打开分片的同时打开cards文档", false, "-cards后缀文件: 每本书用于保存闪卡的文件");
+        this.addSettingItem("cardIndent", "* 制作的闪卡，从第二项开始向右缩进", false, "");
     }
 
     private addSettingItem(key: string, title: string, defaultValue: boolean, description?: string) {
