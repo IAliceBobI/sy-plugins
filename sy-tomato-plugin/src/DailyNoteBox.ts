@@ -2,7 +2,6 @@ import { IProtyle, ITab, Lute, Plugin, openTab } from "siyuan";
 import { events } from "./libs/Events";
 import { NewLute, cleanDiv, siyuan } from "./libs/utils";
 import { DATA_NODE_ID, PROTYLE_WYSIWYG_SELECT } from "./libs/gconst";
-import { STORAGE_DAILY_NOTE_BOX_ID } from "./constants";
 
 class DailyNoteBox {
     private plugin: Plugin;
@@ -78,7 +77,7 @@ class DailyNoteBox {
             });
         });
 
-        this.move2BoxID = this.settingCfg[STORAGE_DAILY_NOTE_BOX_ID] ?? "";
+        this.move2BoxID = this.settingCfg["daily-note-box-id"] ?? "";
         this.move2BoxID = this.move2BoxID.trim();
         if (this.move2BoxID.length != "20231225101829-mx2rjtv".length)
             this.move2BoxID = "";
@@ -92,7 +91,7 @@ class DailyNoteBox {
                 input.className = "b3-text-field fn__flex-center";
                 input.addEventListener("input", () => {
                     this.move2BoxID = input.value.trim();
-                    this.settingCfg[STORAGE_DAILY_NOTE_BOX_ID] = this.move2BoxID;
+                    this.settingCfg["daily-note-box-id"] = this.move2BoxID;
                 });
                 return input;
             },

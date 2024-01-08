@@ -19,4 +19,6 @@ type TomatoSettings = {
     dailyNoteBoxCheckbox: boolean,
     imgOverlayCheckbox: boolean,
     backLinkBottomBoxCheckbox: boolean,
+    "daily-note-box-id": string,
+    "tomato-clocks": string,
 };

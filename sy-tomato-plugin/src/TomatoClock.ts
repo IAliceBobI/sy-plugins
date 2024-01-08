@@ -4,7 +4,6 @@ import {
     showMessage,
 } from "siyuan";
 import "./index.scss";
-import { STORAGE_TOMATO_CLOCKS } from "./constants";
 import { siyuan } from "./libs/utils";
 
 
@@ -28,7 +27,7 @@ class TomatoClock {
         this.timeoutID = 0;
         this.settingCfg = (plugin as any).settingCfg;
 
-        let clocks: string = this.settingCfg[STORAGE_TOMATO_CLOCKS] ?? "5,10,15,25";
+        let clocks: string = this.settingCfg["tomato-clocks"] ?? "5,10,15,25";
         const washed = [0];
         for (const clock of clocks.split(/[,，]/g)) {
             const n = Number(clock.trim());
@@ -42,7 +41,7 @@ class TomatoClock {
             this.addTomatoClock(i);
             return String(i);
         }).join(",");
-        this.settingCfg[STORAGE_TOMATO_CLOCKS] = clocks;
+        this.settingCfg["tomato-clocks"] = clocks;
 
         this.plugin.setting.addItem({
             title: "** 番茄钟时长(中英文逗号隔开，半角数字)",
@@ -53,7 +52,7 @@ class TomatoClock {
                 input.value = clocks;
                 input.className = "b3-text-field fn__flex-center";
                 input.addEventListener("input", () => {
-                    this.settingCfg[STORAGE_TOMATO_CLOCKS] = input.value;
+                    this.settingCfg["tomato-clocks"] = input.value;
                 });
                 return input;
             },
