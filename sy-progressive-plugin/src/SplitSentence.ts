@@ -1,4 +1,4 @@
-import { PROG_ORIGIN_TEXT, RefIDKey } from "../../sy-tomato-plugin/src/libs/gconst";
+import { PROG_ORIGIN_TEXT, RefIDKey, SPACE } from "../../sy-tomato-plugin/src/libs/gconst";
 import { siyuan } from "../../sy-tomato-plugin/src/libs/utils";
 
 
@@ -71,7 +71,7 @@ export class SplitSentence {
                     ps = spliyBy(ps, "……");
                     if (this.asList == "p") {
                         this.textAreas.push({
-                            blocks: ps.map(i => i + ` ((${ref} "*"))\n{: ${RefIDKey}="${ref}"}`),
+                            blocks: ps.map(i => SPACE.repeat(2) + i + ` ((${ref} "*"))\n{: ${RefIDKey}="${ref}"}`),
                             ref,
                         });
                     } else {
