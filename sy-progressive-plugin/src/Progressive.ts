@@ -14,7 +14,7 @@ class Progressive {
     private plugin: Plugin;
     private storage: help.Storage;
     private helper: help.Helper;
-    private openedTabs: ITab[];
+    private openedTabs?: ITab;
     private settings: SettingCfgType;
     private lute: Lute;
 
@@ -25,7 +25,6 @@ class Progressive {
         this.settings = settings;
         this.storage = new help.Storage(plugin);
         this.helper = new help.Helper(plugin);
-        this.openedTabs = [];
         await this.storage.onLayoutReady();
         if (!events.isMobile) {
             const topBarElement = this.plugin.addTopBar({
@@ -438,26 +437,36 @@ class Progressive {
         const piecePre = bookIndex[point - 1] ?? [];
         const piece = bookIndex[point];
         noteID = await help.findDoc(bookInfo.bookID, point);
+        let openPiece = false;
         if (noteID) {
             this.addAndClose(await openTab({ app: this.plugin.app, doc: { id: noteID } }));
-            return;
-        }
-        noteID = await help.createNote(bookInfo.boxID, bookInfo.bookID, piece, point);
-        if (noteID) {
-            await this.addReadingBtns(bookID, noteID, point);
-            await this.fullfilContent(bookInfo.bookID, piecePre, piece, noteID);
-            this.addAndClose(await openTab({
-                app: this.plugin.app, doc: { id: noteID },
-                afterOpen: () => {
-                    if (bookInfo.autoCard == "yes") {
-                        setTimeout(() => {
-                            siyuan.addRiffCards([noteID]);
-                        }, 500);
-                    }
-                }
-            }));
+            openPiece = true;
         } else {
-            await siyuan.pushMsg(this.plugin.i18n.FailToNewDoc);
+            noteID = await help.createNote(bookInfo.boxID, bookInfo.bookID, piece, point);
+            if (noteID) {
+                await this.addReadingBtns(bookID, noteID, point);
+                await this.fullfilContent(bookInfo.bookID, piecePre, piece, noteID);
+                this.addAndClose(await openTab({
+                    app: this.plugin.app, doc: { id: noteID },
+                    afterOpen: () => {
+                        if (bookInfo.autoCard == "yes") {
+                            setTimeout(() => {
+                                siyuan.addRiffCards([noteID]);
+                            }, 500);
+                        }
+                    }
+                }));
+                openPiece = true;
+            } else {
+                await siyuan.pushMsg(this.plugin.i18n.FailToNewDoc);
+            }
+        }
+        if (openPiece && this.settings.openCardsOnOpenPiece) {
+            const hpath = await help.getHPathByDocID(bookID);
+            if (hpath) {
+                const targetDocID = await help.getCardsDoc(bookID, bookInfo.boxID, hpath);
+                openTab({ app: this.plugin.app, doc: { id: targetDocID }, position: "right" });
+            }
         }
     }
 
@@ -553,9 +562,14 @@ class Progressive {
     }
 
     private addAndClose(tab?: ITab) {
+        if (!tab) return;
         navigator.locks.request("Progressive_addAndClose", () => {
-            this.openedTabs.pop()?.close();
-            if (tab) this.openedTabs.push(tab);
+            if (this.openedTabs) {
+                if (this.openedTabs.id != tab.id) {
+                    this.openedTabs.close();
+                }
+            }
+            this.openedTabs = tab;
         });
     }
 

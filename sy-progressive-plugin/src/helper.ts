@@ -180,6 +180,25 @@ export async function isPiece(id: string) {
     return ial.includes(TEMP_CONTENT);
 }
 
+export async function getHPathByDocID(docID: string) {
+    const row = await siyuan.sqlOne(`select hpath from blocks where id = "${docID}"`);
+    let path = row?.hpath ?? "";
+    if (!path) return "";
+    const parts = path.split("/");
+    const docName = parts.pop();
+    const cardDocName = docName + "-cards";
+    parts.push(docName);
+    parts.push(cardDocName);
+    path = parts.join("/");
+    return path;
+}
+
+export async function getCardsDoc(bookID: string, boxID: string, hpath: string) {
+    const attr = {};
+    attr[MarkKey] = getDocIalCards(bookID);
+    const targetDocID = await utils.siyuanCache.createDocWithMdIfNotExists(10000, boxID, hpath, "", attr);
+    return targetDocID;
+}
 
 export function splitByBlockCount(groups: WordCountType[][], blockNumber: number) {
     if (blockNumber <= 0) return groups;

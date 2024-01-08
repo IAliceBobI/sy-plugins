@@ -3,7 +3,7 @@ import { siyuan } from "../../sy-tomato-plugin/src/libs/utils";
 import * as utils from "../../sy-tomato-plugin/src/libs/utils";
 import { events } from "../../sy-tomato-plugin/src/libs/Events";
 import * as gconst from "../../sy-tomato-plugin/src/libs/gconst";
-import { getDocIalCards } from "./helper";
+import { getCardsDoc, getHPathByDocID } from "./helper";
 
 enum CardType {
     B = "B", C = "C", None = "None"
@@ -163,19 +163,6 @@ class FlashBox {
         }
     }
 
-    private async getHPathByDocID(docID: string) {
-        const row = await siyuan.sqlOne(`select hpath from blocks where id = "${docID}"`);
-        let path = row?.hpath ?? "";
-        if (!path) return "";
-        const parts = path.split("/");
-        const docName = parts.pop();
-        const cardDocName = docName + "-cards";
-        parts.push(docName);
-        parts.push(cardDocName);
-        path = parts.join("/");
-        return path;
-    }
-
     private async insertCard(protyle: IProtyle, markdowns: string[], t: CardType, lastSelectedID: string, path?: string) {
         return navigator.locks.request("prog-FlashBox-insertCard", { mode: "exclusive" }, async (_lock) => {
             return this.doInsertCard(protyle, markdowns, t, lastSelectedID, path);
@@ -196,11 +183,9 @@ class FlashBox {
             openTab({ app: this.plugin.app, doc: { id: targetDocID }, position: "right" });
         } else if (isPiece) {
             if (!bookID) return;
-            const hpath = await this.getHPathByDocID(bookID);
+            const hpath = await getHPathByDocID(bookID);
             if (!hpath) return;
-            const attr = {};
-            attr[gconst.MarkKey] = getDocIalCards(bookID);
-            const targetDocID = await utils.siyuanCache.createDocWithMdIfNotExists(10000, boxID, hpath, "", attr);
+            const targetDocID = await getCardsDoc(bookID, boxID, hpath);
             await siyuan.insertBlockAsChildOf(`{: id=${utils.NewNodeID()}}\n${markdown}`, targetDocID);
             openTab({ app: this.plugin.app, doc: { id: targetDocID }, position: "right" });
         } else {
@@ -271,3 +256,5 @@ class FlashBox {
 }
 
 export const flashBox = new FlashBox();
+
+
