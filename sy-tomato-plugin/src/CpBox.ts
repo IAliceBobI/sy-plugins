@@ -16,6 +16,7 @@ class CpBox {
                 navigator.locks.request(LongContentOpsLock, { ifAvailable: true }, async (lock) => {
                     if (lock) {
                         await this.deleteBlocks();
+                        siyuan.pushMsg("批量操作完成，如页面不正确，请F5刷新。");
                     } else {
                         siyuan.pushMsg(this.plugin.i18n.wait4finish);
                     }
@@ -29,6 +30,7 @@ class CpBox {
                 navigator.locks.request(LongContentOpsLock, { ifAvailable: true }, async (lock) => {
                     if (lock) {
                         await this.moveBlocks(false);
+                        siyuan.pushMsg("批量操作完成，如页面不正确，请F5刷新。");
                     } else {
                         siyuan.pushMsg(this.plugin.i18n.wait4finish);
                     }
@@ -42,6 +44,7 @@ class CpBox {
                 navigator.locks.request(LongContentOpsLock, { ifAvailable: true }, async (lock) => {
                     if (lock) {
                         await this.moveBlocks(true);
+                        siyuan.pushMsg("批量操作完成，如页面不正确，请F5刷新。");
                     } else {
                         siyuan.pushMsg(this.plugin.i18n.wait4finish);
                     }

@@ -90,7 +90,7 @@ export function getSyElement(e: Node) {
         const id = e.getAttribute(gconst.DATA_NODE_ID);
         if (id) return e;
     }
-    return getSyElement(e.parentElement)
+    return getSyElement(e.parentElement);
 }
 
 export const getContenteditableElement = (element: Element) => {
