@@ -508,6 +508,20 @@ export const siyuan = {
     async addBookmark(id: string, bookmark: string) {
         return siyuan.setBlockAttrs(id, { bookmark });
     },
+    async getTreeRiffCardsAll(id: string): Promise<Block[]> {
+        const total: Block[] = [];
+        for (let i = 1; ; i++) {
+            const ret = await siyuan.getTreeRiffCards(id, i);
+            if (!ret?.blocks) break;
+            total.push(...ret.blocks);
+            if (total.length >= ret.total) break;
+            if (i >= ret.pageCount + 10) break;
+        }
+        return total;
+    },
+    async getTreeRiffCards(id: string, page: number): Promise<{ blocks: Block[], total: number, pageCount: number }> {
+        return siyuan.call("/api/riff/getTreeRiffCards", { id, page });
+    },
     async addRiffCards(blockIDs: Array<string>, deckID = "20230218211946-2kw8jgx") {
         return siyuan.call("/api/riff/addRiffCards", { blockIDs, deckID });
     },

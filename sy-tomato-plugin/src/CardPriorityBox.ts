@@ -1,5 +1,6 @@
 import { ICardData, IProtyle, Plugin } from "siyuan";
 import "./index.scss";
+import { siyuan } from "./libs/utils";
 
 class CardPriorityBox {
     private plugin: Plugin;
@@ -9,15 +10,15 @@ class CardPriorityBox {
         this.plugin.addCommand({
             langKey: "cardAddPriority",
             hotkey: "F8",
-            editorCallback: (protyle) => {
-                console.log(protyle)
+            editorCallback: (protyle: IProtyle) => {
+                this.updateDocPriority(protyle, +1);
             },
         });
         this.plugin.addCommand({
             langKey: "cardSubPriority",
             hotkey: "F7",
-            editorCallback: (protyle) => {
-                console.log(protyle)
+            editorCallback: (protyle: IProtyle) => {
+                this.updateDocPriority(protyle, -1);
             },
         });
         this.plugin.eventBus.on("open-menu-content", async ({ detail }) => {
@@ -63,6 +64,13 @@ class CardPriorityBox {
                 this.updatePriority(detail.protyle, -1);
             }
         });
+    }
+
+    private async updateDocPriority(protyle: IProtyle, delta: number) {
+        const docID = protyle?.block?.rootID;
+        if (!docID) return;
+        const a = await siyuan.getTreeRiffCardsAll(docID)
+        console.log(a)
     }
 
     private async updatePriority(_protyle: IProtyle, _delta: number) {
