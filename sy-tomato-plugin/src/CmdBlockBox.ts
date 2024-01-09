@@ -3,7 +3,7 @@ import "./index.scss";
 import { getID, getSyElement, siyuan } from "./libs/utils";
 import { BLOCK_REF, DATA_ID, DATA_TYPE } from "./libs/gconst";
 
-const MERGEDOC = '合并两个文档';
+const MERGEDOC = "合并两个文档";
 const BLINKCLASS = "tomato-cmd-box";
 
 class CmdBlockBox {
@@ -22,7 +22,7 @@ class CmdBlockBox {
                     const attrs0 = await siyuan.getBlockAttrs(idsInContent[0]);
                     const alias0 = attrs0.alias ?? "";
                     const title0 = attrs0.title ?? "";
-                    attrs0.zsdfasd
+                    attrs0.zsdfasd;
 
                     const attrs1 = await siyuan.getBlockAttrs(idsInContent[1]);
                     let alias1 = attrs1.alias ?? "";
@@ -50,7 +50,7 @@ class CmdBlockBox {
                 } else {
                     const txt = `请分别粘贴两个文档的引用大致于括号中央，再用'/'触发一次此功能。
 对文档1（              ）的引用将转移到文档2（              ），
-文档1的名字作为文档2的别名，文档1的内容转移到文档2，最后删除文档1。`
+文档1的名字作为文档2的别名，文档1的内容转移到文档2，最后删除文档1。`;
                     insertText(blockDiv, txt, protyle, blockID);
                 }
             }
@@ -76,7 +76,7 @@ function getBlockAndInnerIDs(protyle: Protyle) {
 }
 
 function insertText(blockDiv: Element, txt: string, protyle: Protyle, id: string) {
-    protyle.insert(txt)
+    protyle.insert(txt);
     protyle.focusBlock(blockDiv, false);
     blockDiv.classList.add(BLINKCLASS);
 }
