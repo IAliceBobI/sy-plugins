@@ -1,8 +1,7 @@
 import { Plugin, Protyle } from "siyuan";
 import "./index.scss";
-import { getID, getSyElement, siyuan } from "./libs/utils";
+import { getSyElement, siyuan } from "./libs/utils";
 import { BLOCK_REF, DATA_ID, DATA_TYPE } from "./libs/gconst";
-import { attr } from "svelte/internal";
 
 const MERGEDOC = "合并两个文档";
 const BLINKCLASS = "tomato-cmd-box";
@@ -18,17 +17,23 @@ class CmdBlockBox {
             html: `<div class="b3-list-item__first"><span class="b3-list-item__meta">📄+📄=📃</span><span class="b3-list-item__text">${MERGEDOC}</span></div>`,
             id: "insertEmoji",
             async callback(protyle: Protyle) {
-                const { blockDiv, blockID, idsInContent } = getBlockAndInnerIDs(protyle);
+                const { blockDiv, idsInContent } = getBlockAndInnerIDs(protyle);
                 if (idsInContent.length == 2) {
-                    await mergeDocAttrs(idsInContent);
-                    // newAttrs.alias = alias1;
-                    // await siyuan.setBlockAttrs(docIDs[1], newAttrs);
-                    // await siyuan.transferBlockRef(es[0], es[1]);
+                    const newAttrs = await mergeIntoDoc2(idsInContent[0], idsInContent[1]);
+                    const oldAttrs = setDefaultAttr({} as any);
+                    oldAttrs.title = "moved"
+                    await siyuan.setBlockAttrs(idsInContent[0], oldAttrs);
+                    await siyuan.setBlockAttrs(idsInContent[1], newAttrs);
+                    await moveAllContentToDoc2(protyle, idsInContent[0], idsInContent[1]);
+                    await siyuan.flushTransaction();
+                    await siyuan.transferBlockRef(idsInContent[0], idsInContent[1]);
+                    // await siyuan.removeDocByID(idsInContent[0]);
                 } else {
                     const txt = `请分别粘贴两个文档的引用大致于括号中央，再用'/'触发一次此功能。
-对文档1（              ）的引用将转移到文档2（              ），
+对文档1的引用将转移到文档2，
+文档1（              ） --> 文档2（              ），
 文档1的名字作为文档2的别名，文档1的内容转移到文档2，最后删除文档1。`;
-                    insertText(blockDiv, txt, protyle, blockID);
+                    insertText(blockDiv, txt, protyle);
                 }
             }
         }];
@@ -40,6 +45,17 @@ class CmdBlockBox {
 }
 
 export const cmdBlockBox = new CmdBlockBox();
+
+async function moveAllContentToDoc2(protyle: Protyle, doc1: string, doc2: string) {
+    const doms = await Promise.all((await siyuan.getChildBlocks(doc1)).map(b => siyuan.getBlockDOM(b.id)));
+    for (const { dom } of doms) {
+        await siyuan.appendBlock(protyle.protyle.lute.BlockDOM2Md(dom), doc2);
+    }
+    await siyuan.safeDeleteBlocks(doms.map(d => d.id));
+    // for (const blockID of (await siyuan.getChildBlocks(doc1)).reverse()) {
+    //     await siyuan.safeMoveBlockToParent(blockID.id, doc2);
+    // }
+}
 
 async function mergeIntoDoc2(doc1: string, doc2: string) {
     const newAttrs = setDefaultAttr(await siyuan.getBlockAttrs(doc2));
@@ -56,7 +72,9 @@ async function mergeIntoDoc2(doc1: string, doc2: string) {
     if (!newAttrs.memo) {
         newAttrs.memo = attrs.memo;
     } else {
-        newAttrs.memo += "；" + attrs.memo;
+        if (attrs.memo) {
+            newAttrs.memo += "；" + attrs.memo;
+        }
     }
     return newAttrs;
 }
@@ -73,15 +91,14 @@ function setDefaultAttr(attrs: AttrType) {
 function getBlockAndInnerIDs(protyle: Protyle) {
     const range = protyle.getRange(protyle.protyle.element);
     const blockDiv = getSyElement(range.commonAncestorContainer);
-    const blockID = getID(blockDiv);
     blockDiv.classList.remove(BLINKCLASS);
     const idsInContent = Array
         .from(blockDiv.querySelectorAll(`[${DATA_TYPE}~="${BLOCK_REF}"]`))
         .map(e => e.getAttribute(DATA_ID));
-    return { blockID, idsInContent, blockDiv };
+    return { idsInContent, blockDiv };
 }
 
-function insertText(blockDiv: Element, txt: string, protyle: Protyle, id: string) {
+function insertText(blockDiv: Element, txt: string, protyle: Protyle) {
     protyle.insert(txt);
     protyle.focusBlock(blockDiv, false);
     blockDiv.classList.add(BLINKCLASS);
