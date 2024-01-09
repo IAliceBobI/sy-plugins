@@ -8,17 +8,24 @@ class CardPriorityBox {
     async onload(plugin: Plugin) {
         this.plugin = plugin;
         this.plugin.addCommand({
-            langKey: "cardAddPriority",
-            hotkey: "F8",
+            langKey: "cardPriorityReset",
+            hotkey: "F6",
             editorCallback: (protyle: IProtyle) => {
-                this.updateDocPriority(protyle, +1);
+                this.updateDocPriority(protyle, 0);
             },
         });
         this.plugin.addCommand({
-            langKey: "cardSubPriority",
+            langKey: "cardPrioritySub",
             hotkey: "F7",
             editorCallback: (protyle: IProtyle) => {
                 this.updateDocPriority(protyle, -1);
+            },
+        });
+        this.plugin.addCommand({
+            langKey: "cardPriorityAdd",
+            hotkey: "F8",
+            editorCallback: (protyle: IProtyle) => {
+                this.updateDocPriority(protyle, +1);
             },
         });
         this.plugin.eventBus.on("open-menu-content", async ({ detail }) => {
@@ -72,15 +79,17 @@ class CardPriorityBox {
         const blocks = await siyuan.getTreeRiffCardsAll(docID)
         await Promise.all(blocks.map(block => {
             const ial = block.ial as unknown as AttrType;
-            let priority = Number(ial["custom-card-priority"]);
-            if (!isValidNumber(priority)) {
-                priority = 50;
-            }
-            const newPriority = ensureValidPriority(priority + delta)
-            if (newPriority != priority) {
-                const attr = {} as AttrType;
-                attr["custom-card-priority"] = String(priority);
-                return siyuan.setBlockAttrs(ial.id, attr);
+            if (delta == 0) {
+                return setPriority(ial.id, 50);
+            } else {
+                let priority = Number(ial["custom-card-priority"]);
+                if (!isValidNumber(priority)) {
+                    priority = 50;
+                }
+                const newPriority = ensureValidPriority(priority + delta)
+                if (newPriority != priority) {
+                    return setPriority(ial.id, newPriority);
+                }
             }
         }));
     }
@@ -91,9 +100,16 @@ class CardPriorityBox {
 
     async updateCards(options: ICardData) {
         if (!this.plugin) return;
+        // console.log(options);
         return options;
     }
 
+}
+
+async function setPriority(blockID: string, newPriority: number) {
+    const attr = {} as AttrType;
+    attr["custom-card-priority"] = String(newPriority);
+    return siyuan.setBlockAttrs(blockID, attr);
 }
 
 function ensureValidPriority(priority: number) {
