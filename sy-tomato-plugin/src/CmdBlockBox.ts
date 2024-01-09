@@ -22,6 +22,7 @@ class CmdBlockBox {
                     const attrs0 = await siyuan.getBlockAttrs(idsInContent[0]);
                     const alias0 = attrs0.alias ?? "";
                     const title0 = attrs0.title ?? "";
+                    attrs0.zsdfasd
 
                     const attrs1 = await siyuan.getBlockAttrs(idsInContent[1]);
                     let alias1 = attrs1.alias ?? "";

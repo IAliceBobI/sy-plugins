@@ -378,7 +378,7 @@ export const siyuan = {
     async setBlockAttrs(id: string, attrs: any) {
         return siyuan.call("/api/attr/setBlockAttrs", { id, attrs });
     },
-    async getBlockAttrs(id: string): Promise<{ [key: string]: string }> {
+    async getBlockAttrs(id: string): Promise<AttrType> {
         return siyuan.call("/api/attr/getBlockAttrs", { id });
     },
     async transactions(doOperations: IOperation[]) {
