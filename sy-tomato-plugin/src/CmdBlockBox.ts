@@ -1,7 +1,7 @@
 import { Plugin, Protyle } from "siyuan";
 import "./index.scss";
-import { NewNodeID, cleanDiv, getContenteditableElement, getID, getSyElement, siyuan } from "./libs/utils";
-import { BLOCK_REF, DATA_ID, DATA_NODE_ID, DATA_TYPE } from "./libs/gconst";
+import { getID, getSyElement, siyuan } from "./libs/utils";
+import { BLOCK_REF, DATA_ID, DATA_TYPE } from "./libs/gconst";
 
 const MERGEDOC = '合并两个文档';
 const BLINKCLASS = "tomato-cmd-box";
@@ -17,18 +17,13 @@ class CmdBlockBox {
             html: `<div class="b3-list-item__first"><span class="b3-list-item__meta">📄+📄=📃</span><span class="b3-list-item__text">${MERGEDOC}</span></div>`,
             id: "insertEmoji",
             async callback(protyle: Protyle) {
-                const range = protyle.getRange(protyle.protyle.element);
-                const blockDiv = getSyElement(range.commonAncestorContainer);
-                blockDiv.classList.remove(BLINKCLASS)
-                const docIDs = Array
-                    .from(blockDiv.querySelectorAll(`[${DATA_TYPE}~="${BLOCK_REF}"]`))
-                    .map(e => e.getAttribute(DATA_ID))
-                if (docIDs.length == 2) {
-                    const attrs0 = await siyuan.getBlockAttrs(docIDs[0]);
+                const { blockDiv, blockID, idsInContent } = getBlockAndInnerIDs(protyle);
+                if (idsInContent.length == 2) {
+                    const attrs0 = await siyuan.getBlockAttrs(idsInContent[0]);
                     const alias0 = attrs0.alias ?? "";
                     const title0 = attrs0.title ?? "";
 
-                    const attrs1 = await siyuan.getBlockAttrs(docIDs[1]);
+                    const attrs1 = await siyuan.getBlockAttrs(idsInContent[1]);
                     let alias1 = attrs1.alias ?? "";
 
                     if (title0) {
@@ -52,11 +47,10 @@ class CmdBlockBox {
                     await siyuan.setBlockAttrs(docIDs[1], newAttrs);
                     // await siyuan.transferBlockRef(es[0], es[1]);
                 } else {
-                    const id = getID(blockDiv);
                     const txt = `请分别粘贴两个文档的引用大致于括号中央，再用'/'触发一次此功能。
 对文档1（              ）的引用将转移到文档2（              ），
 文档1的名字作为文档2的别名，文档1的内容转移到文档2，最后删除文档1。`
-                    insertText(blockDiv, txt, protyle, id);
+                    insertText(blockDiv, txt, protyle, blockID);
                 }
             }
         }];
@@ -68,6 +62,17 @@ class CmdBlockBox {
 }
 
 export const cmdBlockBox = new CmdBlockBox();
+
+function getBlockAndInnerIDs(protyle: Protyle) {
+    const range = protyle.getRange(protyle.protyle.element);
+    const blockDiv = getSyElement(range.commonAncestorContainer);
+    const blockID = getID(blockDiv);
+    blockDiv.classList.remove(BLINKCLASS);
+    const idsInContent = Array
+        .from(blockDiv.querySelectorAll(`[${DATA_TYPE}~="${BLOCK_REF}"]`))
+        .map(e => e.getAttribute(DATA_ID));
+    return { blockID, idsInContent, blockDiv };
+}
 
 function insertText(blockDiv: Element, txt: string, protyle: Protyle, id: string) {
     protyle.insert(txt)
