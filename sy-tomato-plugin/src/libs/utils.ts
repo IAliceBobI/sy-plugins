@@ -73,7 +73,7 @@ export async function getBlockDiv(id: string) {
     let tempDiv = document.createElement("div");
     tempDiv.innerHTML = dom;
     tempDiv = tempDiv.firstElementChild as HTMLDivElement;
-    return tempDiv;
+    return { div: tempDiv, id };
 }
 
 export function getID(e: Element) {

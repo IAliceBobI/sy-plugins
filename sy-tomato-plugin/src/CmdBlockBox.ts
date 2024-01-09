@@ -1,6 +1,6 @@
 import { Plugin, Protyle } from "siyuan";
 import "./index.scss";
-import { getSyElement, siyuan } from "./libs/utils";
+import { cleanDiv, getBlockDiv, getSyElement, siyuan } from "./libs/utils";
 import { BLOCK_REF, DATA_ID, DATA_TYPE } from "./libs/gconst";
 
 const MERGEDOC = "合并两个文档";
@@ -29,10 +29,9 @@ class CmdBlockBox {
                     await siyuan.transferBlockRef(idsInContent[0], idsInContent[1]);
                     // await siyuan.removeDocByID(idsInContent[0]);
                 } else {
-                    const txt = `请分别粘贴两个文档的引用大致于括号中央，再用'/'触发一次此功能。
-对文档1的引用将转移到文档2，
-文档1（              ） --> 文档2（              ），
-文档1的名字作为文档2的别名，文档1的内容转移到文档2，最后删除文档1。`;
+                    const txt = `请分别粘贴两个文档的引用于括号中，再用'/'触发一次此功能。
+文档1的引用将转移到文档2，属性、内容将复制到文档2，
+文档1（              ） 👉 文档2（              ）。`;
                     insertText(blockDiv, txt, protyle);
                 }
             }
@@ -47,11 +46,12 @@ class CmdBlockBox {
 export const cmdBlockBox = new CmdBlockBox();
 
 async function moveAllContentToDoc2(protyle: Protyle, doc1: string, doc2: string) {
-    const doms = await Promise.all((await siyuan.getChildBlocks(doc1)).map(b => siyuan.getBlockDOM(b.id)));
-    for (const { dom } of doms) {
-        await siyuan.appendBlock(protyle.protyle.lute.BlockDOM2Md(dom), doc2);
+    const divs = await Promise.all((await siyuan.getChildBlocks(doc1)).map(b => getBlockDiv(b.id)));
+    for (const { div } of divs) {
+        cleanDiv(div, false);
+        await siyuan.appendBlock(protyle.protyle.lute.BlockDOM2Md(div.outerHTML), doc2);
     }
-    await siyuan.safeDeleteBlocks(doms.map(d => d.id));
+    // await siyuan.safeDeleteBlocks(divs.map(d => d.id));
     // for (const blockID of (await siyuan.getChildBlocks(doc1)).reverse()) {
     //     await siyuan.safeMoveBlockToParent(blockID.id, doc2);
     // }
@@ -74,6 +74,15 @@ async function mergeIntoDoc2(doc1: string, doc2: string) {
     } else {
         if (attrs.memo) {
             newAttrs.memo += "；" + attrs.memo;
+        }
+    }
+
+    for (const key in attrs) {
+        if (key.startsWith("custom-")) {
+            if (key == "custom-riff-decks") continue;
+            if (!newAttrs[key]) {
+                newAttrs[key] = attrs[key];
+            }
         }
     }
     return newAttrs;
