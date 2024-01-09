@@ -2,6 +2,7 @@ import { Plugin, Protyle } from "siyuan";
 import "./index.scss";
 import { getID, getSyElement, siyuan } from "./libs/utils";
 import { BLOCK_REF, DATA_ID, DATA_TYPE } from "./libs/gconst";
+import { attr } from "svelte/internal";
 
 const MERGEDOC = "合并两个文档";
 const BLINKCLASS = "tomato-cmd-box";
@@ -19,33 +20,9 @@ class CmdBlockBox {
             async callback(protyle: Protyle) {
                 const { blockDiv, blockID, idsInContent } = getBlockAndInnerIDs(protyle);
                 if (idsInContent.length == 2) {
-                    const attrs0 = await siyuan.getBlockAttrs(idsInContent[0]);
-                    const alias0 = attrs0.alias ?? "";
-                    const title0 = attrs0.title ?? "";
-                    attrs0.zsdfasd;
-
-                    const attrs1 = await siyuan.getBlockAttrs(idsInContent[1]);
-                    let alias1 = attrs1.alias ?? "";
-
-                    if (title0) {
-                        if (!alias1) {
-                            alias1 = title0;
-                        } else {
-                            alias1 = `${alias1},${title0}`;
-                        }
-                    }
-
-                    if (alias0) {
-                        if (!alias1) {
-                            alias1 = alias0;
-                        } else {
-                            alias1 = `${alias1},${alias0}`;
-                        }
-                    }
-
-                    const newAttrs = {} as any;
-                    newAttrs.alias = alias1;
-                    await siyuan.setBlockAttrs(docIDs[1], newAttrs);
+                    await mergeDocAttrs(idsInContent);
+                    // newAttrs.alias = alias1;
+                    // await siyuan.setBlockAttrs(docIDs[1], newAttrs);
                     // await siyuan.transferBlockRef(es[0], es[1]);
                 } else {
                     const txt = `请分别粘贴两个文档的引用大致于括号中央，再用'/'触发一次此功能。
@@ -63,6 +40,35 @@ class CmdBlockBox {
 }
 
 export const cmdBlockBox = new CmdBlockBox();
+
+async function mergeIntoDoc2(doc1: string, doc2: string) {
+    const newAttrs = setDefaultAttr(await siyuan.getBlockAttrs(doc2));
+    const attrs = setDefaultAttr(await siyuan.getBlockAttrs(doc1));
+    delete newAttrs.updated;
+    delete newAttrs.id;
+    delete newAttrs.scroll;
+
+    const alias = [...newAttrs.alias.split(","), ...attrs.alias.split(","), attrs.name, attrs.title];
+    newAttrs.alias = alias.filter(i => i.length > 0).join(",");
+    if (!newAttrs.bookmark) {
+        newAttrs.bookmark = attrs.bookmark;
+    }
+    if (!newAttrs.memo) {
+        newAttrs.memo = attrs.memo;
+    } else {
+        newAttrs.memo += "；" + attrs.memo;
+    }
+    return newAttrs;
+}
+
+function setDefaultAttr(attrs: AttrType) {
+    if (!attrs.alias) attrs.alias = "";
+    if (!attrs.name) attrs.name = "";
+    if (!attrs.title) attrs.title = "";
+    if (!attrs.memo) attrs.memo = "";
+    if (!attrs.bookmark) attrs.bookmark = "";
+    return attrs;
+}
 
 function getBlockAndInnerIDs(protyle: Protyle) {
     const range = protyle.getRange(protyle.protyle.element);
