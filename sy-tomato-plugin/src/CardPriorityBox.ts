@@ -6,6 +6,20 @@ class CardPriorityBox {
 
     async onload(plugin: Plugin) {
         this.plugin = plugin;
+        this.plugin.addCommand({
+            langKey: "cardAddPriority",
+            hotkey: "F8",
+            editorCallback: (protyle) => {
+                console.log(protyle)
+            },
+        });
+        this.plugin.addCommand({
+            langKey: "cardSubPriority",
+            hotkey: "F7",
+            editorCallback: (protyle) => {
+                console.log(protyle)
+            },
+        });
         this.plugin.eventBus.on("open-menu-content", async ({ detail }) => {
             const menu = detail.menu;
             menu.addItem({
