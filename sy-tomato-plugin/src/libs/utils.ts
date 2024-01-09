@@ -5,10 +5,19 @@ import { zipAnyArrays } from "./functional";
 
 export function cleanDiv(div: HTMLDivElement, setRef: boolean): [string, HTMLElement, boolean] {
     const id = div.getAttribute(gconst.DATA_NODE_ID);
-    div.removeAttribute(gconst.DATA_NODE_ID);
+
+    // rm ids
+    div.setAttribute(gconst.DATA_NODE_ID, NewNodeID());
     div.querySelectorAll(`[${gconst.DATA_NODE_ID}]`).forEach((e: HTMLElement) => {
-        e.removeAttribute(gconst.DATA_NODE_ID);
+        e.setAttribute(gconst.DATA_NODE_ID, NewNodeID());
     });
+
+    // rm riff marks
+    div.removeAttribute(gconst.CUSTOM_RIFF_DECKS);
+    div.querySelectorAll(`[${gconst.CUSTOM_RIFF_DECKS}]`).forEach((e: HTMLElement) => {
+        e.removeAttribute(gconst.CUSTOM_RIFF_DECKS);
+    });
+
     if (setRef) {
         let setTheRef = false;
         const originID = div.getAttribute(gconst.RefIDKey) ?? "";

@@ -27,7 +27,6 @@ class CmdBlockBox {
                     await moveAllContentToDoc2(protyle, idsInContent[0], idsInContent[1]);
                     await siyuan.flushTransaction();
                     await siyuan.transferBlockRef(idsInContent[0], idsInContent[1]);
-                    // await siyuan.removeDocByID(idsInContent[0]);
                 } else {
                     const txt = `请分别粘贴两个文档的引用于括号中，再对本块用'/'触发一次此功能。
 文档A的引用将转移到文档B，
@@ -50,7 +49,8 @@ async function moveAllContentToDoc2(protyle: Protyle, doc1: string, doc2: string
     const divs = await Promise.all((await siyuan.getChildBlocks(doc1)).map(b => getBlockDiv(b.id)));
     for (const { div } of divs) {
         cleanDiv(div, false);
-        await siyuan.appendBlock(protyle.protyle.lute.BlockDOM2Md(div.outerHTML), doc2);
+        const md = protyle.protyle.lute.BlockDOM2Md(div.outerHTML).trim();
+        await siyuan.appendBlock(md, doc2);
     }
     // await siyuan.safeDeleteBlocks(divs.map(d => d.id));
     // for (const blockID of (await siyuan.getChildBlocks(doc1)).reverse()) {

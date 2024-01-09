@@ -1,6 +1,7 @@
 import { TOperation } from "siyuan";
 
 export const SPACE = "　";
+export const CUSTOM_RIFF_DECKS = "custom-riff-decks";
 export const DATA_NODE_ID = "data-node-id";
 export const BLOCK_REF = "block-ref";
 export const DATA_ID = "data-id";
