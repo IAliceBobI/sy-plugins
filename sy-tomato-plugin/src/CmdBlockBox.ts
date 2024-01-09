@@ -21,7 +21,7 @@ class CmdBlockBox {
                 if (idsInContent.length == 2) {
                     const newAttrs = await mergeIntoDoc2(idsInContent[0], idsInContent[1]);
                     const oldAttrs = setDefaultAttr({} as any);
-                    oldAttrs.title = "moved"
+                    oldAttrs.title = "moved";
                     await siyuan.setBlockAttrs(idsInContent[0], oldAttrs);
                     await siyuan.setBlockAttrs(idsInContent[1], newAttrs);
                     await moveAllContentToDoc2(protyle, idsInContent[0], idsInContent[1]);

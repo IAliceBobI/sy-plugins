@@ -11,21 +11,21 @@ class CardPriorityBox {
             langKey: "cardPriorityReset",
             hotkey: "F6",
             editorCallback: (protyle: IProtyle) => {
-                this.updateDocPriority(protyle, 0);
+                this.updateDocPriorityLock(protyle, 0);
             },
         });
         this.plugin.addCommand({
             langKey: "cardPrioritySub",
             hotkey: "F7",
             editorCallback: (protyle: IProtyle) => {
-                this.updateDocPriority(protyle, -1);
+                this.updateDocPriorityLock(protyle, -1);
             },
         });
         this.plugin.addCommand({
             langKey: "cardPriorityAdd",
             hotkey: "F8",
             editorCallback: (protyle: IProtyle) => {
-                this.updateDocPriority(protyle, +1);
+                this.updateDocPriorityLock(protyle, +1);
             },
         });
         this.plugin.eventBus.on("open-menu-content", async ({ detail }) => {
@@ -73,11 +73,23 @@ class CardPriorityBox {
         });
     }
 
+    private async updateDocPriorityLock(protyle: IProtyle, delta: number) {
+        return navigator.locks.request("CardPriorityBox.updateDocPriorityLock", { ifAvailable: true }, async (lock) => {
+            if (lock) {
+                await pushPriorityMsg(delta)
+                const count = await this.updateDocPriority(protyle, delta);
+                siyuan.pushMsg(`已经调整了${count}个闪卡的优先级`);
+            } else {
+                siyuan.pushMsg("正在修改优先级，请耐心等候……");
+            }
+        });
+    }
+
     private async updateDocPriority(protyle: IProtyle, delta: number) {
         const docID = protyle?.block?.rootID;
         if (!docID) return;
-        const blocks = await siyuan.getTreeRiffCardsAll(docID)
-        await Promise.all(blocks.map(block => {
+        const blocks = await siyuan.getTreeRiffCardsAll(docID);
+        const tasks = await Promise.all(blocks.map(block => {
             const ial = block.ial as unknown as AttrType;
             if (delta == 0) {
                 return setPriority(ial.id, 50);
@@ -86,12 +98,13 @@ class CardPriorityBox {
                 if (!isValidNumber(priority)) {
                     priority = 50;
                 }
-                const newPriority = ensureValidPriority(priority + delta)
+                const newPriority = ensureValidPriority(priority + delta);
                 if (newPriority != priority) {
                     return setPriority(ial.id, newPriority);
                 }
             }
-        }));
+        }).filter(i => !!i));
+        return tasks.length;
     }
 
     private async updatePriority(_protyle: IProtyle, _delta: number) {
@@ -104,6 +117,16 @@ class CardPriorityBox {
         return options;
     }
 
+}
+
+async function pushPriorityMsg(delta: number) {
+    if (delta == 0) {
+        return siyuan.pushMsg("开始重置闪卡的优先级为50");
+    } else if (delta == -1) {
+        return siyuan.pushMsg("开始减少一点所有闪卡的优先级");
+    } else if (delta == 1) {
+        return siyuan.pushMsg("开始增加一点所有闪卡的优先级");
+    }
 }
 
 async function setPriority(blockID: string, newPriority: number) {
