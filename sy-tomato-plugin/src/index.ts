@@ -1,4 +1,4 @@
-import { Plugin, Setting } from "siyuan";
+import { ICardData, Plugin, Setting } from "siyuan";
 import { ICONS } from "./icons";
 import { tomatoClock } from "./TomatoClock";
 import { linkBox } from "./LinkBox";
@@ -13,6 +13,7 @@ import { siyuan } from "@/libs/utils";
 import { imgOverlayBox } from "./ImgOverlayBox";
 import { dailyNoteBox } from "./DailyNoteBox";
 import { cmdBlockBox } from "./CmdBlockBox";
+import { cardPriorityBox } from "./CardPriorityBox";
 
 export default class ThePlugin extends Plugin {
     private static readonly GLOBAL_THIS: Record<string, any> = globalThis;
@@ -47,6 +48,9 @@ export default class ThePlugin extends Plugin {
 
         this.addSettingItem("cardBoxCheckbox", "* 闪卡工具", false);
         if (this.settingCfg.cardBoxCheckbox ?? false) await cardBox.onload(this);
+
+        this.addSettingItem("cardPriorityBoxCheckbox", "* 闪卡优先级", false);
+        if (this.settingCfg.cardPriorityBoxCheckbox ?? false) await cardPriorityBox.onload(this);
 
         this.addSettingItem("cpBoxCheckbox", "* 长内容工具", false);
         if (this.settingCfg.cpBoxCheckbox ?? false) await cpBox.onload(this);
@@ -89,8 +93,13 @@ export default class ThePlugin extends Plugin {
         schedule.blockIconEvent(detail);
         linkBox.blockIconEvent(detail);
         cardBox.blockIconEvent(detail);
+        cardPriorityBox.blockIconEvent(detail);
         imgOverlayBox.blockIconEvent(detail);
         dailyNoteBox.blockIconEvent(detail);
         cmdBlockBox.blockIconEvent(detail);
+    }
+
+    async updateCards(options: ICardData) {
+        return cardPriorityBox.updateCards(options);
     }
 }
