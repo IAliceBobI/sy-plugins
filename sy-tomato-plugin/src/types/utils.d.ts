@@ -44,6 +44,7 @@ type AttrType = {
     "custom-attr-pic-overlay": string,
     "custom-tomatomention": string,
     "custom-tomatobacklink": string,
+    "custom-card-priority": string,
     [key: string]: string,
 };
 

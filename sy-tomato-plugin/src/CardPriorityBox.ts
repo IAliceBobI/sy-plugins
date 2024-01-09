@@ -1,6 +1,6 @@
 import { ICardData, IProtyle, Plugin } from "siyuan";
 import "./index.scss";
-import { siyuan } from "./libs/utils";
+import { isValidNumber, siyuan } from "./libs/utils";
 
 class CardPriorityBox {
     private plugin: Plugin;
@@ -69,8 +69,20 @@ class CardPriorityBox {
     private async updateDocPriority(protyle: IProtyle, delta: number) {
         const docID = protyle?.block?.rootID;
         if (!docID) return;
-        const a = await siyuan.getTreeRiffCardsAll(docID)
-        console.log(a)
+        const blocks = await siyuan.getTreeRiffCardsAll(docID)
+        await Promise.all(blocks.map(block => {
+            const ial = block.ial as unknown as AttrType;
+            let priority = Number(ial["custom-card-priority"]);
+            if (!isValidNumber(priority)) {
+                priority = 50;
+            }
+            const newPriority = ensureValidPriority(priority + delta)
+            if (newPriority != priority) {
+                const attr = {} as AttrType;
+                attr["custom-card-priority"] = String(priority);
+                return siyuan.setBlockAttrs(ial.id, attr);
+            }
+        }));
     }
 
     private async updatePriority(_protyle: IProtyle, _delta: number) {
@@ -82,6 +94,12 @@ class CardPriorityBox {
         return options;
     }
 
+}
+
+function ensureValidPriority(priority: number) {
+    if (priority > 100) priority = 100;
+    if (priority < 0) priority = 0;
+    return priority;
 }
 
 export const cardPriorityBox = new CardPriorityBox();
