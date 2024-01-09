@@ -29,9 +29,10 @@ class CmdBlockBox {
                     await siyuan.transferBlockRef(idsInContent[0], idsInContent[1]);
                     // await siyuan.removeDocByID(idsInContent[0]);
                 } else {
-                    const txt = `请分别粘贴两个文档的引用于括号中，再用'/'触发一次此功能。
-文档1的引用将转移到文档2，属性、内容将复制到文档2，
-文档1（              ） 👉 文档2（              ）。`;
+                    const txt = `请分别粘贴两个文档的引用于括号中，再对本块用'/'触发一次此功能。
+文档A的引用将转移到文档B，
+文档A属性、内容将复制到文档B，
+文档A（              ）➡️➡️➡️ 文档B（              ）。`;
                     insertText(blockDiv, txt, protyle);
                 }
             }
