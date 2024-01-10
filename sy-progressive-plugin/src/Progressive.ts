@@ -492,20 +492,26 @@ class Progressive {
                 await this.startToLearn(bookID);
                 break;
             case HtmlCBType.deleteAndExit:
-                await siyuan.removeRiffCards([noteID]);
-                siyuan.removeDocByID(noteID);
+                confirm("⚠️", "🏃 🗑", async () => {
+                    await siyuan.removeRiffCards([noteID]);
+                    siyuan.removeDocByID(noteID);
+                })
                 break;
             case HtmlCBType.deleteAndBack:
-                await siyuan.removeRiffCards([noteID]);
-                await this.storage.gotoBlock(bookID, point - 1);
-                await this.startToLearn(bookID);
-                siyuan.removeDocByID(noteID);
+                confirm("⚠️", this.plugin.i18n.DeleteAndBack, async () => {
+                    await siyuan.removeRiffCards([noteID]);
+                    await this.storage.gotoBlock(bookID, point - 1);
+                    await this.startToLearn(bookID);
+                    siyuan.removeDocByID(noteID);
+                });
                 break;
             case HtmlCBType.deleteAndNext:
-                await siyuan.removeRiffCards([noteID]);
-                await this.storage.gotoBlock(bookID, point + 1);
-                await this.startToLearn(bookID);
-                siyuan.removeDocByID(noteID);
+                confirm("⚠️", this.plugin.i18n.DeleteAndNext, async () => {
+                    await siyuan.removeRiffCards([noteID]);
+                    await this.storage.gotoBlock(bookID, point + 1);
+                    await this.startToLearn(bookID);
+                    siyuan.removeDocByID(noteID);
+                });
                 break;
             case HtmlCBType.nextBook:
                 await this.startToLearn();
