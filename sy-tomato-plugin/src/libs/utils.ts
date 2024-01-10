@@ -534,14 +534,15 @@ export const siyuan = {
     async getRiffCards(page = 1, deckID = ""): Promise<GetCardRet> {
         return siyuan.call("/api/riff/getRiffCards", { "id": deckID, page });
     },
-    async getRiffCardsAll() {
+    async getRiffCardsAll(slow?: boolean) {
         const total: Map<string, Block> = new Map();
         for (let i = 1; ; i++) {
             const ret = await siyuan.getRiffCards(i);
             if (!ret?.blocks) break;
-            ret.blocks.forEach(i => total.set(i.id, i))
+            ret.blocks.forEach(i => total.set(i.id, i));
             if (total.size >= ret.total) break;
             if (i >= ret.pageCount + 10) break;
+            if (slow) await sleep(10);
         }
         return total.values();
     },

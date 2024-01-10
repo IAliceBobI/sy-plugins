@@ -1,6 +1,6 @@
 import { ICardData, IEventBusMap, IProtyle, Plugin } from "siyuan";
 import "./index.scss";
-import { getID, isValidNumber, shuffleArray, siyuan, siyuanCache, sleep } from "./libs/utils";
+import { getID, isValidNumber, shuffleArray, siyuan, sleep } from "./libs/utils";
 import { CUSTOM_RIFF_DECKS } from "./libs/gconst";
 
 class CardPriorityBox {
@@ -74,18 +74,15 @@ class CardPriorityBox {
     }
 
     private async loadCards() {
-        const cards = [...await siyuan.getRiffCardsAll()];
-        // while (true) {
+        const cards = [...await siyuan.getRiffCardsAll(true)];
         for (const card of cards) {
             try {
-                await siyuanCache.getBlockAttrs(60000, card.id)
-                // console.log(card.id)
-            } catch (_e) { }
+                await siyuan.getBlockAttrs(card.id);
+            } catch (_e) { _e; }
             finally {
                 await sleep(10);
             }
         }
-        // }
     }
 
     blockIconEvent(detail: IEventBusMap["click-blockicon"]) {
@@ -161,7 +158,7 @@ class CardPriorityBox {
         const start = new Date();
         try {
             let count = 0;
-            const attrMap = (await Promise.all(options.cards.map(card => siyuanCache.getBlockAttrs(60000, card.blockID))))
+            const attrMap = (await Promise.all(options.cards.map(card => siyuan.getBlockAttrs(card.blockID))))
                 .reduce((map, attr) => {
                     if (attr?.id) {
                         map.set(attr.id, readPriority(attr));
