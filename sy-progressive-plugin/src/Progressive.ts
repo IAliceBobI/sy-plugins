@@ -495,7 +495,7 @@ class Progressive {
                 confirm("⚠️", "🏃 🗑", async () => {
                     await siyuan.removeRiffCards([noteID]);
                     siyuan.removeDocByID(noteID);
-                })
+                });
                 break;
             case HtmlCBType.deleteAndBack:
                 confirm("⚠️", this.plugin.i18n.DeleteAndBack, async () => {

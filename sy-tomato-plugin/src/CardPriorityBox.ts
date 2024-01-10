@@ -156,7 +156,7 @@ class CardPriorityBox {
             options.cards = shuffleArray(options.cards);
             options.cards = options.cards.sort((a, b) => attrMap.get(b.blockID) - attrMap.get(a.blockID));
             if (count > 0) {
-                console.log(`您有${count}个疑似失效的闪卡。卡包里有闪卡，但笔记本里找不到对应的闪卡。`)
+                console.log(`您有${count}个疑似失效的闪卡。卡包里有闪卡，但笔记本里找不到对应的闪卡。`);
             }
         } finally {
             clearTimeout(handle);
