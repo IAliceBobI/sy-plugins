@@ -136,12 +136,13 @@ class CardPriorityBox {
 
     async updateCards(options: ICardData) {
         if (!this.plugin) return options;
+        siyuan.pushMsg("正在根据优先级排序……", 2000);
         const handle = setTimeout(() => {
-            siyuan.pushMsg(`正在根据优先级排序，请耐心等候……<br>
-您的卡数量有${options.cards.length}个，越多排序越久，<br>
-如果太久建议到闪卡的设置中，<br>
-限制新卡上限，于复习卡上限。`);
-        }, 3000);
+            siyuan.pushMsg(`您的卡数量有${options.cards.length}个，闪卡越多排序越久，<br>
+建议到 设置 -> 闪卡，<br>
+限制新卡上限、复习卡上限。`, 15000);
+        }, 6000);
+        const start = new Date();
         try {
             let count = 0;
             const attrMap = (await Promise.all(options.cards.map(card => siyuan.getBlockAttrs(card.blockID))))
@@ -160,6 +161,8 @@ class CardPriorityBox {
             }
         } finally {
             clearTimeout(handle);
+            const end = new Date().getTime() - start.getTime();
+            siyuan.pushMsg(`按优先级排序${options.cards.length}个闪卡，花费${end / 1000}秒。<br>数据库已经预热，下次排序更快。`);
         }
         return options;
     }
