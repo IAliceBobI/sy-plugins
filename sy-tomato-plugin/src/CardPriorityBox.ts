@@ -1,6 +1,6 @@
 import { ICardData, IEventBusMap, IProtyle, Plugin } from "siyuan";
 import "./index.scss";
-import { getID, isValidNumber, shuffleArray, siyuan } from "./libs/utils";
+import { getID, isValidNumber, shuffleArray, siyuan, sleep } from "./libs/utils";
 import { CUSTOM_RIFF_DECKS } from "./libs/gconst";
 
 class CardPriorityBox {
@@ -70,6 +70,19 @@ class CardPriorityBox {
                 },
             });
         });
+        this.loadCards().then();
+    }
+
+    private async loadCards() {
+        await siyuan.getTreeRiffCardsAll
+        while (true) {
+            try {
+
+            } catch (_e) { }
+            finally {
+                await sleep(200);
+            }
+        }
     }
 
     blockIconEvent(detail: IEventBusMap["click-blockicon"]) {

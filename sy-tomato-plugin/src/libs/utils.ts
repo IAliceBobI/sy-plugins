@@ -534,6 +534,10 @@ export const siyuan = {
     async getRiffCards(page = 1, deckID = "") {
         return siyuan.call("/api/riff/getRiffCards", { "id": deckID, page });
     },
+    async getRiffCardsAll() {
+
+        return siyuan.call("/api/riff/getRiffCards", { "id": "", page: 1 });
+    },
     async getRiffDecks() {
         return siyuan.call("/api/riff/getRiffDecks", {});
     },
