@@ -135,7 +135,7 @@ class CardPriorityBox {
     }
 
     async updateCards(options: ICardData) {
-        if (!this.plugin) return;
+        if (!this.plugin) return options;
         const attrMap = (await Promise.all(options.cards.map(card => siyuan.getBlockAttrs(card.blockID))))
             .reduce((map, attr) => map.set(attr.id, readPriority(attr)), new Map<string, number>());
         options.cards = shuffleArray(options.cards);
