@@ -546,6 +546,9 @@ export const siyuan = {
         }
         return total.values();
     },
+    async getRiffDueCards(deckID = ""): Promise<GetDueCardRet> {
+        return siyuan.call("/api/riff/getRiffDueCards", { deckID });
+    },
     async getRiffDecks() {
         return siyuan.call("/api/riff/getRiffDecks", {});
     },

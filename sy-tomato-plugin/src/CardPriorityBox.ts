@@ -74,10 +74,10 @@ class CardPriorityBox {
     }
 
     private async loadCards() {
-        const cards = [...await siyuan.getRiffCardsAll(true)];
-        for (const card of cards) {
+        const cards = await siyuan.getRiffDueCards();
+        for (const card of cards.cards) {
             try {
-                await siyuan.getBlockAttrs(card.id);
+                await siyuan.getBlockAttrs(card.blockID);
             } catch (_e) { _e; }
             finally {
                 await sleep(10);
