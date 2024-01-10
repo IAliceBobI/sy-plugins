@@ -29,6 +29,23 @@ class CardPriorityBox {
                 this.updateDocPriorityLock(protyle, +1);
             },
         });
+        this.plugin.eventBus.on("open-menu-content", async ({ detail }) => {
+            const menu = detail.menu;
+            menu.addItem({
+                label: "闪卡增加一点优先级",
+                icon: "iconUp",
+                click: () => {
+                    this.updatePriority(detail.protyle, +1);
+                },
+            });
+            menu.addItem({
+                label: "闪卡减少一点优先级",
+                icon: "iconDown",
+                click: () => {
+                    this.updatePriority(detail.protyle, -1);
+                },
+            });
+        });
     }
 
     blockIconEvent(detail: any) {
@@ -53,10 +70,10 @@ class CardPriorityBox {
         const blocks = (await Promise.all(Array.from(protyle?.element
             ?.querySelectorAll(`.${PROTYLE_WYSIWYG_SELECT}`))
             .map(div => {
-                div.classList.remove(PROTYLE_WYSIWYG_SELECT)
-                return div.getAttribute(DATA_NODE_ID)
+                div.classList.remove(PROTYLE_WYSIWYG_SELECT);
+                return div.getAttribute(DATA_NODE_ID);
             }).filter(i => !!i).map(id => siyuan.getBlockAttrs(id)))).map(ial => {
-                return { ial }
+                return { ial };
             }).filter(b => !!b.ial["custom-riff-decks"]);
         return this.updateDocPriorityLock(protyle, delta, blocks as any);
     }
@@ -137,29 +154,3 @@ function ensureValidPriority(priority: number) {
 }
 
 export const cardPriorityBox = new CardPriorityBox();
-
-// this.plugin.eventBus.on("open-menu-content", async ({ detail }) => {
-//     const menu = detail.menu;
-//     menu.addItem({
-//         label: "闪卡增加一点优先级",
-//         icon: "iconFlashcard",
-//         accelerator: "⌥E",
-//         click: () => {
-//             const blockID = detail?.element?.getAttribute("data-node-id") ?? "";
-//             if (blockID) {
-//                 // this.blankSpaceCard(blockID, blank, detail?.range, detail?.protyle, cardType);
-//             }
-//         },
-//     });
-//     menu.addItem({
-//         label: "闪卡减少一点优先级",
-//         icon: "iconFlashcard",
-//         accelerator: "⌘`",
-//         click: () => {
-//             const blockID = detail?.element?.getAttribute("data-node-id") ?? "";
-//             if (blockID) {
-//                 // this.blankSpaceCard(blockID, blank, detail?.range, detail?.protyle, cardType, getDailyPath());
-//             }
-//         },
-//     });
-// });
