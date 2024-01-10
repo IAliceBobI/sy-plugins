@@ -16,14 +16,8 @@ export class SplitSentence {
     async insert() {
         return navigator.locks.request("prog.SplitSentence.insert", { ifAvailable: true }, async (lock) => {
             if (lock && this.lastID) {
-                if (this.asList == "p") {
-                    for (const b of this.textAreas.slice().reverse()) {
-                        await siyuan.insertBlockAfter(b.blocks.join("\n") + `\n{: ${RefIDKey}="${b.ref}"}`, this.lastID);
-                    }
-                } else {
-                    for (const b of this.textAreas.slice().reverse()) {
-                        await siyuan.insertBlockAfter("* " + b.blocks.join("\n* ") + `\n{: ${RefIDKey}="${b.ref}"}`, this.lastID);
-                    }
+                for (const b of this.textAreas.slice().reverse()) {
+                    await siyuan.insertBlockAfter(b.blocks.join(""), this.lastID);
                 }
             }
         });
@@ -53,33 +47,24 @@ export class SplitSentence {
             const ref = getIDFromIAL(row.ial);
             if (ref) {
                 if (row.type == "h") {
-                    const ps = [row.markdown];
-                    if (this.asList == "p") {
-                        this.textAreas.push({
-                            blocks: ps.map(i => i + `\n{: ${RefIDKey}="${ref}"}`),
-                            ref,
-                        });
-                    } else {
-                        this.textAreas.push({
-                            blocks: ps.map(i => `{: ${RefIDKey}="${ref}"} ` + i + `\n\t{: ${RefIDKey}="${ref}"}`),
-                            ref,
-                        });
-                    }
+                    this.textAreas.push({
+                        blocks: [row.markdown + `\n{: ${RefIDKey}="${ref}"}`],
+                        ref,
+                    });
                 } else {
                     let ps = [row.content];
                     for (const s of "\n。！!？?；;:：") ps = spliyBy(ps, s);
                     ps = spliyBy(ps, "……");
+                    let blocks: string[];
                     if (this.asList == "p") {
-                        this.textAreas.push({
-                            blocks: ps.map(i => SPACE.repeat(2) + i + ` ((${ref} "*"))\n{: ${RefIDKey}="${ref}"}`),
-                            ref,
-                        });
+                        blocks = ps.map(i => i.trim())
+                            .filter(i => i.length > 0)
+                            .map(i => SPACE.repeat(2) + i + ` ((${ref} "*"))\n{: ${RefIDKey}="${ref}"}\n`);
                     } else {
-                        this.textAreas.push({
-                            blocks: ps.map(i => `{: ${RefIDKey}="${ref}"} ` + i + ` ((${ref} "*"))\n\t{: ${RefIDKey}="${ref}"}`),
-                            ref,
-                        });
+                        blocks = ps.map(i => `* {: ${RefIDKey}="${ref}"} ` + i + ` ((${ref} "*"))\n\t{: ${RefIDKey}="${ref}"}\n`);
                     }
+                    blocks.push(`{: ${RefIDKey}="${ref}"}\n`);
+                    this.textAreas.push({ blocks, ref });
                 }
             }
         }
