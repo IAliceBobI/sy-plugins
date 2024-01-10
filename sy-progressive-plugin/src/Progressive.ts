@@ -6,7 +6,7 @@ import { HtmlCBType } from "./helper";
 import * as utils from "../../sy-tomato-plugin/src/libs/utils";
 import * as help from "./helper";
 import * as constants from "./constants";
-import { MarkKey, PROG_ORIGIN_TEXT, RefIDKey, TEMP_CONTENT, TransactionData, WsActionTypes } from "../../sy-tomato-plugin/src/libs/gconst";
+import { MarkKey, PROG_ORIGIN_TEXT, RefIDKey } from "../../sy-tomato-plugin/src/libs/gconst";
 import { SplitSentence } from "./SplitSentence";
 
 class Progressive {
@@ -83,31 +83,31 @@ class Progressive {
                 }
             }
         });
-        this.plugin.eventBus.on("ws-main", async ({ detail }) => {
-            if (detail?.cmd == WsActionTypes.transactions) {
-                for (const element of detail.data as TransactionData[]) {
-                    for (const ops of element?.doOperations ?? []) {
-                        if (ops?.action == "update" && ops.id) {
-                            const row = await siyuan.getDocRowByBlockID(ops.id);
-                            if (row?.id) {
-                                const attr = (await siyuan.getBlockAttrs(row.id))[MarkKey] ?? "";
-                                const pieceLen = TEMP_CONTENT.length + 1 + "20231229160401-0lfc8qj".length + 1 + 1;
-                                if (attr.startsWith(TEMP_CONTENT + "#") && attr.length >= pieceLen) {
-                                    navigator.locks.request(constants.TryAddStarsLock, { ifAvailable: true }, async (lock) => {
-                                        if (lock) {
-                                            for (let i = 0; i < 6; i++) {
-                                                await utils.sleep(4000);
-                                                await this.tryAddRefAttr(row.id);
-                                            }
-                                        }
-                                    });
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        });
+        // this.plugin.eventBus.on("ws-main", async ({ detail }) => {
+        //     if (detail?.cmd == WsActionTypes.transactions) {
+        //         for (const element of detail.data as TransactionData[]) {
+        //             for (const ops of element?.doOperations ?? []) {
+        //                 if (ops?.action == "update" && ops.id) {
+        //                     const row = await siyuan.getDocRowByBlockID(ops.id);
+        //                     if (row?.id) {
+        //                         const attr = (await siyuan.getBlockAttrs(row.id))[MarkKey] ?? "";
+        //                         const pieceLen = TEMP_CONTENT.length + 1 + "20231229160401-0lfc8qj".length + 1 + 1;
+        //                         if (attr.startsWith(TEMP_CONTENT + "#") && attr.length >= pieceLen) {
+        //                             navigator.locks.request(constants.TryAddStarsLock, { ifAvailable: true }, async (lock) => {
+        //                                 if (lock) {
+        //                                     for (let i = 0; i < 6; i++) {
+        //                                         await utils.sleep(4000);
+        //                                         await this.tryAddRefAttr(row.id);
+        //                                     }
+        //                                 }
+        //                             });
+        //                         }
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //     }
+        // });
     }
 
     private async tryAddRefAttr(noteID: string) {
