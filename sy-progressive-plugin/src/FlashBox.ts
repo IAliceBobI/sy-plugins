@@ -165,9 +165,9 @@ class FlashBox {
         }
     }
 
-    private async insertCard(protyle: IProtyle, markdowns: HTMLElement[], t: CardType, lastSelectedID: string, path?: string) {
+    private async insertCard(protyle: IProtyle, divs: HTMLElement[], t: CardType, lastSelectedID: string, path?: string) {
         return navigator.locks.request("prog-FlashBox-insertCard", { mode: "exclusive" }, async (_lock) => {
-            return this.doInsertCard(protyle, markdowns, t, lastSelectedID, path);
+            return this.doInsertCard(protyle, divs, t, lastSelectedID, path);
         });
     }
 
