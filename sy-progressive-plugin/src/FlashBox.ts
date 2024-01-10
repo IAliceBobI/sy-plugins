@@ -181,17 +181,17 @@ class FlashBox {
             const attr = {};
             attr[`custom-dailycard-${v}`] = v;
             const targetDocID = await utils.siyuanCache.createDocWithMdIfNotExists(10000, boxID, path, "", attr);
-            await siyuan.insertBlockAsChildOf(`{: id=${utils.NewNodeID()}}\n${markdown}`, targetDocID);
+            await siyuan.insertBlockAsChildOf(`\n{: id="${utils.NewNodeID()}"}\n${markdown}`, targetDocID);
             openTab({ app: this.plugin.app, doc: { id: targetDocID }, position: "right" });
         } else if (isPiece) {
             if (!bookID) return;
             const hpath = await getHPathByDocID(bookID);
             if (!hpath) return;
             const targetDocID = await getCardsDoc(bookID, boxID, hpath);
-            await siyuan.insertBlockAsChildOf(`{: id=${utils.NewNodeID()}}\n${markdown}`, targetDocID);
+            await siyuan.insertBlockAsChildOf(`{: id="${utils.NewNodeID()}"}\n${markdown}`, targetDocID);
             openTab({ app: this.plugin.app, doc: { id: targetDocID }, position: "right" });
         } else {
-            await siyuan.insertBlockAfter(`{: id=${utils.NewNodeID()}}\n${markdown}\n{: id=${utils.NewNodeID()}}`, lastSelectedID);
+            await siyuan.insertBlockAfter(`{: id="${utils.NewNodeID()}"}\n${markdown}\n{: id="${utils.NewNodeID()}"}`, lastSelectedID);
         }
         await siyuan.addRiffCards([cardID]);
         await siyuan.pushMsg("⚡🗃" + markdown.split("(")[0], 1234);
