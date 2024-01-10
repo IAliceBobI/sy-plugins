@@ -85,21 +85,27 @@ export async function getBlockDiv(id: string) {
     return { div: tempDiv, id };
 }
 
-export function getID(e: Element) {
-    const s = getSyElement(e);
+export function getID(e: Element, attrs?: string[]) {
+    const s = getSyElement(e, attrs);
     if (s) {
         return s.getAttribute(gconst.DATA_NODE_ID);
     }
     return "";
 }
 
-export function getSyElement(e: Node) {
+export function getSyElement(e: Node, attrs?: string[]) {
     if (!e) return;
     if (e instanceof Element) {
         const id = e.getAttribute(gconst.DATA_NODE_ID);
-        if (id) return e;
+        if (id) {
+            if (attrs) {
+                if (attrs.reduce((has, attr) => has && e.hasAttribute(attr), true)) return e;
+            } else {
+                return e;
+            }
+        }
     }
-    return getSyElement(e.parentElement);
+    return getSyElement(e.parentElement, attrs);
 }
 
 export const getContenteditableElement = (element: Element) => {

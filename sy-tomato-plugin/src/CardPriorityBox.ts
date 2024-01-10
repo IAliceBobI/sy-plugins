@@ -1,7 +1,7 @@
-import { ICardData, IProtyle, Plugin } from "siyuan";
+import { ICardData, IEventBusMap, IProtyle, Plugin } from "siyuan";
 import "./index.scss";
-import { isValidNumber, shuffleArray, siyuan } from "./libs/utils";
-import { DATA_NODE_ID, PROTYLE_WYSIWYG_SELECT } from "./libs/gconst";
+import { getID, isValidNumber, shuffleArray, siyuan } from "./libs/utils";
+import { CUSTOM_RIFF_DECKS, DATA_NODE_ID } from "./libs/gconst";
 
 class CardPriorityBox {
     private plugin: Plugin;
@@ -35,46 +35,43 @@ class CardPriorityBox {
                 label: "闪卡增加一点优先级",
                 icon: "iconUp",
                 click: () => {
-                    this.updatePriority(detail.protyle, +1);
+                    this.updatePriority(detail.protyle, [detail.element], +1);
                 },
             });
             menu.addItem({
                 label: "闪卡减少一点优先级",
                 icon: "iconDown",
                 click: () => {
-                    this.updatePriority(detail.protyle, -1);
+                    this.updatePriority(detail.protyle, [detail.element], -1);
                 },
             });
         });
     }
 
-    blockIconEvent(detail: any) {
+    blockIconEvent(detail: IEventBusMap["click-blockicon"]) {
         if (!this.plugin) return;
         detail.menu.addItem({
-            iconHTML: "",
+            iconHTML: "⬆️",
             label: "闪卡增加一点优先级",
             click: () => {
-                this.updatePriority(detail.protyle, +1);
+                this.updatePriority(detail.protyle, detail.blockElements, +1);
             }
         });
         detail.menu.addItem({
-            iconHTML: "",
+            iconHTML: "⬇️",
             label: "闪卡减少一点优先级",
             click: () => {
-                this.updatePriority(detail.protyle, -1);
+                this.updatePriority(detail.protyle, detail.blockElements, -1);
             }
         });
     }
 
-    private async updatePriority(protyle: IProtyle, delta: number) {
-        const blocks = (await Promise.all(Array.from(protyle?.element
-            ?.querySelectorAll(`.${PROTYLE_WYSIWYG_SELECT}`))
-            .map(div => {
-                div.classList.remove(PROTYLE_WYSIWYG_SELECT);
-                return div.getAttribute(DATA_NODE_ID);
-            }).filter(i => !!i).map(id => siyuan.getBlockAttrs(id)))).map(ial => {
-                return { ial };
-            }).filter(b => !!b.ial["custom-riff-decks"]);
+    private async updatePriority(protyle: IProtyle, elements: HTMLElement[], delta: number) {
+        const blocks = (await Promise.all(elements.map(div => {
+            return getID(div, [CUSTOM_RIFF_DECKS]);
+        }).filter(i => !!i).map(id => siyuan.getBlockAttrs(id)))).map(ial => {
+            return { ial };
+        }).filter(b => !!b.ial[CUSTOM_RIFF_DECKS]);
         return this.updateDocPriorityLock(protyle, delta, blocks as any);
     }
 

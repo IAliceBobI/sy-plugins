@@ -1,7 +1,7 @@
 import { Plugin, Protyle } from "siyuan";
 import "./index.scss";
 import { cleanDiv, getBlockDiv, getSyElement, siyuan } from "./libs/utils";
-import { BLOCK_REF, DATA_ID, DATA_TYPE } from "./libs/gconst";
+import { BLOCK_REF, CUSTOM_RIFF_DECKS, DATA_ID, DATA_TYPE } from "./libs/gconst";
 
 const MERGEDOC = "合并两个文档";
 const BLINKCLASS = "tomato-cmd-box";
@@ -80,7 +80,7 @@ async function mergeIntoDoc2(doc1: string, doc2: string) {
 
     for (const key in attrs) {
         if (key.startsWith("custom-")) {
-            if (key == "custom-riff-decks") continue;
+            if (key == CUSTOM_RIFF_DECKS) continue;
             if (!newAttrs[key]) {
                 newAttrs[key] = attrs[key];
             }
