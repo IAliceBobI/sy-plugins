@@ -1,7 +1,7 @@
 import { ICardData, IEventBusMap, IProtyle, Plugin } from "siyuan";
 import "./index.scss";
 import { getID, isValidNumber, shuffleArray, siyuan } from "./libs/utils";
-import { CUSTOM_RIFF_DECKS, DATA_NODE_ID } from "./libs/gconst";
+import { CUSTOM_RIFF_DECKS } from "./libs/gconst";
 
 class CardPriorityBox {
     private plugin: Plugin;
@@ -32,10 +32,27 @@ class CardPriorityBox {
         this.plugin.eventBus.on("open-menu-content", async ({ detail }) => {
             const menu = detail.menu;
             menu.addItem({
-                label: "闪卡增加一点优先级",
-                icon: "iconUp",
+                label: this.plugin.i18n.cardPriorityReset,
+                icon: "iconRestore",
+                accelerator: "F6",
                 click: () => {
-                    this.updatePriority(detail.protyle, [detail.element], +1);
+                    this.updateDocPriorityLock(detail.protyle, 0);
+                },
+            });
+            menu.addItem({
+                label: this.plugin.i18n.cardPrioritySub,
+                icon: "iconDown",
+                accelerator: "F7",
+                click: () => {
+                    this.updateDocPriorityLock(detail.protyle, -1);
+                },
+            });
+            menu.addItem({
+                label: this.plugin.i18n.cardPriorityAdd,
+                icon: "iconUp",
+                accelerator: "F8",
+                click: () => {
+                    this.updateDocPriorityLock(detail.protyle, +1);
                 },
             });
             menu.addItem({
@@ -45,23 +62,30 @@ class CardPriorityBox {
                     this.updatePriority(detail.protyle, [detail.element], -1);
                 },
             });
+            menu.addItem({
+                label: "闪卡增加一点优先级",
+                icon: "iconUp",
+                click: () => {
+                    this.updatePriority(detail.protyle, [detail.element], +1);
+                },
+            });
         });
     }
 
     blockIconEvent(detail: IEventBusMap["click-blockicon"]) {
         if (!this.plugin) return;
         detail.menu.addItem({
-            iconHTML: "⬆️",
-            label: "闪卡增加一点优先级",
-            click: () => {
-                this.updatePriority(detail.protyle, detail.blockElements, +1);
-            }
-        });
-        detail.menu.addItem({
             iconHTML: "⬇️",
             label: "闪卡减少一点优先级",
             click: () => {
                 this.updatePriority(detail.protyle, detail.blockElements, -1);
+            }
+        });
+        detail.menu.addItem({
+            iconHTML: "⬆️",
+            label: "闪卡增加一点优先级",
+            click: () => {
+                this.updatePriority(detail.protyle, detail.blockElements, +1);
             }
         });
     }
