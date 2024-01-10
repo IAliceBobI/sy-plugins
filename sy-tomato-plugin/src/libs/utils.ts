@@ -525,18 +525,25 @@ export const siyuan = {
         }
         return total;
     },
-    async getTreeRiffCards(id: string, page: number): Promise<{ blocks: Block[], total: number, pageCount: number }> {
+    async getTreeRiffCards(id: string, page: number): Promise<GetCardRet> {
         return siyuan.call("/api/riff/getTreeRiffCards", { id, page });
     },
     async addRiffCards(blockIDs: Array<string>, deckID = "20230218211946-2kw8jgx") {
         return siyuan.call("/api/riff/addRiffCards", { blockIDs, deckID });
     },
-    async getRiffCards(page = 1, deckID = "") {
+    async getRiffCards(page = 1, deckID = ""): Promise<GetCardRet> {
         return siyuan.call("/api/riff/getRiffCards", { "id": deckID, page });
     },
     async getRiffCardsAll() {
-
-        return siyuan.call("/api/riff/getRiffCards", { "id": "", page: 1 });
+        const total: Map<string, Block> = new Map();
+        for (let i = 1; ; i++) {
+            const ret = await siyuan.getRiffCards(i);
+            if (!ret?.blocks) break;
+            ret.blocks.forEach(i => total.set(i.id, i))
+            if (total.size >= ret.total) break;
+            if (i >= ret.pageCount + 10) break;
+        }
+        return total.values();
     },
     async getRiffDecks() {
         return siyuan.call("/api/riff/getRiffDecks", {});
@@ -681,34 +688,21 @@ export const siyuan = {
         return lines.join("\n");
     },
     async removeBrokenCards() {
-        const handle = setInterval(() => {
-            siyuan.pushMsg("正在确认无效闪卡，请耐心等待……", 2000);
-        }, 2400);
-        try {
-            let invalidCardIDs = [];
-            for (let page = 1; page < Number.MAX_SAFE_INTEGER; page++) {
-                const resp = await siyuan.getRiffCards(page);
-                const cards = resp["blocks"];
-                if (!cards.length) break;
-                for (const i in cards) {
-                    const card = cards[i];
-                    const valid = card["box"];
-                    if (!valid) {
-                        invalidCardIDs.push(card["id"]);
-                    }
-                }
+        siyuan.pushMsg("正在确认无效闪卡，请耐心等待……", 4000);
+        let invalidCardIDs = [];
+        for (const card of await siyuan.getRiffCardsAll()) {
+            if (!card.box) {
+                invalidCardIDs.push(card.id);
             }
-            invalidCardIDs = zipAnyArrays(
-                await Promise.all(invalidCardIDs.map((card) => siyuan.checkBlockExist(card))),
-                invalidCardIDs,
-            ).filter(e => !e[0]).map(e => e[1]);
-            if (invalidCardIDs.length > 0) {
-                await siyuan.removeRiffCards(invalidCardIDs);
-            }
-            return invalidCardIDs;
-        } finally {
-            clearInterval(handle);
         }
+        invalidCardIDs = zipAnyArrays(
+            await Promise.all(invalidCardIDs.map((card) => siyuan.checkBlockExist(card))),
+            invalidCardIDs,
+        ).filter(e => !e[0]).map(e => e[1]);
+        if (invalidCardIDs.length > 0) {
+            await siyuan.removeRiffCards(invalidCardIDs);
+        }
+        return invalidCardIDs;
     },
     async getDocNameByBlockID(blockID: string) {
         let row = await siyuan.sqlOne(

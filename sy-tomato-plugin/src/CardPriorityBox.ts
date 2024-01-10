@@ -1,6 +1,6 @@
 import { ICardData, IEventBusMap, IProtyle, Plugin } from "siyuan";
 import "./index.scss";
-import { getID, isValidNumber, shuffleArray, siyuan, sleep } from "./libs/utils";
+import { getID, isValidNumber, shuffleArray, siyuan, siyuanCache, sleep } from "./libs/utils";
 import { CUSTOM_RIFF_DECKS } from "./libs/gconst";
 
 class CardPriorityBox {
@@ -74,15 +74,18 @@ class CardPriorityBox {
     }
 
     private async loadCards() {
-        await siyuan.getTreeRiffCardsAll
-        while (true) {
+        const cards = [...await siyuan.getRiffCardsAll()];
+        // while (true) {
+        for (const card of cards) {
             try {
-
+                await siyuanCache.getBlockAttrs(60000, card.id)
+                // console.log(card.id)
             } catch (_e) { }
             finally {
-                await sleep(200);
+                await sleep(10);
             }
         }
+        // }
     }
 
     blockIconEvent(detail: IEventBusMap["click-blockicon"]) {
@@ -158,7 +161,7 @@ class CardPriorityBox {
         const start = new Date();
         try {
             let count = 0;
-            const attrMap = (await Promise.all(options.cards.map(card => siyuan.getBlockAttrs(card.blockID))))
+            const attrMap = (await Promise.all(options.cards.map(card => siyuanCache.getBlockAttrs(60000, card.blockID))))
                 .reduce((map, attr) => {
                     if (attr?.id) {
                         map.set(attr.id, readPriority(attr));
@@ -175,7 +178,7 @@ class CardPriorityBox {
         } finally {
             clearTimeout(handle);
             const end = new Date().getTime() - start.getTime();
-            siyuan.pushMsg(`按优先级排序${options.cards.length}个闪卡，花费${end / 1000}秒。<br>数据库已经预热，下次排序更快。`);
+            siyuan.pushMsg(`按优先级排序${options.cards.length}个闪卡，花费${end / 1000}秒。<br>数据库已经预热，下次排序更快。`, 2000);
         }
         return options;
     }

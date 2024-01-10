@@ -48,3 +48,4 @@ type AttrType = {
     [key: string]: string,
 };
 
+type GetCardRet = { blocks: Block[], total: number, pageCount: number };
