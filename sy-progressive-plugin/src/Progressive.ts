@@ -1,4 +1,4 @@
-import { Dialog, Menu, Plugin, openTab, confirm, ITab, Lute, IProtyle } from "siyuan";
+import { Dialog, Menu, Plugin, openTab, confirm, ITab, Lute, IProtyle, Protyle } from "siyuan";
 import "./index.scss";
 import { EventType, events } from "../../sy-tomato-plugin/src/libs/Events";
 import { siyuan, timeUtil } from "../../sy-tomato-plugin/src/libs/utils";
@@ -6,7 +6,7 @@ import { HtmlCBType } from "./helper";
 import * as utils from "../../sy-tomato-plugin/src/libs/utils";
 import * as help from "./helper";
 import * as constants from "./constants";
-import { MarkKey, PROG_ORIGIN_TEXT, RefIDKey } from "../../sy-tomato-plugin/src/libs/gconst";
+import { BlockNodeEnum, DATA_NODE_ID, DATA_NODE_INDEX, DATA_TYPE, MarkKey, PROG_ORIGIN_TEXT, RefIDKey } from "../../sy-tomato-plugin/src/libs/gconst";
 import { SplitSentence } from "./SplitSentence";
 
 class Progressive {
@@ -67,21 +67,20 @@ class Progressive {
                 },
             });
         });
-        events.addListener("ProgressiveBox", (eventType, detail) => {
-            if (eventType == EventType.loaded_protyle_static) {
-                const protyle: IProtyle = detail.protyle;
-                if (help.isProtylePiece(protyle)) {
-                    const noteID = protyle.block.rootID;
-                    navigator.locks.request(constants.TryAddStarsLock, { ifAvailable: true }, async (lock) => {
+        events.addListener("ProgressiveBox", (eventType, detail: Protyle) => {
+            navigator.locks.request(constants.TryAddStarsLock, { ifAvailable: true }, async (lock) => {
+                if (eventType == EventType.loaded_protyle_static) {
+                    const protyle: IProtyle = detail.protyle;
+                    if (help.isProtylePiece(protyle)) {
                         if (lock) {
-                            for (let i = 0; i < 6; i++) {
-                                await utils.sleep(4000);
-                                await this.tryAddRefAttr(noteID);
+                            for (let i = 0; i < 5; i++) {
+                                await this.tryAddRefAttr(protyle);
+                                await utils.sleep(2000);
                             }
                         }
-                    });
+                    }
                 }
-            }
+            });
         });
         // this.plugin.eventBus.on("ws-main", async ({ detail }) => {
         //     if (detail?.cmd == WsActionTypes.transactions) {
@@ -110,41 +109,31 @@ class Progressive {
         // });
     }
 
-    private async tryAddRefAttr(noteID: string) {
-        const children = await siyuan.getChildBlocks(noteID);
-        const ids = children.filter(c => {
-            return c.type == "h" || c.type == "p" || c.type == "l";
-        }).map(c => {
-            return `"${c.id}"`;
-        });
-        const rows = await siyuan.sql(`select id,ial from blocks where id in (${ids.join(",")})`); // TODO: too many?
-        const findSibling = (block: Block) => {
-            let preBlock: Block;
-            if (block) {
-                for (let i = 0; i < rows.length; i++) {
-                    if (i == 0 && block.id == rows[i].id) {
-                        preBlock = rows[i + 1];
-                        break;
-                    }
-                    if (i > 0 && block.id == rows[i].id) {
-                        preBlock = rows[i - 1];
-                        break;
-                    }
+    private async tryAddRefAttr(protyle: IProtyle) {
+        Array.from(protyle.element.querySelectorAll(`div[${DATA_NODE_ID}][${DATA_NODE_INDEX}]`))
+            .filter((e: HTMLElement) => !e.getAttribute(RefIDKey))
+            .filter((e: HTMLElement) => {
+                const a = e.getAttribute(DATA_TYPE);
+                return a == BlockNodeEnum.NODE_PARAGRAPH
+                    || a == BlockNodeEnum.NODE_LIST
+                    || a == BlockNodeEnum.NODE_LIST_ITEM
+                    || a == BlockNodeEnum.NODE_HEADING
+                    || a == BlockNodeEnum.NODE_BLOCKQUOTE
+                    || a == BlockNodeEnum.NODE_CODE_BLOCK;
+            })
+            .forEach((e: HTMLElement) => {
+                let ref = "";
+                if (e.previousElementSibling) {
+                    ref = e.previousElementSibling.getAttribute(RefIDKey);
+                } else if (e.nextElementSibling) {
+                    ref = e.nextElementSibling.getAttribute(RefIDKey);
                 }
-            }
-            return preBlock;
-        };
-        rows.filter(row => !row.ial.includes(RefIDKey)).forEach(async row => {
-            const s = findSibling(row);
-            if (s) {
-                const attr = (await siyuan.getBlockAttrs(s.id))[RefIDKey] ?? "";
-                if (attr) {
-                    const newAttr = {};
-                    newAttr[RefIDKey] = attr;
-                    await siyuan.setBlockAttrs(row.id, newAttr);
+                if (ref) {
+                    const attr = {} as AttrType;
+                    attr["custom-progref"] = ref;
+                    siyuan.setBlockAttrs(e.getAttribute(DATA_NODE_ID), attr);
                 }
-            }
-        });
+            });
     }
 
     private addMenu(rect?: DOMRect) {
