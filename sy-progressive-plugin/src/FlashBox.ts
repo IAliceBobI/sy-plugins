@@ -1,4 +1,4 @@
-import { IProtyle, Plugin, openTab } from "siyuan";
+import { IProtyle, Lute, Plugin, openTab } from "siyuan";
 import { siyuan } from "../../sy-tomato-plugin/src/libs/utils";
 import * as utils from "../../sy-tomato-plugin/src/libs/utils";
 import { events } from "../../sy-tomato-plugin/src/libs/Events";
@@ -46,6 +46,7 @@ function getBlockDOM(dom: HTMLElement): { dom: HTMLElement, blockID: string } {
 class FlashBox {
     private plugin: Plugin;
     private settings: SettingCfgType;
+    private lute: Lute;
 
     blockIconEvent(detail: any) {
         if (!this.plugin) return;
@@ -81,6 +82,7 @@ class FlashBox {
     async onload(plugin: Plugin, settings: SettingCfgType) {
         this.plugin = plugin;
         this.settings = settings;
+        this.lute = utils.NewLute();
         let cardType = CardType.None;
         if (this.settings.addCodeBlock) {
             cardType = CardType.C;
@@ -150,9 +152,9 @@ class FlashBox {
     }
 
     private async makeCard(protyle: IProtyle, t: CardType, path?: string, noRef?: boolean) {
-        const { ids, markdowns } = this.cloneSelectedLineMarkdowns(protyle, noRef);
+        const { ids, divs } = this.cloneSelectedLineMarkdowns(protyle, noRef);
         if (ids.length > 0) { // multilines
-            await this.insertCard(protyle, markdowns, t, ids[ids.length - 1], path);
+            await this.insertCard(protyle, divs, t, ids[ids.length - 1], path);
         } else {
             const blockID = events.lastBlockID;
             const range = document.getSelection()?.getRangeAt(0);
@@ -163,17 +165,17 @@ class FlashBox {
         }
     }
 
-    private async insertCard(protyle: IProtyle, markdowns: string[], t: CardType, lastSelectedID: string, path?: string) {
+    private async insertCard(protyle: IProtyle, markdowns: HTMLElement[], t: CardType, lastSelectedID: string, path?: string) {
         return navigator.locks.request("prog-FlashBox-insertCard", { mode: "exclusive" }, async (_lock) => {
             return this.doInsertCard(protyle, markdowns, t, lastSelectedID, path);
         });
     }
 
-    private async doInsertCard(protyle: IProtyle, markdowns: string[], t: CardType, lastSelectedID: string, path?: string) {
+    private async doInsertCard(protyle: IProtyle, divs: HTMLElement[], t: CardType, lastSelectedID: string, path?: string) {
         const boxID = events.boxID;
         const { bookID, pieceID, isPiece } = await isInPiece(protyle);
         if (!pieceID) return;
-        const { cardID, markdown } = this.createList(markdowns, t);
+        const { cardID, markdown } = this.createList(divs, t);
         if (path) {
             const v = getDailyAttrValue();
             const attr = {};
@@ -195,16 +197,18 @@ class FlashBox {
         await siyuan.pushMsg("⚡🗃" + markdown.split("(")[0], 1234);
     }
 
-    private createList(markdowns: string[], cardType: CardType) {
+    private createList(divs: HTMLElement[], cardType: CardType) {
         const tmp = [];
         let idx = 0;
         let star = "* ";
         if (this.settings.cardIndent) {
             star = "  * ";
         }
-        for (const m of markdowns) {
-            if (idx++ == 0) tmp.push("* " + m);
-            else tmp.push(star + m);
+        for (const div of divs) {
+            div.removeAttribute(gconst.DATA_NODE_ID);
+            const md = this.lute.BlockDOM2Md(div.outerHTML);
+            if (idx++ == 0) tmp.push("* " + md);
+            else tmp.push(star + md);
         }
         const cardID = utils.NewNodeID();
         if (cardType === CardType.C) {
@@ -217,9 +221,8 @@ class FlashBox {
     }
 
     private cloneSelectedLineMarkdowns(protyle: IProtyle, noRef?: boolean) {
-        const lute = utils.NewLute();
         const multiLine = protyle?.element?.querySelectorAll(`.${gconst.PROTYLE_WYSIWYG_SELECT}`);
-        const markdowns = [];
+        const divs = [];
         let setRef = !noRef;
         const ids = [];
         for (const div of multiLine) {
@@ -227,9 +230,9 @@ class FlashBox {
             const [id, elem, hasRef] = this.cloneDiv(div as any, setRef);
             if (hasRef) setRef = false;
             ids.push(id);
-            markdowns.push(lute.BlockDOM2Md(elem.outerHTML));
+            divs.push(elem);
         }
-        return { markdowns, ids };
+        return { divs, ids };
     }
 
     private cloneDiv(div: HTMLDivElement, setRef: boolean): [string, HTMLElement, boolean] {
@@ -238,8 +241,7 @@ class FlashBox {
     }
 
     private async blankSpaceCard(blockID: string, selected: string, range: Range, protyle: IProtyle, cardType: CardType, path?: string, noRef?: boolean) {
-        const lute = utils.NewLute();
-        let md = "";
+        let tmpDiv: HTMLElement;
         const { dom } = getBlockDOM(range.endContainer.parentElement);
         if (!dom) return;
         if (selected) {
@@ -252,12 +254,12 @@ class FlashBox {
                 e.setAttribute("data-type", v);
                 e.removeAttribute("style");
             });
-            md = lute.BlockDOM2Md(div.outerHTML);
+            tmpDiv = div;
         } else {
             const [_id, div] = this.cloneDiv(dom as HTMLDivElement, !noRef);
-            md = lute.BlockDOM2Md(div.outerHTML);
+            tmpDiv = div;
         }
-        await this.insertCard(protyle, [md], cardType, blockID, path);
+        await this.insertCard(protyle, [tmpDiv], cardType, blockID, path);
     }
 }
 
