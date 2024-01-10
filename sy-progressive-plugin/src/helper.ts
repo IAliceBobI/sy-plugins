@@ -219,14 +219,11 @@ export function splitByBlockCount(groups: WordCountType[][], blockNumber: number
 
 export async function copyBlock(id: string, lute: Lute, mark?: string) {
     const { div: tempDiv } = await utils.getBlockDiv(id);
+    tempDiv.setAttribute(RefIDKey, id);
+    if (mark) tempDiv.setAttribute(mark, "1");
     utils.cleanDiv(tempDiv, true);
     let md = lute.BlockDOM2Md(tempDiv.outerHTML);
-    if (mark) {
-        md = md + "\n" + `{: ${RefIDKey}="${id}" ${mark}="1" }`;
-    } else {
-        md = md + "\n" + `{: ${RefIDKey}="${id}" }`;
-    }
-    return md;
+    return md.trim();
 }
 
 export function rmBadThings(s: string) {

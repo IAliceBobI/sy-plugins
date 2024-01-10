@@ -6,7 +6,7 @@ import { zipAnyArrays } from "./functional";
 export function cleanDiv(div: HTMLDivElement, setRef: boolean): [string, HTMLElement, boolean] {
     const id = div.getAttribute(gconst.DATA_NODE_ID);
 
-    // rm ids
+    // new ids
     div.setAttribute(gconst.DATA_NODE_ID, NewNodeID());
     div.querySelectorAll(`[${gconst.DATA_NODE_ID}]`).forEach((e: HTMLElement) => {
         e.setAttribute(gconst.DATA_NODE_ID, NewNodeID());
