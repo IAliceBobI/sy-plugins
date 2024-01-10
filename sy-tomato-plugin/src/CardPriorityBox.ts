@@ -136,20 +136,30 @@ class CardPriorityBox {
 
     async updateCards(options: ICardData) {
         if (!this.plugin) return options;
-        let count = 0;
-        const attrMap = (await Promise.all(options.cards.map(card => siyuan.getBlockAttrs(card.blockID))))
-            .reduce((map, attr) => {
-                if (attr?.id) {
-                    map.set(attr.id, readPriority(attr));
-                } else {
-                    count++;
-                }
-                return map;
-            }, new Map<string, number>());
-        options.cards = shuffleArray(options.cards);
-        options.cards = options.cards.sort((a, b) => attrMap.get(b.blockID) - attrMap.get(a.blockID));
-        if (count > 0) {
-            siyuan.pushMsg(`您有${count}个疑似失效的闪卡。<br>卡包里有闪卡，但笔记本里找不到对应的闪卡。`)
+        const handle = setTimeout(() => {
+            siyuan.pushMsg(`正在根据优先级排序，请耐心等候……<br>
+您的卡数量有${options.cards.length}个，越多排序越久，<br>
+如果太久建议到闪卡的设置中，<br>
+限制新卡上限，于复习卡上限。`);
+        }, 3000);
+        try {
+            let count = 0;
+            const attrMap = (await Promise.all(options.cards.map(card => siyuan.getBlockAttrs(card.blockID))))
+                .reduce((map, attr) => {
+                    if (attr?.id) {
+                        map.set(attr.id, readPriority(attr));
+                    } else {
+                        count++;
+                    }
+                    return map;
+                }, new Map<string, number>());
+            options.cards = shuffleArray(options.cards);
+            options.cards = options.cards.sort((a, b) => attrMap.get(b.blockID) - attrMap.get(a.blockID));
+            if (count > 0) {
+                console.log(`您有${count}个疑似失效的闪卡。卡包里有闪卡，但笔记本里找不到对应的闪卡。`)
+            }
+        } finally {
+            clearTimeout(handle);
         }
         return options;
     }
