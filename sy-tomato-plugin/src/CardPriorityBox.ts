@@ -171,7 +171,8 @@ class CardPriorityBox {
             }
         } finally {
             const end = new Date().getTime() - start.getTime();
-            siyuan.pushMsg(`部分按优先级排序${part1.length}/${options.cards.length}个闪卡，花费${end / 1000}秒。`, 4000);
+            siyuan.pushMsg(`部分按优先级排序${part1.length}/${options.cards.length}个闪卡，花费${end / 1000}秒。<br>
+下个版本思源放开限制后，再全部闪卡按优先级排序。`, 4000);
             part1.push(...part2);
             options.cards = part1;
         }
