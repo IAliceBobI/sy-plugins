@@ -60,6 +60,8 @@ export class SplitSentence {
                         blocks = ps.map(i => i.trim())
                             .filter(i => i.length > 0)
                             .map(i => SPACE.repeat(2) + i + ` ((${ref} "*"))\n{: ${RefIDKey}="${ref}"}\n`);
+                    } else if(this.asList == "t") {
+                        blocks = ps.map(i => `* {: ${RefIDKey}="${ref}"}[ ] ` + i + ` ((${ref} "*"))\n\t{: ${RefIDKey}="${ref}"}\n`);
                     } else {
                         blocks = ps.map(i => `* {: ${RefIDKey}="${ref}"} ` + i + ` ((${ref} "*"))\n\t{: ${RefIDKey}="${ref}"}\n`);
                     }

@@ -551,6 +551,13 @@ class Progressive {
                 await help.cleanNote(noteID);
                 break;
             }
+            case HtmlCBType.splitByPunctuationsListCheck: {
+                const s = new SplitSentence(noteID, "t");
+                await s.split();
+                await s.insert();
+                await help.cleanNote(noteID);
+                break;
+            }
             default:
                 throw "Invalid HtmlCBType " + cbType;
         }

@@ -8,4 +8,4 @@ type SettingCfgType = {
     cardIndent: boolean,
 }
 
-type AsList = "p" | "l";
+type AsList = "p" | "l" | "t";

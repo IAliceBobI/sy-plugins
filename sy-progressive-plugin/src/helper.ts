@@ -33,6 +33,7 @@ export enum HtmlCBType {
     viewContents = 14,
     splitByPunctuations = 15,
     splitByPunctuationsList = 16,
+    splitByPunctuationsListCheck = 17,
 }
 
 export class Storage {
@@ -587,13 +588,28 @@ export class Helper {
         </div>`;
     }
 
+    btnSplitByPunctuationsListCheck(bookID: string, noteID: string, point: number) {
+        const btnID = utils.newID().slice(0, IDLen);
+        return `<div>
+            ${styleColor("var(--b3-font-background11)", "#000000")}
+            <div>
+                <button title="按标点断句，形成任务" onclick="${btnID}()" id="btn${btnID}">✂📜✅</button>
+            </div>
+            <script>
+                function ${btnID}() {
+                    globalThis.progressive_zZmqus5PtYRi.progressive.htmlBlockReadNextPeice("${bookID}","${noteID}",${HtmlCBType.splitByPunctuationsListCheck},${point})
+                }
+            </script>
+        </div>`;
+    }
+
     getReadingBtns3(bookID: string, noteID: string, point: number) {
         return `{{{col
 ${this.btnSplitByPunctuations(bookID, noteID, point)}
 
-${this.btnSplitByPunctuationsList(bookID, noteID, point)}
+${this.btnSplitByPunctuationsListCheck(bookID, noteID, point)}
 
-　
+${this.btnSplitByPunctuationsList(bookID, noteID, point)}
 
 　
 
