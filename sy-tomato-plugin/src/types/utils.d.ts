@@ -23,6 +23,7 @@ type TomatoSettings = {
     cmdBlockBoxCheckbox: boolean,
     "daily-note-box-id": string,
     "tomato-clocks": string,
+    "back-link-max-size": number,
 };
 
 type AttrType = {

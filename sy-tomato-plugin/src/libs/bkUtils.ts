@@ -58,7 +58,7 @@ export function scanAllRef(allRefs: RefCollector, div: HTMLDivElement, docID: st
 }
 
 export function addRef(txt: string, id: string, allRefs: RefCollector, docID: string) {
-    if (txt != "*" && id != docID) {
+    if (txt != "*" && id != docID && Array.from(txt.matchAll(/^c?\d{4}-\d{2}-\d{2}$/g)).length == 0) {
         const key = id + txt;
         const c = (allRefs.get(key)?.count ?? 0) + 1;
         const span = refTag(id, txt, c);
@@ -132,6 +132,7 @@ export interface IBKMaker {
     shouldFreeze: boolean;
     mentionCounting: HTMLSpanElement;
     blBox: any;
+    settingCfg: TomatoSettings;
 }
 
 export function init(self: IBKMaker, docID: string, blBox: any) {
@@ -141,6 +142,7 @@ export function init(self: IBKMaker, docID: string, blBox: any) {
     self.shouldFreeze = false;
     self.mentionCounting = document.createElement("span");
     self.mentionCounting.classList.add("b3-label__text");
+    self.settingCfg = blBox.settingCfg;
 }
 
 export async function getBackLinks(self: IBKMaker) {
@@ -154,7 +156,8 @@ export async function getBackLinks(self: IBKMaker) {
     self.container.appendChild(topDiv);
     self.container.appendChild(contentContainer);
 
-    for (const backlinkDoc of await Promise.all(backlink2.backlinks.map((backlink) => {
+    const maxCount = self.settingCfg["back-link-max-size"] ?? 100;
+    for (const backlinkDoc of await Promise.all(backlink2.backlinks.slice(0, maxCount).map((backlink) => {
         return siyuanCache.getBacklinkDoc(12 * 1000, self.docID, backlink.id);
     }))) {
         for (const backlinksInDoc of backlinkDoc.backlinks) {

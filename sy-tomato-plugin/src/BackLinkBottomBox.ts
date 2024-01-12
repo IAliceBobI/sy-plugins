@@ -8,7 +8,7 @@ import {
     integrateCounting,
     shouldInsertDiv
 } from "./libs/bkUtils";
-import { siyuanCache } from "./libs/utils";
+import { isValidNumber, siyuanCache } from "./libs/utils";
 import { MarkKey, TEMP_CONTENT } from "./libs/gconst";
 
 const BKMAKER_ADD = "BKMAKER_ADD";
@@ -28,6 +28,7 @@ class BKMaker implements IBKMaker {
 
     public freezeCheckBox: HTMLInputElement;
     public label: HTMLLabelElement;
+    public settingCfg: TomatoSettings;
 
     constructor(blBox: BackLinkBottomBox, docID: string) {
         init(this, docID, blBox);
@@ -102,12 +103,34 @@ class BKMaker implements IBKMaker {
 
 class BackLinkBottomBox {
     public plugin: Plugin;
+    public settingCfg: TomatoSettings;
     public divCache: MaxCache<HTMLElement> = new MaxCache(CACHE_LIMIT);
     private makerCache: MaxCache<BKMaker> = new MaxCache(CACHE_LIMIT);
     private docID: string;
     private keepAliveID: any;
     async onload(plugin: Plugin) {
         this.plugin = plugin;
+        this.settingCfg = (plugin as any).settingCfg;
+        const MaxCount = 100;
+        if (!isValidNumber(this.settingCfg["back-link-max-size"])) this.settingCfg["back-link-max-size"] = MaxCount;
+        this.plugin.setting.addItem({
+            title: "** 底部反链最大展开的文件数",
+            description: "注意：一个文件中可能有多个反链。所以此设置不等于反链数量。",
+            createActionElement: () => {
+                const input = document.createElement("input") as HTMLInputElement;
+                input.className = "input";
+                input.value = String(this.settingCfg["back-link-max-size"]);
+                input.className = "b3-text-field fn__flex-center";
+                input.addEventListener("input", () => {
+                    let c = Number(input.value.trim());
+                    if (!isValidNumber(c)) c = MaxCount;
+                    if (c == 0) c = MaxCount;
+                    this.settingCfg["back-link-max-size"] = c;
+                });
+                return input;
+            },
+        });
+
         events.addListener("BackLinkBottomBox", (eventType, detail) => {
             if (eventType == EventType.loaded_protyle_static || eventType == EventType.switch_protyle) {
                 navigator.locks.request("BackLinkBottomBoxLock", { ifAvailable: true }, async (lock) => {
