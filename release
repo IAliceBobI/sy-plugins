@@ -7,6 +7,8 @@ if [[ -z "${1}" ]]; then
     exit
 fi
 
+./deploy ${1}
+
 projDir=${0:a:h}/sy-${1}-plugin
 projName="${projDir:t}"
 deployDir="${projDir:h}/deploy-repos/${projName}"
