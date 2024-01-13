@@ -285,19 +285,23 @@ export const siyuan = {
     async call(url: string, reqData: any) {
         const method = "POST";
         const headers = { "Content-Type": "application/json" };
-        const data = await fetch(url, {
-            method,
-            headers,
-            body: JSON.stringify(reqData),
-        });
-        const json = await data.json();
-        if (json?.code && json?.code != 0) {
-            console.warn("p5 code=%s %s", json?.code, json?.msg);
-            return null;
+        try {
+            const data = await fetch(url, {
+                method,
+                headers,
+                body: JSON.stringify(reqData),
+            });
+            const json = await data.json();
+            if (json?.code && json?.code != 0) {
+                console.warn(`p5: ${json?.code} ${json?.msg} ${reqData}`);
+                return null;
+            }
+            if (json?.data === undefined)
+                return data;
+            return json.data;
+        } catch (e) {
+            console.warn(e, url, reqData);
         }
-        if (json?.data === undefined)
-            return data;
-        return json.data;
     },
     async getDocCreateSavePath(notebookID: string) {
         const notebook = notebookID;
