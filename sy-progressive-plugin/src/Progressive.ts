@@ -6,7 +6,7 @@ import { HtmlCBType } from "./helper";
 import * as utils from "../../sy-tomato-plugin/src/libs/utils";
 import * as help from "./helper";
 import * as constants from "./constants";
-import { BlockNodeEnum, DATA_NODE_ID, DATA_NODE_INDEX, DATA_TYPE, MarkKey, PROG_ORIGIN_TEXT, RefIDKey } from "../../sy-tomato-plugin/src/libs/gconst";
+import { BlockNodeEnum, DATA_NODE_ID, DATA_TYPE, MarkKey, PROG_ORIGIN_TEXT, RefIDKey } from "../../sy-tomato-plugin/src/libs/gconst";
 import { SplitSentence } from "./SplitSentence";
 
 class Progressive {
@@ -17,6 +17,8 @@ class Progressive {
     private openedTabs?: ITab;
     private settings: SettingCfgType;
     private lute: Lute;
+    private docID: string;
+    private observer: MutationObserver;
 
     async onload(plugin: Plugin, settings: SettingCfgType) {
         Progressive.GLOBAL_THIS["progressive_zZmqus5PtYRi"] = { progressive: this, utils, siyuan, timeUtil, events };
@@ -71,69 +73,49 @@ class Progressive {
             navigator.locks.request(constants.TryAddStarsLock, { ifAvailable: true }, async (lock) => {
                 if (eventType == EventType.loaded_protyle_static) {
                     const protyle: IProtyle = detail.protyle;
-                    if (help.isProtylePiece(protyle)) {
-                        if (lock) {
-                            for (let i = 0; i < 5; i++) {
-                                await this.tryAddRefAttr(protyle);
-                                await utils.sleep(2000);
-                            }
+                    const nextDocID = protyle?.block?.rootID;
+                    const element = protyle?.wysiwyg?.element;
+                    if (lock && element && nextDocID && help.isProtylePiece(protyle)) {
+                        if (this.docID != nextDocID) {
+                            this.docID = nextDocID;
+                            this.observer?.disconnect();
+                            this.observer = new MutationObserver((_mutationsList) => {
+                                this.tryAddRefAttr(element);
+                            });
+                            this.observer.observe(element, { childList: true });
                         }
                     }
                 }
             });
         });
-        // this.plugin.eventBus.on("ws-main", async ({ detail }) => {
-        //     if (detail?.cmd == WsActionTypes.transactions) {
-        //         for (const element of detail.data as TransactionData[]) {
-        //             for (const ops of element?.doOperations ?? []) {
-        //                 if (ops?.action == "update" && ops.id) {
-        //                     const row = await siyuan.getDocRowByBlockID(ops.id);
-        //                     if (row?.id) {
-        //                         const attr = (await siyuan.getBlockAttrs(row.id))[MarkKey] ?? "";
-        //                         const pieceLen = TEMP_CONTENT.length + 1 + "20231229160401-0lfc8qj".length + 1 + 1;
-        //                         if (attr.startsWith(TEMP_CONTENT + "#") && attr.length >= pieceLen) {
-        //                             navigator.locks.request(constants.TryAddStarsLock, { ifAvailable: true }, async (lock) => {
-        //                                 if (lock) {
-        //                                     for (let i = 0; i < 6; i++) {
-        //                                         await utils.sleep(4000);
-        //                                         await this.tryAddRefAttr(row.id);
-        //                                     }
-        //                                 }
-        //                             });
-        //                         }
-        //                     }
-        //                 }
-        //             }
-        //         }
-        //     }
-        // });
     }
 
-    private async tryAddRefAttr(protyle: IProtyle) {
-        Array.from(protyle.element.querySelectorAll(`div[${DATA_NODE_ID}][${DATA_NODE_INDEX}]`))
-            .filter((e: HTMLElement) => !e.getAttribute(RefIDKey))
-            .filter((e: HTMLElement) => {
-                const a = e.getAttribute(DATA_TYPE);
-                return a == BlockNodeEnum.NODE_PARAGRAPH
-                    || a == BlockNodeEnum.NODE_LIST
-                    || a == BlockNodeEnum.NODE_LIST_ITEM
-                    || a == BlockNodeEnum.NODE_HEADING
-                    || a == BlockNodeEnum.NODE_BLOCKQUOTE
-                    || a == BlockNodeEnum.NODE_CODE_BLOCK;
-            })
-            .forEach((e: HTMLElement) => {
-                let ref = "";
-                if (e.previousElementSibling) {
-                    ref = e.previousElementSibling.getAttribute(RefIDKey);
-                } else if (e.nextElementSibling) {
-                    ref = e.nextElementSibling.getAttribute(RefIDKey);
-                }
-                if (ref) {
-                    const attr = {} as AttrType;
-                    attr["custom-progref"] = ref;
-                    siyuan.setBlockAttrs(e.getAttribute(DATA_NODE_ID), attr);
-                }
-            });
+    private async tryAddRefAttr(element: HTMLElement) {
+        return navigator.locks.request(constants.TryAddStarsLock + "tryAddRefAttr", { ifAvailable: true }, async (lock) => {
+            if (lock) {
+                Array.from(element.querySelectorAll(`div[${DATA_NODE_ID}]`))
+                    .filter((e: HTMLElement) => !e.getAttribute(RefIDKey))
+                    .filter((e: HTMLElement) => {
+                        const a = e.getAttribute(DATA_TYPE);
+                        return a == BlockNodeEnum.NODE_PARAGRAPH
+                            || a == BlockNodeEnum.NODE_LIST
+                            || a == BlockNodeEnum.NODE_LIST_ITEM
+                            || a == BlockNodeEnum.NODE_HEADING
+                            || a == BlockNodeEnum.NODE_BLOCKQUOTE
+                            || a == BlockNodeEnum.NODE_CODE_BLOCK;
+                    }).forEach(e => {
+                        const ref = findBack(e) || findForward(e);
+                        if (ref) {
+                            const attr = {} as AttrType;
+                            attr["custom-progref"] = ref;
+                            setTimeout(() => {
+                                siyuan.setBlockAttrs(e.getAttribute(DATA_NODE_ID), attr);
+                            }, 5000);
+                            e.setAttribute(RefIDKey, ref);
+                        }
+                    });
+            }
+        });
     }
 
     private addMenu(rect?: DOMRect) {
@@ -681,3 +663,43 @@ class Progressive {
 }
 
 export const prog = new Progressive();
+
+function findBack(e: Element) {
+    for (let i = 0; i < 1000 && e; i++, e = e.previousElementSibling) {
+        const ref = e.getAttribute(RefIDKey);
+        if (ref) return ref;
+    }
+}
+
+function findForward(e: Element) {
+    for (let i = 0; i < 1000 && e; i++, e = e.nextElementSibling) {
+        const ref = e.getAttribute(RefIDKey);
+        if (ref) return ref;
+    }
+}
+
+// this.plugin.eventBus.on("ws-main", async ({ detail }) => {
+//     if (detail?.cmd == WsActionTypes.transactions) {
+//         for (const element of detail.data as TransactionData[]) {
+//             for (const ops of element?.doOperations ?? []) {
+//                 if (ops?.action == "update" && ops.id) {
+//                     const row = await siyuan.getDocRowByBlockID(ops.id);
+//                     if (row?.id) {
+//                         const attr = (await siyuan.getBlockAttrs(row.id))[MarkKey] ?? "";
+//                         const pieceLen = TEMP_CONTENT.length + 1 + "20231229160401-0lfc8qj".length + 1 + 1;
+//                         if (attr.startsWith(TEMP_CONTENT + "#") && attr.length >= pieceLen) {
+//                             navigator.locks.request(constants.TryAddStarsLock, { ifAvailable: true }, async (lock) => {
+//                                 if (lock) {
+//                                     for (let i = 0; i < 6; i++) {
+//                                         await utils.sleep(4000);
+//                                         await this.tryAddRefAttr(row.id);
+//                                     }
+//                                 }
+//                             });
+//                         }
+//                     }
+//                 }
+//             }
+//         }
+//     }
+// });

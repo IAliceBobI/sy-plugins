@@ -76,7 +76,7 @@ class Tag2RefBox {
                     if (spans.length > 0) {
                         parent.replaceChild(spans[0], e);
                         for (const rest of spans.slice(1).reverse()) {
-                            spans[0].insertAdjacentElement("afterend", rest)
+                            spans[0].insertAdjacentElement("afterend", rest);
                         }
                     }
                 }
