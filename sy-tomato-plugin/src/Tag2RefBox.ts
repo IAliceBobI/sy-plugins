@@ -1,6 +1,6 @@
 import { IProtyle, Lute, Plugin } from "siyuan";
 import { EventType, events } from "./libs/Events";
-import { BLOCK_REF, DATA_ID, DATA_SUBTYPE, DATA_TYPE } from "./libs/gconst";
+import { BLOCK_REF, DATA_ID, DATA_SUBTYPE, DATA_TYPE, REF_HIERARCHY } from "./libs/gconst";
 import { NewLute, getID, getSyElement, siyuan } from "./libs/utils";
 
 type IDName = {
@@ -100,16 +100,22 @@ class Tag2RefBox {
     }
 }
 
-
 async function insertMd(idName: IDName[]) {
     if (idName.length > 1) {
-        let i = 0;
-        const mdList = [];
-        for (const ref of idName.map(({ id, name }) => `((${id} '${name}'))`)) {
-            mdList.push(`${'  '.repeat(i++)}* ${ref}`);
+        const attrValue = `${idName.map(i => i.id).join(",")}`
+        const row = await siyuan.sqlOne(`select id from blocks 
+where type='l' 
+and root_id="${idName[0].id}"
+and ial like '%${REF_HIERARCHY}="${attrValue}"%' limit 1`);
+        if (!row?.id) {
+            let i = 0;
+            const mdList = [];
+            for (const ref of idName.map(({ id, name }) => `((${id} '${name}'))`)) {
+                mdList.push(`${'  '.repeat(i++)}* ${ref}`);
+            }
+            mdList.push(`{: ${REF_HIERARCHY}="${attrValue}"}`);
+            await siyuan.insertBlockAsChildOf(mdList.join("\n"), idName[0].id);
         }
-
-        await siyuan.insertBlockAsChildOf(mdList.join("\n"), idName[0].id);
     }
 }
 
