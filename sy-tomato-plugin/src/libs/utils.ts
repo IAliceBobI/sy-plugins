@@ -303,11 +303,11 @@ export const siyuan = {
             console.warn(e, url, reqData);
         }
     },
-    async getDocCreateSavePath(notebookID: string) {
+    async getDocCreateSavePath(notebookID: string): Promise<{ path: string }> {
         const notebook = notebookID;
         return siyuan.call("/api/filetree/getDocCreateSavePath", { notebook });
     },
-    async getRefCreateSavePath(notebookID: string) {
+    async getRefCreateSavePath(notebookID: string): Promise<{ path: string }> {
         const notebook = notebookID;
         return siyuan.call("/api/filetree/getRefCreateSavePath", { notebook });
     },
