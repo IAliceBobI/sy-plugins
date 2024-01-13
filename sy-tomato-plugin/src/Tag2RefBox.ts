@@ -3,6 +3,11 @@ import { EventType, events } from "./libs/Events";
 import { BLOCK_REF, DATA_ID, DATA_SUBTYPE, DATA_TYPE } from "./libs/gconst";
 import { NewLute, getID, getSyElement, siyuan } from "./libs/utils";
 
+type IDName = {
+    id: string;
+    name: string;
+};
+
 class Tag2RefBox {
     public plugin: Plugin;
     public settingCfg: TomatoSettings;
@@ -62,6 +67,7 @@ class Tag2RefBox {
                 nodes.set(id, block);
                 let i = 0;
                 const spans: HTMLSpanElement[] = [];
+                const idName: IDName[] = [];
                 for (const ref of refs) {
                     if (i++ > 0) {
                         const span = document.createElement("span") as HTMLSpanElement;
@@ -70,10 +76,12 @@ class Tag2RefBox {
                     }
                     const span = document.createElement("span") as HTMLSpanElement;
                     span.setAttribute(DATA_TYPE, BLOCK_REF);
-                    span.setAttribute(DATA_ID, await createRefDoc(notebookId, ref));
+                    const id = await createRefDoc(notebookId, ref);
+                    span.setAttribute(DATA_ID, id);
                     span.setAttribute(DATA_SUBTYPE, "d");
                     span.innerText = ref;
                     spans.push(span);
+                    idName.push({ id, name: ref })
                 };
                 if (spans.length > 0) {
                     parent.replaceChild(spans[0], e);
@@ -81,6 +89,7 @@ class Tag2RefBox {
                         spans[0].insertAdjacentElement("afterend", rest);
                     }
                 }
+                await insertMd(idName);
             }
         }
 
@@ -88,6 +97,17 @@ class Tag2RefBox {
             const md = this.lute.BlockDOM2Md(element.outerHTML);
             await siyuan.safeUpdateBlock(nodeID, md);
         }
+    }
+}
+
+async function insertMd(idName: IDName[]) {
+    if (idName.length > 1) {
+        let i = 0;
+        const mdList = [];
+        for (const ref of idName.map(({ id, name }) => `((${id} '${name}'))`)) {
+            mdList.push(`${'  '.repeat(i++)}* ${ref}`);
+        }
+        await siyuan.insertBlockAsChildOf(mdList.join("\n"), idName[0].id);
     }
 }
 
