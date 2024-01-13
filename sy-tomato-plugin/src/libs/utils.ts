@@ -299,6 +299,14 @@ export const siyuan = {
             return data;
         return json.data;
     },
+    async getDocCreateSavePath(notebookID: string) {
+        const notebook = notebookID;
+        return siyuan.call("/api/filetree/getDocCreateSavePath", { notebook });
+    },
+    async getRefCreateSavePath(notebookID: string) {
+        const notebook = notebookID;
+        return siyuan.call("/api/filetree/getRefCreateSavePath", { notebook });
+    },
     async openNotebook(notebookID: string) {
         const notebook = notebookID;
         return siyuan.call("/api/notebook/openNotebook", { notebook });
