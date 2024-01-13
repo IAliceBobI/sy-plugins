@@ -44,45 +44,47 @@ class Tag2RefBox {
     }
 
     private async findAllTag(element: HTMLElement) {
-        const cursorID = events.lastBlockID;
         const elements = Array.from(element.querySelectorAll(`span[${DATA_TYPE}="tag"]`))
             .filter(e => e.childElementCount == 0)
             .map((e: HTMLElement) => { return { e, text: e.textContent || e.innerText }; })
             .map(({ e, text }) => { return { e, text: text?.replace(/\u200B/g, "")?.trim() }; })
-            .filter(({ text }) => !!text)
-            .reduce((nodes, { e, text }) => {
-                const refs = text.split("/").filter(i => !!i);
-                const parent = e.parentElement;
-                const block = getSyElement(e) as HTMLElement;
-                const id = getID(block);
-                if (refs.length > 0 && parent && id && id != cursorID) {
-                    nodes.set(id, block);
-                    let i = 0;
-                    const spans: HTMLSpanElement[] = refs.reduce((all, ref) => {
-                        if (i > 0) {
-                            const span = document.createElement("span") as HTMLSpanElement;
-                            span.innerText = "/";
-                            all.push(span);
-                        }
+            .filter(({ text }) => !!text);
+
+        const cursorID = events.lastBlockID;
+        const nodes = new Map<string, HTMLElement>()
+        for (const { e, text } of elements) {
+            const refs = text.split("/").filter(i => !!i);
+            const parent = e.parentElement;
+            const block = getSyElement(e) as HTMLElement;
+            const id = getID(block);
+            if (refs.length > 0 && parent && id && id != cursorID) {
+                nodes.set(id, block);
+                let i = 0;
+                const spans: HTMLSpanElement[] = refs.reduce((all, ref) => {
+                    if (i > 0) {
                         const span = document.createElement("span") as HTMLSpanElement;
-                        span.setAttribute(DATA_TYPE, BLOCK_REF);
-                        span.setAttribute(DATA_ID, NewNodeID());
-                        span.setAttribute(DATA_SUBTYPE, "d");
-                        span.innerText = ref;
+                        span.innerText = "/";
                         all.push(span);
-                        i++;
-                        return all;
-                    }, []);
-                    if (spans.length > 0) {
-                        parent.replaceChild(spans[0], e);
-                        for (const rest of spans.slice(1).reverse()) {
-                            spans[0].insertAdjacentElement("afterend", rest);
-                        }
+                    }
+                    const span = document.createElement("span") as HTMLSpanElement;
+                    span.setAttribute(DATA_TYPE, BLOCK_REF);
+                    span.setAttribute(DATA_ID, NewNodeID());
+                    span.setAttribute(DATA_SUBTYPE, "d");
+                    span.innerText = ref;
+                    all.push(span);
+                    i++;
+                    return all;
+                }, []);
+                if (spans.length > 0) {
+                    parent.replaceChild(spans[0], e);
+                    for (const rest of spans.slice(1).reverse()) {
+                        spans[0].insertAdjacentElement("afterend", rest);
                     }
                 }
-                return nodes;
-            }, new Map<string, HTMLElement>());
-        for (const [nodeID, element] of elements) {
+            }
+        }
+
+        for (const [nodeID, element] of nodes) {
             const md = this.lute.BlockDOM2Md(element.outerHTML);
             await siyuan.safeUpdateBlock(nodeID, md);
         }
