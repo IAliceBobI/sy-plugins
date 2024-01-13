@@ -85,6 +85,11 @@ export async function getBlockDiv(id: string) {
     return { div: tempDiv, id };
 }
 
+export function getCursorElement() {
+    const selection = document.getSelection();
+    return getSyElement(selection?.focusNode);
+}
+
 export function getID(e: Element, attrs?: string[]) {
     const s = getSyElement(e, attrs);
     if (s) {

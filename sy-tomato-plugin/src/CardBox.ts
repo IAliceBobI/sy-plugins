@@ -1,7 +1,8 @@
 import { IProtyle, Plugin, confirm, openTab } from "siyuan";
-import { getID, siyuan, sleep } from "@/libs/utils";
+import { getCursorElement, siyuan } from "@/libs/utils";
 import "./index.scss";
 import { EventType, events } from "@/libs/Events";
+import { BlockNodeEnum, CUSTOM_RIFF_DECKS, DATA_NODE_ID, DATA_NODE_INDEX, DATA_TYPE } from "./libs/gconst";
 
 class CardBox {
     private plugin: Plugin;
@@ -44,7 +45,7 @@ class CardBox {
             langKey: "addFlashCard",
             hotkey: "⌘1",
             callback: async () => {
-                await this.addFlashCard();
+                await this.addFlashCard(getCursorElement() as any);
             },
         });
         this.plugin.addCommand({
@@ -64,10 +65,7 @@ class CardBox {
                 label: this.plugin.i18n.addFlashCard,
                 icon: "iconFlashcard",
                 click: () => {
-                    const blockID = detail?.element?.getAttribute("data-node-id") ?? "";
-                    if (blockID) {
-                        this.addFlashCard(blockID);
-                    }
+                    this.addFlashCard(detail.element);
                 },
             });
         });
@@ -123,43 +121,36 @@ class CardBox {
             label: this.plugin.i18n.addFlashCard,
             click: () => {
                 for (const element of detail.blockElements) {
-                    const blockID = getID(element);
-                    if (blockID) {
-                        this.addFlashCard(blockID);
-                        break;
-                    }
+                    this.addFlashCard(element);
+                    break;
                 }
             }
         });
     }
 
-    private async addFlashCard(blockID?: string) {
-        if (!blockID) blockID = events.lastBlockID;
-        if (!blockID) {
-            siyuan.pushMsg(this.plugin.i18n.clickOneBlockFirst);
-            return;
-        }
-        let count = 30;
-        let md = "";
-        let msgSent = false;
-        while (count > 0) {
-            count -= 1;
-            const [listID, mdret] = await siyuan.findListType(blockID);
-            md = mdret;
-            if (listID) {
-                await siyuan.addRiffCards([listID]);
-                break;
-            }
-            if (!msgSent) {
-                siyuan.pushMsg(this.plugin.i18n.lookingForTheList, 2000);
-                msgSent = true;
-            }
-            await sleep(200);
-        }
-        if (count <= 0) {
-            siyuan.pushMsg(md + "<br>" + this.plugin.i18n.reindex, 0);
+    private async addFlashCard(element: HTMLElement) {
+        if (!element) return;
+        const { id, isCard } = findListTypeByElement(element);
+        if (!isCard) {
+            await siyuan.addRiffCards([id]);
+        } else {
+            await siyuan.removeRiffCards([id]);
         }
     }
 }
 
 export const cardBox = new CardBox();
+
+function findListTypeByElement(e: HTMLElement) {
+    let id: string;
+    let isCard: boolean;
+    for (let i = 0; i < 1000 && e; i++, e = e.parentElement) {
+        const tmpID = e.getAttribute(DATA_NODE_ID);
+        const dataType = e.getAttribute(DATA_TYPE);
+        if (tmpID && e.hasAttribute(DATA_NODE_INDEX) && dataType == BlockNodeEnum.NODE_LIST) {
+            id = tmpID;
+            isCard = e.hasAttribute(CUSTOM_RIFF_DECKS);
+        }
+    }
+    return { id, isCard };
+}
