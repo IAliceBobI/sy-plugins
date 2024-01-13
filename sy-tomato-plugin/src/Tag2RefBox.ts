@@ -1,7 +1,7 @@
 import { IProtyle, Lute, Plugin } from "siyuan";
 import { EventType, events } from "./libs/Events";
-import { BLOCK_REF, DATA_ID, DATA_NODE_ID, DATA_SUBTYPE, DATA_TYPE } from "./libs/gconst";
-import { NewLute, siyuan } from "./libs/utils";
+import { BLOCK_REF, DATA_ID, DATA_SUBTYPE, DATA_TYPE } from "./libs/gconst";
+import { NewLute, NewNodeID, getID, getSyElement, siyuan, sleep } from "./libs/utils";
 
 class Tag2RefBox {
     public plugin: Plugin;
@@ -17,47 +17,54 @@ class Tag2RefBox {
                 navigator.locks.request("Tomato-Tag2RefBox-Lock", { ifAvailable: true }, async (lock) => {
                     if (lock) {
                         const protyle = detail.protyle as IProtyle;
-                        console.log(detail)
-                        await this.findAllTag(protyle.element);
+                        for (let i = 0; i < 5; i++) {
+                            await this.findAllTag(protyle.element);
+                            await sleep(2000);
+                        }
                     }
                 });
             }
         });
     }
+
     private async findAllTag(element: HTMLElement) {
         const elements = Array.from(element.querySelectorAll(`span[${DATA_TYPE}="tag"]`))
             .filter(e => e.childElementCount == 0)
-            .map((e: HTMLElement) => { return { e, text: e.textContent || e.innerText } })
-            .map(({ e, text }) => { return { e, text: text.replace(/\u200B/g, "").trim() } })
+            .map((e: HTMLElement) => { return { e, text: e.textContent || e.innerText }; })
+            .map(({ e, text }) => { return { e, text: text.replace(/\u200B/g, "").trim() }; })
             .filter(({ text }) => !!text)
             .reduce((nodes, { e, text }) => {
                 const refs = text.split("/").filter(i => !!i);
                 const parent = e.parentElement;
-                const id = parent?.getAttribute(DATA_NODE_ID);
-                if (refs.length > 0 && id) {
-                    parent.removeChild(e);
-                    nodes.set(id, parent)
+                const block = getSyElement(e) as HTMLElement;
+                const id = getID(block);
+                if (refs.length > 0 && parent && id) {
+                    nodes.set(id, block);
                     let i = 0;
-                    refs.forEach(ref => {
+                    const div = refs.reduce((all, ref) => {
                         if (i > 0) {
-                            const span = parent.appendChild(document.createElement("span")) as HTMLSpanElement;
-                            span.innerText = "/"
+                            const span = document.createElement("span") as HTMLSpanElement;
+                            span.innerText = "/";
+                            all.appendChild(span);
                         }
-                        const span = parent.appendChild(document.createElement("span")) as HTMLSpanElement;
-                        span.setAttribute(DATA_TYPE, BLOCK_REF)
-                        span.setAttribute(DATA_ID, "abc");
+                        const span = document.createElement("span") as HTMLSpanElement;
+                        span.setAttribute(DATA_TYPE, BLOCK_REF);
+                        span.setAttribute(DATA_ID, NewNodeID());
                         span.setAttribute(DATA_SUBTYPE, "d");
                         span.innerText = ref;
+                        all.appendChild(span);
                         i++;
-                    });
-                    // document.getSelection().collapse(parent, 1);
+                        return all;
+                    }, document.createElement("div"));
+                    parent.replaceChild(div, e);
                 }
                 return nodes;
-            }, new Map<string, HTMLElement>())
+            }, new Map<string, HTMLElement>());
         const cursorID = events.lastBlockID;
         for (const [nodeID, element] of elements) {
             if (nodeID == cursorID) continue;
-            await siyuan.safeUpdateBlock(nodeID, this.lute.BlockDOM2Md(element.outerHTML))
+            const md = this.lute.BlockDOM2Md(element.outerHTML);
+            await siyuan.safeUpdateBlock(nodeID, md);
         }
     }
 }
