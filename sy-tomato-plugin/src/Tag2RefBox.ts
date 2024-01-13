@@ -93,9 +93,9 @@ class Tag2RefBox {
 
 async function createRefDoc(notebookId: string, name: string) {
     await siyuan.flushTransaction();
-    const { path } = await siyuan.getRefCreateSavePath(notebookId);
     const row = await siyuan.sqlOne(`select id from blocks where type='d' and content='${name}' limit 1`);
     if (row?.id) return row.id;
+    const { path } = await siyuan.getRefCreateSavePath(notebookId);
     return await siyuan.createDocWithMdIfNotExists(notebookId, path + name, "");
 }
 
