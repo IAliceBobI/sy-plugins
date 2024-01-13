@@ -100,6 +100,7 @@ class Tag2RefBox {
     }
 }
 
+
 async function insertMd(idName: IDName[]) {
     if (idName.length > 1) {
         let i = 0;
@@ -107,6 +108,7 @@ async function insertMd(idName: IDName[]) {
         for (const ref of idName.map(({ id, name }) => `((${id} '${name}'))`)) {
             mdList.push(`${'  '.repeat(i++)}* ${ref}`);
         }
+
         await siyuan.insertBlockAsChildOf(mdList.join("\n"), idName[0].id);
     }
 }

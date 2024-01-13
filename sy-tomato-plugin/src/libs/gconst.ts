@@ -44,6 +44,7 @@ export const RefIDKey = "custom-progref"; // for content
 export const TEMP_CONTENT = "插件管理勿改managedByPluginDoNotModify";
 export const IN_PIECE_REF = "custom-in-piece-ref";
 export const PROG_ORIGIN_TEXT = "custom-prog-origin-text";
+export const REF_HIERARCHY = "custom-ref-hierarchy";
 
 export enum WsActionTypes {
     transactions = "transactions",
