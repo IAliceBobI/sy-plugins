@@ -1,11 +1,11 @@
-.protyle-wysiwyg div[custom-origin-hpath]::before {
+.protyle-wysiwyg div[custom-origin-hpath]:not([custom-prog-origin-text])::before {
   content: attr(custom-origin-hpath);
   opacity: 0.5;
   font-size: medium;
   color: var(--b3-font-color12);
 }
 
-.protyle-wysiwyg div[custom-ref-hpath]::after {
+.protyle-wysiwyg div[custom-ref-hpath]:not([custom-prog-origin-text])::after {
   content: attr(custom-ref-hpath);
   opacity: 0.5;
   font-size: medium;
