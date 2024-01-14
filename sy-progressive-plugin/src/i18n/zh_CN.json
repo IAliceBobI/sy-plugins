@@ -50,7 +50,7 @@
   "addOrReaddDoc": "添加文档/重新添加文档",
   "splitByBlockCount": "按块数拆分(0为不按块数拆分)",
   "splitByWordCount": "字数拆分(0为不根据字数拆分)",
-  "splitByHeadings": "拆分各级标题",
+  "splitByHeadings": "填入要拆分的标题级别，逗号隔开。(1~6)",
   "youFoundAPiece": "你发现了一个阅读分片！",
   "maybeBookRemoved": "似乎{bookID}已经被删除",
   "openingDocPieceForYou": "正在为您打开文档片段，请耐心等待……",

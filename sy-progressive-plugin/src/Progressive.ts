@@ -206,13 +206,13 @@ class Progressive {
                 <div class="fn__hr"></div>
                 <div class="prog-style__id" id="${statisticDivID}"></div>
                 <div class="fn__hr"></div>
-                <span class="prog-style__id">1⃣${this.plugin.i18n.splitByHeadings}</span>
-                <input type="checkbox" id="${titleSplitID}" class="prog-style__checkbox"/>
+                <div class="prog-style__id">1、${this.plugin.i18n.splitByHeadings}</div>
+                <input type="text" id="${titleSplitID}" class="prog-style__input"/>
                 <div class="fn__hr"></div>
-                <div class="prog-style__id">2⃣${this.plugin.i18n.splitByBlockCount}</div>
+                <div class="prog-style__id">2、${this.plugin.i18n.splitByBlockCount}</div>
                 <input type="text" id="${BlockNumID}" class="prog-style__input"/>
                 <div class="fn__hr"></div>
-                <div class="prog-style__id">3⃣${this.plugin.i18n.splitByWordCount}</div>
+                <div class="prog-style__id">3、${this.plugin.i18n.splitByWordCount}</div>
                 <input type="text" id="${LengthSplitID}" class="prog-style__input"/>
                 <div class="fn__hr"></div>
                 <span class="prog-style__id">${this.plugin.i18n.autoCard}</span>
@@ -239,10 +239,8 @@ class Progressive {
             平均每个标题下有：${Math.ceil(contentBlocks.length / (headCount == 0 ? 1 : headCount))}块<br>
             平均每个块有：${Math.ceil(wordCount / contentBlocks.length)}字`;
 
-        const titleCheckBox = dialog.element.querySelector("#" + titleSplitID) as HTMLInputElement;
-        titleCheckBox.title = "1~6级标题，都被切分。";
-        titleCheckBox.checked = true;
-        titleCheckBox.disabled = true;
+        const titleInput = dialog.element.querySelector("#" + titleSplitID) as HTMLInputElement;
+        titleInput.value = "1,2,3,4,5,6";
 
         const autoCardBox = dialog.element.querySelector("#" + autoCardID) as HTMLInputElement;
         autoCardBox.checked = false;
@@ -263,6 +261,15 @@ class Progressive {
 
         const btn = dialog.element.querySelector("#" + btnSplitID) as HTMLButtonElement;
         btn.addEventListener("click", async () => {
+            const headings = titleInput.value.trim().replace(/，/g, ",")
+                .split(",").map(i => i.trim()).filter(i => !!i)
+                .map(i => Number(i));
+            if (!headings.reduce((ret, i) => ret && utils.isValidNumber(i) && i >= 1 && i <= 6, true)) {
+                titleInput.value = "1,2,3,4,5,6";
+                return;
+            }
+            headings.sort();
+
             const splitLen = Number(LengthSplitInput.value.trim());
             if (!utils.isValidNumber(splitLen)) {
                 LengthSplitInput.value = "0";
@@ -283,7 +290,7 @@ class Progressive {
             }
 
             await siyuan.pushMsg(this.plugin.i18n.splitByHeadings);
-            let groups = new help.HeadingGroup(contentBlocks).split();
+            let groups = new help.HeadingGroup(contentBlocks, headings).split();
             groups = help.splitByBlockCount(groups, blockNumber);
             if (splitLen > 0) {
                 await siyuan.pushMsg(this.plugin.i18n.splitByWordCount + ":" + splitLen);

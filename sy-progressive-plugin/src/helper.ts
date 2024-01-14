@@ -4,7 +4,7 @@ import * as utils from "../../sy-tomato-plugin/src/libs/utils";
 import * as constants from "./constants";
 import { IProtyle, Lute, Plugin } from "siyuan";
 
-export type WordCountType = { id: string; count: number; type: string; };
+export type WordCountType = { id: string; count: number; type: string; subType: string };
 export type BookInfo = {
     time?: number,
     boxID?: string,
@@ -699,10 +699,10 @@ ${this.btnNextBook(bookID, noteID, point)}
             }
             const rets = await Promise.all(tasks);
             let i = 0;
-            for (const { id, type } of group) {
+            for (const { id, type, subType } of group) {
                 const { wordCount } = rets[i++];
                 const count = wordCount;
-                content.push({ id, count, type });
+                content.push({ id, count, type, subType });
             }
             iter += i;
             await siyuan.pushMsg(this.plugin.i18n.countBlocks.replace("{iter}", iter), 3000);
@@ -788,10 +788,12 @@ export class HeadingGroup {
     private group: WordCountType[][];
     private list: WordCountType[];
     private lastType: string;
-    constructor(wordCount: WordCountType[]) {
+    private headings: string[];
+    constructor(wordCount: WordCountType[], headings: number[]) {
         this.wordCount = wordCount;
         this.group = [];
         this.list = [];
+        this.headings = headings.map(i => `h${i}`);
     }
     private add(wc: WordCountType) {
         this.getList(wc).push(wc);
@@ -804,7 +806,7 @@ export class HeadingGroup {
         }
     }
     private shouldNext(wc: WordCountType) {
-        if (wc.type === "h" && this.lastType != "h") {
+        if (wc.type === "h" && this.headings.includes(wc.subType) && this.lastType != "h") {
             return true;
         }
         return false;
@@ -816,6 +818,7 @@ export class HeadingGroup {
         return this.list;
     }
     split() {
+        if (this.headings.length == 0) return [this.wordCount];
         for (const wc of this.wordCount) {
             this.add(wc);
         }
