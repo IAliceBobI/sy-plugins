@@ -46,6 +46,7 @@ export const IN_PIECE_REF = "custom-in-piece-ref";
 export const PROG_ORIGIN_TEXT = "custom-prog-origin-text";
 export const REF_HIERARCHY = "custom-ref-hierarchy";
 export const ORIGIN_HPATH = "custom-origin-hpath";
+export const REF_HPATH = "custom-ref-hpath";
 
 export enum WsActionTypes {
     transactions = "transactions",

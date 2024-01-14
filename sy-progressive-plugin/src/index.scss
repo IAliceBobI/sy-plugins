@@ -1,7 +1,15 @@
 .protyle-wysiwyg div[custom-origin-hpath]::before {
   content: attr(custom-origin-hpath);
   opacity: 0.5;
+  font-size: medium;
   color: var(--b3-font-color12);
+}
+
+.protyle-wysiwyg div[custom-ref-hpath]::after {
+  content: attr(custom-ref-hpath);
+  opacity: 0.5;
+  font-size: medium;
+  color: var(--b3-font-color5);
 }
 
 .protyle-wysiwyg div[custom-prog-piece-previous] {

@@ -38,11 +38,9 @@ export async function cleanDiv(div: HTMLDivElement, setRef: boolean): Promise<[s
                 });
                 setTheRef = true;
             }
-            if (!div.getAttribute(gconst.ORIGIN_HPATH)) {
-                const row = await siyuan.sqlOne(`select hpath from blocks where id="${originID}"`);
-                if (row?.hpath) {
-                    div.setAttribute(gconst.ORIGIN_HPATH, row.hpath);
-                }
+            const path = (await siyuan.getBlockBreadcrumb(originID)).slice(0, -1).map(i => i.name).join("::");
+            if (path) {
+                div.setAttribute(gconst.ORIGIN_HPATH, path);
             }
         }
         {
@@ -58,6 +56,10 @@ export async function cleanDiv(div: HTMLDivElement, setRef: boolean): Promise<[s
                 }
             } else {
                 setTheRef = true;
+            }
+            const path = (await siyuan.getBlockBreadcrumb(id)).slice(0, -1).map(i => i.name).join("::");
+            if (path) {
+                div.setAttribute(gconst.REF_HPATH, path);
             }
         }
         if (setTheRef) return [id, div, true];
@@ -346,6 +348,9 @@ export const siyuan = {
     },
     async getBlockIndex(id: string): Promise<number> {
         return await siyuan.call("/api/block/getBlockIndex", { id });
+    },
+    async getBlockBreadcrumb(id: string, excludeTypes: string[] = []): Promise<BreadcrumbPath[]> {
+        return await siyuan.call("/api/block/getBlockBreadcrumb", { id, excludeTypes });
     },
     async setUILayout(layout: any): Promise<any> {
         return await siyuan.call("/api/system/setUILayout", { layout });

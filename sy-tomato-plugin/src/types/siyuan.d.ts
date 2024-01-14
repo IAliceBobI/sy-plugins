@@ -109,3 +109,28 @@ type GetBlocksWordCount = {
 }
 
 type GetBlockKramdown = { id: string, kramdown: string }
+
+type GetCardRet = { blocks: Block[], total: number, pageCount: number };
+
+type DueCard = {
+    deckID: string;
+    cardID: string;
+    blockID: string;
+    state: number;
+    nextDues: { "1": string, "2": string, "3": string, "4": string };
+}
+
+type GetDueCardRet = {
+    cards: DueCard[],
+    unreviewedCount: number,
+    unreviewedNewCardCount: number,
+    unreviewedOldCardCount: number,
+};
+
+type BreadcrumbPath = {
+    id: string;
+    name: string;
+    type: string;
+    subType: string;
+    children: any;
+};
