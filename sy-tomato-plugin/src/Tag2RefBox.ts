@@ -23,6 +23,7 @@ class Tag2RefBox {
             if (eventType == EventType.loaded_protyle_static) {
                 navigator.locks.request("Tomato-Tag2RefBox-onload", { ifAvailable: true }, async (lock) => {
                     const protyle: IProtyle = detail.protyle;
+                    if (!protyle) return;
                     const notebookId = protyle.notebookId;
                     const nextDocID = protyle?.block?.rootID;
                     const element = protyle?.wysiwyg?.element;

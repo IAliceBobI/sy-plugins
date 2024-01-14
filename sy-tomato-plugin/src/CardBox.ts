@@ -72,6 +72,7 @@ class CardBox {
         events.addListener("CardBox", (eventType, detail) => {
             if (eventType == EventType.loaded_protyle_static || eventType == EventType.switch_protyle) {
                 const protyle = detail.protyle as IProtyle;
+                if (!protyle) return;
                 if (protyle?.element?.classList?.contains("card__block")) {
                     const id = protyle.block.id;
                     if (!id) {

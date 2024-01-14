@@ -73,6 +73,7 @@ class Progressive {
             navigator.locks.request(constants.TryAddStarsLock, { ifAvailable: true }, async (lock) => {
                 if (eventType == EventType.loaded_protyle_static) {
                     const protyle: IProtyle = detail.protyle;
+                    if (!protyle) return;
                     const nextDocID = protyle?.block?.rootID;
                     const element = protyle?.wysiwyg?.element;
                     if (lock && element && nextDocID && help.isProtylePiece(protyle)) {
