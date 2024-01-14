@@ -321,9 +321,11 @@ export async function createNote(boxID: string, bookID: string, piece: string[],
 
 export class Helper {
     private plugin: Plugin;
+    private setting: SettingCfgType;
 
-    constructor(plugin: Plugin) {
+    constructor(plugin: Plugin, setting: SettingCfgType) {
         this.plugin = plugin;
+        this.setting = setting;
     }
 
     getContentPrefix(level: number) {
@@ -349,6 +351,7 @@ export class Helper {
     }
 
     btnViewContents(bookID: string, noteID: string, point: number) {
+        if (!this.setting.btnViewContents) return "";
         const btnID = utils.newID().slice(0, IDLen);
         return `<div>
             ${styleColor("var(--b3-card-success-background)", "var(--b3-card-success-color)")}
@@ -364,6 +367,7 @@ export class Helper {
     }
 
     btnFullfilContent(bookID: string, noteID: string, point: number) {
+        if (!this.setting.btnFullfilContent) return "";
         const btnFullfilContentID = utils.newID().slice(0, IDLen);
         return `<div>
             ${styleColor("var(--b3-card-info-background)", "var(--b3-card-info-color)")}
@@ -379,6 +383,7 @@ export class Helper {
     }
 
     btnCleanUnchanged(bookID: string, noteID: string, point: number) {
+        if (!this.setting.btnCleanUnchanged) return "";
         const btnCleanUnchangedID = utils.newID().slice(0, IDLen);
         return `<div>
             ${styleColor("var(--b3-card-info-background)", "var(--b3-card-info-color)")}
@@ -394,6 +399,7 @@ export class Helper {
     }
 
     btnPrevious(bookID: string, noteID: string, point: number) {
+        if (!this.setting.btnPrevious) return "";
         const btnPreviousID = utils.newID().slice(0, IDLen);
         return `<div>
             ${styleColor("var(--b3-card-success-background)", "var(--b3-card-success-color)")}
@@ -409,6 +415,7 @@ export class Helper {
     }
 
     btnNext(bookID: string, noteID: string, point: number) {
+        if (!this.setting.btnNext) return "";
         const btnNextID = utils.newID().slice(0, IDLen);
         return `<div>
             ${styleColor("var(--b3-card-success-background)", "var(--b3-card-success-color)")}
@@ -424,6 +431,7 @@ export class Helper {
     }
 
     btnDeleteExit(bookID: string, noteID: string, point: number) {
+        if (!this.setting.btnDeleteExit) return "";
         const btnID = utils.newID().slice(0, IDLen);
         return `<div>
             ${styleColor("var(--b3-card-error-background)", "var(--b3-card-error-color)")}
@@ -439,6 +447,7 @@ export class Helper {
     }
 
     btnDeleteBack(bookID: string, noteID: string, point: number) {
+        if (!this.setting.btnDeleteBack) return "";
         const btnID = utils.newID().slice(0, IDLen);
         return `<div>
             ${styleColor("var(--b3-card-error-background)", "var(--b3-card-error-color)")}
@@ -454,6 +463,7 @@ export class Helper {
     }
 
     btnDeleteNext(bookID: string, noteID: string, point: number) {
+        if (!this.setting.btnDeleteNext) return "";
         const btnID = utils.newID().slice(0, IDLen);
         return `<div>
             ${styleColor("var(--b3-card-error-background)", "var(--b3-card-error-color)")}
@@ -469,6 +479,7 @@ export class Helper {
     }
 
     btnSaveCard(bookID: string, noteID: string, point: number) {
+        if (!this.setting.btnSaveCard) return "";
         const btnSaveCardID = utils.newID().slice(0, IDLen);
         return `<div>
             ${styleColor("var(--b3-card-warning-background)", "var(--b3-card-warning-color)")}
@@ -484,6 +495,7 @@ export class Helper {
     }
 
     btnDelCard(bookID: string, noteID: string, point: number) {
+        if (!this.setting.btnDelCard) return "";
         const btnSaveCardID = utils.newID().slice(0, IDLen);
         return `<div>
             ${styleColor("var(--b3-card-warning-background)", "var(--b3-card-warning-color)")}
@@ -499,6 +511,7 @@ export class Helper {
     }
 
     btnStop(bookID: string, noteID: string, point: number) {
+        if (!this.setting.btnStop) return "";
         const btnStopID = utils.newID().slice(0, IDLen);
         return `<div>
             ${styleColor("var(--b3-font-background6)", "#000000")}
@@ -514,6 +527,7 @@ export class Helper {
     }
 
     btnNextBook(bookID: string, noteID: string, point: number) {
+        if (!this.setting.btnNextBook) return "";
         const btnNextBookID = utils.newID().slice(0, IDLen);
         return `<div>
             ${styleColor("var(--b3-font-background6)", "#000000")}
@@ -529,6 +543,7 @@ export class Helper {
     }
 
     btnIgnoreBook(bookID: string, noteID: string, point: number) {
+        if (!this.setting.btnIgnoreBook) return "";
         const btnIgnoreBookID = utils.newID().slice(0, IDLen);
         return `<div>
             ${styleColor("var(--b3-font-background5)", "#000000")}
@@ -544,6 +559,7 @@ export class Helper {
     }
 
     btnOpenFlashcardTab(bookID: string, noteID: string, point: number) {
+        if (!this.setting.btnOpenFlashcardTab) return "";
         const btnID = utils.newID().slice(0, IDLen);
         return `<div>
             ${styleColor("var(--b3-font-background11)", "#000000")}
@@ -559,6 +575,7 @@ export class Helper {
     }
 
     btnSplitByPunctuations(bookID: string, noteID: string, point: number) {
+        if (!this.setting.btnSplitByPunctuations) return "";
         const btnID = utils.newID().slice(0, IDLen);
         return `<div>
             ${styleColor("var(--b3-font-background11)", "#000000")}
@@ -574,6 +591,7 @@ export class Helper {
     }
 
     btnSplitByPunctuationsList(bookID: string, noteID: string, point: number) {
+        if (!this.setting.btnSplitByPunctuationsList) return "";
         const btnID = utils.newID().slice(0, IDLen);
         return `<div>
             ${styleColor("var(--b3-font-background11)", "#000000")}
@@ -589,6 +607,7 @@ export class Helper {
     }
 
     btnSplitByPunctuationsListCheck(bookID: string, noteID: string, point: number) {
+        if (!this.setting.btnSplitByPunctuationsListCheck) return "";
         const btnID = utils.newID().slice(0, IDLen);
         return `<div>
             ${styleColor("var(--b3-font-background11)", "#000000")}

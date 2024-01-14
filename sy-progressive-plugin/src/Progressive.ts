@@ -26,7 +26,7 @@ class Progressive {
         this.lute = utils.NewLute();
         this.settings = settings;
         this.storage = new help.Storage(plugin);
-        this.helper = new help.Helper(plugin);
+        this.helper = new help.Helper(plugin, this.settings);
         await this.storage.onLayoutReady();
         if (!events.isMobile) {
             const topBarElement = this.plugin.addTopBar({
