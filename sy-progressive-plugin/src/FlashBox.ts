@@ -248,7 +248,7 @@ class FlashBox {
 
     private async cloneDiv(div: HTMLDivElement, setRef: boolean) {
         div = div.cloneNode(true) as HTMLDivElement;
-        return utils.cleanDiv(div, setRef);
+        return utils.cleanDiv(div, setRef, setRef);
     }
 
     private async blankSpaceCard(blockID: string, selected: string, range: Range, protyle: IProtyle, cardType: CardType, path?: string, noRef?: boolean) {

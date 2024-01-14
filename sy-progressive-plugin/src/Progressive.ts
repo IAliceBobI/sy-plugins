@@ -589,7 +589,7 @@ class Progressive {
         for (const id of piece) {
             allContent.push(await help.copyBlock(id, this.lute, PROG_ORIGIN_TEXT));
         }
-        await siyuan.insertBlockAsChildOf(allContent.join("\n\n"), noteID);
+        await siyuan.insertBlockAsChildOf(allContent.filter(i => !!i).join("\n\n"), noteID);
     }
 
     private async getBook2Learn(bookID?: string): Promise<help.BookInfo> {

@@ -220,7 +220,8 @@ export function splitByBlockCount(groups: WordCountType[][], blockNumber: number
 
 export async function copyBlock(id: string, lute: Lute, mark?: string) {
     const { div: tempDiv } = await utils.getBlockDiv(id);
-    await utils.cleanDiv(tempDiv, true);
+    if (tempDiv.getAttribute(MarkKey)) return "";
+    await utils.cleanDiv(tempDiv, true, false);
     tempDiv.setAttribute(RefIDKey, id);
     if (mark) tempDiv.setAttribute(mark, "1");
     const md = lute.BlockDOM2Md(tempDiv.outerHTML);

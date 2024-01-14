@@ -3,7 +3,7 @@ import { v4 as uuid } from "uuid";
 import * as gconst from "./gconst";
 import { zipAnyArrays } from "./functional";
 
-export async function cleanDiv(div: HTMLDivElement, setRef: boolean): Promise<[string, HTMLElement, boolean]> {
+export async function cleanDiv(div: HTMLDivElement, setRef: boolean, setOrigin: boolean): Promise<[string, HTMLElement, boolean]> {
     const id = div.getAttribute(gconst.DATA_NODE_ID);
 
     // new ids
@@ -17,9 +17,8 @@ export async function cleanDiv(div: HTMLDivElement, setRef: boolean): Promise<[s
     div.querySelectorAll(`[${gconst.CUSTOM_RIFF_DECKS}]`).forEach((e: HTMLElement) => {
         e.removeAttribute(gconst.CUSTOM_RIFF_DECKS);
     });
-
-    if (setRef) {
-        let setTheRef = false;
+    let setTheRef = false;
+    if (setOrigin) {
         const originID = div.getAttribute(gconst.RefIDKey) ?? "";
         if (originID) {
             const all = div.querySelectorAll(`[${gconst.DATA_ID}="${originID}"]`) ?? [];
@@ -43,28 +42,27 @@ export async function cleanDiv(div: HTMLDivElement, setRef: boolean): Promise<[s
                 div.setAttribute(gconst.ORIGIN_HPATH, path);
             }
         }
-        {
-            const all = div.querySelectorAll(`[${gconst.DATA_ID}="${id}"]`) ?? [];
-            if (all.length == 0) {
-                const span = div.querySelector("[contenteditable=\"true\"]")?.appendChild(document.createElement("span"));
-                if (span) {
-                    span.setAttribute(gconst.DATA_TYPE, gconst.BlockNodeEnum.BLOCK_REF);
-                    span.setAttribute(gconst.DATA_SUBTYPE, "s");
-                    span.setAttribute(gconst.DATA_ID, id);
-                    span.innerText = "*";
-                    setTheRef = true;
-                }
-            } else {
+    }
+    if (setRef) {
+        const all = div.querySelectorAll(`[${gconst.DATA_ID}="${id}"]`) ?? [];
+        if (all.length == 0) {
+            const span = div.querySelector("[contenteditable=\"true\"]")?.appendChild(document.createElement("span"));
+            if (span) {
+                span.setAttribute(gconst.DATA_TYPE, gconst.BlockNodeEnum.BLOCK_REF);
+                span.setAttribute(gconst.DATA_SUBTYPE, "s");
+                span.setAttribute(gconst.DATA_ID, id);
+                span.innerText = "*";
                 setTheRef = true;
             }
-            const path = (await siyuan.getBlockBreadcrumb(id)).slice(0, -1).map(i => i.name).join("::");
-            if (path) {
-                div.setAttribute(gconst.REF_HPATH, path);
-            }
+        } else {
+            setTheRef = true;
         }
-        if (setTheRef) return [id, div, true];
+        const path = (await siyuan.getBlockBreadcrumb(id)).slice(0, -1).map(i => i.name).join("::");
+        if (path) {
+            div.setAttribute(gconst.REF_HPATH, path);
+        }
     }
-    return [id, div, false];
+    return [id, div, setTheRef];
 }
 
 export function tryAddRef2Div(div: HTMLDivElement, id: string): HTMLDivElement {
@@ -675,7 +673,7 @@ export const siyuan = {
                 let tempDiv = document.createElement("div") as HTMLDivElement;
                 tempDiv.innerHTML = dom;
                 tempDiv = tempDiv.firstElementChild as HTMLDivElement;
-                await cleanDiv(tempDiv, false);
+                await cleanDiv(tempDiv, false, false);
                 mds.push(lute.BlockDOM2Md(tempDiv.outerHTML));
             }
             if (mds.length > 0) await siyuan.insertBlockAfter(mds.join("\n\n"), insertPoint["id"]);

@@ -48,7 +48,7 @@ export const cmdBlockBox = new CmdBlockBox();
 async function moveAllContentToDoc2(protyle: Protyle, doc1: string, doc2: string) {
     const divs = await Promise.all((await siyuan.getChildBlocks(doc1)).map(b => getBlockDiv(b.id)));
     for (const { div } of divs) {
-        await cleanDiv(div, false);
+        await cleanDiv(div, false, false);
         const md = protyle.protyle.lute.BlockDOM2Md(div.outerHTML).trim();
         await siyuan.appendBlock(md, doc2);
     }
