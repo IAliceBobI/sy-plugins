@@ -31,16 +31,18 @@ export async function cleanDiv(div: HTMLDivElement, setRef: boolean): Promise<[s
                     spanOri.setAttribute(gconst.DATA_ID, originID);
                     spanOri.innerText = "@";
                     setTheRef = true;
-                    const row = await siyuan.sqlOne(`select hpath from blocks where id="${originID}"`);
-                    if (row?.hpath) {
-                        div.setAttribute(gconst.ORIGIN_HPATH, row.hpath);
-                    }
                 }
             } else {
                 all.forEach((e: HTMLElement) => {
                     if (e.innerText == "*") e.innerText = "@";
                 });
                 setTheRef = true;
+            }
+            if (!div.getAttribute(gconst.ORIGIN_HPATH)) {
+                const row = await siyuan.sqlOne(`select hpath from blocks where id="${originID}"`);
+                if (row?.hpath) {
+                    div.setAttribute(gconst.ORIGIN_HPATH, row.hpath);
+                }
             }
         }
         {

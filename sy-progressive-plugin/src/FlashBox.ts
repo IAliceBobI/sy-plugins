@@ -204,7 +204,9 @@ class FlashBox {
         if (this.settings.cardIndent) {
             star = "  * ";
         }
+        let hpath: string;
         for (const div of divs) {
+            if (!hpath) hpath = div.getAttribute(gconst.ORIGIN_HPATH);
             div.removeAttribute(gconst.DATA_NODE_ID);
             const md = this.lute.BlockDOM2Md(div.outerHTML);
             if (idx++ == 0) tmp.push("* " + md);
@@ -216,7 +218,11 @@ class FlashBox {
         } else if (cardType === CardType.B) {
             tmp.push(star + ">");
         }
-        tmp.push(`{: id="${cardID}"}`);
+        if (hpath) {
+            tmp.push(`{: id="${cardID}" ${gconst.ORIGIN_HPATH}="${hpath}"}`);
+        } else {
+            tmp.push(`{: id="${cardID}"}`);
+        }
         return { cardID, "markdown": tmp.join("\n") };
     }
 
