@@ -73,7 +73,7 @@ class PieceMovingBox {
                 const row = await siyuan.sqlOne(`select id from blocks where type='d' and ial like "%${getDocIalMark(bookID, pieceNum)}%"`);
                 if (row?.id) {
                     const { div } = await getBlockDiv(blockID);
-                    cleanDiv(div, false);
+                    await cleanDiv(div, false);
                     const md = this.lute.BlockDOM2Md(div.outerHTML);
                     if (delta < 0) {
                         await siyuan.appendBlock(md, row.id);

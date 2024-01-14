@@ -3,7 +3,7 @@ import { v4 as uuid } from "uuid";
 import * as gconst from "./gconst";
 import { zipAnyArrays } from "./functional";
 
-export function cleanDiv(div: HTMLDivElement, setRef: boolean): [string, HTMLElement, boolean] {
+export async function cleanDiv(div: HTMLDivElement, setRef: boolean): Promise<[string, HTMLElement, boolean]> {
     const id = div.getAttribute(gconst.DATA_NODE_ID);
 
     // new ids
@@ -31,6 +31,10 @@ export function cleanDiv(div: HTMLDivElement, setRef: boolean): [string, HTMLEle
                     spanOri.setAttribute(gconst.DATA_ID, originID);
                     spanOri.innerText = "@";
                     setTheRef = true;
+                    const row = await siyuan.sqlOne(`select hpath from blocks where id="${originID}"`);
+                    if (row?.hpath) {
+                        div.setAttribute(gconst.ORIGIN_HPATH, row.hpath);
+                    }
                 }
             } else {
                 all.forEach((e: HTMLElement) => {
@@ -664,7 +668,7 @@ export const siyuan = {
                 let tempDiv = document.createElement("div") as HTMLDivElement;
                 tempDiv.innerHTML = dom;
                 tempDiv = tempDiv.firstElementChild as HTMLDivElement;
-                cleanDiv(tempDiv, false);
+                await cleanDiv(tempDiv, false);
                 mds.push(lute.BlockDOM2Md(tempDiv.outerHTML));
             }
             if (mds.length > 0) await siyuan.insertBlockAfter(mds.join("\n\n"), insertPoint["id"]);

@@ -152,7 +152,7 @@ class FlashBox {
     }
 
     private async makeCard(protyle: IProtyle, t: CardType, path?: string, noRef?: boolean) {
-        const { ids, divs } = this.cloneSelectedLineMarkdowns(protyle, noRef);
+        const { ids, divs } = await this.cloneSelectedLineMarkdowns(protyle, noRef);
         if (ids.length > 0) { // multilines
             await this.insertCard(protyle, divs, t, ids[ids.length - 1], path);
         } else {
@@ -220,14 +220,14 @@ class FlashBox {
         return { cardID, "markdown": tmp.join("\n") };
     }
 
-    private cloneSelectedLineMarkdowns(protyle: IProtyle, noRef?: boolean) {
+    private async cloneSelectedLineMarkdowns(protyle: IProtyle, noRef?: boolean) {
         const multiLine = protyle?.element?.querySelectorAll(`.${gconst.PROTYLE_WYSIWYG_SELECT}`);
         const divs = [];
         let setRef = !noRef;
         const ids = [];
         for (const div of multiLine) {
             div.classList.remove(gconst.PROTYLE_WYSIWYG_SELECT);
-            const [id, elem, hasRef] = this.cloneDiv(div as any, setRef);
+            const [id, elem, hasRef] = await this.cloneDiv(div as any, setRef);
             if (hasRef) setRef = false;
             ids.push(id);
             divs.push(elem);
@@ -235,7 +235,7 @@ class FlashBox {
         return { divs, ids };
     }
 
-    private cloneDiv(div: HTMLDivElement, setRef: boolean): [string, HTMLElement, boolean] {
+    private async cloneDiv(div: HTMLDivElement, setRef: boolean) {
         div = div.cloneNode(true) as HTMLDivElement;
         return utils.cleanDiv(div, setRef);
     }
@@ -246,7 +246,7 @@ class FlashBox {
         if (!dom) return;
         if (selected) {
             protyle.toolbar.setInlineMark(protyle, "mark", "range");
-            const [_id, div] = this.cloneDiv(dom as HTMLDivElement, !noRef);
+            const [_id, div] = await this.cloneDiv(dom as HTMLDivElement, !noRef);
             protyle.toolbar.setInlineMark(protyle, "mark", "range");
             protyle.toolbar.setInlineMark(protyle, "prog-marked", "range", { type: "backgroundColor", color: "var(--b3-font-background9)" });
             div.querySelectorAll('[data-type~="prog-marked"]').forEach(e => {
@@ -256,7 +256,7 @@ class FlashBox {
             });
             tmpDiv = div;
         } else {
-            const [_id, div] = this.cloneDiv(dom as HTMLDivElement, !noRef);
+            const [_id, div] = await this.cloneDiv(dom as HTMLDivElement, !noRef);
             tmpDiv = div;
         }
         await this.insertCard(protyle, [tmpDiv], cardType, blockID, path);

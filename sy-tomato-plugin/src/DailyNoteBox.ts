@@ -154,7 +154,7 @@ class DailyNoteBox {
             const { dom } = await siyuan.getBlockDOM(blockID);
             const div = document.createElement("div");
             div.innerHTML = dom;
-            cleanDiv(div.firstElementChild as HTMLDivElement, false);
+            await cleanDiv(div.firstElementChild as HTMLDivElement, false);
             const md = this.lute.BlockDOM2Md(div.innerHTML);
             await siyuan.appendBlock(md, docID);
             await siyuan.safeUpdateBlock(blockID, "");

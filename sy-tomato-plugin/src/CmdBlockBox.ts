@@ -48,14 +48,10 @@ export const cmdBlockBox = new CmdBlockBox();
 async function moveAllContentToDoc2(protyle: Protyle, doc1: string, doc2: string) {
     const divs = await Promise.all((await siyuan.getChildBlocks(doc1)).map(b => getBlockDiv(b.id)));
     for (const { div } of divs) {
-        cleanDiv(div, false);
+        await cleanDiv(div, false);
         const md = protyle.protyle.lute.BlockDOM2Md(div.outerHTML).trim();
         await siyuan.appendBlock(md, doc2);
     }
-    // await siyuan.safeDeleteBlocks(divs.map(d => d.id));
-    // for (const blockID of (await siyuan.getChildBlocks(doc1)).reverse()) {
-    //     await siyuan.safeMoveBlockToParent(blockID.id, doc2);
-    // }
 }
 
 async function mergeIntoDoc2(doc1: string, doc2: string) {
@@ -117,7 +113,7 @@ function insertText(blockDiv: Element, txt: string, protyle: Protyle) {
 // const newDiv = blockDiv.cloneNode(true) as HTMLElement;
 // const editable = getContenteditableElement(newDiv);
 // editable.textContent = "abc";
-// cleanDiv(newDiv as any, false);
+// c111leanDiv(newDiv as any, false);
 // const newID = NewNodeID();
 // newDiv.setAttribute(DATA_NODE_ID, newID)
 // protyle.transaction([
