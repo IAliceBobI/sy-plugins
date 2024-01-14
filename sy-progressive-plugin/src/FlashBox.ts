@@ -220,10 +220,13 @@ class FlashBox {
         } else if (cardType === CardType.B) {
             tmp.push(star + ">");
         }
-        const attrList = []
-        attrList.push(`id="${cardID}"`)
-        if (originPath) attrList.push(`${gconst.ORIGIN_HPATH}="${originPath}"`)
-        if (refPath) attrList.push(`${gconst.REF_HPATH}="${refPath}"`)
+        const attrList = [];
+        attrList.push(`id="${cardID}"`);
+        if (originPath) {
+            attrList.push(`${gconst.ORIGIN_HPATH}="${originPath}"`);
+        } else if (refPath) {
+            attrList.push(`${gconst.REF_HPATH}="${refPath}"`);
+        }
         tmp.push(`{: ${attrList.join(" ")} }`);
         return { cardID, "markdown": tmp.join("\n") };
     }
