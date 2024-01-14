@@ -68,23 +68,23 @@ export default class ThePlugin extends Plugin {
         this.addSettingItem("openCardsOnOpenPiece", "* 打开分片的同时打开cards文档", false, "-cards后缀文件: 每本书用于保存闪卡的文件");
         this.addSettingItem("cardIndent", "* 制作的闪卡，从第二项开始向右缩进", false, "");
 
-        this.addSettingItem("btnViewContents", "* 打开目录", true, "按钮");
-        this.addSettingItem("btnSplitByPunctuationsListCheck", "通过标点符号拆分分片为任务列表", true, "按钮");
-        this.addSettingItem("btnFullfilContent", "填充原文", true, "按钮");
-        this.addSettingItem("btnCleanUnchanged", "清除未更改的内容", true, "按钮");
-        this.addSettingItem("btnPrevious", "上一个分片", true, "按钮");
-        this.addSettingItem("btnNext", "下一个分片", true, "按钮");
-        this.addSettingItem("btnDeleteBack", "删除，去上一个分片", true, "按钮");
-        this.addSettingItem("btnDeleteNext", "删除，去下一个分片", true, "按钮");
-        this.addSettingItem("btnSaveCard", "制作文档闪卡", true, "按钮");
-        this.addSettingItem("btnDelCard", "取消文档闪卡", true, "按钮");
-        this.addSettingItem("btnStop", "停止", true, "按钮");
-        this.addSettingItem("btnNextBook", "换下一本书", true, "按钮");
-        this.addSettingItem("btnIgnoreBook", "忽略这本书", true, "按钮");
-        this.addSettingItem("btnOpenFlashcardTab", "打开本书的闪卡", true, "按钮");
-        this.addSettingItem("btnSplitByPunctuations", "通过标点符号拆分分片", true, "按钮");
-        this.addSettingItem("btnSplitByPunctuationsList", "通过标点符号拆分分片为列表", true, "按钮");
-        this.addSettingItem("btnDeleteExit", "删除并退出", true, "按钮");
+        this.addSettingItem("btnViewContents", "* 打开目录", true, "🗂");
+        this.addSettingItem("btnPrevious", "* 上一个分片", true, "⬅");
+        this.addSettingItem("btnNext", "* 下一个分片", true, "➡");
+        this.addSettingItem("btnCleanUnchanged", "* 删除分片中未改过的原文", true, "🧹");
+        this.addSettingItem("btnFullfilContent", "* 重新插入分片内容", true, "⬇");
+        this.addSettingItem("btnStop", "* 关闭分片", true, "🏃");
+        this.addSettingItem("btnNextBook", "* 换一本书看", true, "📚📖");
+        this.addSettingItem("btnOpenFlashcardTab", "* 打开本书的闪卡", true, "⚡");
+        this.addSettingItem("btnDeleteBack", "* 删除分片，看上一个分片", true, "⬅ 🗑");
+        this.addSettingItem("btnDeleteNext", "* 删除分片，看下一个分片", true, "🗑 ➡");
+        this.addSettingItem("btnSaveCard", "* 文档制卡", true, "➕🗃");
+        this.addSettingItem("btnDelCard", "* 取消文档制卡", true, "➖🗃");
+        this.addSettingItem("btnDeleteExit", "* 删除分片并退出", true, "🏃 🗑");
+        this.addSettingItem("btnIgnoreBook", "* 不再推送本书", true, "🚫");
+        this.addSettingItem("btnSplitByPunctuations", "* 按标点断句", true, "✂📜");
+        this.addSettingItem("btnSplitByPunctuationsListCheck", "* 按标点断句，形成任务列表(可以ctrl+enter勾选任务)", true, "✂📜✅");
+        this.addSettingItem("btnSplitByPunctuationsList", "* 按标点断句，形成列表", true, "✂📜📌");
     }
 
     private addSettingItem(key: string, title: string, defaultValue: boolean, description?: string) {

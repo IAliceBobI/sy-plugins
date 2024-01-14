@@ -612,7 +612,7 @@ export class Helper {
         return `<div>
             ${styleColor("var(--b3-font-background11)", "#000000")}
             <div>
-                <button title="按标点断句，形成任务" onclick="${btnID}()" id="btn${btnID}">✂📜✅</button>
+                <button title="按标点断句，形成任务列表(可以ctrl+enter勾选任务)" onclick="${btnID}()" id="btn${btnID}">✂📜✅</button>
             </div>
             <script>
                 function ${btnID}() {
