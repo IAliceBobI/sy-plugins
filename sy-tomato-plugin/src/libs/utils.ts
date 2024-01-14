@@ -349,7 +349,6 @@ export const siyuan = {
     },
     async createDocWithMdIfNotExists(notebookID: string, path_readable: string, markdown: string, attr?: any): Promise<string> {
         return navigator.locks.request("tomato.siyuan.createDocWithMdIfNotExists", { mode: "exclusive" }, async (_lock) => {
-            await siyuan.flushTransaction();
             const row = await siyuan.sqlOne(`select id from blocks where hpath="${path_readable}" and type='d' limit 1`);
             const docID = row?.id ?? "";
             if (!docID) {

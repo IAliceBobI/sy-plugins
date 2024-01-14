@@ -1,7 +1,7 @@
 import { IProtyle, Lute, Plugin } from "siyuan";
 import { EventType, events } from "./libs/Events";
 import { BLOCK_REF, DATA_ID, DATA_SUBTYPE, DATA_TYPE, REF_HIERARCHY } from "./libs/gconst";
-import { NewLute, getID, getSyElement, siyuan } from "./libs/utils";
+import { NewLute, getID, getSyElement, siyuan, siyuanCache } from "./libs/utils";
 
 type IDName = {
     id: string;
@@ -57,7 +57,7 @@ class Tag2RefBox {
             .filter(({ text }) => !!text);
 
         const cursorID = events.lastBlockID;
-        const nodes = new Map<string, HTMLElement>()
+        const nodes = new Map<string, HTMLElement>();
         for (const { e, text } of elements) {
             const refs = text.split("/").filter(i => !!i);
             const parent = e.parentElement;
@@ -81,8 +81,8 @@ class Tag2RefBox {
                     span.setAttribute(DATA_SUBTYPE, "d");
                     span.innerText = ref;
                     spans.push(span);
-                    idName.push({ id, name: ref })
-                };
+                    idName.push({ id, name: ref });
+                }
                 if (spans.length > 0) {
                     parent.replaceChild(spans[0], e);
                     for (const rest of spans.slice(1).reverse()) {
@@ -102,7 +102,7 @@ class Tag2RefBox {
 
 async function insertMd(idName: IDName[]) {
     if (idName.length > 1) {
-        const attrValue = `${idName.map(i => i.id).join(",")}`
+        const attrValue = `${idName.map(i => i.id).join(",")}`;
         const row = await siyuan.sqlOne(`select id from blocks 
 where type='l' 
 and root_id="${idName[0].id}"
@@ -111,7 +111,7 @@ and ial like '%${REF_HIERARCHY}="${attrValue}"%' limit 1`);
             let i = 0;
             const mdList = [];
             for (const ref of idName.map(({ id, name }) => `((${id} '${name}'))`)) {
-                mdList.push(`${'  '.repeat(i++)}* ${ref}`);
+                mdList.push(`${"  ".repeat(i++)}* ${ref}`);
             }
             mdList.push(`{: ${REF_HIERARCHY}="${attrValue}"}`);
             await siyuan.insertBlockAsChildOf(mdList.join("\n"), idName[0].id);
@@ -120,11 +120,10 @@ and ial like '%${REF_HIERARCHY}="${attrValue}"%' limit 1`);
 }
 
 async function createRefDoc(notebookId: string, name: string) {
-    await siyuan.flushTransaction();
     const row = await siyuan.sqlOne(`select id from blocks where type='d' and content='${name}' limit 1`);
     if (row?.id) return row.id;
     const { path } = await siyuan.getRefCreateSavePath(notebookId);
-    return await siyuan.createDocWithMdIfNotExists(notebookId, path + name, "");
+    return await siyuanCache.createDocWithMdIfNotExists(5000, notebookId, path + name, "");
 }
 
 export const tag2RefBox = new Tag2RefBox();
