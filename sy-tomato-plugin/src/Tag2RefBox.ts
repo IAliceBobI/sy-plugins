@@ -28,6 +28,7 @@ class Tag2RefBox {
                     const nextDocID = protyle?.block?.rootID;
                     const element = protyle?.wysiwyg?.element;
                     if (lock && element && nextDocID && notebookId) {
+                        await this.findAllTagLock(notebookId, element);
                         if (this.docID != nextDocID) {
                             this.docID = nextDocID;
                             this.observer?.disconnect();

@@ -1,5 +1,5 @@
 import { Plugin, getFrontend, Protyle } from "siyuan";
-import { getID } from "./utils";
+import { getCursorElement, getID } from "./utils";
 
 export enum EventType {
     click_editorcontent = "click-editorcontent",
@@ -103,8 +103,7 @@ class Events {
 }
 
 function getCursorBlock() {
-    const selection = document.getSelection();
-    return getID(selection?.focusNode?.parentElement);
+    return getID(getCursorElement());
 }
 
 export const events = new Events();
