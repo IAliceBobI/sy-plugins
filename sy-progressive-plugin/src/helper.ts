@@ -181,7 +181,7 @@ export async function isPiece(id: string) {
     return ial.includes(TEMP_CONTENT);
 }
 
-export async function getHPathByDocID(docID: string) {
+export async function getCardHPathByDocID(docID: string) {
     const row = await siyuan.sqlOne(`select hpath from blocks where id = "${docID}"`);
     let path = row?.hpath ?? "";
     if (!path) return "";

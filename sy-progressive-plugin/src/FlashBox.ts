@@ -3,7 +3,7 @@ import { siyuan } from "../../sy-tomato-plugin/src/libs/utils";
 import * as utils from "../../sy-tomato-plugin/src/libs/utils";
 import { events } from "../../sy-tomato-plugin/src/libs/Events";
 import * as gconst from "../../sy-tomato-plugin/src/libs/gconst";
-import { getCardsDoc, getHPathByDocID } from "./helper";
+import { getCardsDoc, getCardHPathByDocID } from "./helper";
 
 enum CardType {
     B = "B", C = "C", None = "None"
@@ -174,7 +174,6 @@ class FlashBox {
     private async doInsertCard(protyle: IProtyle, divs: HTMLElement[], t: CardType, lastSelectedID: string, path?: string) {
         const boxID = events.boxID;
         const { bookID, pieceID, isPiece } = await isInPiece(protyle);
-        if (!pieceID) return;
         const { cardID, markdown } = this.createList(divs, t);
         if (path) {
             const v = getDailyAttrValue();
@@ -184,8 +183,13 @@ class FlashBox {
             await siyuan.insertBlockAsChildOf(`\n{: id="${utils.NewNodeID()}"}\n${markdown}`, targetDocID);
             openTab({ app: this.plugin.app, doc: { id: targetDocID }, position: "right" });
         } else if (isPiece) {
-            if (!bookID) return;
-            const hpath = await getHPathByDocID(bookID);
+            if (!bookID || !pieceID) return;
+            let hpath = "";
+            if (this.settings.cardUnderPiece) {
+                hpath = await getCardHPathByDocID(pieceID);
+            } else {
+                hpath = await getCardHPathByDocID(bookID);
+            }
             if (!hpath) return;
             const targetDocID = await getCardsDoc(bookID, boxID, hpath);
             await siyuan.insertBlockAsChildOf(`{: id="${utils.NewNodeID()}"}\n${markdown}`, targetDocID);
@@ -224,7 +228,7 @@ class FlashBox {
         attrList.push(`id="${cardID}"`);
         if (originPath) {
             attrList.push(`${gconst.ORIGIN_HPATH}="${originPath}"`);
-        } 
+        }
         if (refPath) {
             attrList.push(`${gconst.REF_HPATH}="${refPath}"`);
         }

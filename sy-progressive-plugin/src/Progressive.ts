@@ -441,7 +441,12 @@ class Progressive {
             }
         }
         if (openPiece && this.settings.openCardsOnOpenPiece) {
-            const hpath = await help.getHPathByDocID(bookID);
+            let hpath = "";
+            if (this.settings.cardUnderPiece) {
+                hpath = await help.getCardHPathByDocID(noteID);
+            } else {
+                hpath = await help.getCardHPathByDocID(bookID);
+            }
             if (hpath) {
                 const targetDocID = await help.getCardsDoc(bookID, bookInfo.boxID, hpath);
                 openTab({ app: this.plugin.app, doc: { id: targetDocID }, position: "right" });

@@ -1,6 +1,7 @@
 // https://app.quicktype.io/?l=ts
 
 type SettingCfgType = {
+    cardUnderPiece: boolean;
     addCodeBlock: boolean,
     addQuoteBlock: boolean,
     showLastBlock: boolean,
