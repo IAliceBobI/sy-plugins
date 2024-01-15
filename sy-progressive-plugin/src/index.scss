@@ -5,7 +5,7 @@
   color: var(--b3-font-color12);
 }
 
-.protyle-wysiwyg div[custom-ref-hpath]:not([custom-prog-origin-text])::after {
+.protyle-wysiwyg div[custom-ref-hpath]:not([custom-prog-origin-text]):not([custom-origin-hpath])::before {
   content: attr(custom-ref-hpath);
   opacity: 0.5;
   font-size: medium;
