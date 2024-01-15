@@ -224,7 +224,8 @@ class FlashBox {
         attrList.push(`id="${cardID}"`);
         if (originPath) {
             attrList.push(`${gconst.ORIGIN_HPATH}="${originPath}"`);
-        } else if (refPath) {
+        } 
+        if (refPath) {
             attrList.push(`${gconst.REF_HPATH}="${refPath}"`);
         }
         tmp.push(`{: ${attrList.join(" ")} }`);
