@@ -149,33 +149,15 @@ class CardPriorityBox {
 
     async updateCards(options: ICardData) {
         if (!this.plugin) return options;
-        siyuan.pushMsg("正在根据优先级排序……", 2000);
-        const start = new Date();
         shuffleArray(options.cards);
-        const part1 = options.cards.slice(0, 50);
-        const part2 = options.cards.slice(50);
-        try {
-            let count = 0;
-            const attrMap = (await Promise.all(part1.map(card => siyuan.getBlockAttrs(card.blockID))))
-                .reduce((map, attr) => {
-                    if (attr?.id) {
-                        map.set(attr.id, readPriority(attr));
-                    } else {
-                        count++;
-                    }
-                    return map;
-                }, new Map<string, number>());
-            part1.sort((a, b) => attrMap.get(b.blockID) - attrMap.get(a.blockID));
-            if (count > 0) {
-                console.log(`您有${count}个疑似失效的闪卡。卡包里有闪卡，但笔记本里找不到对应的闪卡。`);
-            }
-        } finally {
-            const end = new Date().getTime() - start.getTime();
-            siyuan.pushMsg(`部分按优先级排序${part1.length}/${options.cards.length}个闪卡，花费${end / 1000}秒。<br>
-下个版本思源放开限制后，再全部闪卡按优先级排序。`, 4000);
-            part1.push(...part2);
-            options.cards = part1;
-        }
+        const attrMap = (await Promise.all(options.cards.map(card => siyuan.getBlockAttrs(card.blockID))))
+            .reduce((map, attr) => {
+                if (attr?.id) {
+                    map.set(attr.id, readPriority(attr));
+                }
+                return map;
+            }, new Map<string, number>());
+        options.cards.sort((a, b) => attrMap.get(b.blockID) - attrMap.get(a.blockID));
         return options;
     }
 }

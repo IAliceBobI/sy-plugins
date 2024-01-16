@@ -1,7 +1,6 @@
 import { App, Constants, IOperation, Lute, fetchSyncPost, openTab } from "siyuan";
 import { v4 as uuid } from "uuid";
 import * as gconst from "./gconst";
-import { zipAnyArrays } from "./functional";
 
 export async function cleanDiv(div: HTMLDivElement, setRef: boolean, setOrigin: boolean): Promise<[string, HTMLElement, boolean]> {
     const id = div.getAttribute(gconst.DATA_NODE_ID);
@@ -717,21 +716,24 @@ export const siyuan = {
         return lines.join("\n");
     },
     async removeBrokenCards() {
-        siyuan.pushMsg("正在确认无效闪卡，请耐心等待……", 4000);
-        let invalidCardIDs = [];
-        for (const card of await siyuan.getRiffCardsAll()) {
-            if (!card.box) {
-                invalidCardIDs.push(card.id);
+        return navigator.locks.request("removeBrokenCardsLock", { ifAvailable: true }, async (lock) => {
+            if (!lock) return;
+            siyuan.pushMsg("正在确认无效闪卡，请耐心等待……", 4000);
+            const invalidCardIDs = [];
+            for (const card of await siyuan.getRiffCardsAll()) {
+                if (!card.box) {
+                    invalidCardIDs.push(card.id);
+                }
             }
-        }
-        invalidCardIDs = zipAnyArrays(
-            await Promise.all(invalidCardIDs.map((card) => siyuan.checkBlockExist(card))),
-            invalidCardIDs,
-        ).filter(e => !e[0]).map(e => e[1]);
-        if (invalidCardIDs.length > 0) {
-            await siyuan.removeRiffCards(invalidCardIDs);
-        }
-        return invalidCardIDs;
+            // invalidCardIDs = zipAnyArrays(
+            //     await Promise.all(invalidCardIDs.map((card) => siyuan.checkBlockExist(card))),
+            //     invalidCardIDs,
+            // ).filter(e => !e[0]).map(e => e[1]);
+            if (invalidCardIDs.length > 0) {
+                await siyuan.removeRiffCards(invalidCardIDs);
+            }
+            return invalidCardIDs;
+        });
     },
     async getDocNameByBlockID(blockID: string) {
         let row = await siyuan.sqlOne(
