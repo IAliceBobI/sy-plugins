@@ -19,21 +19,20 @@ class HierarchyRefGox {
         this.plugin = plugin;
         this.lute = NewLute();
         this.settingCfg = (plugin as any).settingCfg;
-        events.addListener("Tomato-Tag2RefBox", (eventType, detail) => {
+        events.addListener("Tomato-HierarchyRefGox", (eventType, detail) => {
             if (eventType == EventType.loaded_protyle_static) {
-                navigator.locks.request("Tomato-Tag2RefBox-onload", { ifAvailable: true }, async (lock) => {
+                navigator.locks.request("Tomato-HierarchyRefGox-onload", { ifAvailable: true }, async (lock) => {
                     const protyle: IProtyle = detail.protyle;
                     if (!protyle) return;
                     const notebookId = protyle.notebookId;
                     const nextDocID = protyle?.block?.rootID;
                     const element = protyle?.wysiwyg?.element;
                     if (lock && element && nextDocID && notebookId) {
-                        await this.findAllTagLock(notebookId, element);
                         if (this.docID != nextDocID) {
                             this.docID = nextDocID;
                             this.observer?.disconnect();
                             this.observer = new MutationObserver((_mutationsList) => {
-                                this.findAllTagLock(notebookId, element);
+                                this.findAllRefLock(notebookId, element);
                             });
                             this.observer.observe(element, { childList: true });
                         }
@@ -43,15 +42,15 @@ class HierarchyRefGox {
         });
     }
 
-    private async findAllTagLock(notebookId: string, element: HTMLElement) {
-        return navigator.locks.request("Tomato-Tag2RefBox-findAllTagLock", { ifAvailable: true }, async (lock) => {
+    private async findAllRefLock(notebookId: string, element: HTMLElement) {
+        return navigator.locks.request("Tomato-HierarchyRefGox-findAllRefLock", { ifAvailable: true }, async (lock) => {
             if (lock && element) {
-                await this.findAllTag(notebookId, element);
+                await this.findAllRef(notebookId, element);
             }
         });
     }
 
-    private async findAllTag(notebookId: string, element: HTMLElement) {
+    private async findAllRef(notebookId: string, element: HTMLElement) {
         const elements = Array.from(element.querySelectorAll(`span[${DATA_TYPE}="tag"]`))
             .filter(e => e.childElementCount == 0)
             .map((e: HTMLElement) => { return { e, text: e.textContent || e.innerText }; })
