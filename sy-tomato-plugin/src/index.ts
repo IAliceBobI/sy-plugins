@@ -15,7 +15,6 @@ import { dailyNoteBox } from "./DailyNoteBox";
 import { cmdBlockBox } from "./CmdBlockBox";
 import { cardPriorityBox } from "./CardPriorityBox";
 import { tag2RefBox } from "./Tag2RefBox";
-import { hierarchyRefGox } from "./HierarchyRefGox";
 
 export default class ThePlugin extends Plugin {
     private static readonly GLOBAL_THIS: Record<string, any> = globalThis;
@@ -71,9 +70,6 @@ export default class ThePlugin extends Plugin {
 
         this.addSettingItem("tag2RefBoxCheckbox", "* 自动将标签转为引用（引用也继承标签的层级关系）", false, "请勿匆忙开启！开启会将当前编辑区内的标签转为引用！");
         if (this.settingCfg.tag2RefBoxCheckbox ?? false) await tag2RefBox.onload(this);
-
-        // this.addSettingItem("hierarchyRefGoxCheckbox", "* 层级引用", false, "");
-        // if (this.settingCfg.hierarchyRefGoxCheckbox ?? false) await hierarchyRefGox.onload(this);
 
         this.addSettingItem("cmdBlockBoxCheckbox", "* 命令块", false);
         if (this.settingCfg.cmdBlockBoxCheckbox ?? false) await cmdBlockBox.onload(this);

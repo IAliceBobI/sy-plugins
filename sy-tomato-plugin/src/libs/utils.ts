@@ -725,10 +725,6 @@ export const siyuan = {
                     invalidCardIDs.push(card.id);
                 }
             }
-            // invalidCardIDs = zipAnyArrays(
-            //     await Promise.all(invalidCardIDs.map((card) => siyuan.checkBlockExist(card))),
-            //     invalidCardIDs,
-            // ).filter(e => !e[0]).map(e => e[1]);
             if (invalidCardIDs.length > 0) {
                 await siyuan.removeRiffCards(invalidCardIDs);
             }
