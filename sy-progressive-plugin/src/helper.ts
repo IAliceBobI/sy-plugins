@@ -164,7 +164,7 @@ export function tempContent(content: string, id?: string) { // for btns and spli
     else return content + `\n{: id="${id}" ${MarkKey}="${TEMP_CONTENT}"}`;
 }
 
-export function getDocIalMark(bookID: string, point: number) {
+export function getDocIalPieces(bookID: string, point: number) {
     return `${TEMP_CONTENT}#${bookID},${point}`;
 }
 
@@ -178,6 +178,25 @@ export function getDocIalCards(bookID: string) {
 
 export function getDocIalSummary(bookID: string) {
     return `summary#${TEMP_CONTENT}#${bookID}`;
+}
+
+export async function getBookIDByBlock(blockID: string) {
+    const docRow = await siyuan.getDocRowByBlockID(blockID);
+    return getBookID(docRow?.id);
+}
+
+export async function getBookID(docID: string): Promise<{ bookID: string, pieceNum: number }> {
+    const ret = { bookID: "", pieceNum: NaN } as Awaited<ReturnType<typeof getBookID>>;
+    if (docID) {
+        const attrs = await siyuan.getBlockAttrs(docID);
+        if (attrs["custom-progmark"]) {
+            const last = attrs["custom-progmark"].split("#").pop();
+            const parts = last.split(",");
+            ret.bookID = parts[0];
+            ret.pieceNum = Number(parts[1]);
+        }
+    }
+    return ret;
 }
 
 export async function getCardHPathByDocID(docID: string) {
@@ -279,7 +298,7 @@ export async function cleanNote(noteID: string, force: boolean) {
 }
 
 export async function findDoc(bookID: string, point: number) {
-    return doFindDoc(bookID, getDocIalMark, point);
+    return doFindDoc(bookID, getDocIalPieces, point);
 }
 
 export async function findContents(bookID: string) {
@@ -295,7 +314,7 @@ export async function findSummary(bookID: string) {
 }
 
 async function doFindDoc(bookID: string, func: Func, point?: number) {
-    if (point) {
+    if (utils.isValidNumber(point)) {
         const tmp = func;
         func = (bookID: string) => { return tmp(bookID, point); };
     }
@@ -339,7 +358,7 @@ export async function createNote(boxID: string, bookID: string, piece: string[],
 
     dir = dir + `/pieces-${bookName}/` + content;
     const docID = await siyuan.createDocWithMd(boxID, dir, "");
-    attr[MarkKey] = getDocIalMark(bookID, point);
+    attr[MarkKey] = getDocIalPieces(bookID, point);
     await siyuan.setBlockAttrs(docID, attr);
     return docID;
 }

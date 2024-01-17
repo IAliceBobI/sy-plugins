@@ -1,7 +1,7 @@
 import { IProtyle, Lute, Plugin } from "siyuan";
-import { getDocIalMark, isProtylePiece } from "./helper";
+import { getBookIDByBlock, getDocIalPieces, isProtylePiece } from "./helper";
 import { NewLute, cleanDiv, getBlockDiv, isValidNumber, siyuan } from "../../sy-tomato-plugin/src/libs/utils";
-import { DATA_NODE_ID, MarkKey, PROTYLE_WYSIWYG_SELECT } from "../../sy-tomato-plugin/src/libs/gconst";
+import { DATA_NODE_ID, PROTYLE_WYSIWYG_SELECT } from "../../sy-tomato-plugin/src/libs/gconst";
 
 class PieceMovingBox {
     private plugin: Plugin;
@@ -63,14 +63,11 @@ class PieceMovingBox {
 
     private async moveBlock(blockID: string, delta: number) {
         if (delta == 0) return;
-        const row = await siyuan.getDocRowByBlockID(blockID);
-        const attrs = await siyuan.getBlockAttrs(row.id);
-        const bookID = attrs[MarkKey]?.split("#")[1]?.split(",")[0];
-        let pieceNum = Number(attrs[MarkKey]?.split("#")[1]?.split(",")[1]);
+        let { bookID, pieceNum } = await getBookIDByBlock(blockID);
         if (isValidNumber(pieceNum) && bookID) {
             pieceNum += delta;
             if (pieceNum >= 0) {
-                const row = await siyuan.sqlOne(`select id from blocks where type='d' and ial like "%${getDocIalMark(bookID, pieceNum)}%"`);
+                const row = await siyuan.sqlOne(`select id from blocks where type='d' and ial like "%${getDocIalPieces(bookID, pieceNum)}%"`);
                 if (row?.id) {
                     const { div } = await getBlockDiv(blockID);
                     await cleanDiv(div, false, false);

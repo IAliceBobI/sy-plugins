@@ -1,6 +1,6 @@
 import { IProtyle, Lute, Plugin } from "siyuan";
-import { isPiece, isProtylePiece } from "./helper";
-import { NewLute, getCursorElement, getID, getSyElement, siyuan } from "../../sy-tomato-plugin/src/libs/utils";
+import { getBookIDByBlock, isProtylePiece } from "./helper";
+import { NewLute, getCursorElement, getID, siyuan } from "../../sy-tomato-plugin/src/libs/utils";
 import { PROTYLE_WYSIWYG_SELECT } from "../../sy-tomato-plugin/src/libs/gconst";
 
 class PieceSummaryBox {
@@ -55,11 +55,8 @@ class PieceSummaryBox {
     }
 
     private async copyBlock(element: HTMLElement) {
-        const docRow = await siyuan.getDocRowByBlockID(getID(element));
-        if (!docRow.id) return;
-        
-
-        console.log(element)
+        const { bookID } = await getBookIDByBlock(getID(element));
+        console.log(element);
     }
 
     private async copyBlocks(protyle: IProtyle) {
@@ -75,3 +72,4 @@ class PieceSummaryBox {
 }
 
 export const pieceSummaryBox = new PieceSummaryBox();
+

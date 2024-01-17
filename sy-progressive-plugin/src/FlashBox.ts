@@ -3,7 +3,7 @@ import { siyuan } from "../../sy-tomato-plugin/src/libs/utils";
 import * as utils from "../../sy-tomato-plugin/src/libs/utils";
 import { events } from "../../sy-tomato-plugin/src/libs/Events";
 import * as gconst from "../../sy-tomato-plugin/src/libs/gconst";
-import { getCardsDoc, getCardHPathByDocID } from "./helper";
+import { getCardsDoc, getCardHPathByDocID, getBookID } from "./helper";
 
 enum CardType {
     B = "B", C = "C", None = "None"
@@ -19,20 +19,6 @@ function getDailyAttrValue() {
     const today = utils.timeUtil.dateFormat(new Date()).split(" ")[0];
     const [y, m, d] = today.split("-");
     return y + m + d;
-}
-
-async function isInPiece(protyle: IProtyle): Promise<{ bookID: string, docID: string, isPiece: boolean }> {
-    const ret = {} as Awaited<ReturnType<typeof isInPiece>>;
-    ret.docID = ret.bookID = protyle.block?.rootID ?? "";
-    ret.isPiece = false;
-    if (ret.docID) {
-        const attrs = await siyuan.getBlockAttrs(ret.docID);
-        if (attrs[gconst.MarkKey]?.startsWith(gconst.TEMP_CONTENT)) {
-            ret.isPiece = true;
-            ret.bookID = attrs[gconst.MarkKey].split("#")[1]?.split(",")[0] ?? "";
-        }
-    }
-    return ret;
 }
 
 function getBlockDOM(dom: HTMLElement): { dom: HTMLElement, blockID: string } {
@@ -173,7 +159,9 @@ class FlashBox {
 
     private async doInsertCard(protyle: IProtyle, divs: HTMLElement[], t: CardType, _lastSelectedID: string, path?: string) {
         const boxID = events.boxID;
-        const { bookID, docID, isPiece } = await isInPiece(protyle);
+        const docID = protyle.block?.rootID;
+        if (!docID) return;
+        let { bookID } = await getBookID(docID);
         const { cardID, markdown } = this.createList(divs, t);
         if (path) {
             const v = getDailyAttrValue();
@@ -183,12 +171,12 @@ class FlashBox {
             await siyuan.insertBlockAsChildOf(`\n{: id="${utils.NewNodeID()}"}\n${markdown}`, targetDocID);
             openTab({ app: this.plugin.app, doc: { id: targetDocID }, position: "right" });
         } else {
-            if (!bookID || !docID) return;
             let hpath = "";
-            if (isPiece && !this.settings.cardUnderPiece) {
+            if (bookID && !this.settings.cardUnderPiece) {
                 hpath = await getCardHPathByDocID(bookID);
             } else {
                 hpath = await getCardHPathByDocID(docID);
+                bookID = docID;
             }
             if (!hpath) return;
             const targetDocID = await getCardsDoc(bookID, boxID, hpath);
