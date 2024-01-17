@@ -6,7 +6,7 @@ import { HtmlCBType } from "./helper";
 import * as utils from "../../sy-tomato-plugin/src/libs/utils";
 import * as help from "./helper";
 import * as constants from "./constants";
-import { BlockNodeEnum, DATA_NODE_ID, DATA_TYPE, MarkKey, PROG_ORIGIN_TEXT, RefIDKey } from "../../sy-tomato-plugin/src/libs/gconst";
+import { BlockNodeEnum, DATA_NODE_ID, DATA_TYPE, MarkKey, PARAGRAPH_INDEX, PROG_ORIGIN_TEXT, RefIDKey } from "../../sy-tomato-plugin/src/libs/gconst";
 import { SplitSentence } from "./SplitSentence";
 
 class Progressive {
@@ -105,10 +105,11 @@ class Progressive {
                             || a == BlockNodeEnum.NODE_BLOCKQUOTE
                             || a == BlockNodeEnum.NODE_CODE_BLOCK;
                     }).forEach(e => {
-                        const ref = findBack(e) || findForward(e);
+                        const { ref, idx } = findBack(e) || findForward(e);
                         if (ref) {
                             const attr = {} as AttrType;
                             attr["custom-progref"] = ref;
+                            attr["custom-paragraph-index"] = idx;
                             setTimeout(() => {
                                 siyuan.setBlockAttrs(e.getAttribute(DATA_NODE_ID), attr);
                             }, 5000);
@@ -684,14 +685,18 @@ export const prog = new Progressive();
 function findBack(e: Element) {
     for (let i = 0; i < 1000 && e; i++, e = e.previousElementSibling) {
         const ref = e.getAttribute(RefIDKey);
-        if (ref) return ref;
+        const idx = e.getAttribute(PARAGRAPH_INDEX) ?? "";
+        if (ref) return { ref, idx };
+        return {};
     }
 }
 
 function findForward(e: Element) {
     for (let i = 0; i < 1000 && e; i++, e = e.nextElementSibling) {
         const ref = e.getAttribute(RefIDKey);
-        if (ref) return ref;
+        const idx = e.getAttribute(PARAGRAPH_INDEX) ?? "";
+        if (ref) return { ref, idx };
+        return {};
     }
 }
 

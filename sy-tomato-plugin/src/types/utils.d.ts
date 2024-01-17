@@ -48,5 +48,8 @@ type AttrType = {
     "custom-tomatobacklink": string,
     "custom-card-priority": string,
     "custom-ref-hierarchy": string,
+    "custom-origin-hpath": string,
+    "custom-ref-hpath": string,
+    "custom-paragraph-index": string,
     [key: string]: string,
 };
