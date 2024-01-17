@@ -224,7 +224,18 @@ export async function copyBlock(id: string, lute: Lute, mark?: string, idx?: { i
     const { div: tempDiv } = await utils.getBlockDiv(id);
     if (tempDiv.getAttribute(MarkKey)) return "";
     if (idx && tempDiv.getAttribute(DATA_TYPE) != BlockNodeEnum.NODE_HEADING) {
-        tempDiv.setAttribute(PARAGRAPH_INDEX, String(idx.i++));
+        const editableDiv = utils.getContenteditableElement(tempDiv);
+        if (editableDiv) {
+            const idxSpan = editableDiv.insertBefore(document.createElement('span'), editableDiv.firstChild) as HTMLSpanElement;
+            if (idxSpan) {
+                idxSpan.setAttribute(DATA_TYPE, "text")
+                // idxSpan.style.backgroundColor = "var(--b3-font-background3)";
+                // idxSpan.style.color = "var(--b3-font-color7)";
+                idxSpan.textContent = `[${idx.i}]`;
+                tempDiv.setAttribute(PARAGRAPH_INDEX, String(idx.i));
+                idx.i++
+            }
+        }
     }
     const txt = tempDiv.textContent.replace(/\u200B/g, "").trim();
     if (!txt || txt == "*") return "";
