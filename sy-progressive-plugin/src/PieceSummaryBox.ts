@@ -1,29 +1,22 @@
 import { IProtyle, Lute, Plugin } from "siyuan";
-import { getDocIalMark, isProtylePiece } from "./helper";
-import { NewLute, cleanDiv, getBlockDiv, isValidNumber, siyuan } from "../../sy-tomato-plugin/src/libs/utils";
-import { DATA_NODE_ID, MarkKey, PROTYLE_WYSIWYG_SELECT } from "../../sy-tomato-plugin/src/libs/gconst";
+import { isProtylePiece } from "./helper";
+import { NewLute, getCursorElement, siyuan } from "../../sy-tomato-plugin/src/libs/utils";
+import { PROTYLE_WYSIWYG_SELECT } from "../../sy-tomato-plugin/src/libs/gconst";
 
 class PieceSummaryBox {
     private plugin: Plugin;
     settings: SettingCfgType;
-    private lute: Lute;
+    lute: Lute;
 
     blockIconEvent(detail: any) {
         if (!this.plugin) return;
         const protyle: IProtyle = detail.protyle;
         if (isProtylePiece(protyle)) {
             detail.menu.addItem({
-                iconHTML: "",
-                label: "移动到上一分片内",
+                iconHTML: "📨",
+                label: this.plugin.i18n.collect,
                 click: () => {
-                    this.move(protyle, -1);
-                }
-            });
-            detail.menu.addItem({
-                iconHTML: "",
-                label: "移动到下一分片内",
-                click: () => {
-                    this.move(protyle, 1);
+                    this.copyBlocks(protyle);
                 }
             });
         }
@@ -33,27 +26,27 @@ class PieceSummaryBox {
         this.plugin = plugin;
         this.settings = settings;
         this.lute = NewLute();
+        this.plugin.addCommand({
+            langKey: "collect",
+            hotkey: "⌥Z",
+            editorCallback: (protyle) => {
+                if (isProtylePiece(protyle)) {
+                    this.copyBlocks(protyle);
+                } else {
+                    siyuan.pushMsg("请在渐进阅读的分片内操作。");
+                }
+            },
+        });
         this.plugin.eventBus.on("open-menu-content", async ({ detail }) => {
             const protyle: IProtyle = detail.protyle;
             if (isProtylePiece(protyle)) {
                 const menu = detail.menu;
                 menu.addItem({
-                    label: "移动到上一分片内",
-                    icon: "iconMove",
+                    label: this.plugin.i18n.collect,
+                    icon: "iconCopy",
                     click: () => {
-                        const blockID = detail?.element?.getAttribute("data-node-id") ?? "";
-                        if (blockID) {
-                            this.moveBlock(blockID, -1);
-                        }
-                    },
-                });
-                menu.addItem({
-                    label: "移动到下一分片内",
-                    icon: "iconMove",
-                    click: () => {
-                        const blockID = detail?.element?.getAttribute("data-node-id") ?? "";
-                        if (blockID) {
-                            this.moveBlock(blockID, 1);
+                        if (detail?.element) {
+                            this.copyBlock(detail?.element);
                         }
                     },
                 });
@@ -61,35 +54,18 @@ class PieceSummaryBox {
         });
     }
 
-    private async moveBlock(blockID: string, delta: number) {
-        if (delta == 0) return;
-        const row = await siyuan.getDocRowByBlockID(blockID);
-        const attrs = await siyuan.getBlockAttrs(row.id);
-        const bookID = attrs[MarkKey]?.split("#")[1]?.split(",")[0];
-        let pieceNum = Number(attrs[MarkKey]?.split("#")[1]?.split(",")[1]);
-        if (isValidNumber(pieceNum) && bookID) {
-            pieceNum += delta;
-            if (pieceNum >= 0) {
-                const row = await siyuan.sqlOne(`select id from blocks where type='d' and ial like "%${getDocIalMark(bookID, pieceNum)}%"`);
-                if (row?.id) {
-                    const { div } = await getBlockDiv(blockID);
-                    await cleanDiv(div, false, false);
-                    const md = this.lute.BlockDOM2Md(div.outerHTML);
-                    if (delta < 0) {
-                        await siyuan.appendBlock(md, row.id);
-                    } else {
-                        await siyuan.insertBlockAsChildOf(md, row.id);
-                    }
-                    await siyuan.safeUpdateBlock(blockID, "");
-                }
-            }
-        }
+    private async copyBlock(element: HTMLElement) {
+        console.log(element)
     }
 
-    private async move(protyle: IProtyle, delta: number) {
+    private async copyBlocks(protyle: IProtyle) {
         const nodes = protyle.element.querySelectorAll(`.${PROTYLE_WYSIWYG_SELECT}`);
-        for (const e of nodes) {
-            await this.moveBlock(e.getAttribute(DATA_NODE_ID), delta);
+        if (nodes.length > 0) {
+            for (const e of nodes) {
+                await this.copyBlock(e as HTMLElement);
+            }
+        } else {
+            await this.copyBlock(getCursorElement() as HTMLElement);
         }
     }
 }
