@@ -37,30 +37,31 @@ export default class ThePlugin extends Plugin {
                 addCodeBlock: false,
                 addQuoteBlock: true,
                 showLastBlock: false,
-                openCardsOnOpenPiece: false,
                 cardIndent: false,
+                openCardsOnOpenPiece: false,
                 cardUnderPiece: false,
+                addIndex2paragraph: false,
             } as SettingCfgType;
         }
 
         if (this.settingCfg.btnViewContents == undefined) this.settingCfg.btnViewContents = true;
-        if (this.settingCfg.btnSplitByPunctuationsListCheck == undefined) this.settingCfg.btnSplitByPunctuationsListCheck = true;
-        if (this.settingCfg.btnFullfilContent == undefined) this.settingCfg.btnFullfilContent = true;
-        if (this.settingCfg.btnCleanUnchanged == undefined) this.settingCfg.btnCleanUnchanged = true;
-        if (this.settingCfg.btnCleanOriginText == undefined) this.settingCfg.btnCleanOriginText = true;
         if (this.settingCfg.btnPrevious == undefined) this.settingCfg.btnPrevious = true;
         if (this.settingCfg.btnNext == undefined) this.settingCfg.btnNext = true;
+        if (this.settingCfg.btnCleanUnchanged == undefined) this.settingCfg.btnCleanUnchanged = true;
+        if (this.settingCfg.btnCleanOriginText == undefined) this.settingCfg.btnCleanOriginText = true;
+        if (this.settingCfg.btnFullfilContent == undefined) this.settingCfg.btnFullfilContent = true;
+        if (this.settingCfg.btnStop == undefined) this.settingCfg.btnStop = true;
+        if (this.settingCfg.btnNextBook == undefined) this.settingCfg.btnNextBook = true;
+        if (this.settingCfg.btnOpenFlashcardTab == undefined) this.settingCfg.btnOpenFlashcardTab = true;
         if (this.settingCfg.btnDeleteBack == undefined) this.settingCfg.btnDeleteBack = true;
         if (this.settingCfg.btnDeleteNext == undefined) this.settingCfg.btnDeleteNext = true;
         if (this.settingCfg.btnSaveCard == undefined) this.settingCfg.btnSaveCard = true;
         if (this.settingCfg.btnDelCard == undefined) this.settingCfg.btnDelCard = true;
-        if (this.settingCfg.btnStop == undefined) this.settingCfg.btnStop = true;
-        if (this.settingCfg.btnNextBook == undefined) this.settingCfg.btnNextBook = true;
-        if (this.settingCfg.btnIgnoreBook == undefined) this.settingCfg.btnIgnoreBook = true;
-        if (this.settingCfg.btnOpenFlashcardTab == undefined) this.settingCfg.btnOpenFlashcardTab = true;
-        if (this.settingCfg.btnSplitByPunctuations == undefined) this.settingCfg.btnSplitByPunctuations = true;
-        if (this.settingCfg.btnSplitByPunctuationsList == undefined) this.settingCfg.btnSplitByPunctuationsList = true;
         if (this.settingCfg.btnDeleteExit == undefined) this.settingCfg.btnDeleteExit = true;
+        if (this.settingCfg.btnIgnoreBook == undefined) this.settingCfg.btnIgnoreBook = true;
+        if (this.settingCfg.btnSplitByPunctuations == undefined) this.settingCfg.btnSplitByPunctuations = true;
+        if (this.settingCfg.btnSplitByPunctuationsListCheck == undefined) this.settingCfg.btnSplitByPunctuationsListCheck = true;
+        if (this.settingCfg.btnSplitByPunctuationsList == undefined) this.settingCfg.btnSplitByPunctuationsList = true;
 
         await prog.onload(this, this.settingCfg);
         await flashBox.onload(this, this.settingCfg);
