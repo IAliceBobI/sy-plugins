@@ -31,11 +31,7 @@ class PieceSummaryBox {
             langKey: "collect",
             hotkey: "⌥Z",
             editorCallback: (protyle) => {
-                if (isProtylePiece(protyle)) {
-                    this.copyBlocks(protyle);
-                } else {
-                    siyuan.pushMsg("请在渐进阅读的分片内操作。");
-                }
+                this.copyBlocks(protyle);
             },
         });
         this.plugin.eventBus.on("open-menu-content", async ({ detail }) => {
