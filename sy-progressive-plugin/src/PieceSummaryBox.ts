@@ -59,11 +59,11 @@ class PieceSummaryBox {
         const notebook = events.boxID;
         const { bookID } = await getBookIDByBlock(getID(element));
         if (bookID) {
-            let summaryID = await findSummary(bookID)
+            let summaryID = await findSummary(bookID);
             if (!summaryID) {
-                const hpath = await getHPathByDocID(bookID, "summary")
+                const hpath = await getHPathByDocID(bookID, "summary");
                 if (hpath) {
-                    summaryID = await getSummaryDoc(bookID, notebook, hpath)
+                    summaryID = await getSummaryDoc(bookID, notebook, hpath);
                 }
             }
             if (summaryID) {
