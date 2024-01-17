@@ -72,9 +72,6 @@ class BKMaker {
         }
         if (dupItems.length == 3) {
             this.item.removeChild(dupItems[1]);
-            // console.log("---");
-            // dupItems.splice(1, 1);
-            // dupItems.forEach(e => console.log(e.getAttribute(DATA_NODE_ID)))
         }
     }
 

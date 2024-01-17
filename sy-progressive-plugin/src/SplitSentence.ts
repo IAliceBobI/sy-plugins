@@ -134,7 +134,7 @@ function getIDFromIAL(ial: string) {
     // {: updated="20240104110156" custom-progref="20240103165224-jdum4t6" id="20240104110156-8tsr201"}
     const ref = ial.match(/custom-progref="([^"]+)"/);
     const idx = ial.match(/custom-paragraph-index="([^"]+)"/);
-    let idxText = "0"
+    let idxText = "";
     if (idx && idx[1]) {
         idxText = idx[1];
     }

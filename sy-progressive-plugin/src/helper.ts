@@ -227,14 +227,14 @@ export async function copyBlock(id: string, lute: Lute, mark?: string, idx?: { i
     if (idx && tempDiv.getAttribute(DATA_TYPE) != BlockNodeEnum.NODE_HEADING) {
         const editableDiv = utils.getContenteditableElement(tempDiv);
         if (editableDiv) {
-            const idxSpan = editableDiv.insertBefore(document.createElement('span'), editableDiv.firstChild) as HTMLSpanElement;
+            const idxSpan = editableDiv.insertBefore(document.createElement("span"), editableDiv.firstChild) as HTMLSpanElement;
             if (idxSpan) {
-                idxSpan.setAttribute(DATA_TYPE, "text")
+                idxSpan.setAttribute(DATA_TYPE, "text");
                 // idxSpan.style.backgroundColor = "var(--b3-font-background3)";
                 // idxSpan.style.color = "var(--b3-font-color7)";
                 idxSpan.textContent = `[${idx.i}]`;
                 tempDiv.setAttribute(PARAGRAPH_INDEX, String(idx.i));
-                idx.i++
+                idx.i++;
             }
         }
     }
@@ -252,7 +252,6 @@ export function rmBadThings(s: string) {
 }
 
 export async function cleanNote(noteID: string, force: boolean) {
-    console.log(force)
     for (const row of await siyuan.sql(`select ial,markdown,id from blocks where root_id="${noteID}" and ial like '%${PROG_ORIGIN_TEXT}="1"%'`)) {
         const ial: string = row?.ial ?? "";
         const markdown: string = row?.markdown ?? "";
@@ -282,11 +281,11 @@ export async function cleanNote(noteID: string, force: boolean) {
 }
 
 export async function findDoc(bookID: string, point: number) {
-    return doFindDoc(bookID, getDocIalMark, point)
+    return doFindDoc(bookID, getDocIalMark, point);
 }
 
 export async function findContents(bookID: string) {
-    return doFindDoc(bookID, getDocIalContents)
+    return doFindDoc(bookID, getDocIalContents);
 }
 
 export async function findCards(bookID: string) {
