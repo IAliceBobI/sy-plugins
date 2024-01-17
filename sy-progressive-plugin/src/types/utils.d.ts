@@ -12,6 +12,7 @@ type SettingCfgType = {
     btnSplitByPunctuationsListCheck: boolean;
     btnFullfilContent: boolean;
     btnCleanUnchanged: boolean;
+    btnCleanOriginText: boolean;
     btnPrevious: boolean;
     btnNext: boolean;
     btnDeleteBack: boolean;

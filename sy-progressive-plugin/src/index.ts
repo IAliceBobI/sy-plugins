@@ -45,6 +45,7 @@ export default class ThePlugin extends Plugin {
         if (this.settingCfg.btnSplitByPunctuationsListCheck == undefined) this.settingCfg.btnSplitByPunctuationsListCheck = true;
         if (this.settingCfg.btnFullfilContent == undefined) this.settingCfg.btnFullfilContent = true;
         if (this.settingCfg.btnCleanUnchanged == undefined) this.settingCfg.btnCleanUnchanged = true;
+        if (this.settingCfg.btnCleanOriginText == undefined) this.settingCfg.btnCleanOriginText = true;
         if (this.settingCfg.btnPrevious == undefined) this.settingCfg.btnPrevious = true;
         if (this.settingCfg.btnNext == undefined) this.settingCfg.btnNext = true;
         if (this.settingCfg.btnDeleteBack == undefined) this.settingCfg.btnDeleteBack = true;
@@ -75,6 +76,7 @@ export default class ThePlugin extends Plugin {
         this.addSettingItem("btnPrevious", "* 上一个分片", true, "⬅");
         this.addSettingItem("btnNext", "* 下一个分片", true, "➡");
         this.addSettingItem("btnCleanUnchanged", "* 删除分片中未改过的原文", true, "🧹");
+        this.addSettingItem("btnCleanOriginText", "* 删除原文", true, "🧹🧹");
         this.addSettingItem("btnFullfilContent", "* 重新插入分片内容", true, "⬇");
         this.addSettingItem("btnStop", "* 关闭分片", true, "🏃");
         this.addSettingItem("btnNextBook", "* 换一本书看", true, "📚📖");

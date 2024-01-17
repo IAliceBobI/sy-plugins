@@ -34,6 +34,7 @@ export enum HtmlCBType {
     splitByPunctuations = 15,
     splitByPunctuationsList = 16,
     splitByPunctuationsListCheck = 17,
+    cleanOriginText = 18,
 }
 
 export class Storage {
@@ -250,25 +251,30 @@ export function rmBadThings(s: string) {
     return s.replace(/[​]+/g, "").trim();
 }
 
-export async function cleanNote(noteID: string) {
+export async function cleanNote(noteID: string, force: boolean) {
+    console.log(force)
     for (const row of await siyuan.sql(`select ial,markdown,id from blocks where root_id="${noteID}" and ial like '%${PROG_ORIGIN_TEXT}="1"%'`)) {
         const ial: string = row?.ial ?? "";
         const markdown: string = row?.markdown ?? "";
         if (ial.includes(TEMP_CONTENT)) {
             await siyuan.safeDeleteBlock(row.id);
-        } else if (ial.includes(RefIDKey)) {
-            if (!markdown) continue;
-            if (!markdown.includes("*")) continue;
-            for (const attr of ial.split(" ")) {
-                if (attr.includes(RefIDKey)) {
-                    const originalID = attr.split("\"")[1]; // custom-progref="20231119150726-2xxypwa"
-                    const origin = await siyuan.sqlOne(`select markdown from blocks where id="${originalID}"`);
-                    const oriMarkdown = origin?.markdown ?? "";
-                    const markdownWithoutStar = markdown.replace(`((${originalID} "*"))`, "");
-                    if (rmBadThings(oriMarkdown) == rmBadThings(markdownWithoutStar)) {
-                        await siyuan.safeDeleteBlock(row.id); // delete the same content
+        } else if (ial.includes(RefIDKey) && ial.includes(PROG_ORIGIN_TEXT)) {
+            if (force) {
+                await siyuan.safeDeleteBlock(row.id);
+            } else {
+                if (!markdown) continue;
+                if (!markdown.includes("*")) continue;
+                for (const attr of ial.split(" ")) {
+                    if (attr.includes(RefIDKey)) {
+                        const originalID = attr.split("\"")[1]; // custom-progref="20231119150726-2xxypwa"
+                        const origin = await siyuan.sqlOne(`select markdown from blocks where id="${originalID}"`);
+                        const oriMarkdown = origin?.markdown ?? "";
+                        const markdownWithoutStar = markdown.replace(`((${originalID} "*"))`, "");
+                        if (rmBadThings(oriMarkdown) == rmBadThings(markdownWithoutStar)) {
+                            await siyuan.safeDeleteBlock(row.id); // delete the same content
+                        }
+                        break;
                     }
-                    break;
                 }
             }
         }
@@ -411,6 +417,22 @@ export class Helper {
             <script>
                 function ${btnCleanUnchangedID}() {
                     globalThis.progressive_zZmqus5PtYRi.progressive.htmlBlockReadNextPeice("${bookID}","${noteID}",${HtmlCBType.cleanUnchanged},${point})
+                }
+            </script>
+        </div>`;
+    }
+
+    btnCleanOriginText(bookID: string, noteID: string, point: number) {
+        if (!this.setting.btnCleanOriginText) return "";
+        const btnID = utils.newID().slice(0, IDLen);
+        return `<div>
+            ${styleColor("var(--b3-card-info-background)", "var(--b3-card-info-color)")}
+            <div>
+                <button title="删除原文" onclick="${btnID}()" id="btn${btnID}">${this.plugin.i18n.cleanUnchangedOriginDoc.repeat(2)}</button>
+            </div>
+            <script>
+                function ${btnID}() {
+                    globalThis.progressive_zZmqus5PtYRi.progressive.htmlBlockReadNextPeice("${bookID}","${noteID}",${HtmlCBType.cleanOriginText},${point})
                 }
             </script>
         </div>`;
@@ -648,7 +670,7 @@ ${this.btnSplitByPunctuationsListCheck(bookID, noteID, point)}
 
 ${this.btnSplitByPunctuationsList(bookID, noteID, point)}
 
-　
+${this.btnCleanOriginText(bookID, noteID, point)}
 
 　
 

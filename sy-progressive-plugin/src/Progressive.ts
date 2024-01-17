@@ -523,7 +523,10 @@ class Progressive {
                 break;
             }
             case HtmlCBType.cleanUnchanged:
-                await help.cleanNote(noteID);
+                await help.cleanNote(noteID, false);
+                break;
+            case HtmlCBType.cleanOriginText:
+                await help.cleanNote(noteID, true);
                 break;
             case HtmlCBType.openFlashcardTab:
                 if (bookID) openTab({ app: this.plugin.app, card: { type: "doc", id: bookID } });
@@ -536,21 +539,21 @@ class Progressive {
                 const s = new SplitSentence(noteID, "p");
                 await s.split();
                 await s.insert();
-                await help.cleanNote(noteID);
+                await help.cleanNote(noteID, true);
                 break;
             }
             case HtmlCBType.splitByPunctuationsList: {
                 const s = new SplitSentence(noteID, "l");
                 await s.split();
                 await s.insert();
-                await help.cleanNote(noteID);
+                await help.cleanNote(noteID, true);
                 break;
             }
             case HtmlCBType.splitByPunctuationsListCheck: {
                 const s = new SplitSentence(noteID, "t");
                 await s.split();
                 await s.insert();
-                await help.cleanNote(noteID);
+                await help.cleanNote(noteID, true);
                 break;
             }
             default:
