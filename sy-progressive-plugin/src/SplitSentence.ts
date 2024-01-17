@@ -1,4 +1,4 @@
-import { PROG_ORIGIN_TEXT, RefIDKey, SPACE } from "../../sy-tomato-plugin/src/libs/gconst";
+import { PARAGRAPH_INDEX, PROG_ORIGIN_TEXT, RefIDKey, SPACE } from "../../sy-tomato-plugin/src/libs/gconst";
 import { siyuan } from "../../sy-tomato-plugin/src/libs/utils";
 
 
@@ -44,11 +44,12 @@ export class SplitSentence {
         }
         for (const row of rows) {
             this.lastID = row.id;
-            const ref = getIDFromIAL(row.ial);
+            const { ref, idx } = getIDFromIAL(row.ial);
             if (ref) {
+                const attrLine = `{: ${RefIDKey}="${ref}" ${PARAGRAPH_INDEX}="${idx}" ${PROG_ORIGIN_TEXT}="1"}`;
                 if (row.type == "h") {
                     this.textAreas.push({
-                        blocks: [row.markdown + `\n{: ${RefIDKey}="${ref}"}`],
+                        blocks: [row.markdown + `\n${attrLine}`],
                         ref,
                     });
                 } else {
@@ -59,13 +60,13 @@ export class SplitSentence {
                     if (this.asList == "p") {
                         blocks = ps.map(i => i.trim())
                             .filter(i => i.length > 0)
-                            .map(i => SPACE.repeat(2) + i + ` ((${ref} "*"))\n{: ${RefIDKey}="${ref}"}\n`);
-                    } else if(this.asList == "t") {
-                        blocks = ps.map(i => `* {: ${RefIDKey}="${ref}"}[ ] ` + i + ` ((${ref} "*"))\n\t{: ${RefIDKey}="${ref}"}\n`);
+                            .map(i => SPACE.repeat(2) + i + ` ((${ref} "*"))\n${attrLine}\n`);
+                    } else if (this.asList == "t") {
+                        blocks = ps.map(i => `* ${attrLine}[ ] ` + i + ` ((${ref} "*"))\n\t${attrLine}\n`);
                     } else {
-                        blocks = ps.map(i => `* {: ${RefIDKey}="${ref}"} ` + i + ` ((${ref} "*"))\n\t{: ${RefIDKey}="${ref}"}\n`);
+                        blocks = ps.map(i => `* ${attrLine} ` + i + ` ((${ref} "*"))\n\t${attrLine}\n`);
                     }
-                    blocks.push(`{: ${RefIDKey}="${ref}"}\n`);
+                    blocks.push(`${attrLine}\n`);
                     this.textAreas.push({ blocks, ref });
                 }
             }
@@ -132,6 +133,11 @@ function spliyBy(content: string[], s: string) {
 function getIDFromIAL(ial: string) {
     // {: updated="20240104110156" custom-progref="20240103165224-jdum4t6" id="20240104110156-8tsr201"}
     const ref = ial.match(/custom-progref="([^"]+)"/);
-    if (ref) return ref[1] ?? "";
-    return "";
+    const idx = ial.match(/custom-paragraph-index="([^"]+)"/);
+    let idxText = "0"
+    if (idx && idx[1]) {
+        idxText = idx[1];
+    }
+    if (ref) return { ref: ref[1] ?? "", idx: idxText };
+    return {};
 }

@@ -109,11 +109,12 @@ class Progressive {
                         if (ref) {
                             const attr = {} as AttrType;
                             attr["custom-progref"] = ref;
-                            attr["custom-paragraph-index"] = idx;
+                            if (idx) attr["custom-paragraph-index"] = idx;
                             setTimeout(() => {
                                 siyuan.setBlockAttrs(e.getAttribute(DATA_NODE_ID), attr);
-                            }, 5000);
+                            }, 4000);
                             e.setAttribute(RefIDKey, ref);
+                            if (idx) e.setAttribute(PARAGRAPH_INDEX, idx);
                         }
                     });
             }
@@ -687,8 +688,8 @@ function findBack(e: Element) {
         const ref = e.getAttribute(RefIDKey);
         const idx = e.getAttribute(PARAGRAPH_INDEX) ?? "";
         if (ref) return { ref, idx };
-        return {};
     }
+    return {};
 }
 
 function findForward(e: Element) {
@@ -696,8 +697,8 @@ function findForward(e: Element) {
         const ref = e.getAttribute(RefIDKey);
         const idx = e.getAttribute(PARAGRAPH_INDEX) ?? "";
         if (ref) return { ref, idx };
-        return {};
     }
+    return {};
 }
 
 // this.plugin.eventBus.on("ws-main", async ({ detail }) => {
