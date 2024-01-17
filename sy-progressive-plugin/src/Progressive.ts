@@ -313,10 +313,6 @@ class Progressive {
         if (!blockID) {
             blockID = events.lastBlockID;
         }
-        if (await help.isPiece(blockID)) {
-            await siyuan.pushMsg(this.plugin.i18n.opsInOriDoc);
-            return;
-        }
         const row = await siyuan.sqlOne(`select root_id from blocks where id="${blockID}"`);
         if (row) {
             const bookID = row["root_id"];

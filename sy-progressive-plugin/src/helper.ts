@@ -176,10 +176,8 @@ export function getDocIalCards(bookID: string) {
     return `cards#${TEMP_CONTENT}#${bookID}`;
 }
 
-export async function isPiece(id: string) {
-    const row = await siyuan.sqlOne(`select ial from blocks where id="${id}"`);
-    const ial: string = row?.ial ?? "";
-    return ial.includes(TEMP_CONTENT);
+export function getDocIalSummary(bookID: string) {
+    return `summary#${TEMP_CONTENT}#${bookID}`;
 }
 
 export async function getCardHPathByDocID(docID: string) {
@@ -290,6 +288,10 @@ export async function findContents(bookID: string) {
 
 export async function findCards(bookID: string) {
     return doFindDoc(bookID, getDocIalCards);
+}
+
+export async function findSummary(bookID: string) {
+    return doFindDoc(bookID, getDocIalSummary);
 }
 
 async function doFindDoc(bookID: string, func: Func, point?: number) {
