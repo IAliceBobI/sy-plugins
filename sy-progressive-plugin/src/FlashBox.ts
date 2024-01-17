@@ -167,7 +167,7 @@ class FlashBox {
             const v = getDailyAttrValue();
             const attr = {};
             attr[`custom-dailycard-${v}`] = v;
-            const targetDocID = await utils.siyuanCache.createDocWithMdIfNotExists(10000, boxID, path, "", attr);
+            const targetDocID = await utils.siyuanCache.createDocWithMdIfNotExists(5000, boxID, path, "", attr);
             await siyuan.insertBlockAsChildOf(`\n{: id="${utils.NewNodeID()}"}\n${markdown}`, targetDocID);
             openTab({ app: this.plugin.app, doc: { id: targetDocID }, position: "right" });
         } else {

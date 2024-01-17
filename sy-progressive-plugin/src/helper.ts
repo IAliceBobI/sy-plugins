@@ -217,7 +217,7 @@ export async function getCardsDoc(bookID: string, boxID: string, hpath: string) 
     if (id) return id;
     const attr = {};
     attr[MarkKey] = getDocIalCards(bookID);
-    const targetDocID = await utils.siyuanCache.createDocWithMdIfNotExists(10000, boxID, hpath, "", attr);
+    const targetDocID = await utils.siyuanCache.createDocWithMdIfNotExists(5000, boxID, hpath, "", attr);
     return targetDocID;
 }
 

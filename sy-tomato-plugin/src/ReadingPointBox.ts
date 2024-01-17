@@ -1,5 +1,5 @@
 import { Plugin, openTab } from "siyuan";
-import { getID, siyuan, sleep } from "@/libs/utils";
+import { getID, siyuan, siyuanCache, sleep } from "@/libs/utils";
 import "./index.scss";
 import { events } from "@/libs/Events";
 
@@ -96,7 +96,6 @@ class ReadingPointBox {
         navigator.locks.request(CreateDocLock, { ifAvailable: true }, async (lock) => {
             if (lock) {
                 await this.showContents();
-                await sleep(4000);
             }
         });
     }
@@ -119,7 +118,7 @@ class ReadingPointBox {
         const sqlStr = `select id from blocks where box='${boxID}' and ial like '%bookmark=%' limit 1`;
         const rows = await siyuan.sql(sqlStr);
         if (rows.length > 0) {
-            const docID = await siyuan.createDocWithMdIfNotExists(boxID, "/📚" + cfg.name, "");
+            const docID = await siyuanCache.createDocWithMdIfNotExists(5000, boxID, "/📚" + cfg.name, "");
             await siyuan.clearAll(docID);
             await this.insertContents(boxID, docID);
             openTab({
