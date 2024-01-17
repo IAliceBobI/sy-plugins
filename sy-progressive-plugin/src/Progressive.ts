@@ -390,7 +390,7 @@ class Progressive {
             const attr = {};
             attr[MarkKey] = help.getDocIalContents(bookID);
             attr["custom-sy-readonly"] = "true";
-            contentID = await siyuan.createDocWithMdIfNotExists(boxID, `${hpath}/${bookName}-contents`, c.join("\n"), attr);
+            contentID = await siyuan.createDocWithMdIfNotExists(boxID, `${hpath}/contents-${bookName}`, c.join("\n"), attr);
         }
         if (contentID) await openTab({ app: this.plugin.app, doc: { id: contentID } });
     }

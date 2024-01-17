@@ -187,7 +187,7 @@ export async function getCardHPathByDocID(docID: string) {
     if (!path) return "";
     const parts = path.split("/");
     const docName = parts.pop();
-    const cardDocName = docName + "-cards";
+    const cardDocName = "cards-" + docName;
     parts.push(docName);
     parts.push(cardDocName);
     path = parts.join("/");
@@ -195,6 +195,8 @@ export async function getCardHPathByDocID(docID: string) {
 }
 
 export async function getCardsDoc(bookID: string, boxID: string, hpath: string) {
+    const id = await findCards(bookID);
+    if (id) return id;
     const attr = {};
     attr[MarkKey] = getDocIalCards(bookID);
     const targetDocID = await utils.siyuanCache.createDocWithMdIfNotExists(10000, boxID, hpath, "", attr);
@@ -260,25 +262,24 @@ export async function cleanNote(noteID: string) {
 }
 
 export async function findDoc(bookID: string, point: number) {
-    const row = await siyuan.sqlOne(`select id, path, box from blocks where type='d' and 
-        ial like '%${MarkKey}="${getDocIalMark(bookID, point)}"%'`);
-    if (row?.id && row?.path) {
-        const [dirStr, file] = utils.dir(row["path"]);
-        const dir = await siyuan.readDir(`/data/${row["box"]}${dirStr}`);
-        if (dir) {
-            for (const f of dir) {
-                if (f.name === file) {
-                    return row["id"];
-                }
-            }
-        }
-    }
-    return "";
+    return doFindDoc(bookID, getDocIalMark, point)
 }
 
 export async function findContents(bookID: string) {
+    return doFindDoc(bookID, getDocIalContents)
+}
+
+export async function findCards(bookID: string) {
+    return doFindDoc(bookID, getDocIalCards);
+}
+
+async function doFindDoc(bookID: string, func: Func, point?: number) {
+    if (point) {
+        const tmp = func;
+        func = (bookID: string) => { return tmp(bookID, point); };
+    }
     const row = await siyuan.sqlOne(`select id, path, box from blocks where type='d' and 
-        ial like '%${MarkKey}="${getDocIalContents(bookID)}"%'`);
+        ial like '%${MarkKey}="${func(bookID)}"%'`);
     if (row?.id && row?.path) {
         const [dirStr, file] = utils.dir(row["path"]);
         const dir = await siyuan.readDir(`/data/${row["box"]}${dirStr}`);
@@ -315,7 +316,7 @@ export async function createNote(boxID: string, bookID: string, piece: string[],
         content = `[${point}]${content}`;
     }
 
-    dir = dir + `/${bookName}-pieces/` + content;
+    dir = dir + `/pieces-${bookName}/` + content;
     const docID = await siyuan.createDocWithMd(boxID, dir, "");
     attr[MarkKey] = getDocIalMark(bookID, point);
     await siyuan.setBlockAttrs(docID, attr);
