@@ -7,6 +7,7 @@ type SettingCfgType = {
     showLastBlock: boolean,
     openCardsOnOpenPiece: boolean,
     cardIndent: boolean,
+    addIndex2paragraph: boolean,
     btnViewContents: boolean,
     btnSplitByPunctuationsListCheck: boolean;
     btnFullfilContent: boolean;

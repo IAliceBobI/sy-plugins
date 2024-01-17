@@ -67,8 +67,9 @@ export default class ThePlugin extends Plugin {
         this.addSettingItem("addQuoteBlock", "* 制卡时加入引述块", true, "与代码块二选一");
         this.addSettingItem("showLastBlock", "* 显示上一分片最后一个块", false, "当前分片显示上一分片最后一个块内容");
         this.addSettingItem("cardIndent", "* 制作的闪卡，从第二项开始向右缩进", false, "");
-        this.addSettingItem("openCardsOnOpenPiece", "* 打开分片的同时打开cards文档", false, "-cards后缀文件: 每本书用于保存闪卡的文件");
+        this.addSettingItem("openCardsOnOpenPiece", "* 打开分片的同时打开cards文档", false, "'cards-'前缀文件: 每本书用于保存闪卡的文件");
         this.addSettingItem("cardUnderPiece", "* 分片内制卡，放于分片的子文档内", false, "");
+        this.addSettingItem("addIndex2paragraph", "* 新建分片时，给段落标上序号", false, "");
 
         this.addSettingItem("btnViewContents", "* 打开目录", true, "🗂");
         this.addSettingItem("btnPrevious", "* 上一个分片", true, "⬅");

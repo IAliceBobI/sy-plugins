@@ -223,7 +223,7 @@
 
 ## 2024-01-17
 
-* 重命名：新内文件都以 cards-、contents-、pieces-开头。
+* 重命名：新建文件以 `cards-`、`contents-`、`pieces-`开头。
 
 ## 2024-01-15
 
