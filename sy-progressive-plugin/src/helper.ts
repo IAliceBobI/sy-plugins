@@ -1,4 +1,4 @@
-import { IDLen, MarkKey, PROG_ORIGIN_TEXT, RefIDKey, TEMP_CONTENT } from "../../sy-tomato-plugin/src/libs/gconst";
+import { BlockNodeEnum, DATA_TYPE, IDLen, MarkKey, PARAGRAPH_INDEX, PROG_ORIGIN_TEXT, RefIDKey, TEMP_CONTENT } from "../../sy-tomato-plugin/src/libs/gconst";
 import { siyuan, styleColor } from "../../sy-tomato-plugin/src/libs/utils";
 import * as utils from "../../sy-tomato-plugin/src/libs/utils";
 import * as constants from "./constants";
@@ -220,9 +220,12 @@ export function splitByBlockCount(groups: WordCountType[][], blockNumber: number
     return tmp;
 }
 
-export async function copyBlock(id: string, lute: Lute, mark?: string) {
+export async function copyBlock(id: string, lute: Lute, mark?: string, idx?: { i: number }) {
     const { div: tempDiv } = await utils.getBlockDiv(id);
     if (tempDiv.getAttribute(MarkKey)) return "";
+    if (idx && tempDiv.getAttribute(DATA_TYPE) != BlockNodeEnum.NODE_HEADING) {
+        tempDiv.setAttribute(PARAGRAPH_INDEX, String(idx.i++));
+    }
     const txt = tempDiv.textContent.replace(/\u200B/g, "").trim();
     if (!txt || txt == "*") return "";
     await utils.cleanDiv(tempDiv, true, true);
