@@ -441,9 +441,9 @@ class Progressive {
         if (openPiece && this.settings.openCardsOnOpenPiece) {
             let hpath = "";
             if (this.settings.cardUnderPiece) {
-                hpath = await help.getCardHPathByDocID(noteID);
+                hpath = await help.getHPathByDocID(noteID, "cards");
             } else {
-                hpath = await help.getCardHPathByDocID(bookID);
+                hpath = await help.getHPathByDocID(bookID, "cards");
             }
             if (hpath) {
                 const targetDocID = await help.getCardsDoc(bookID, bookInfo.boxID, hpath);

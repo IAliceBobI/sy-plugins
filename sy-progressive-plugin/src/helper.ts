@@ -199,13 +199,13 @@ export async function getBookID(docID: string): Promise<{ bookID: string, pieceN
     return ret;
 }
 
-export async function getCardHPathByDocID(docID: string) {
+export async function getHPathByDocID(docID: string, prefix: string) {
     const row = await siyuan.sqlOne(`select hpath from blocks where id = "${docID}"`);
     let path = row?.hpath ?? "";
     if (!path) return "";
     const parts = path.split("/");
     const docName = parts.pop();
-    const cardDocName = "cards-" + docName;
+    const cardDocName = prefix + "-" + docName;
     parts.push(docName);
     parts.push(cardDocName);
     path = parts.join("/");
@@ -217,6 +217,15 @@ export async function getCardsDoc(bookID: string, boxID: string, hpath: string) 
     if (id) return id;
     const attr = {};
     attr[MarkKey] = getDocIalCards(bookID);
+    const targetDocID = await utils.siyuanCache.createDocWithMdIfNotExists(5000, boxID, hpath, "", attr);
+    return targetDocID;
+}
+
+export async function getSummaryDoc(bookID: string, boxID: string, hpath: string) {
+    const id = await findSummary(bookID);
+    if (id) return id;
+    const attr = {};
+    attr[MarkKey] = getDocIalSummary(bookID);
     const targetDocID = await utils.siyuanCache.createDocWithMdIfNotExists(5000, boxID, hpath, "", attr);
     return targetDocID;
 }

@@ -1,7 +1,8 @@
 import { IProtyle, Lute, Plugin } from "siyuan";
-import { findSummary, getBookIDByBlock, isProtylePiece } from "./helper";
-import { NewLute, getCursorElement, getID, siyuan, siyuanCache } from "../../sy-tomato-plugin/src/libs/utils";
+import { findSummary, getBookIDByBlock, getHPathByDocID, getSummaryDoc, isProtylePiece } from "./helper";
+import { NewLute, getCursorElement, getID, siyuan } from "../../sy-tomato-plugin/src/libs/utils";
 import { PROTYLE_WYSIWYG_SELECT } from "../../sy-tomato-plugin/src/libs/gconst";
+import { events } from "../../sy-tomato-plugin/src/libs/Events";
 
 class PieceSummaryBox {
     private plugin: Plugin;
@@ -55,15 +56,20 @@ class PieceSummaryBox {
     }
 
     private async copyBlock(element: HTMLElement) {
+        const notebook = events.boxID;
         const { bookID } = await getBookIDByBlock(getID(element));
         if (bookID) {
             let summaryID = await findSummary(bookID)
             if (!summaryID) {
-                await siyuanCache.createDocWithMdIfNotExists(3000,"","","","")
-            }  
+                const hpath = await getHPathByDocID(bookID, "summary")
+                if (hpath) {
+                    summaryID = await getSummaryDoc(bookID, notebook, hpath)
+                }
+            }
+            if (summaryID) {
+                console.log(element);
+            }
         }
-
-        console.log(element);
     }
 
     private async copyBlocks(protyle: IProtyle) {

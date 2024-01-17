@@ -3,7 +3,7 @@ import { siyuan } from "../../sy-tomato-plugin/src/libs/utils";
 import * as utils from "../../sy-tomato-plugin/src/libs/utils";
 import { events } from "../../sy-tomato-plugin/src/libs/Events";
 import * as gconst from "../../sy-tomato-plugin/src/libs/gconst";
-import { getCardsDoc, getCardHPathByDocID, getBookID } from "./helper";
+import { getCardsDoc, getHPathByDocID, getBookID } from "./helper";
 
 enum CardType {
     B = "B", C = "C", None = "None"
@@ -173,9 +173,9 @@ class FlashBox {
         } else {
             let hpath = "";
             if (bookID && !this.settings.cardUnderPiece) {
-                hpath = await getCardHPathByDocID(bookID);
+                hpath = await getHPathByDocID(bookID, "cards");
             } else {
-                hpath = await getCardHPathByDocID(docID);
+                hpath = await getHPathByDocID(docID, "cards");
                 bookID = docID;
             }
             if (!hpath) return;
