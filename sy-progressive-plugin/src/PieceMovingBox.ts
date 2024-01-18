@@ -63,11 +63,11 @@ class PieceMovingBox {
 
     private async moveBlock(blockID: string, delta: number) {
         if (delta == 0) return;
-        let { bookID, pieceNum } = await getBookIDByBlock(blockID);
+        const { bookID, pieceNum } = await getBookIDByBlock(blockID);
         if (isValidNumber(pieceNum) && bookID) {
-            pieceNum += delta;
-            if (pieceNum >= 0) {
-                const row = await siyuan.sqlOne(`select id from blocks where type='d' and ial like "%${getDocIalPieces(bookID, pieceNum)}%"`);
+            const newPiece = pieceNum + delta;
+            if (newPiece >= 0) {
+                const row = await siyuan.sqlOne(`select id from blocks where type='d' and ial like "%${getDocIalPieces(bookID, newPiece)}%"`);
                 if (row?.id) {
                     const { div } = await getBlockDiv(blockID);
                     await cleanDiv(div, false, false);

@@ -66,7 +66,7 @@ class PieceSummaryBox {
             if (summaryID) {
                 element = element.cloneNode(true) as HTMLElement;
                 await cleanDiv(element as any, true, true);
-                const md = this.lute.BlockDOM2Md(element.outerHTML)
+                const md = this.lute.BlockDOM2Md(element.outerHTML);
                 await siyuan.appendBlock(md, summaryID);
                 await openTab({ app: this.plugin.app, doc: { id: summaryID }, position: "right" });
             }

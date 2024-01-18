@@ -98,19 +98,19 @@ class DailyNoteBox {
         });
     }
 
-    async findDailyNote(boxID: string, currentDocName: string, deltaMs: number) {
-        currentDocName = currentDocName.trim();
-        if (isValidDate(currentDocName)) {
+    async findDailyNote(boxID: string, ymd: string, deltaMs: number) {
+        if (!ymd) return "";
+        if (isValidDate(ymd)) {
             if (deltaMs < 0) {
                 const rows = await siyuan.sql(`select id from blocks where type = "d" 
-                and content < "${currentDocName}" and ial like "%custom-dailynote-%" 
+                and content < "${ymd}" and ial like "%custom-dailynote-%" 
                 order by content desc limit 1`);
                 for (const d of rows) {
                     return d.id;
                 }
             } else {
                 const rows = await siyuan.sql(`select id from blocks where type = "d" 
-                and content > "${currentDocName}" and ial like "%custom-dailynote-%" 
+                and content > "${ymd}" and ial like "%custom-dailynote-%" 
                 order by content asc limit 1`);
                 for (const d of rows) {
                     return d.id;
@@ -134,8 +134,15 @@ class DailyNoteBox {
         if (!currentDocID && boxID) {
             targetDocID = (await siyuan.createDailyNote(boxID)).id;
         } else {
-            const currentDocName = await siyuan.getDocNameByBlockID(currentDocID);
-            targetDocID = await this.findDailyNote(boxID, currentDocName, deltaMs);
+            const attrs = await siyuan.getBlockAttrs(currentDocID);
+            let ymd: string;
+            for (const key in attrs) {
+                if (key.startsWith("custom-dailynote-")) {
+                    const v = attrs[key];
+                    ymd = `${v.slice(0, 4)}-${v.slice(4, 6)}-${v.slice(6, 8)}`;
+                }
+            }
+            targetDocID = await this.findDailyNote(boxID, ymd, deltaMs);
             if (!targetDocID) {
                 await siyuan.pushMsg("没了！");
                 return;
