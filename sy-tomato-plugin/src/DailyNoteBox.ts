@@ -131,7 +131,7 @@ class DailyNoteBox {
         if (deltaMs == 0) return;
         const currentDocID = events.docID;
         let targetDocID: string;
-        if (!currentDocID && boxID) {
+        if (!currentDocID) {
             targetDocID = (await siyuan.createDailyNote(boxID)).id;
         } else {
             const attrs = await siyuan.getBlockAttrs(currentDocID);
@@ -144,8 +144,7 @@ class DailyNoteBox {
             }
             targetDocID = await this.findDailyNote(boxID, ymd, deltaMs);
             if (!targetDocID) {
-                await siyuan.pushMsg("没了！");
-                return;
+                targetDocID = (await siyuan.createDailyNote(boxID)).id;
             }
         }
         if (currentDocID != targetDocID) this.lastOpen?.close();
