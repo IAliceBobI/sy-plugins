@@ -41,6 +41,7 @@ class PieceSummaryBox {
                 menu.addItem({
                     label: this.plugin.i18n.collect,
                     icon: "iconCopy",
+                    accelerator: "⌥Z",
                     click: () => {
                         if (detail?.element) {
                             this.copyBlock(detail?.element);
