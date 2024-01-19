@@ -60,7 +60,7 @@ export class SplitSentence {
                     const newID = NewNodeID();
                     const attrLine = `{: id="${newID}" ${RefIDKey}="${ref}" ${PARAGRAPH_INDEX}="${idx}" ${PROG_ORIGIN_TEXT}="1"}`;
                     return { attrLine, newID };
-                }
+                };
                 const ATTR_LINE = `{: ${RefIDKey}="${ref}" ${PARAGRAPH_INDEX}="${idx}" ${PROG_ORIGIN_TEXT}="1"}`;
                 if (row.type == "h") {
                     const { newID, attrLine } = getAttrLine();
@@ -88,7 +88,7 @@ export class SplitSentence {
                     } else {
                         blocks = ps.map(i => {
                             const { newID, attrLine } = getAttrLine();
-                            return { text: `* ${ATTR_LINE} ` + i + ` ((${ref} "*"))\n\t${attrLine}\n`, id: newID }
+                            return { text: `* ${ATTR_LINE} ` + i + ` ((${ref} "*"))\n\t${attrLine}\n`, id: newID };
                         });
                     }
                     const { newID, attrLine } = getAttrLine();
