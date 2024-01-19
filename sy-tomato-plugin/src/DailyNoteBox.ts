@@ -99,25 +99,30 @@ class DailyNoteBox {
     }
 
     async findDailyNote(boxID: string, ymd: string, deltaMs: number) {
-        if (!ymd) return "";
-        if (isValidDate(ymd)) {
+        if (ymd) {
             if (deltaMs < 0) {
-                const rows = await siyuan.sql(`select id from blocks where type = "d" 
-                and content < "${ymd}" and ial like "%custom-dailynote-%" 
-                order by content desc limit 1`);
+                const rows = await siyuan.sql(`select B.id from (select block_id from attributes 
+                    where box='${boxID}' 
+                    and name < 'custom-dailynote-${ymd}' 
+                    order by name desc limit 1) as A inner join blocks as B
+                    on A.block_id = B.id
+                    and B.ial like "%custom-dailynote-%"`);
                 for (const d of rows) {
                     return d.id;
                 }
             } else {
-                const rows = await siyuan.sql(`select id from blocks where type = "d" 
-                and content > "${ymd}" and ial like "%custom-dailynote-%" 
-                order by content asc limit 1`);
+                const rows = await siyuan.sql(`select B.id from (select block_id from attributes 
+                    where box='${boxID}' 
+                    and name > 'custom-dailynote-${ymd}' 
+                    order by name asc limit 1) as A inner join blocks as B
+                    on A.block_id = B.id
+                    and B.ial like "%custom-dailynote-%"`);
                 for (const d of rows) {
                     return d.id;
                 }
             }
         }
-        return (await siyuan.createDailyNote(boxID)).id;
+        return "";
     }
 
     async openDailyNote(deltaMs: number) {
@@ -131,22 +136,17 @@ class DailyNoteBox {
         if (deltaMs == 0) return;
         const currentDocID = events.docID;
         let targetDocID: string;
-        if (!currentDocID) {
-            targetDocID = (await siyuan.createDailyNote(boxID)).id;
-        } else {
+        if (currentDocID) {
             const attrs = await siyuan.getBlockAttrs(currentDocID);
             let ymd: string;
             for (const key in attrs) {
                 if (key.startsWith("custom-dailynote-")) {
-                    const v = attrs[key];
-                    ymd = `${v.slice(0, 4)}-${v.slice(4, 6)}-${v.slice(6, 8)}`;
+                    ymd = attrs[key];
                 }
             }
             targetDocID = await this.findDailyNote(boxID, ymd, deltaMs);
-            if (!targetDocID) {
-                targetDocID = (await siyuan.createDailyNote(boxID)).id;
-            }
         }
+        if (!targetDocID) targetDocID = (await siyuan.createDailyNote(boxID)).id;
         if (currentDocID != targetDocID) this.lastOpen?.close();
         if (targetDocID) this.lastOpen = await openTab({ app: this.plugin.app, doc: { id: targetDocID } });
     }
@@ -186,8 +186,8 @@ class DailyNoteBox {
 
 export const dailyNoteBox = new DailyNoteBox();
 
-function isValidDate(str: string): boolean {
-    const regex = /^\d{4}-\d{2}-\d{2}$/;
-    return regex.test(str);
-}
+// function isValidDate(str: string): boolean {
+//     const regex = /^\d{4}-\d{2}-\d{2}$/;
+//     return regex.test(str);
+// }
 
