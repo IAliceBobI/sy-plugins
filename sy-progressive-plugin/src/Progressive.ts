@@ -77,6 +77,7 @@ class Progressive {
                     const nextDocID = protyle?.block?.rootID;
                     const element = protyle?.wysiwyg?.element;
                     if (lock && element && nextDocID && help.isProtylePiece(protyle)) {
+                        await this.tryAddRefAttr(element);
                         if (this.docID != nextDocID) {
                             this.docID = nextDocID;
                             this.observer?.disconnect();
@@ -115,6 +116,10 @@ class Progressive {
                             }, 4000);
                             e.setAttribute(RefIDKey, ref);
                             if (idx) e.setAttribute(PARAGRAPH_INDEX, idx);
+                            e.querySelectorAll(`div[${DATA_NODE_ID}]`).forEach(e => {
+                                e.setAttribute(RefIDKey, ref);
+                                if (idx) e.setAttribute(PARAGRAPH_INDEX, idx);
+                            })
                         }
                     });
             }
