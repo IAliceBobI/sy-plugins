@@ -7,6 +7,7 @@ if [[ -z "${1}" ]]; then
     exit
 fi
 
+pnpm lint
 ./deploy ${1}
 
 projDir=${0:a:h}/sy-${1}-plugin
