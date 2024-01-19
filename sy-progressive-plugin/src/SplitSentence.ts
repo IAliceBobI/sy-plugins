@@ -27,7 +27,7 @@ export class SplitSentence {
                 }
                 if (firstID) {
                     setTimeout(() => {
-                        openTab({ app: this.plugin.app, doc: { id: firstID, action: ["cb-get-all", "cb-get-focus"] } })
+                        openTab({ app: this.plugin.app, doc: { id: firstID, action: ["cb-get-all", "cb-get-focus"] } });
                     }, 1000);
                     window.location.href = "siyuan://blocks/" + firstID;
                 }
