@@ -1,7 +1,7 @@
 import { IProtyle, Lute, Plugin, openTab } from "siyuan";
 import { findSummary, getBookIDByBlock, getHPathByDocID, getSummaryDoc, isProtylePiece } from "./helper";
 import { NewLute, cleanDiv, getCursorElement, getID, siyuan } from "../../sy-tomato-plugin/src/libs/utils";
-import { PROTYLE_WYSIWYG_SELECT } from "../../sy-tomato-plugin/src/libs/gconst";
+import { DATA_NODE_ID, PROTYLE_WYSIWYG_SELECT } from "../../sy-tomato-plugin/src/libs/gconst";
 import { events } from "../../sy-tomato-plugin/src/libs/Events";
 
 class PieceSummaryBox {
@@ -65,10 +65,15 @@ class PieceSummaryBox {
             }
             if (summaryID) {
                 element = element.cloneNode(true) as HTMLElement;
-                await cleanDiv(element as any, true, true);
+                const [_id, div, _s] = await cleanDiv(element as any, true, true);
+                const newID = div.getAttribute(DATA_NODE_ID);
                 const md = this.lute.BlockDOM2Md(element.outerHTML);
                 await siyuan.appendBlock(md, summaryID);
-                await openTab({ app: this.plugin.app, doc: { id: summaryID }, position: "right" });
+                await openTab({
+                    app: this.plugin.app,
+                    doc: { id: newID, action: ["cb-get-focus", "cb-get-all"] },
+                    position: "right"
+                });
             }
         }
     }

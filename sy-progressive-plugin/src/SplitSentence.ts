@@ -1,6 +1,6 @@
 import { PARAGRAPH_INDEX, PROG_ORIGIN_TEXT, RefIDKey, SPACE } from "../../sy-tomato-plugin/src/libs/gconst";
 import { NewNodeID, siyuan } from "../../sy-tomato-plugin/src/libs/utils";
-import { Plugin } from "siyuan";
+import { Plugin, openTab } from "siyuan";
 
 export class SplitSentence {
     private asList: AsList;
@@ -26,7 +26,9 @@ export class SplitSentence {
                     }
                 }
                 if (firstID) {
-                    // openTab({ app: this.plugin.app, doc: { id: firstID, action: ["cb-get-all", "cb-get-focus"] } })
+                    setTimeout(() => {
+                        openTab({ app: this.plugin.app, doc: { id: firstID, action: ["cb-get-all", "cb-get-focus"] } })
+                    }, 1000);
                     window.location.href = "siyuan://blocks/" + firstID;
                 }
             }
