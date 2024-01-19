@@ -104,8 +104,9 @@ class DailyNoteBox {
                 const rows = await siyuan.sql(`select B.id from (select block_id from attributes 
                     where box='${boxID}' 
                     and name < 'custom-dailynote-${ymd}' 
-                    order by name desc limit 1) as A inner join blocks as B
-                    on A.block_id = B.id
+                    and name like 'custom-dailynote-%' 
+                    order by name desc limit 1) as A inner join blocks as B 
+                    on A.block_id = B.id 
                     and B.ial like "%custom-dailynote-%"`);
                 for (const d of rows) {
                     return d.id;
@@ -114,8 +115,9 @@ class DailyNoteBox {
                 const rows = await siyuan.sql(`select B.id from (select block_id from attributes 
                     where box='${boxID}' 
                     and name > 'custom-dailynote-${ymd}' 
-                    order by name asc limit 1) as A inner join blocks as B
-                    on A.block_id = B.id
+                    and name like 'custom-dailynote-%' 
+                    order by name asc limit 1) as A inner join blocks as B 
+                    on A.block_id = B.id 
                     and B.ial like "%custom-dailynote-%"`);
                 for (const d of rows) {
                     return d.id;
