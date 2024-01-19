@@ -1,23 +1,33 @@
 import { PARAGRAPH_INDEX, PROG_ORIGIN_TEXT, RefIDKey, SPACE } from "../../sy-tomato-plugin/src/libs/gconst";
-import { siyuan } from "../../sy-tomato-plugin/src/libs/utils";
-
+import { NewNodeID, siyuan } from "../../sy-tomato-plugin/src/libs/utils";
+import { Plugin } from "siyuan";
 
 export class SplitSentence {
     private asList: AsList;
     private noteID: string;
     private lastID: string;
-    private textAreas: { blocks: string[], ref: string }[];
+    private textAreas: { blocks: { text: string, id: string }[], ref: string }[];
+    plugin: Plugin;
 
-    constructor(noteID: string, asList: AsList) {
+    constructor(plugin: Plugin, noteID: string, asList: AsList) {
         this.noteID = noteID;
         this.asList = asList;
+        this.plugin = plugin;
     }
 
     async insert() {
         return navigator.locks.request("prog.SplitSentence.insert", { ifAvailable: true }, async (lock) => {
             if (lock && this.lastID) {
+                let firstID: string;
                 for (const b of this.textAreas.slice().reverse()) {
-                    await siyuan.insertBlockAfter(b.blocks.join(""), this.lastID);
+                    if (b.blocks.length > 0) {
+                        firstID = b.blocks[0].id;
+                        await siyuan.insertBlockAfter(b.blocks.map(i => i.text).join(""), this.lastID);
+                    }
+                }
+                if (firstID) {
+                    // openTab({ app: this.plugin.app, doc: { id: firstID, action: ["cb-get-all", "cb-get-focus"] } })
+                    window.location.href = "siyuan://blocks/" + firstID;
                 }
             }
         });
@@ -46,27 +56,43 @@ export class SplitSentence {
             this.lastID = row.id;
             const { ref, idx } = getIDFromIAL(row.ial);
             if (ref) {
-                const attrLine = `{: ${RefIDKey}="${ref}" ${PARAGRAPH_INDEX}="${idx}" ${PROG_ORIGIN_TEXT}="1"}`;
+                const getAttrLine = () => {
+                    const newID = NewNodeID();
+                    const attrLine = `{: id="${newID}" ${RefIDKey}="${ref}" ${PARAGRAPH_INDEX}="${idx}" ${PROG_ORIGIN_TEXT}="1"}`;
+                    return { attrLine, newID };
+                }
+                const ATTR_LINE = `{: ${RefIDKey}="${ref}" ${PARAGRAPH_INDEX}="${idx}" ${PROG_ORIGIN_TEXT}="1"}`;
                 if (row.type == "h") {
+                    const { newID, attrLine } = getAttrLine();
                     this.textAreas.push({
-                        blocks: [row.markdown + `\n${attrLine}`],
+                        blocks: [{ text: row.markdown + `\n${attrLine}`, id: newID }],
                         ref,
                     });
                 } else {
                     let ps = [row.content];
                     for (const s of "\n。！!？?；;:：") ps = spliyBy(ps, s);
                     ps = spliyBy(ps, "……");
-                    let blocks: string[];
+                    let blocks: { text: string, id: string }[];
                     if (this.asList == "p") {
                         blocks = ps.map(i => i.trim())
                             .filter(i => i.length > 0)
-                            .map(i => SPACE.repeat(2) + i + ` ((${ref} "*"))\n${attrLine}\n`);
+                            .map(i => {
+                                const { newID, attrLine } = getAttrLine();
+                                return { text: SPACE.repeat(2) + i + ` ((${ref} "*"))\n${attrLine}\n`, id: newID };
+                            });
                     } else if (this.asList == "t") {
-                        blocks = ps.map(i => `* ${attrLine}[ ] ` + i + ` ((${ref} "*"))\n\t${attrLine}\n`);
+                        blocks = ps.map(i => {
+                            const { newID, attrLine } = getAttrLine();
+                            return { text: `* ${ATTR_LINE}[ ] ` + i + ` ((${ref} "*"))\n\t${attrLine}\n`, id: newID };
+                        });
                     } else {
-                        blocks = ps.map(i => `* ${attrLine} ` + i + ` ((${ref} "*"))\n\t${attrLine}\n`);
+                        blocks = ps.map(i => {
+                            const { newID, attrLine } = getAttrLine();
+                            return { text: `* ${ATTR_LINE} ` + i + ` ((${ref} "*"))\n\t${attrLine}\n`, id: newID }
+                        });
                     }
-                    blocks.push(`${attrLine}\n`);
+                    const { newID, attrLine } = getAttrLine();
+                    blocks.push({ text: `${attrLine}\n`, id: newID });
                     this.textAreas.push({ blocks, ref });
                 }
             }

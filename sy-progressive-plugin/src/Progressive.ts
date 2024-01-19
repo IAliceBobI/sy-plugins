@@ -534,21 +534,21 @@ class Progressive {
                 await this.openContentsLock(bookID);
                 break;
             case HtmlCBType.splitByPunctuations: {
-                const s = new SplitSentence(noteID, "p");
+                const s = new SplitSentence(this.plugin, noteID, "p");
                 await s.split();
                 await s.insert();
                 await help.cleanNote(noteID, true);
                 break;
             }
             case HtmlCBType.splitByPunctuationsList: {
-                const s = new SplitSentence(noteID, "l");
+                const s = new SplitSentence(this.plugin, noteID, "l");
                 await s.split();
                 await s.insert();
                 await help.cleanNote(noteID, true);
                 break;
             }
             case HtmlCBType.splitByPunctuationsListCheck: {
-                const s = new SplitSentence(noteID, "t");
+                const s = new SplitSentence(this.plugin, noteID, "t");
                 await s.split();
                 await s.insert();
                 await help.cleanNote(noteID, true);
