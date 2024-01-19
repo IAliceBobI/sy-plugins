@@ -128,7 +128,7 @@ class Progressive {
             label: this.plugin.i18n.addProgressiveReading,
             accelerator: "",
             click: async () => {
-                this.addProgressiveReadingWithLock();
+                await this.addProgressiveReadingWithLock();
             }
         });
         menu.addItem({
@@ -166,13 +166,13 @@ class Progressive {
         }
     }
 
-    private addProgressiveReadingWithLock(bookID?: string) {
-        navigator.locks.request(constants.AddProgressiveReadingLock, { ifAvailable: true }, async (lock) => {
+    private async addProgressiveReadingWithLock(bookID?: string) {
+        return navigator.locks.request(constants.AddProgressiveReadingLock, { ifAvailable: true }, async (lock) => {
             if (lock) {
                 await this.addProgressiveReading(bookID, events.boxID);
                 await utils.sleep(constants.IndexTime2Wait);
             } else {
-                siyuan.pushMsg(this.plugin.i18n.slowDownALittleBit);
+                await siyuan.pushMsg(this.plugin.i18n.slowDownALittleBit + " [1]");
             }
         });
     }
@@ -324,7 +324,7 @@ class Progressive {
                     for (let j = 0; j < idx[i].length; j++) {
                         if (blockID === idx[i][j]) {
                             await this.storage.gotoBlock(bookID, i);
-                            this.startToLearnWithLock(bookID);
+                            await this.startToLearnWithLock(bookID);
                             return;
                         }
                     }
@@ -336,24 +336,24 @@ class Progressive {
         }
     }
 
-    private startToLearnWithLock(bookID?: string) {
-        navigator.locks.request(constants.StartToLearnLock, { ifAvailable: true }, async (lock) => {
+    private async startToLearnWithLock(bookID?: string) {
+        return navigator.locks.request(constants.StartToLearnLock, { ifAvailable: true }, async (lock) => {
             if (lock) {
                 await siyuan.pushMsg(this.plugin.i18n.openingDocPieceForYou);
                 await this.startToLearn(bookID);
                 await utils.sleep(constants.IndexTime2Wait);
             } else {
-                siyuan.pushMsg(this.plugin.i18n.slowDownALittleBit);
+                await siyuan.pushMsg(this.plugin.i18n.slowDownALittleBit + " [2]");
             }
         });
     }
 
     private async openContentsLock(bookID: string) {
-        navigator.locks.request(constants.BuildContentsLock, { ifAvailable: true }, async (lock) => {
+        return navigator.locks.request(constants.BuildContentsLock, { ifAvailable: true }, async (lock) => {
             if (lock) {
                 await this.openContents(bookID);
             } else {
-                siyuan.pushMsg("构建/打开目录中，请稍后片刻……");
+                await siyuan.pushMsg("构建/打开目录中，请稍后片刻……");
             }
         });
     }
@@ -416,14 +416,14 @@ class Progressive {
         noteID = await help.findDoc(bookInfo.bookID, point);
         let openPiece = false;
         if (noteID) {
-            this.addAndClose(await openTab({ app: this.plugin.app, doc: { id: noteID } }));
+            await this.addAndClose(await openTab({ app: this.plugin.app, doc: { id: noteID } }));
             openPiece = true;
         } else {
             noteID = await help.createNote(bookInfo.boxID, bookInfo.bookID, piece, point);
             if (noteID) {
                 await this.addReadingBtns(bookID, noteID, point);
                 await this.fullfilContent(bookInfo.bookID, piecePre, piece, noteID);
-                this.addAndClose(await openTab({
+                await this.addAndClose(await openTab({
                     app: this.plugin.app, doc: { id: noteID },
                     afterOpen: () => {
                         if (bookInfo.autoCard == "yes") {
@@ -453,12 +453,12 @@ class Progressive {
     }
 
     async htmlBlockReadNextPeice(bookID: string, noteID: string, cbType: HtmlCBType, point: number) {
-        navigator.locks.request(constants.StartToLearnLock, { ifAvailable: true }, async (lock) => {
+        return navigator.locks.request("htmlBlockReadNextPeiceLock", { ifAvailable: true }, async (lock) => {
             if (lock) {
                 await this.htmlBlockReadNextPeiceInLock(bookID, noteID, cbType, point);
                 await utils.sleep(constants.IndexTime2Wait);
             } else {
-                siyuan.pushMsg(this.plugin.i18n.slowDownALittleBit);
+                await siyuan.pushMsg(this.plugin.i18n.slowDownALittleBit + " [3]");
             }
         });
     }
@@ -467,11 +467,11 @@ class Progressive {
         switch (cbType) {
             case HtmlCBType.previous:
                 await this.storage.gotoBlock(bookID, point - 1);
-                await this.startToLearn(bookID);
+                await this.startToLearnWithLock(bookID);
                 break;
             case HtmlCBType.next:
                 await this.storage.gotoBlock(bookID, point + 1);
-                await this.startToLearn(bookID);
+                await this.startToLearnWithLock(bookID);
                 break;
             case HtmlCBType.deleteAndExit:
                 confirm("⚠️", "🏃 🗑", async () => {
@@ -483,7 +483,7 @@ class Progressive {
                 confirm("⚠️", this.plugin.i18n.DeleteAndBack, async () => {
                     await siyuan.removeRiffCards([noteID]);
                     await this.storage.gotoBlock(bookID, point - 1);
-                    await this.startToLearn(bookID);
+                    await this.startToLearnWithLock(bookID);
                     siyuan.removeDocByID(noteID);
                 });
                 break;
@@ -491,12 +491,12 @@ class Progressive {
                 confirm("⚠️", this.plugin.i18n.DeleteAndNext, async () => {
                     await siyuan.removeRiffCards([noteID]);
                     await this.storage.gotoBlock(bookID, point + 1);
-                    await this.startToLearn(bookID);
+                    await this.startToLearnWithLock(bookID);
                     siyuan.removeDocByID(noteID);
                 });
                 break;
             case HtmlCBType.nextBook:
-                await this.startToLearn();
+                await this.startToLearnWithLock();
                 break;
             case HtmlCBType.quit: {
                 const t = await openTab({ app: this.plugin.app, doc: { id: noteID } });
@@ -559,9 +559,9 @@ class Progressive {
         }
     }
 
-    private addAndClose(tab?: ITab) {
+    private async addAndClose(tab?: ITab) {
         if (!tab) return;
-        navigator.locks.request("Progressive_addAndClose", () => {
+        return navigator.locks.request("Progressive_addAndClose", async () => {
             if (this.openedTabs) {
                 if (this.openedTabs.id != tab.id) {
                     this.openedTabs.close();
