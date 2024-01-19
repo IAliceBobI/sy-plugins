@@ -119,7 +119,7 @@ class Progressive {
                             e.querySelectorAll(`div[${DATA_NODE_ID}]`).forEach(e => {
                                 e.setAttribute(RefIDKey, ref);
                                 if (idx) e.setAttribute(PARAGRAPH_INDEX, idx);
-                            })
+                            });
                         }
                     });
             }
