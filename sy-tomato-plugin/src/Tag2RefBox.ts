@@ -35,7 +35,7 @@ class Tag2RefBox {
                             this.observer = new MutationObserver((mutationsList) => {
                                 mutationsList
                                     .map(i => i.previousSibling)
-                                    .forEach((e: HTMLElement) => this.findAllTagLock(notebookId, e))
+                                    .forEach((e: HTMLElement) => this.findAllTagLock(notebookId, e));
                             });
                             this.observer.observe(element, { childList: true });
                         }

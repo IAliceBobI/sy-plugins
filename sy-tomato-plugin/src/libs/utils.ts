@@ -718,7 +718,7 @@ export const siyuan = {
     async removeBrokenCards() {
         return navigator.locks.request("removeBrokenCardsLock", { ifAvailable: true }, async (lock) => {
             if (!lock) return;
-            siyuan.pushMsg("正在确认无效闪卡，请耐心等待……", 4000);
+            siyuan.pushMsg("正在确认无效闪卡，请耐心等待……", 1000);
             const invalidCardIDs = [];
             for (const card of await siyuan.getRiffCardsAll()) {
                 if (!card.box) {
