@@ -129,19 +129,9 @@ class CardPriorityBox {
 
     private async addBtns(element: HTMLElement) {
         [...element.querySelectorAll(`[${CUSTOM_RIFF_DECKS}]`)]
-            .filter(e => {
-                const tomato = [...e.querySelectorAll(`[${TOMATO_CONTROL_ELEMENT}]`)];
-                if (tomato.length == 0) return true;
-                tomato.slice(1).forEach(e => e.parentElement.removeChild(e));
-                return tomato.reduce((ret, te: HTMLElement) => {
-                    if (te.childElementCount == 0) {
-                        te.parentElement.removeChild(te);
-                        return true;
-                    }
-                    return ret;
-                }, false);
-            })
             .map((e: HTMLElement) => {
+                [...e.querySelectorAll(`[${TOMATO_CONTROL_ELEMENT}]`)].forEach(e => e.parentElement.removeChild(e));
+
                 let priority = Number(e.getAttribute(CARD_PRIORITY) ?? "50");
                 if (!isValidNumber(priority)) priority = 50;
 
