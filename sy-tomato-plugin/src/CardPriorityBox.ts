@@ -1,7 +1,7 @@
 import { ICardData, IEventBusMap, IProtyle, Plugin } from "siyuan";
 import "./index.scss";
 import { getID, isValidNumber, shuffleArray, siyuan } from "./libs/utils";
-import { CARD_PRIORITY, CUSTOM_RIFF_DECKS, SPACE, TOMATO_CONTROL_ELEMENT } from "./libs/gconst";
+import { CARD_PRIORITY, CUSTOM_RIFF_DECKS, DATA_NODE_ID, SPACE, TOMATO_CONTROL_ELEMENT } from "./libs/gconst";
 import { DialogText } from "./libs/DialogText";
 import { EventType, events } from "./libs/Events";
 
@@ -130,14 +130,14 @@ class CardPriorityBox {
     private async addBtns(element: HTMLElement) {
         [...element.querySelectorAll(`[${CUSTOM_RIFF_DECKS}]`)]
             .map((e: HTMLElement) => {
-                [...e.querySelectorAll(`[${TOMATO_CONTROL_ELEMENT}]`)].forEach(e => e.parentElement.removeChild(e));
+                e.querySelectorAll(`[${TOMATO_CONTROL_ELEMENT}]`).forEach(e => e.parentElement.removeChild(e));
 
+                const cardID = e.getAttribute(DATA_NODE_ID);
                 let priority = Number(e.getAttribute(CARD_PRIORITY) ?? "50");
                 if (!isValidNumber(priority)) priority = 50;
 
                 const div = e.appendChild(document.createElement("div"));
                 div.setAttribute(TOMATO_CONTROL_ELEMENT, "1");
-                // div.style.paddingLeft = "20px";
                 div.contentEditable = "false";
                 div.style.display = "flex";
                 div.style.justifyContent = "space-between";
@@ -148,7 +148,7 @@ class CardPriorityBox {
                 div.appendChild(document.createElement("span"));//2
                 div.appendChild(document.createElement("span"));//1
                 const subDiv = div.appendChild(document.createElement("div")); // 0
-                div.appendChild(document.createElement("span"));//1
+                const rmCard = div.appendChild(document.createElement("a"));//1
                 div.appendChild(document.createElement("span"));//2
                 div.appendChild(document.createElement("span"));//3
                 div.appendChild(document.createElement("span"));//4
@@ -169,12 +169,21 @@ class CardPriorityBox {
                 subOne.classList.add("b3-button--white");
                 subOne.textContent = "➖";
 
+                rmCard.title = "取消制卡";
+                rmCard.classList.add("b3-button");
+                rmCard.classList.add("b3-button--white");
+                rmCard.textContent = "🚫";
+
                 addOne.addEventListener("click", async () => {
                     await this.updatePrioritySelected([e], priority + 1);
                     await this.addBtns(element);
                 });
                 subOne.addEventListener("click", async () => {
                     await this.updatePrioritySelected([e], priority - 1);
+                    await this.addBtns(element);
+                });
+                rmCard.addEventListener("click", async () => {
+                    await siyuan.removeRiffCards([cardID]);
                     await this.addBtns(element);
                 });
             });
