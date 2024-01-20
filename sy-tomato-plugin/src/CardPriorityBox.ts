@@ -60,7 +60,7 @@ class CardPriorityBox {
             if (isValidNumber(p)) {
                 return navigator.locks.request("CardPriorityBox.updateDocPriorityLock", { ifAvailable: true }, async (lock) => {
                     if (lock) {
-                        await siyuan.pushMsg(`设置闪卡优先级为：${newPriority}`)
+                        await siyuan.pushMsg(`设置闪卡优先级为：${newPriority}`);
                         const count = await this.updateDocPriority(protyle, p, blocks);
                         await siyuan.pushMsg(`已经调整了${count}个闪卡的优先级`);
                     } else {
@@ -74,7 +74,7 @@ class CardPriorityBox {
     }
 
     private async updateDocPriority(protyle: IProtyle, newPriority: number, blocks?: Block[]) {
-        newPriority = ensureValidPriority(newPriority)
+        newPriority = ensureValidPriority(newPriority);
         if (!blocks) {
             const docID = protyle?.block?.rootID;
             if (!docID) return;

@@ -1,5 +1,5 @@
 import { newID } from "./utils";
-import DialogTextSv from "./DialogTextSv.svelte"
+import DialogTextSv from "./DialogTextSv.svelte";
 import { Dialog } from "siyuan";
 
 export class DialogText {
