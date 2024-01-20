@@ -146,52 +146,54 @@ class CardPriorityBox {
                 if (!isValidNumber(priority)) priority = 50;
 
                 const div = e.querySelector(".protyle-attr")?.appendChild(document.createElement("div"));
-                div.setAttribute(TOMATO_CONTROL_ELEMENT, "1");
-                div.style.display = "flex";
+                if (div) {
+                    div.setAttribute(TOMATO_CONTROL_ELEMENT, "1");
+                    div.style.display = "flex";
 
-                const subDiv = div.appendChild(document.createElement("div"));
-                const subOne = subDiv.appendChild(document.createElement("a"));
-                const priText = subDiv.appendChild(document.createElement("span"));
-                const addOne = subDiv.appendChild(document.createElement("a"));
-                const spanSpace = subDiv.appendChild(document.createElement("span"));
-                const rmCard = subDiv.appendChild(document.createElement("a"));
+                    const subDiv = div.appendChild(document.createElement("div"));
+                    const subOne = subDiv.appendChild(document.createElement("a"));
+                    const priText = subDiv.appendChild(document.createElement("span"));
+                    const addOne = subDiv.appendChild(document.createElement("a"));
+                    const spanSpace = subDiv.appendChild(document.createElement("span"));
+                    const rmCard = subDiv.appendChild(document.createElement("a"));
 
 
-                priText.textContent = `${SPACE + priority + SPACE}`;
-                if (this.cards?.has(cardID)) {
-                    priText.title = `${JSON.stringify(this.cards.get(cardID))}【${CacheMinutes}分钟缓存】`;
-                    priText.innerHTML = `<strong>${priText.textContent}</strong>`;
+                    priText.textContent = `${SPACE + priority + SPACE}`;
+                    if (this.cards?.has(cardID)) {
+                        priText.title = `${JSON.stringify(this.cards.get(cardID))}【${CacheMinutes}分钟缓存】`;
+                        priText.innerHTML = `<strong>${priText.textContent}</strong>`;
+                    }
+                    spanSpace.textContent = SPACE;
+
+                    addOne.title = "闪卡优先级+1";
+                    addOne.classList.add("b3-button");
+                    addOne.classList.add("b3-button--white");
+                    addOne.textContent = "➕";
+
+                    subOne.title = "闪卡优先级-1";
+                    subOne.classList.add("b3-button");
+                    subOne.classList.add("b3-button--white");
+                    subOne.textContent = "➖";
+
+                    rmCard.title = "取消制卡";
+                    rmCard.classList.add("b3-button");
+                    rmCard.classList.add("b3-button--white");
+                    rmCard.textContent = "🚫";
+
+                    addOne.addEventListener("click", async () => {
+                        await this.updatePrioritySelected([e], priority + 1);
+                        await this.addBtns(element);
+                    });
+                    subOne.addEventListener("click", async () => {
+                        await this.updatePrioritySelected([e], priority - 1);
+                        await this.addBtns(element);
+                    });
+                    rmCard.addEventListener("click", async () => {
+                        await siyuan.removeRiffCards([cardID]);
+                        await siyuan.pushMsg(`已经删除闪卡：${text}`);
+                        await this.addBtns(element);
+                    });
                 }
-                spanSpace.textContent = SPACE;
-
-                addOne.title = "闪卡优先级+1";
-                addOne.classList.add("b3-button");
-                addOne.classList.add("b3-button--white");
-                addOne.textContent = "➕";
-
-                subOne.title = "闪卡优先级-1";
-                subOne.classList.add("b3-button");
-                subOne.classList.add("b3-button--white");
-                subOne.textContent = "➖";
-
-                rmCard.title = "取消制卡";
-                rmCard.classList.add("b3-button");
-                rmCard.classList.add("b3-button--white");
-                rmCard.textContent = "🚫";
-
-                addOne.addEventListener("click", async () => {
-                    await this.updatePrioritySelected([e], priority + 1);
-                    await this.addBtns(element);
-                });
-                subOne.addEventListener("click", async () => {
-                    await this.updatePrioritySelected([e], priority - 1);
-                    await this.addBtns(element);
-                });
-                rmCard.addEventListener("click", async () => {
-                    await siyuan.removeRiffCards([cardID]);
-                    await siyuan.pushMsg(`已经删除闪卡：${text}`);
-                    await this.addBtns(element);
-                });
             });
     }
 }
