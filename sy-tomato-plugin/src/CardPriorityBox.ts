@@ -133,6 +133,8 @@ class CardPriorityBox {
                 e.querySelectorAll(`[${TOMATO_CONTROL_ELEMENT}]`).forEach(e => e.parentElement.removeChild(e));
 
                 const cardID = e.getAttribute(DATA_NODE_ID);
+                const text = e.textContent;
+
                 let priority = Number(e.getAttribute(CARD_PRIORITY) ?? "50");
                 if (!isValidNumber(priority)) priority = 50;
 
@@ -184,6 +186,7 @@ class CardPriorityBox {
                 });
                 rmCard.addEventListener("click", async () => {
                     await siyuan.removeRiffCards([cardID]);
+                    await siyuan.pushMsg(`已经删除闪卡：${text}`);
                     await this.addBtns(element);
                 });
             });
