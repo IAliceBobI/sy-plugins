@@ -1,6 +1,6 @@
 import { ICardData, IEventBusMap, IProtyle, Plugin } from "siyuan";
 import "./index.scss";
-import { getID, isValidNumber, shuffleArray, siyuan, sleep } from "./libs/utils";
+import { getID, isValidNumber, shuffleArray, siyuan } from "./libs/utils";
 import { CUSTOM_RIFF_DECKS } from "./libs/gconst";
 
 class CardPriorityBox {
@@ -9,114 +9,56 @@ class CardPriorityBox {
     async onload(plugin: Plugin) {
         this.plugin = plugin;
         this.plugin.addCommand({
-            langKey: "cardPriorityReset",
+            langKey: "cardPrioritySet",
             hotkey: "F6",
             editorCallback: (protyle: IProtyle) => {
-                this.updateDocPriorityLock(protyle, 0);
+                this.updateDocPriorityLock(protyle);
             },
         });
-        this.plugin.addCommand({
-            langKey: "cardPrioritySub",
-            hotkey: "F7",
-            editorCallback: (protyle: IProtyle) => {
-                this.updateDocPriorityLock(protyle, -1);
-            },
-        });
-        this.plugin.addCommand({
-            langKey: "cardPriorityAdd",
-            hotkey: "F8",
-            editorCallback: (protyle: IProtyle) => {
-                this.updateDocPriorityLock(protyle, +1);
-            },
-        });
+
         this.plugin.eventBus.on("open-menu-content", async ({ detail }) => {
             const menu = detail.menu;
             menu.addItem({
-                label: this.plugin.i18n.cardPriorityReset,
-                icon: "iconRestore",
+                label: this.plugin.i18n.cardPrioritySet,
                 accelerator: "F6",
                 click: () => {
-                    this.updateDocPriorityLock(detail.protyle, 0);
+                    this.updateDocPriorityLock(detail.protyle);
                 },
             });
             menu.addItem({
-                label: this.plugin.i18n.cardPrioritySub,
-                icon: "iconDown",
-                accelerator: "F7",
+                label: "为闪卡设置优先级",
                 click: () => {
-                    this.updateDocPriorityLock(detail.protyle, -1);
-                },
-            });
-            menu.addItem({
-                label: this.plugin.i18n.cardPriorityAdd,
-                icon: "iconUp",
-                accelerator: "F8",
-                click: () => {
-                    this.updateDocPriorityLock(detail.protyle, +1);
-                },
-            });
-            menu.addItem({
-                label: "闪卡减少一点优先级",
-                icon: "iconDown",
-                click: () => {
-                    this.updatePriority(detail.protyle, [detail.element], -1);
-                },
-            });
-            menu.addItem({
-                label: "闪卡增加一点优先级",
-                icon: "iconUp",
-                click: () => {
-                    this.updatePriority(detail.protyle, [detail.element], +1);
+                    this.updatePriority(detail.protyle, [detail.element]);
                 },
             });
         });
-        this.loadCards().then();
-    }
-
-    private async loadCards() {
-        const cards = await siyuan.getRiffDueCards();
-        for (const card of cards.cards) {
-            try {
-                await siyuan.getBlockAttrs(card.blockID);
-            } catch (_e) { _e; }
-            finally {
-                await sleep(10);
-            }
-        }
     }
 
     blockIconEvent(detail: IEventBusMap["click-blockicon"]) {
         if (!this.plugin) return;
         detail.menu.addItem({
-            iconHTML: "⬇️",
-            label: "闪卡减少一点优先级",
+            label: "为闪卡设置优先级",
             click: () => {
-                this.updatePriority(detail.protyle, detail.blockElements, -1);
-            }
-        });
-        detail.menu.addItem({
-            iconHTML: "⬆️",
-            label: "闪卡增加一点优先级",
-            click: () => {
-                this.updatePriority(detail.protyle, detail.blockElements, +1);
+                this.updatePriority(detail.protyle, detail.blockElements);
             }
         });
     }
 
-    private async updatePriority(protyle: IProtyle, elements: HTMLElement[], delta: number) {
+    private async updatePriority(protyle: IProtyle, elements: HTMLElement[]) {
         const blocks = (await Promise.all(elements.map(div => {
             return getID(div, [CUSTOM_RIFF_DECKS]);
         }).filter(i => !!i).map(id => siyuan.getBlockAttrs(id)))).map(ial => {
             return { ial };
         }).filter(b => !!b.ial[CUSTOM_RIFF_DECKS]);
-        return this.updateDocPriorityLock(protyle, delta, blocks as any);
+        return this.updateDocPriorityLock(protyle, blocks as any);
     }
 
-    private async updateDocPriorityLock(protyle: IProtyle, delta: number, blocks?: Block[]) {
+    private async updateDocPriorityLock(protyle: IProtyle, blocks?: Block[]) {
+        const newPriority = 11;
         return navigator.locks.request("CardPriorityBox.updateDocPriorityLock", { ifAvailable: true }, async (lock) => {
             if (lock) {
-                await pushPriorityMsg(delta);
-                const count = await this.updateDocPriority(protyle, delta, blocks);
+                await siyuan.pushMsg(`设置闪卡优先级为：${newPriority}`)
+                const count = await this.updateDocPriority(protyle, newPriority, blocks);
                 await siyuan.pushMsg(`已经调整了${count}个闪卡的优先级`);
             } else {
                 await siyuan.pushMsg("正在修改优先级，请耐心等候……");
@@ -124,7 +66,8 @@ class CardPriorityBox {
         });
     }
 
-    private async updateDocPriority(protyle: IProtyle, delta: number, blocks?: Block[]) {
+    private async updateDocPriority(protyle: IProtyle, newPriority: number, blocks?: Block[]) {
+        newPriority = ensureValidPriority(newPriority)
         if (!blocks) {
             const docID = protyle?.block?.rootID;
             if (!docID) return;
@@ -133,15 +76,8 @@ class CardPriorityBox {
         const tasks = await Promise.all(blocks.map(block => {
             const ial = block.ial as unknown as AttrType;
             const priority = readPriority(ial);
-            if (delta == 0) {
-                if (priority != 50) {
-                    return setPriority(ial.id, 50);
-                }
-            } else {
-                const newPriority = ensureValidPriority(priority + delta);
-                if (priority != newPriority) {
-                    return setPriority(ial.id, newPriority);
-                }
+            if (newPriority != priority) {
+                return setPriority(ial.id, newPriority);
             }
         }).filter(i => !!i));
         return tasks.length;
@@ -168,16 +104,6 @@ function readPriority(ial: AttrType) {
         priority = 50;
     }
     return priority;
-}
-
-async function pushPriorityMsg(delta: number) {
-    if (delta == 0) {
-        return siyuan.pushMsg("开始重置闪卡的优先级为50");
-    } else if (delta == -1) {
-        return siyuan.pushMsg("开始减少一点所有闪卡的优先级");
-    } else if (delta == 1) {
-        return siyuan.pushMsg("开始增加一点所有闪卡的优先级");
-    }
 }
 
 async function setPriority(blockID: string, newPriority: number) {

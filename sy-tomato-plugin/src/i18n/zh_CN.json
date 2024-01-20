@@ -39,7 +39,5 @@
   "moveBlock2today": "移动内容到 daily note",
   "previousNote": "上一个日志",
   "nextNote": "下一个日志",
-  "cardPriorityReset": "当前文档与其子文档，所有闪卡优先级设为50",
-  "cardPriorityAdd": "当前文档与其子文档，所有闪卡增加一点优先级",
-  "cardPrioritySub": "当前文档与其子文档，所有闪卡减少一点优先级"
+  "cardPrioritySet": "为当前文档与其子文档内，所有闪卡设置优先级"
 }
