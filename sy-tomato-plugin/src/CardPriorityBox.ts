@@ -2,6 +2,7 @@ import { ICardData, IEventBusMap, IProtyle, Plugin } from "siyuan";
 import "./index.scss";
 import { getID, isValidNumber, shuffleArray, siyuan } from "./libs/utils";
 import { CUSTOM_RIFF_DECKS } from "./libs/gconst";
+import { DialogText } from "./libs/DialogText";
 
 class CardPriorityBox {
     private plugin: Plugin;
@@ -54,14 +55,20 @@ class CardPriorityBox {
     }
 
     private async updateDocPriorityLock(protyle: IProtyle, blocks?: Block[]) {
-        const newPriority = 11;
-        return navigator.locks.request("CardPriorityBox.updateDocPriorityLock", { ifAvailable: true }, async (lock) => {
-            if (lock) {
-                await siyuan.pushMsg(`设置闪卡优先级为：${newPriority}`)
-                const count = await this.updateDocPriority(protyle, newPriority, blocks);
-                await siyuan.pushMsg(`已经调整了${count}个闪卡的优先级`);
+        new DialogText("输入新的优先级", "50", async (newPriority: string) => {
+            const p = Number(newPriority);
+            if (isValidNumber(p)) {
+                return navigator.locks.request("CardPriorityBox.updateDocPriorityLock", { ifAvailable: true }, async (lock) => {
+                    if (lock) {
+                        await siyuan.pushMsg(`设置闪卡优先级为：${newPriority}`)
+                        const count = await this.updateDocPriority(protyle, p, blocks);
+                        await siyuan.pushMsg(`已经调整了${count}个闪卡的优先级`);
+                    } else {
+                        await siyuan.pushMsg("正在修改优先级，请耐心等候……");
+                    }
+                });
             } else {
-                await siyuan.pushMsg("正在修改优先级，请耐心等候……");
+                await siyuan.pushMsg(`您的输入有误：${newPriority}`);
             }
         });
     }
