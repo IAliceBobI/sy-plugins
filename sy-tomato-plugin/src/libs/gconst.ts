@@ -10,6 +10,7 @@ export const DATA_TYPE = "data-type";
 export const DATA_SUBTYPE = "data-subtype";
 export const PROTYLE_WYSIWYG_SELECT = "protyle-wysiwyg--select";
 export const IDLen = 20;
+export const TOMATO_CONTROL_ELEMENT = "tomato-control";
 
 export enum BlockNodeEnum {
     BLOCK_REF = "block-ref",
@@ -48,6 +49,7 @@ export const REF_HIERARCHY = "custom-ref-hierarchy";
 export const ORIGIN_HPATH = "custom-origin-hpath";
 export const REF_HPATH = "custom-ref-hpath";
 export const PARAGRAPH_INDEX = "custom-paragraph-index";
+export const CARD_PRIORITY = "custom-card-priority";
 
 export enum WsActionTypes {
     transactions = "transactions",

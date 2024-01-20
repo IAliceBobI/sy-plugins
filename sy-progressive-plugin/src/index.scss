@@ -3,6 +3,7 @@
   opacity: 0.5;
   font-size: medium;
   color: var(--b3-font-color12);
+  padding-left: 15px;
 }
 
 .protyle-wysiwyg div[custom-ref-hpath]:not([custom-prog-origin-text]):not([custom-origin-hpath])::before {
@@ -10,6 +11,7 @@
   opacity: 0.5;
   font-size: medium;
   color: var(--b3-font-color5);
+  padding-left: 15px;
 }
 
 .protyle-wysiwyg div[custom-prog-piece-previous] {

@@ -1,8 +1,9 @@
 import { ICardData, IEventBusMap, IProtyle, Plugin } from "siyuan";
 import "./index.scss";
 import { getID, isValidNumber, shuffleArray, siyuan } from "./libs/utils";
-import { CUSTOM_RIFF_DECKS } from "./libs/gconst";
+import { CARD_PRIORITY, CUSTOM_RIFF_DECKS, SPACE, TOMATO_CONTROL_ELEMENT } from "./libs/gconst";
 import { DialogText } from "./libs/DialogText";
+import { EventType, events } from "./libs/Events";
 
 class CardPriorityBox {
     private plugin: Plugin;
@@ -32,6 +33,19 @@ class CardPriorityBox {
                     this.updatePriority(detail.protyle, [detail.element]);
                 },
             });
+        });
+
+        events.addListener("Tomato-CardPriorityBox", (eventType, detail) => {
+            if (eventType == EventType.loaded_protyle_static) {
+                navigator.locks.request("Tomato-CardPriorityBox-onload", { ifAvailable: true }, async (lock) => {
+                    const protyle: IProtyle = detail.protyle;
+                    if (!protyle) return;
+                    const element = protyle?.wysiwyg?.element as HTMLElement;
+                    if (lock && element) {
+                        await addBtns(element);
+                    }
+                });
+            }
         });
     }
 
@@ -103,6 +117,42 @@ class CardPriorityBox {
         options.cards.sort((a, b) => attrMap.get(b.blockID) - attrMap.get(a.blockID));
         return options;
     }
+}
+
+async function addBtns(element: HTMLElement) {
+    [...element.querySelectorAll(`[${CUSTOM_RIFF_DECKS}]`)]
+        .filter(e => e.querySelectorAll(`[${TOMATO_CONTROL_ELEMENT}]`).length == 0)
+        .map((e: HTMLElement) => {
+            const priority = e.getAttribute(CARD_PRIORITY) ?? "50";
+            const div = e.appendChild(document.createElement("div"));
+            div.setAttribute(TOMATO_CONTROL_ELEMENT, "1");
+            // div.style.paddingLeft = "20px";
+            div.contentEditable = "false";
+            div.style.display = "flex"
+            div.style.justifyContent = "space-between"
+            div.style.fontSize = "small"
+
+            div.appendChild(document.createElement("span"));//2
+            const label = div.appendChild(document.createElement("label"));//1
+            const subDiv = div.appendChild(document.createElement("div")); // 0
+            div.appendChild(document.createElement("span"));//1
+            div.appendChild(document.createElement("span"));//2
+
+            const subOne = subDiv.appendChild(document.createElement("a"));
+            const span = subDiv.appendChild(document.createElement("span"));
+            const addOne = subDiv.appendChild(document.createElement("a"));
+
+            label.textContent = "闪卡优先级"
+            span.textContent = SPACE + `${priority}` + SPACE;
+
+            addOne.classList.add("b3-button");
+            addOne.classList.add("b3-button--white");
+            addOne.textContent = "➕";
+
+            subOne.classList.add("b3-button");
+            subOne.classList.add("b3-button--white");
+            subOne.textContent = "➖";
+        });
 }
 
 function readPriority(ial: AttrType) {
