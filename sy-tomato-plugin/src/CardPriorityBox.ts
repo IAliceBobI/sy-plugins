@@ -78,7 +78,7 @@ class CardPriorityBox {
         if (isValidNumber(priority)) {
             await this.updateDocPriorityLock(priority, blocks);
         } else {
-            new DialogText("输入新的优先级", "50", async (priorityTxt: string) => {
+            new DialogText(`为${blocks.length}张卡输入新的优先级`, "50", async (priorityTxt: string) => {
                 const priority = Number(priorityTxt);
                 if (isValidNumber(priority)) {
                     return this.updateDocPriorityLock(priority, blocks);
@@ -149,13 +149,14 @@ class CardPriorityBox {
                 div.setAttribute(TOMATO_CONTROL_ELEMENT, "1");
                 // div.style.paddingLeft = "20px";
                 div.contentEditable = "false";
-                div.style.display = "flex"
-                div.style.justifyContent = "space-between"
-                div.style.fontSize = "small"
+                div.style.display = "flex";
+                div.style.justifyContent = "space-between";
+                div.style.fontSize = "small";
 
+                div.appendChild(document.createElement("span"));//4
                 div.appendChild(document.createElement("span"));//3
                 div.appendChild(document.createElement("span"));//2
-                const label = div.appendChild(document.createElement("label"));//1
+                div.appendChild(document.createElement("span"));//1
                 const subDiv = div.appendChild(document.createElement("div")); // 0
                 div.appendChild(document.createElement("span"));//1
                 div.appendChild(document.createElement("span"));//2
@@ -166,25 +167,26 @@ class CardPriorityBox {
                 const span = subDiv.appendChild(document.createElement("span"));
                 const addOne = subDiv.appendChild(document.createElement("a"));
 
-                label.textContent = "闪卡优先级"
                 span.textContent = SPACE + `${priority}` + SPACE;
 
+                addOne.title = "闪卡优先级+1";
                 addOne.classList.add("b3-button");
                 addOne.classList.add("b3-button--white");
                 addOne.textContent = "➕";
 
+                subOne.title = "闪卡优先级-1";
                 subOne.classList.add("b3-button");
                 subOne.classList.add("b3-button--white");
                 subOne.textContent = "➖";
 
                 addOne.addEventListener("click", async () => {
-                    await this.updatePrioritySelected([e], priority + 1)
+                    await this.updatePrioritySelected([e], priority + 1);
                     await this.addBtns(element);
-                })
+                });
                 subOne.addEventListener("click", async () => {
-                    await this.updatePrioritySelected([e], priority - 1)
+                    await this.updatePrioritySelected([e], priority - 1);
                     await this.addBtns(element);
-                })
+                });
             });
     }
 }
