@@ -145,7 +145,7 @@ class CardPriorityBox {
                 let priority = Number(e.getAttribute(CARD_PRIORITY) ?? "50");
                 if (!isValidNumber(priority)) priority = 50;
 
-                const div = e.querySelector('.protyle-attr')?.appendChild(document.createElement("div"));
+                const div = e.querySelector(".protyle-attr")?.appendChild(document.createElement("div"));
                 div.setAttribute(TOMATO_CONTROL_ELEMENT, "1");
                 div.style.display = "flex";
 

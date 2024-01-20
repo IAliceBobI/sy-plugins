@@ -560,7 +560,7 @@ export const siyuan = {
     async getTreeRiffCardsMap(docID: string) {
         return (await siyuan.getTreeRiffCardsAll(docID)).reduce((m, b: any) => {
             const c = b.riffCard as RiffCard;
-            c.due = timeUtil.dateFormatDay(new Date(c.due))
+            c.due = timeUtil.dateFormatDay(new Date(c.due));
             m.set(b.id, c);
             return m;
         }, new Map<string, RiffCard>());
