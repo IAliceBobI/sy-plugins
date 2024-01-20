@@ -138,28 +138,19 @@ class CardPriorityBox {
                 let priority = Number(e.getAttribute(CARD_PRIORITY) ?? "50");
                 if (!isValidNumber(priority)) priority = 50;
 
-                const div = e.appendChild(document.createElement("div"));
+                const div = e.querySelector('.protyle-attr')?.appendChild(document.createElement("div"));
                 div.setAttribute(TOMATO_CONTROL_ELEMENT, "1");
-                div.contentEditable = "false";
                 div.style.display = "flex";
-                div.style.justifyContent = "space-between";
-                div.style.fontSize = "small";
 
-                div.appendChild(document.createElement("span"));//4
-                div.appendChild(document.createElement("span"));//3
-                div.appendChild(document.createElement("span"));//2
-                div.appendChild(document.createElement("span"));//1
-                const subDiv = div.appendChild(document.createElement("div")); // 0
-                const rmCard = div.appendChild(document.createElement("a"));//1
-                div.appendChild(document.createElement("span"));//2
-                div.appendChild(document.createElement("span"));//3
-                div.appendChild(document.createElement("span"));//4
-
+                const subDiv = div.appendChild(document.createElement("div"));
                 const subOne = subDiv.appendChild(document.createElement("a"));
-                const span = subDiv.appendChild(document.createElement("span"));
+                const priText = subDiv.appendChild(document.createElement("span"));
                 const addOne = subDiv.appendChild(document.createElement("a"));
+                const spanSpace = subDiv.appendChild(document.createElement("span"));
+                const rmCard = subDiv.appendChild(document.createElement("a"));
 
-                span.textContent = SPACE + `${priority}` + SPACE;
+                priText.textContent = SPACE + `${priority}` + SPACE;
+                spanSpace.textContent = SPACE;
 
                 addOne.title = "闪卡优先级+1";
                 addOne.classList.add("b3-button");
