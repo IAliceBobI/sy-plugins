@@ -53,3 +53,5 @@ type AttrType = {
     "custom-paragraph-index": string,
     [key: string]: string,
 };
+
+type RiffCard = { due: string, reps: number };

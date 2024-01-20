@@ -1,12 +1,15 @@
 import { ICardData, IEventBusMap, IProtyle, Plugin } from "siyuan";
 import "./index.scss";
-import { getID, isValidNumber, shuffleArray, siyuan } from "./libs/utils";
+import { getID, isValidNumber, shuffleArray, siyuan, siyuanCache } from "./libs/utils";
 import { CARD_PRIORITY, CUSTOM_RIFF_DECKS, DATA_NODE_ID, SPACE, TOMATO_CONTROL_ELEMENT } from "./libs/gconst";
 import { DialogText } from "./libs/DialogText";
 import { EventType, events } from "./libs/Events";
 
+const CacheMinutes = 5;
+
 class CardPriorityBox {
     private plugin: Plugin;
+    private cards: Map<string, RiffCard>;
 
     async onload(plugin: Plugin) {
         this.plugin = plugin;
@@ -47,7 +50,11 @@ class CardPriorityBox {
                     const protyle: IProtyle = detail.protyle;
                     if (!protyle) return;
                     const element = protyle?.wysiwyg?.element as HTMLElement;
-                    if (lock && element) {
+                    const docID = protyle?.block?.rootID;
+                    if (lock && element && docID) {
+                        siyuanCache.getTreeRiffCardsMap(CacheMinutes * 60 * 1000, docID).then(map => {
+                            this.cards = map;
+                        });
                         await this.addBtns(element);
                     }
                 });
@@ -149,7 +156,12 @@ class CardPriorityBox {
                 const spanSpace = subDiv.appendChild(document.createElement("span"));
                 const rmCard = subDiv.appendChild(document.createElement("a"));
 
-                priText.textContent = SPACE + `${priority}` + SPACE;
+
+                priText.textContent = `${SPACE + priority + SPACE}`;
+                if (this.cards?.has(cardID)) {
+                    priText.title = `${JSON.stringify(this.cards.get(cardID))}【${CacheMinutes}分钟缓存】`;
+                    priText.innerHTML = `<strong>${priText.textContent}</strong>`;
+                }
                 spanSpace.textContent = SPACE;
 
                 addOne.title = "闪卡优先级+1";

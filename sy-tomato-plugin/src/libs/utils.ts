@@ -228,6 +228,14 @@ export const timeUtil = {
         seconds = (seconds < 10 ? "0" : "") + seconds;
         return year + "-" + month + "-" + day + " " + hours + ":" + minutes + ":" + seconds;
     },
+    dateFormatDay(date: Date) {
+        const year: any = date.getFullYear();
+        let month: any = date.getMonth() + 1;
+        let day: any = date.getDate();
+        month = (month < 10 ? "0" : "") + month;
+        day = (day < 10 ? "0" : "") + day;
+        return year + "-" + month + "-" + day;
+    },
     dateFromYYYYMMDDHHmmss(date: string) {
         return new Date(date);
     },
@@ -549,6 +557,14 @@ export const siyuan = {
         }
         return total;
     },
+    async getTreeRiffCardsMap(docID: string) {
+        return (await siyuan.getTreeRiffCardsAll(docID)).reduce((m, b: any) => {
+            const c = b.riffCard as RiffCard;
+            c.due = timeUtil.dateFormatDay(new Date(c.due))
+            m.set(b.id, c);
+            return m;
+        }, new Map<string, RiffCard>());
+    },
     async getTreeRiffCards(id: string, page: number): Promise<GetCardRet> {
         return siyuan.call("/api/riff/getTreeRiffCards", { id, page });
     },
@@ -760,6 +776,7 @@ export const siyuanCache = {
     sqlOne: createCache(siyuan.sqlOne),
     sql: createCache(siyuan.sql),
     getBlockAttrs: createCache(siyuan.getBlockAttrs),
+    getTreeRiffCardsMap: createCache(siyuan.getTreeRiffCardsMap),
 };
 
 export function createCache
