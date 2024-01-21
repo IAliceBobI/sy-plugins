@@ -166,17 +166,14 @@ class CardPriorityBox {
                     spanSpace.textContent = SPACE;
 
                     addOne.title = "闪卡优先级+1";
-                    addOne.classList.add("b3-button");
                     addOne.classList.add("b3-button--white");
                     addOne.textContent = "➕";
 
                     subOne.title = "闪卡优先级-1";
-                    subOne.classList.add("b3-button");
                     subOne.classList.add("b3-button--white");
                     subOne.textContent = "➖";
 
                     rmCard.title = "取消制卡";
-                    rmCard.classList.add("b3-button");
                     rmCard.classList.add("b3-button--white");
                     rmCard.textContent = "🚫";
 
@@ -191,10 +188,9 @@ class CardPriorityBox {
                     rmCard.addEventListener("click", () => {
                         confirm("删除闪卡", text, async () => {
                             await siyuan.removeRiffCards([cardID]);
-                            const attrbar = e.querySelector(`[${TOMATO_CONTROL_ELEMENT}]`);
-                            if (attrbar) {
-                                attrbar.parentElement.removeChild(attrbar);
-                            }
+                            e.querySelectorAll(`[${TOMATO_CONTROL_ELEMENT}]`).forEach(e => {
+                                e.parentElement.removeChild(e);
+                            });
                         });
                     });
                 }
