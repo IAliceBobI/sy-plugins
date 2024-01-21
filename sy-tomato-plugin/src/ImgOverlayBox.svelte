@@ -2,10 +2,12 @@
     import { onDestroy, onMount } from "svelte";
     import { fabric } from "fabric";
     import { getID } from "./libs/utils";
+    import { Dialog } from "siyuan";
 
     export let imgSpan: HTMLSpanElement;
     export let nextOverlays: Overlays;
     export let originOverlays: Overlays;
+    export let dialog: Dialog;
     let canvas: fabric.Canvas;
     let drawingRect: fabric.Rect = null;
 
@@ -165,10 +167,15 @@
             canvas.renderAll();
         }
     }
+
+    function exit() {
+        dialog?.destroy();
+    }
 </script>
 
 <!-- https://learn.svelte.dev/tutorial/if-blocks -->
 <div class="b3-dialog__content">
     <canvas id="imgOverlayBoxCanvas"></canvas>
     <button class="b3-button" on:click={remove}>删除最后一个层</button>
+    <button class="b3-button" on:click={exit}>退出</button>
 </div>

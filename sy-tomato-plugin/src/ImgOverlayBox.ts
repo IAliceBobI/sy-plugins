@@ -70,6 +70,7 @@ class ImgOverlayBox {
                 imgSpan,
                 nextOverlays,
                 originOverlays,
+                dialog,
             }
         });
     }
