@@ -195,7 +195,7 @@ class CardPriorityBox {
                             if (attrbar) {
                                 attrbar.parentElement.removeChild(attrbar);
                             }
-                        })
+                        });
                     });
                 }
             });
