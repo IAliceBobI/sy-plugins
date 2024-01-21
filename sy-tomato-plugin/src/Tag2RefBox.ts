@@ -107,10 +107,8 @@ class Tag2RefBox {
 async function insertMd(idName: IDName[]) {
     if (idName.length > 1) {
         const attrValue = `${idName.map(i => i.id).join(",")}`;
-        const row = await siyuan.sqlOne(`select id from blocks 
-where type='l' 
-and root_id="${idName[0].id}"
-and ial like '%${REF_HIERARCHY}="${attrValue}"%' limit 1`);
+        const row = await siyuan.sqlOne(`select block_id as id from attributes
+            where name="${REF_HIERARCHY}" and value like "%${attrValue}%" limit 1`);
         if (!row?.id) {
             let i = 0;
             const mdList = [];
