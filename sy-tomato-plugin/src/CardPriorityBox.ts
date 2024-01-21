@@ -166,15 +166,12 @@ class CardPriorityBox {
                     spanSpace.textContent = SPACE;
 
                     addOne.title = "闪卡优先级+1";
-                    addOne.classList.add("b3-button--white");
                     addOne.textContent = "➕";
 
                     subOne.title = "闪卡优先级-1";
-                    subOne.classList.add("b3-button--white");
                     subOne.textContent = "➖";
 
                     rmCard.title = "取消制卡";
-                    rmCard.classList.add("b3-button--white");
                     rmCard.textContent = "🚫";
 
                     addOne.addEventListener("click", async () => {
