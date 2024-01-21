@@ -1,4 +1,4 @@
-import { ICardData, IEventBusMap, IProtyle, Plugin } from "siyuan";
+import { ICardData, IEventBusMap, IProtyle, Plugin, confirm } from "siyuan";
 import "./index.scss";
 import { getID, isValidNumber, shuffleArray, siyuan, siyuanCache } from "./libs/utils";
 import { CARD_PRIORITY, CUSTOM_RIFF_DECKS, DATA_NODE_ID, SPACE, TOMATO_CONTROL_ELEMENT } from "./libs/gconst";
@@ -188,10 +188,14 @@ class CardPriorityBox {
                         await this.updatePrioritySelected([e], priority - 1);
                         await this.addBtns(element);
                     });
-                    rmCard.addEventListener("click", async () => {
-                        await siyuan.removeRiffCards([cardID]);
-                        await siyuan.pushMsg(`已经删除闪卡：${text}`);
-                        await this.addBtns(element);
+                    rmCard.addEventListener("click", () => {
+                        confirm("删除闪卡", text, async () => {
+                            await siyuan.removeRiffCards([cardID]);
+                            const attrbar = e.querySelector(`[${TOMATO_CONTROL_ELEMENT}]`);
+                            if (attrbar) {
+                                attrbar.parentElement.removeChild(attrbar);
+                            }
+                        })
                     });
                 }
             });
