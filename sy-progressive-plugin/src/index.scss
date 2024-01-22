@@ -19,6 +19,10 @@
   transform-origin: 0 0;
 }
 
+.protyle-wysiwyg div[custom-prog-key-note] {
+  color: var(--b3-font-color8);
+}
+
 @keyframes progFadeIn {
   from {
     opacity: 0.4;
