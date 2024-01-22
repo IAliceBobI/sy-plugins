@@ -152,8 +152,8 @@ export async function getBackLinks(self: IBKMaker) {
     const btnDiv = document.createElement("div");
     initBtnDiv(self, btnDiv);
     const topDiv = document.createElement("div");
-    self.container.appendChild(btnDiv);
     self.container.appendChild(topDiv);
+    self.container.appendChild(btnDiv);
     self.container.appendChild(contentContainer);
 
     const maxCount = self.settingCfg["back-link-max-size"] ?? 100;
