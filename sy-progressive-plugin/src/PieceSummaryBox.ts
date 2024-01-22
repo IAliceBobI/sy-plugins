@@ -12,7 +12,8 @@ class PieceSummaryBox {
     blockIconEvent(detail: any) {
         if (!this.plugin) return;
         const protyle: IProtyle = detail.protyle;
-        if (isProtylePiece(protyle)) {
+        const { isPiece } = isProtylePiece(protyle);
+        if (isPiece) {
             detail.menu.addItem({
                 iconHTML: "📨",
                 label: this.plugin.i18n.collect,
@@ -36,7 +37,8 @@ class PieceSummaryBox {
         });
         this.plugin.eventBus.on("open-menu-content", async ({ detail }) => {
             const protyle: IProtyle = detail.protyle;
-            if (isProtylePiece(protyle)) {
+            const { isPiece } = isProtylePiece(protyle);
+            if (isPiece) {
                 const menu = detail.menu;
                 menu.addItem({
                     label: this.plugin.i18n.collect,

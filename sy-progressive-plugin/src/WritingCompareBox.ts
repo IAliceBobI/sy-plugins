@@ -1,6 +1,6 @@
 import { IProtyle, Lute, Plugin, openTab } from "siyuan";
-import { NewLute, cleanDiv, getBlockDiv, siyuan } from "../../sy-tomato-plugin/src/libs/utils";
-import { copyBlock, findKeysDoc, getHPathByDocID, getKeysDoc, isProtylePiece } from "./helper";
+import { NewLute, cleanDiv, getBlockDiv, isValidNumber, siyuan } from "../../sy-tomato-plugin/src/libs/utils";
+import { findKeysDoc, getHPathByDocID, getKeysDoc, isProtyleKeyDoc, isProtylePiece } from "./helper";
 import { MarkKey, PROG_KEY_NOTE, PROG_ORIGIN_TEXT } from "../../sy-tomato-plugin/src/libs/gconst";
 
 class WritingCompareBox {
@@ -14,26 +14,37 @@ class WritingCompareBox {
         this.lute = NewLute();
         this.plugin.eventBus.on("open-menu-content", async ({ detail }) => {
             const protyle: IProtyle = detail.protyle;
-            if (isProtylePiece(protyle)) {
+            const { isPiece, markKey } = isProtylePiece(protyle);
+            if (isPiece) {
                 const menu = detail.menu;
                 menu.addItem({
                     label: "提取笔记",
                     icon: "iconCopy",
                     click: async () => {
-                        await this.extractNotes(protyle.block?.rootID, protyle.notebookId);
+                        await this.extractNotes(protyle.block?.rootID, protyle.notebookId, markKey);
+                    },
+                });
+            } else if (isProtyleKeyDoc(protyle)) {
+                const menu = detail.menu;
+                menu.addItem({
+                    label: "对比原文",
+                    icon: "iconEye",
+                    click: async () => {
                     },
                 });
             }
         });
     }
 
-    private async extractNotes(pieceID: string, notebookId: string) {
-        if (!pieceID || !notebookId) return;
-        let keysDocID = await findKeysDoc(pieceID);
+    private async extractNotes(pieceID: string, notebookId: string, markKey: string) {
+        if (!pieceID || !notebookId || !markKey) return;
+        const point = Number(markKey.split('#').pop()?.split(",").pop());
+        if (!isValidNumber(point)) return;
+        let keysDocID = await findKeysDoc(pieceID, point);
         if (!keysDocID) {
             const hpath = await getHPathByDocID(pieceID, "keys");
             if (hpath) {
-                keysDocID = await getKeysDoc(pieceID, notebookId, hpath);
+                keysDocID = await getKeysDoc(pieceID, point, notebookId, hpath);
             }
         }
         if (!keysDocID) return;

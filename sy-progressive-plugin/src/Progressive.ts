@@ -82,7 +82,8 @@ class Progressive {
                         });
                     }
                     const nextDocID = protyle?.block?.rootID;
-                    if (lock && nextDocID && help.isProtylePiece(protyle)) {
+                    const { isPiece } = help.isProtylePiece(protyle);
+                    if (lock && nextDocID && isPiece) {
                         await this.tryAddRefAttr(welement);
                         if (this.docID != nextDocID) {
                             this.docID = nextDocID;

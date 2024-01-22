@@ -180,8 +180,8 @@ export function getDocIalSummary(bookID: string) {
     return `summary#${TEMP_CONTENT}#${bookID}`;
 }
 
-export function getDocIalKeysDoc(bookID: string) {
-    return `keysDoc#${TEMP_CONTENT}#${bookID}`;
+export function getDocIalKeysDoc(bookID: string, point: number) {
+    return `keysDoc#${TEMP_CONTENT}#${bookID},${point}`;
 }
 
 export async function getBookIDByBlock(blockID: string) {
@@ -234,11 +234,11 @@ export async function getSummaryDoc(bookID: string, boxID: string, hpath: string
     return targetDocID;
 }
 
-export async function getKeysDoc(bookID: string, boxID: string, hpath: string) {
-    const id = await findKeysDoc(bookID);
+export async function getKeysDoc(bookID: string, point: number, boxID: string, hpath: string) {
+    const id = await findKeysDoc(bookID, point);
     if (id) return id;
     const attr = {};
-    attr[MarkKey] = getDocIalKeysDoc(bookID);
+    attr[MarkKey] = getDocIalKeysDoc(bookID, point);
     const targetDocID = await utils.siyuanCache.createDocWithMdIfNotExists(5000, boxID, hpath, "", attr);
     return targetDocID;
 }
@@ -335,8 +335,8 @@ export async function findSummary(bookID: string) {
     return doFindDoc(bookID, getDocIalSummary);
 }
 
-export async function findKeysDoc(bookID: string) {
-    return doFindDoc(bookID, getDocIalKeysDoc);
+export async function findKeysDoc(bookID: string, point: number) {
+    return doFindDoc(bookID, getDocIalKeysDoc, point);
 }
 
 async function doFindDoc(bookID: string, func: Func, point?: number) {
@@ -923,6 +923,13 @@ export function appendChild(parent: HTMLElement, type: string, textContent: stri
 }
 
 export function isProtylePiece(protyle: IProtyle) {
+    const div = protyle?.element?.querySelector(`[${MarkKey}]`) as HTMLDivElement;
+    const attr = div?.getAttribute(MarkKey) ?? "";
+    const pieceLen = TEMP_CONTENT.length + 1 + "20231229160401-0lfc8qj".length + 1 + 1;
+    return { isPiece: attr.startsWith(TEMP_CONTENT + "#") && attr.length >= pieceLen, markKey: attr };
+}
+
+export function isProtyleKeyDoc(protyle: IProtyle) {
     const div = protyle?.element?.querySelector(`[${MarkKey}]`) as HTMLDivElement;
     const attr = div?.getAttribute(MarkKey) ?? "";
     const pieceLen = TEMP_CONTENT.length + 1 + "20231229160401-0lfc8qj".length + 1 + 1;

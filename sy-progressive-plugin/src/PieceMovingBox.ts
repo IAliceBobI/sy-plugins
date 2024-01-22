@@ -11,7 +11,8 @@ class PieceMovingBox {
     blockIconEvent(detail: any) {
         if (!this.plugin) return;
         const protyle: IProtyle = detail.protyle;
-        if (isProtylePiece(protyle)) {
+        const { isPiece } = isProtylePiece(protyle);
+        if (isPiece) {
             detail.menu.addItem({
                 iconHTML: "",
                 label: "移动到上一分片内",
@@ -35,7 +36,8 @@ class PieceMovingBox {
         this.lute = NewLute();
         this.plugin.eventBus.on("open-menu-content", async ({ detail }) => {
             const protyle: IProtyle = detail.protyle;
-            if (isProtylePiece(protyle)) {
+            const { isPiece } = isProtylePiece(protyle);
+            if (isPiece) {
                 const menu = detail.menu;
                 menu.addItem({
                     label: "移动到上一分片内",
