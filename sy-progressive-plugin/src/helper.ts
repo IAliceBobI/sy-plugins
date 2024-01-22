@@ -180,6 +180,10 @@ export function getDocIalSummary(bookID: string) {
     return `summary#${TEMP_CONTENT}#${bookID}`;
 }
 
+export function getDocIalKeysDoc(bookID: string) {
+    return `keysDoc#${TEMP_CONTENT}#${bookID}`;
+}
+
 export async function getBookIDByBlock(blockID: string) {
     const docRow = await siyuan.getDocRowByBlockID(blockID);
     return getBookID(docRow?.id);
@@ -226,6 +230,15 @@ export async function getSummaryDoc(bookID: string, boxID: string, hpath: string
     if (id) return id;
     const attr = {};
     attr[MarkKey] = getDocIalSummary(bookID);
+    const targetDocID = await utils.siyuanCache.createDocWithMdIfNotExists(5000, boxID, hpath, "", attr);
+    return targetDocID;
+}
+
+export async function getKeysDoc(bookID: string, boxID: string, hpath: string) {
+    const id = await findKeysDoc(bookID);
+    if (id) return id;
+    const attr = {};
+    attr[MarkKey] = getDocIalKeysDoc(bookID);
     const targetDocID = await utils.siyuanCache.createDocWithMdIfNotExists(5000, boxID, hpath, "", attr);
     return targetDocID;
 }
@@ -320,6 +333,10 @@ export async function findCards(bookID: string) {
 
 export async function findSummary(bookID: string) {
     return doFindDoc(bookID, getDocIalSummary);
+}
+
+export async function findKeysDoc(bookID: string) {
+    return doFindDoc(bookID, getDocIalKeysDoc);
 }
 
 async function doFindDoc(bookID: string, func: Func, point?: number) {
