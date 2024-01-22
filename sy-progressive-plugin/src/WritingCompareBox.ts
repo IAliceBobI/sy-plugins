@@ -36,7 +36,13 @@ class WritingCompareBox {
             .map(e => e.div);
         for (const div of divs) {
             await cleanDiv(div, false, false);
-            console.log(div)
+            // let summaryID = await findSummary(pieceID);
+            // if (!summaryID) {
+            //     const hpath = await getHPathByDocID(pieceID, "keys");
+            //     if (hpath) {
+            //         summaryID = await getSummaryDoc(pieceID, notebook, hpath);
+            //     }
+            // }
         }
     }
 }

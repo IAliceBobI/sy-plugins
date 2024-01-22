@@ -73,18 +73,24 @@ class Progressive {
             navigator.locks.request(constants.TryAddStarsLock, { ifAvailable: true }, async (lock) => {
                 if (eventType == EventType.loaded_protyle_static) {
                     const protyle: IProtyle = detail.protyle;
-                    if (!protyle) return;
+                    const welement = protyle?.wysiwyg?.element as HTMLElement;
+                    const element = protyle?.element as HTMLElement;
+                    if (!protyle || !welement || !element) return;
+                    if (element.classList.contains("card__block")) {
+                        element.querySelectorAll(`[${MarkKey}]`).forEach((e: HTMLElement) => {
+                            e.style.display = "none";
+                        });
+                    }
                     const nextDocID = protyle?.block?.rootID;
-                    const element = protyle?.wysiwyg?.element;
-                    if (lock && element && nextDocID && help.isProtylePiece(protyle)) {
-                        await this.tryAddRefAttr(element);
+                    if (lock && nextDocID && help.isProtylePiece(protyle)) {
+                        await this.tryAddRefAttr(welement);
                         if (this.docID != nextDocID) {
                             this.docID = nextDocID;
                             this.observer?.disconnect();
                             this.observer = new MutationObserver((_mutationsList) => {
-                                this.tryAddRefAttr(element);
+                                this.tryAddRefAttr(welement);
                             });
-                            this.observer.observe(element, { childList: true });
+                            this.observer.observe(welement, { childList: true });
                         }
                     }
                 }
