@@ -2,6 +2,10 @@ import { App, Constants, IOperation, Lute, fetchSyncPost, openTab } from "siyuan
 import { v4 as uuid } from "uuid";
 import * as gconst from "./gconst";
 
+export function sortedMap<K, V>(map: Map<K, V>, compareFn?: (a: [K, V], b: [K, V]) => number) {
+    return new Map([...map.entries()].sort(compareFn));
+}
+
 export async function cleanDiv(div: HTMLDivElement, setRef: boolean, setOrigin: boolean): Promise<[string, HTMLElement, boolean]> {
     const id = div.getAttribute(gconst.DATA_NODE_ID);
 
