@@ -1,4 +1,4 @@
-import { Dialog, openTab } from "siyuan";
+import { Dialog, Plugin, openTab } from "siyuan";
 import { BLOCK_REF, DATA_ID, DATA_NODE_ID, DATA_TYPE } from "./gconst";
 import { SearchEngine } from "./search";
 import { chunks, extractLinks, isValidNumber, siyuanCache } from "./utils";
@@ -124,6 +124,7 @@ export function createEyeBtn() {
 export const MENTION_CACHE_TIME = 1 * 60 * 1000;
 
 export interface IBKMaker {
+    plugin: Plugin
     docID: string
     container: HTMLElement;
     label: HTMLElement;
@@ -143,6 +144,7 @@ export function init(self: IBKMaker, docID: string, blBox: any) {
     self.mentionCounting = document.createElement("span");
     self.mentionCounting.classList.add("b3-label__text");
     self.settingCfg = blBox.settingCfg;
+    self.plugin = blBox.plugin;
 }
 
 export async function getBackLinks(self: IBKMaker) {
@@ -190,7 +192,10 @@ export async function getBackLinks(self: IBKMaker) {
         btn.style.color = "var(--b3-protyle-inline-blockref-color)";
         btn.textContent = e.textContent;
         btn.addEventListener("click", () => {
-            openTab({ app: self.blBox.plugin.app, doc: { id: e.getAttribute(DATA_ID), action: ["cb-get-all", "cb-get-focus", "cb-get-hl"] } });
+            setTimeout(() => {
+                openTab({ app: self.plugin.app, doc: { id: e.getAttribute(DATA_ID), action: ["cb-get-all", "cb-get-focus"] } });
+            }, 1000);
+            window.location.href = "siyuan://blocks/" + e.getAttribute(DATA_ID);
         });
         e.parentElement.replaceChild(btn, e);
     });

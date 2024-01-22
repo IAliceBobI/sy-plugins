@@ -29,6 +29,7 @@ class BKMaker implements IBKMaker {
     public freezeCheckBox: HTMLInputElement;
     public label: HTMLLabelElement;
     public settingCfg: TomatoSettings;
+    public plugin: Plugin;
 
     constructor(blBox: BackLinkBottomBox, docID: string) {
         init(this, docID, blBox);
