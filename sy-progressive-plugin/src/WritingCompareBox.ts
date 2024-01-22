@@ -56,7 +56,13 @@ class WritingCompareBox {
                 }
             }
             if (!cmpDocID) return;
-            console.log(pieceID, cmpDocID)
+            await siyuan.clearAll(cmpDocID);
+            const mdList: string[] = [];
+
+            
+
+            await siyuan.insertBlockAsChildOf(mdList.join("\n"), cmpDocID);
+            openTab({ app: this.plugin.app, doc: { id: cmpDocID }, position: "right" })
         }
     }
 
