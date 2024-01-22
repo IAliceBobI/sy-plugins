@@ -80,9 +80,27 @@ class WritingCompareBox {
                     return m;
                 }, new Map<string, HTMLElement[]>());
 
-            const pieceDivs = (await Promise.all((await siyuan.getChildBlocks(pieceID)).map(b => getBlockDiv(b.id))))
+            const { ids, m: pieceDivMap } = (await Promise.all((await siyuan.getChildBlocks(pieceID)).map(b => getBlockDiv(b.id))))
                 .filter(e => e.div.getAttribute(PROG_ORIGIN_TEXT))
-                .map(e => e.div);
+                .map(e => e.div)
+                .reduce((obj, e) => {
+                    const k = e.getAttribute(RefIDKey);
+                    obj.ids.push(k);
+                    if (!obj.m.has(k)) obj.m.set(k, []);
+                    obj.m.get(k).push(e);
+                    return obj;
+                }, { ids: [] as string[], m: new Map<string, HTMLElement[]>() });
+
+            for (const id of [... new Set(ids)]) {
+                for (const div of pieceDivMap.get(id) ?? []) {
+                    await cleanDiv(div as any, false, false);
+                    mdList.push(this.lute.BlockDOM2Md(div.outerHTML))
+                }
+                for (const div of keyNoteDivMap.get(id) ?? []) {
+                    await cleanDiv(div as any, false, false);
+                    mdList.push(this.lute.BlockDOM2Md(div.outerHTML))
+                }
+            }
 
             await siyuan.insertBlockAsChildOf(mdList.join("\n"), cmpDocID);
             openTab({ app: this.plugin.app, doc: { id: cmpDocID }, position: "right" })
