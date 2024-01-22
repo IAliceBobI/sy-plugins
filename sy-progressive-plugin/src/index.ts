@@ -5,6 +5,7 @@ import { EventType, events } from "../../sy-tomato-plugin/src/libs/Events";
 import { flashBox } from "./FlashBox";
 import { pieceMovingBox } from "./PieceMovingBox";
 import { pieceSummaryBox } from "./PieceSummaryBox";
+import { writingCompareBox } from "./WritingCompareBox";
 
 const STORAGE_SETTINGS = "ProgressiveLearning.json";
 
@@ -67,6 +68,7 @@ export default class ThePlugin extends Plugin {
         await flashBox.onload(this, this.settingCfg);
         await pieceMovingBox.onload(this, this.settingCfg);
         await pieceSummaryBox.onload(this, this.settingCfg);
+        await writingCompareBox.onload(this, this.settingCfg);
 
         this.addSettingItem("addCodeBlock", "* 制卡时加入代码块", false, "与引述块二选一");
         this.addSettingItem("addQuoteBlock", "* 制卡时加入引述块", true, "与代码块二选一");
