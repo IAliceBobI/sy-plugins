@@ -194,7 +194,7 @@ export async function getBackLinks(self: IBKMaker) {
         btn.addEventListener("click", () => {
             setTimeout(() => {
                 openTab({ app: self.plugin.app, doc: { id: e.getAttribute(DATA_ID), action: ["cb-get-all", "cb-get-focus"] } });
-            }, 1000);
+            }, 2000);
             window.location.href = "siyuan://blocks/" + e.getAttribute(DATA_ID);
         });
         e.parentElement.replaceChild(btn, e);
@@ -302,10 +302,15 @@ async function path2div(self: IBKMaker, docBlock: HTMLElement, blockPaths: Block
             }
         }
     }
-    refPathList.forEach((s, idx) => {
+    refPathList.forEach((s, idx, arr) => {
         s = s.cloneNode(true) as HTMLScriptElement;
-        if (idx < refPathList.length - 1) {
+        if (idx < arr.length - 1) {
             s.appendChild(createSpan("  ➡  "));
+        } else {
+            const e = s.querySelector(`[${DATA_ID}]`);
+            if (e) {
+                e.textContent = "[...]";
+            }
         }
         div.appendChild(s);
     });
