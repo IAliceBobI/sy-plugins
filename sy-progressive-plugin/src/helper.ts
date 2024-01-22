@@ -925,13 +925,13 @@ export function appendChild(parent: HTMLElement, type: string, textContent: stri
 export function isProtylePiece(protyle: IProtyle) {
     const div = protyle?.element?.querySelector(`[${MarkKey}]`) as HTMLDivElement;
     const attr = div?.getAttribute(MarkKey) ?? "";
-    const pieceLen = TEMP_CONTENT.length + 1 + "20231229160401-0lfc8qj".length + 1 + 1;
+    const pieceLen = getDocIalPieces("20231229160401-0lfc8qj", 0).length;
     return { isPiece: attr.startsWith(TEMP_CONTENT + "#") && attr.length >= pieceLen, markKey: attr };
 }
 
 export function isProtyleKeyDoc(protyle: IProtyle) {
     const div = protyle?.element?.querySelector(`[${MarkKey}]`) as HTMLDivElement;
     const attr = div?.getAttribute(MarkKey) ?? "";
-    const pieceLen = TEMP_CONTENT.length + 1 + "20231229160401-0lfc8qj".length + 1 + 1;
-    return attr.startsWith(TEMP_CONTENT + "#") && attr.length >= pieceLen;
+    const fake = getDocIalKeysDoc("20231229160401-0lfc8qj", 0);
+    return { isKeyDoc: attr.includes(fake.split("#", 1)[0] + "#" + TEMP_CONTENT + "#") && attr.length >= fake.length, keyDocAttr: attr };
 }

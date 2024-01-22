@@ -24,14 +24,17 @@ class WritingCompareBox {
                         await this.extractNotes(protyle.block?.rootID, protyle.notebookId, markKey);
                     },
                 });
-            } else if (isProtyleKeyDoc(protyle)) {
-                const menu = detail.menu;
-                menu.addItem({
-                    label: "对比原文",
-                    icon: "iconEye",
-                    click: async () => {
-                    },
-                });
+            } else {
+                const { isKeyDoc, keyDocAttr } = isProtyleKeyDoc(protyle);
+                if (isKeyDoc) {
+                    const menu = detail.menu;
+                    menu.addItem({
+                        label: "对比原文",
+                        icon: "iconEye",
+                        click: async () => {
+                        },
+                    });
+                }
             }
         });
     }
