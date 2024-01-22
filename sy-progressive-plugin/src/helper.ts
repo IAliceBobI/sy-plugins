@@ -184,6 +184,10 @@ export function getDocIalKeysDoc(bookID: string, point: number) {
     return `keysDoc#${TEMP_CONTENT}#${bookID},${point}`;
 }
 
+export function getDocIalCompareDoc(bookID: string, point: number) {
+    return `compareDoc#${TEMP_CONTENT}#${bookID},${point}`;
+}
+
 export async function getBookIDByBlock(blockID: string) {
     const docRow = await siyuan.getDocRowByBlockID(blockID);
     return getBookID(docRow?.id);
@@ -239,6 +243,15 @@ export async function getKeysDoc(bookID: string, point: number, boxID: string, h
     if (id) return id;
     const attr = {};
     attr[MarkKey] = getDocIalKeysDoc(bookID, point);
+    const targetDocID = await utils.siyuanCache.createDocWithMdIfNotExists(5000, boxID, hpath, "", attr);
+    return targetDocID;
+}
+
+export async function getCompareDoc(bookID: string, point: number, boxID: string, hpath: string) {
+    const id = await findCompareDoc(bookID, point);
+    if (id) return id;
+    const attr = {};
+    attr[MarkKey] = getDocIalCompareDoc(bookID, point);
     const targetDocID = await utils.siyuanCache.createDocWithMdIfNotExists(5000, boxID, hpath, "", attr);
     return targetDocID;
 }
@@ -337,6 +350,10 @@ export async function findSummary(bookID: string) {
 
 export async function findKeysDoc(bookID: string, point: number) {
     return doFindDoc(bookID, getDocIalKeysDoc, point);
+}
+
+export async function findCompareDoc(bookID: string, point: number) {
+    return doFindDoc(bookID, getDocIalCompareDoc, point);
 }
 
 async function doFindDoc(bookID: string, func: Func, point?: number) {

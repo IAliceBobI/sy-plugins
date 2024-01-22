@@ -1,6 +1,6 @@
 import { IProtyle, Lute, Plugin, openTab } from "siyuan";
 import { NewLute, cleanDiv, getBlockDiv, isValidNumber, siyuan } from "../../sy-tomato-plugin/src/libs/utils";
-import { findKeysDoc, findPieceDoc, getHPathByDocID, getKeysDoc, isProtyleKeyDoc, isProtylePiece } from "./helper";
+import { findCompareDoc, findKeysDoc, findPieceDoc, getHPathByDocID, getKeysDoc, isProtyleKeyDoc, isProtylePiece } from "./helper";
 import { MarkKey, PROG_KEY_NOTE, PROG_ORIGIN_TEXT } from "../../sy-tomato-plugin/src/libs/gconst";
 
 class WritingCompareBox {
@@ -47,14 +47,14 @@ class WritingCompareBox {
             const point = Number(parts[1]);
             if (!isValidNumber(point)) return;
             const pieceID = await findPieceDoc(parts[0], point);
-            let keysDocID = await findKeysDoc(parts[0], point);
-            if (!keysDocID) {
+            let cmpDocID = await findCompareDoc(parts[0], point);
+            if (!cmpDocID) {
                 const hpath = await getHPathByDocID(pieceID, "compare");
                 if (hpath) {
-                    keysDocID = await getKeysDoc(parts[0], point, notebookId, hpath);
+                    cmpDocID = await getKeysDoc(parts[0], point, notebookId, hpath);
                 }
             }
-            if (!keysDocID) return;
+            if (!cmpDocID) return;
         }
     }
 
