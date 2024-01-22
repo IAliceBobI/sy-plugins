@@ -82,19 +82,23 @@ export class SplitSentence {
                                 const { newID, attrLine } = getAttrLine();
                                 return { text: SPACE.repeat(2) + i + ` ((${ref} "*"))\n${attrLine}\n`, id: newID };
                             });
+                        const { newID } = getAttrLine();
+                        blocks.push({ text: `{: id="${newID}"}\n`, id: newID });
                     } else if (this.asList == "t") {
                         blocks = ps.map(i => {
                             const { newID, attrLine } = getAttrLine();
                             return { text: `* ${ATTR_LINE}[ ] ` + i + ` ((${ref} "*"))\n\t${attrLine}\n`, id: newID };
                         });
+                        const { newID, attrLine } = getAttrLine();
+                        blocks.push({ text: `${attrLine}\n`, id: newID });
                     } else {
                         blocks = ps.map(i => {
                             const { newID, attrLine } = getAttrLine();
                             return { text: `* ${ATTR_LINE} ` + i + ` ((${ref} "*"))\n\t${attrLine}\n`, id: newID };
                         });
+                        const { newID, attrLine } = getAttrLine();
+                        blocks.push({ text: `${attrLine}\n`, id: newID });
                     }
-                    const { newID, attrLine } = getAttrLine();
-                    blocks.push({ text: `${attrLine}\n`, id: newID });
                     this.textAreas.push({ blocks, ref });
                 }
             }

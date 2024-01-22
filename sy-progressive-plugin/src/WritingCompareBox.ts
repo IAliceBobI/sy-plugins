@@ -1,7 +1,7 @@
 import { IProtyle, Lute, Plugin, openTab } from "siyuan";
 import { NewLute, cleanDiv, getBlockDiv, isValidNumber, siyuan } from "../../sy-tomato-plugin/src/libs/utils";
 import { findCompareDoc, findKeysDoc, findPieceDoc, getCompareDoc, getHPathByDocID, getKeysDoc, isProtyleKeyDoc, isProtylePiece } from "./helper";
-import { MarkKey, PROG_KEY_NOTE, PROG_ORIGIN_TEXT } from "../../sy-tomato-plugin/src/libs/gconst";
+import { MarkKey, PROG_KEY_NOTE, PROG_ORIGIN_TEXT, RefIDKey } from "../../sy-tomato-plugin/src/libs/gconst";
 
 class WritingCompareBox {
     private plugin: Plugin;
@@ -59,7 +59,25 @@ class WritingCompareBox {
             await siyuan.clearAll(cmpDocID);
             const mdList: string[] = [];
 
-            
+            const keyNoteDivs = (await Promise.all((await siyuan.getChildBlocks(keyNoteID)).map(b => getBlockDiv(b.id))))
+                .map(e => e.div)
+                .reduce((all, e) => {
+                    all.divs.push(e);
+                    const ref = e.getAttribute(RefIDKey);
+                    if (ref) {
+                        all.lastRef = ref;
+                    } else if (all.lastRef) {
+                        e.setAttribute(RefIDKey, all.lastRef);
+                    }
+                    return all;
+                }, { lastRef: "", divs: [] as HTMLElement[] })
+                .divs
+                .filter(e => !e.getAttribute(PROG_KEY_NOTE))
+                .forEach(e => console.log(e.textContent, e.getAttribute(RefIDKey)))
+
+            const pieceDivs = (await Promise.all((await siyuan.getChildBlocks(pieceID)).map(b => getBlockDiv(b.id))))
+                .filter(e => e.div.getAttribute(PROG_ORIGIN_TEXT))
+                .map(e => e.div);
 
             await siyuan.insertBlockAsChildOf(mdList.join("\n"), cmpDocID);
             openTab({ app: this.plugin.app, doc: { id: cmpDocID }, position: "right" })
