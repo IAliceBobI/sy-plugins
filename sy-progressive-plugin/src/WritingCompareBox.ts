@@ -94,17 +94,17 @@ class WritingCompareBox {
             for (const id of [... new Set(ids)]) {
                 for (const div of pieceDivMap.get(id) ?? []) {
                     await cleanDiv(div as any, false, false);
-                    div.setAttribute(PROG_KEY_NOTE, "1")
-                    mdList.push(this.lute.BlockDOM2Md(div.outerHTML))
+                    div.setAttribute(PROG_KEY_NOTE, "1");
+                    mdList.push(this.lute.BlockDOM2Md(div.outerHTML));
                 }
                 for (const div of keyNoteDivMap.get(id) ?? []) {
                     await cleanDiv(div as any, false, false);
-                    mdList.push(this.lute.BlockDOM2Md(div.outerHTML))
+                    mdList.push(this.lute.BlockDOM2Md(div.outerHTML));
                 }
             }
 
             await siyuan.insertBlockAsChildOf(mdList.join("\n"), cmpDocID);
-            openTab({ app: this.plugin.app, doc: { id: cmpDocID }, position: "right" })
+            openTab({ app: this.plugin.app, doc: { id: cmpDocID }, position: "right" });
         }
     }
 
@@ -136,7 +136,7 @@ class WritingCompareBox {
                 mdList.push(md);
             }
             await siyuan.insertBlockAsChildOf(mdList.join("\n"), keysDocID);
-            openTab({ app: this.plugin.app, doc: { id: keysDocID }, position: "right" })
+            openTab({ app: this.plugin.app, doc: { id: keysDocID }, position: "right" });
         }
     }
 }
