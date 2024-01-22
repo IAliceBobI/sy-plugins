@@ -1,6 +1,6 @@
 import { IProtyle, Lute, Plugin, openTab } from "siyuan";
 import { NewLute, cleanDiv, getBlockDiv, isValidNumber, siyuan } from "../../sy-tomato-plugin/src/libs/utils";
-import { findCompareDoc, findKeysDoc, findPieceDoc, getHPathByDocID, getKeysDoc, isProtyleKeyDoc, isProtylePiece } from "./helper";
+import { findCompareDoc, findKeysDoc, findPieceDoc, getCompareDoc, getHPathByDocID, getKeysDoc, isProtyleKeyDoc, isProtylePiece } from "./helper";
 import { MarkKey, PROG_KEY_NOTE, PROG_ORIGIN_TEXT } from "../../sy-tomato-plugin/src/libs/gconst";
 
 class WritingCompareBox {
@@ -47,14 +47,16 @@ class WritingCompareBox {
             const point = Number(parts[1]);
             if (!isValidNumber(point)) return;
             const pieceID = await findPieceDoc(parts[0], point);
+            if (!pieceID) return;
             let cmpDocID = await findCompareDoc(parts[0], point);
             if (!cmpDocID) {
                 const hpath = await getHPathByDocID(pieceID, "compare");
                 if (hpath) {
-                    cmpDocID = await getKeysDoc(parts[0], point, notebookId, hpath);
+                    cmpDocID = await getCompareDoc(parts[0], point, notebookId, hpath);
                 }
             }
             if (!cmpDocID) return;
+            console.log(pieceID, cmpDocID)
         }
     }
 
@@ -72,6 +74,7 @@ class WritingCompareBox {
                 }
             }
             if (!keysDocID) return;
+            await siyuan.clearAll(keysDocID);
 
             const divs = (await Promise.all((await siyuan.getChildBlocks(pieceID)).map(b => getBlockDiv(b.id))))
                 .filter(e => !e.div.getAttribute(PROG_ORIGIN_TEXT))
@@ -84,7 +87,7 @@ class WritingCompareBox {
                 const md = this.lute.BlockDOM2Md(div.outerHTML);
                 mdList.push(md);
             }
-            await siyuan.appendBlock(mdList.join("\n"), keysDocID);
+            await siyuan.insertBlockAsChildOf(mdList.join("\n"), keysDocID);
             openTab({ app: this.plugin.app, doc: { id: keysDocID }, position: "right" })
         }
     }

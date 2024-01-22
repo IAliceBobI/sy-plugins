@@ -462,9 +462,10 @@ export const siyuan = {
         // if ids.length > 1, like wordCount will be the sum of blocks.
         return siyuan.call("api/block/getBlocksWordCount", { ids });
     },
+    // don't append to doc after clearAll
     async clearAll(docID: string) {
         const blocks = await siyuan.getChildBlocks(docID);
-        siyuan.safeDeleteBlocks(blocks.map((b: any) => b["id"]));
+        return siyuan.safeDeleteBlocks(blocks.map((b: any) => b["id"]));
     },
     async safeDeleteBlocks(ids: string[]) {
         for (const idlist of chunks(ids, 50)) {
