@@ -367,7 +367,7 @@ function initBtnDiv(self: IBKMaker, topDiv: HTMLDivElement) {
     {
         const help = topDiv.appendChild(document.createElement("span"));
         help.classList.add("b3-label__text");
-        help.title = "搜索语法";
+        help.title = "点击查看：搜索语法";
         help.innerHTML = icon("Help", 16);
         help.addEventListener("click", () => { new Dialog({ title: "搜索语法", content: SEARCH_HELP }); });
         topDiv.appendChild(createSpan("&nbsp;".repeat(1)));
