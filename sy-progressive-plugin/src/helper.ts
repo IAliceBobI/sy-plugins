@@ -319,7 +319,7 @@ export async function cleanNote(noteID: string, force: boolean) {
     }
 }
 
-export async function findDoc(bookID: string, point: number) {
+export async function findPieceDoc(bookID: string, point: number) {
     return doFindDoc(bookID, getDocIalPieces, point);
 }
 

@@ -32,6 +32,7 @@ class WritingCompareBox {
                         label: "对比原文",
                         icon: "iconEye",
                         click: async () => {
+                            
                         },
                     });
                 }

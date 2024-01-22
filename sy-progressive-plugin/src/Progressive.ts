@@ -425,7 +425,7 @@ class Progressive {
         }
         const piecePre = bookIndex[point - 1] ?? [];
         const piece = bookIndex[point];
-        noteID = await help.findDoc(bookInfo.bookID, point);
+        noteID = await help.findPieceDoc(bookInfo.bookID, point);
         let openPiece = false;
         if (noteID) {
             await this.addAndClose(await openTab({ app: this.plugin.app, doc: { id: noteID } }));
