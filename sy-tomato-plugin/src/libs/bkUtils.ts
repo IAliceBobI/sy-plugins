@@ -194,7 +194,7 @@ export async function getBackLinks(self: IBKMaker) {
         btn.addEventListener("click", () => {
             setTimeout(() => {
                 openTab({ app: self.plugin.app, doc: { id: e.getAttribute(DATA_ID), action: ["cb-get-all", "cb-get-focus"] } });
-            }, 2000);
+            }, 2500);
             window.location.href = "siyuan://blocks/" + e.getAttribute(DATA_ID);
         });
         e.parentElement.replaceChild(btn, e);
