@@ -59,7 +59,7 @@ class WritingCompareBox {
             await siyuan.clearAll(cmpDocID);
             const mdList: string[] = [];
 
-            const keyNoteDivs = (await Promise.all((await siyuan.getChildBlocks(keyNoteID)).map(b => getBlockDiv(b.id))))
+            const keyNoteDivMap = (await Promise.all((await siyuan.getChildBlocks(keyNoteID)).map(b => getBlockDiv(b.id))))
                 .map(e => e.div)
                 .reduce((all, e) => {
                     all.divs.push(e);
@@ -73,7 +73,12 @@ class WritingCompareBox {
                 }, { lastRef: "", divs: [] as HTMLElement[] })
                 .divs
                 .filter(e => !e.getAttribute(PROG_KEY_NOTE))
-                .forEach(e => console.log(e.textContent, e.getAttribute(RefIDKey)))
+                .reduce((m, e) => {
+                    const k = e.getAttribute(RefIDKey);
+                    if (!m.has(k)) m.set(k, []);
+                    m.get(k).push(e);
+                    return m;
+                }, new Map<string, HTMLElement[]>());
 
             const pieceDivs = (await Promise.all((await siyuan.getChildBlocks(pieceID)).map(b => getBlockDiv(b.id))))
                 .filter(e => e.div.getAttribute(PROG_ORIGIN_TEXT))
