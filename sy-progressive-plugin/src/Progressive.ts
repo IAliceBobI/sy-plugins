@@ -77,7 +77,7 @@ class Progressive {
                     const element = protyle?.element as HTMLElement;
                     if (!protyle || !welement || !element) return;
                     if (this.settings.hideBtnsInFlashCard && element.classList.contains("card__block")) {
-                        element.querySelectorAll(`[${MarkKey}]`).forEach((e: HTMLElement) => {
+                        element.querySelectorAll(`[${MarkKey}][${DATA_NODE_ID}]`).forEach((e: HTMLElement) => {
                             e.style.display = "none";
                         });
                     }
