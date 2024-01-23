@@ -391,12 +391,12 @@ export async function createNote(boxID: string, bookID: string, piece: string[],
         if (content) break;
     }
 
-    if (!content) {
+    if (content) {
+        attr["alias"] = bookName + "," + content;
+        content = `[${point}]${content}`;
+    } else {
         attr["alias"] = bookName;
         content = `[${point}]${bookName}`;
-    } else {
-        attr["alias"] = content;
-        content = `[${point}]${content}`;
     }
 
     dir = dir + `/pieces-${bookName}/` + content;
