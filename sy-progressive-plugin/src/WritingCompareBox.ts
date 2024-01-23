@@ -1,7 +1,7 @@
 import { IProtyle, Lute, Plugin, openTab } from "siyuan";
 import { NewLute, cleanDiv, getBlockDiv, isValidNumber, siyuan } from "../../sy-tomato-plugin/src/libs/utils";
 import { findCompareDoc, findKeysDoc, findPieceDoc, getCompareDoc, getHPathByDocID, getKeysDoc, isProtyleKeyDoc, isProtylePiece } from "./helper";
-import { MarkKey, PROG_KEY_NOTE, PROG_ORIGIN_TEXT, RefIDKey } from "../../sy-tomato-plugin/src/libs/gconst";
+import { MarkKey, PROG_KEY_NOTE, PROG_ORIGIN_TEXT, RefIDKey, WEB_ZERO_SPACE } from "../../sy-tomato-plugin/src/libs/gconst";
 
 class WritingCompareBox {
     private plugin: Plugin;
@@ -127,6 +127,7 @@ class WritingCompareBox {
             const divs = (await Promise.all((await siyuan.getChildBlocks(pieceID)).map(b => getBlockDiv(b.id))))
                 .filter(e => !e.div.getAttribute(PROG_ORIGIN_TEXT))
                 .filter(e => !e.div.getAttribute(MarkKey))
+                .filter(e => e.div.textContent.replace(new RegExp(WEB_ZERO_SPACE, "g"), "").trim())
                 .map(e => e.div);
             const mdList: string[] = [];
             for (const div of divs) {
