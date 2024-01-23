@@ -58,7 +58,7 @@ export function scanAllRef(allRefs: RefCollector, div: HTMLDivElement, docID: st
 }
 
 export function addRef(txt: string, id: string, allRefs: RefCollector, docID: string) {
-    if (txt != "*" && id != docID && Array.from(txt.matchAll(/^c?\d{4}-\d{2}-\d{2}(@第\d+周-星期.{1})?$/g)).length == 0) {
+    if (txt != "*" && txt != "@" && id != docID && Array.from(txt.matchAll(/^c?\d{4}-\d{2}-\d{2}(@第\d+周-星期.{1})?$/g)).length == 0) {
         const key = id + txt;
         const c = (allRefs.get(key)?.count ?? 0) + 1;
         const span = refTag(id, txt, c);
