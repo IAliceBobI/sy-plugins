@@ -71,6 +71,12 @@
 
 <img src="assets/cardPriorityMenu.png" alt="drawing" width="600"/>
 
+还可鼠标悬浮于优先级上，查看复习次数（reps）：
+
+<img src="assets/cardReps.png" alt="drawing" width="600"/>
+
+**需要点击内容块任意位置，以触发复习次数的加载。当`优先级`由普通字体变成粗体时，可以鼠标悬浮以显示复习次数。**
+
 > 本功能默认关闭，请从配置中打开。
 
 > [打不开图片请看这里](https://gitee.com/TokenzQdBN/sy-plugins/blob/main/sy-tomato-plugin/README_zh_CN.md)
