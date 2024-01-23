@@ -261,7 +261,7 @@
 
 [或者到官方论坛提交问题](https://ld246.com/tag/siyuan)
 
-# 打赏、鼓励 🎉
+# 打赏、鼓励、催更 🎉
 
 <div>
 <img src="https://player-pubpic.oss-cn-beijing.aliyuncs.com/static/wx.png" alt="alipay" width="180" />
