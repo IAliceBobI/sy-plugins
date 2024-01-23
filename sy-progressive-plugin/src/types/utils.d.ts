@@ -1,6 +1,7 @@
 // https://app.quicktype.io/?l=ts
 
 type SettingCfgType = {
+    hideBtnsInFlashCard: boolean;
     cardUnderPiece: boolean;
     addCodeBlock: boolean,
     addQuoteBlock: boolean,

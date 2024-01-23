@@ -76,7 +76,7 @@ class Progressive {
                     const welement = protyle?.wysiwyg?.element as HTMLElement;
                     const element = protyle?.element as HTMLElement;
                     if (!protyle || !welement || !element) return;
-                    if (element.classList.contains("card__block")) {
+                    if (this.settings.hideBtnsInFlashCard && element.classList.contains("card__block")) {
                         element.querySelectorAll(`[${MarkKey}]`).forEach((e: HTMLElement) => {
                             e.style.display = "none";
                         });
