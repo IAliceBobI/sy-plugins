@@ -14,6 +14,10 @@
   padding-left: 15px;
 }
 
+.protyle-wysiwyg div[custom-progref][custom-paragraph-index]:not([custom-prog-origin-text]):not([custom-prog-key-note]) {
+  color: var(--b3-font-color7);
+}
+
 .protyle-wysiwyg div[custom-prog-piece-previous] {
   transform: scale(0.6);
   transform-origin: 0 0;
