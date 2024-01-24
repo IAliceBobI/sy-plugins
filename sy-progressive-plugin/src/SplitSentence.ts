@@ -19,7 +19,7 @@ export class SplitSentence {
         return navigator.locks.request("prog.SplitSentence.insert", { ifAvailable: true }, async (lock) => {
             if (lock && this.lastID) {
                 let firstID: string;
-                let mdList: string[] = [];
+                const mdList: string[] = [];
                 for (const b of this.textAreas) {
                     if (!firstID && b.blocks.length > 0) {
                         firstID = b.blocks[0].id;

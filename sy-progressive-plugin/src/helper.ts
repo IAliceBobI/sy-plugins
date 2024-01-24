@@ -312,7 +312,7 @@ export async function cleanNote(noteID: string, force: boolean) {
             tasks.push(siyuan.safeDeleteBlock(row.id));
         } else if (ial.includes(RefIDKey) && ial.includes(PROG_ORIGIN_TEXT)) {
             if (force) {
-                tasks.push(siyuan.deleteBlock(row.id))
+                tasks.push(siyuan.deleteBlock(row.id));
             } else {
                 if (!markdown) continue;
                 if (!markdown.includes("*")) continue;
@@ -323,7 +323,7 @@ export async function cleanNote(noteID: string, force: boolean) {
                         const oriMarkdown = origin?.markdown ?? "";
                         const markdownWithoutStar = markdown.replace(`((${originalID} "*"))`, "");
                         if (rmBadThings(oriMarkdown) == rmBadThings(markdownWithoutStar)) {
-                            tasks.push(siyuan.deleteBlock(row.id)) // delete the same content
+                            tasks.push(siyuan.deleteBlock(row.id)); // delete the same content
                         }
                         break;
                     }
