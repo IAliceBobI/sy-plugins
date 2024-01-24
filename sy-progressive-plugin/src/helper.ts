@@ -893,12 +893,31 @@ export class HeadingGroup {
     private group: WordCountType[][];
     private list: WordCountType[];
     private lastType: string;
+    private bookID: string;
     private headings: string[];
-    constructor(wordCount: WordCountType[], headings: number[]) {
+    constructor(wordCount: WordCountType[], headings: string[], bookID: string) {
         this.wordCount = wordCount;
         this.group = [];
         this.list = [];
-        this.headings = headings.map(i => `h${i}`);
+        this.headings = headings;
+        this.bookID = bookID;
+    }
+    public async init() {
+        if (this.headings.includes("b")) {
+            utils.arrayRemove(this.headings, "b");
+            this.headings.push("7");
+
+            const blocks = await siyuan.sql(`select id from blocks where root_id='${this.bookID}' and markdown like "**%**"`);
+            const s = new Set(blocks.map(b => b.id));
+            this.wordCount.forEach(e => {
+                if (s.has(e.id)) {
+                    e.type = "h";
+                    e.subType = "h7";
+                }
+            });
+        }
+        this.headings = this.headings.map(i => `h${i}`);
+        return this;
     }
     private add(wc: WordCountType) {
         this.getList(wc).push(wc);

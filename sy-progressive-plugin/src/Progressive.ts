@@ -254,7 +254,7 @@ class Progressive {
             平均每个块有：${Math.ceil(wordCount / contentBlocks.length)}字`;
 
         const titleInput = dialog.element.querySelector("#" + titleSplitID) as HTMLInputElement;
-        titleInput.value = "1,2,3,4,5,6";
+        titleInput.value = "1,2,3,4,5,6,b";
 
         const autoCardBox = dialog.element.querySelector("#" + autoCardID) as HTMLInputElement;
         autoCardBox.checked = false;
@@ -276,10 +276,13 @@ class Progressive {
         const btn = dialog.element.querySelector("#" + btnSplitID) as HTMLButtonElement;
         btn.addEventListener("click", async () => {
             const headings = titleInput.value.trim().replace(/，/g, ",")
-                .split(",").map(i => i.trim()).filter(i => !!i)
-                .map(i => Number(i));
-            if (!headings.reduce((ret, i) => ret && utils.isValidNumber(i) && i >= 1 && i <= 6, true)) {
-                titleInput.value = "1,2,3,4,5,6";
+                .split(",").map(i => i.trim()).filter(i => !!i);
+            if (!headings.reduce((ret, i) => {
+                if (i == "b") return ret;
+                const j = Number(i);
+                return ret && utils.isValidNumber(j) && j >= 1 && j <= 6;
+            }, true)) {
+                titleInput.value = "1,2,3,4,5,6,b";
                 return;
             }
             headings.sort();
@@ -304,7 +307,7 @@ class Progressive {
             }
 
             await siyuan.pushMsg(this.plugin.i18n.splitByHeadings);
-            let groups = new help.HeadingGroup(contentBlocks, headings).split();
+            let groups = (await new help.HeadingGroup(contentBlocks, headings, bookID).init()).split();
             groups = help.splitByBlockCount(groups, blockNumber);
             if (splitLen > 0) {
                 await siyuan.pushMsg(this.plugin.i18n.splitByWordCount + ":" + splitLen);

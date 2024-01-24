@@ -2,6 +2,14 @@ import { App, Constants, IOperation, Lute, fetchSyncPost, openTab } from "siyuan
 import { v4 as uuid } from "uuid";
 import * as gconst from "./gconst";
 
+export function arrayRemove<T>(array: T[], element: T) {
+    const index = array.indexOf(element);
+    if (index !== -1) {
+        array.splice(index, 1);
+    }
+    return array;
+}
+
 export function sortedMap<K, V>(map: Map<K, V>, compareFn?: (a: [K, V], b: [K, V]) => number) {
     return new Map([...map.entries()].sort(compareFn));
 }
