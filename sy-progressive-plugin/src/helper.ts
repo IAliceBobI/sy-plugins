@@ -304,14 +304,15 @@ export function rmBadThings(s: string) {
 }
 
 export async function cleanNote(noteID: string, force: boolean) {
+    const tasks = [];
     for (const row of await siyuan.sql(`select ial,markdown,id from blocks where root_id="${noteID}" and ial like '%${PROG_ORIGIN_TEXT}="1"%'`)) {
         const ial: string = row?.ial ?? "";
         const markdown: string = row?.markdown ?? "";
         if (ial.includes(TEMP_CONTENT)) {
-            await siyuan.safeDeleteBlock(row.id);
+            tasks.push(siyuan.safeDeleteBlock(row.id));
         } else if (ial.includes(RefIDKey) && ial.includes(PROG_ORIGIN_TEXT)) {
             if (force) {
-                await siyuan.safeDeleteBlock(row.id);
+                tasks.push(siyuan.deleteBlock(row.id))
             } else {
                 if (!markdown) continue;
                 if (!markdown.includes("*")) continue;
@@ -322,7 +323,7 @@ export async function cleanNote(noteID: string, force: boolean) {
                         const oriMarkdown = origin?.markdown ?? "";
                         const markdownWithoutStar = markdown.replace(`((${originalID} "*"))`, "");
                         if (rmBadThings(oriMarkdown) == rmBadThings(markdownWithoutStar)) {
-                            await siyuan.safeDeleteBlock(row.id); // delete the same content
+                            tasks.push(siyuan.deleteBlock(row.id)) // delete the same content
                         }
                         break;
                     }
@@ -330,6 +331,7 @@ export async function cleanNote(noteID: string, force: boolean) {
             }
         }
     }
+    await Promise.all(tasks);
 }
 
 export async function findPieceDoc(bookID: string, point: number) {

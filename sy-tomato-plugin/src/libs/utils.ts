@@ -484,6 +484,9 @@ export const siyuan = {
         if (await siyuan.checkBlockExist(id))
             return siyuan.call("/api/block/deleteBlock", { id });
     },
+    async deleteBlock(id: string) {
+        return siyuan.call("/api/block/deleteBlock", { id });
+    },
     async safeMoveBlockToParent(id: string, parentID: string) {
         if (await siyuan.checkBlockExist(id))
             return siyuan.call("/api/block/moveBlock", { id, parentID });

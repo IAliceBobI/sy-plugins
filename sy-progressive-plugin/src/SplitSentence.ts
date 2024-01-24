@@ -19,12 +19,14 @@ export class SplitSentence {
         return navigator.locks.request("prog.SplitSentence.insert", { ifAvailable: true }, async (lock) => {
             if (lock && this.lastID) {
                 let firstID: string;
-                for (const b of this.textAreas.slice().reverse()) {
-                    if (b.blocks.length > 0) {
+                let mdList: string[] = [];
+                for (const b of this.textAreas) {
+                    if (!firstID && b.blocks.length > 0) {
                         firstID = b.blocks[0].id;
-                        await siyuan.insertBlockAfter(b.blocks.map(i => i.text).join(""), this.lastID);
                     }
+                    mdList.push(b.blocks.map(i => i.text).join(""));
                 }
+                await siyuan.insertBlockAfter(mdList.join("\n\n"), this.lastID);
                 if (firstID) {
                     setTimeout(() => {
                         openTab({ app: this.plugin.app, doc: { id: firstID, action: ["cb-get-all", "cb-get-focus"] } });
