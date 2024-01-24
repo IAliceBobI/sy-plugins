@@ -380,7 +380,7 @@ async function doFindDoc(bookID: string, func: Func, point?: number) {
 }
 
 export async function createNote(boxID: string, bookID: string, piece: string[], point: number) {
-    const attr = {};
+    const attr = {} as AttrType;
     const row = await siyuan.sqlOne(`select hpath,content from blocks where type='d' and id='${bookID}'`);
     let dir = row?.hpath ?? "";
     const bookName = row?.content ?? "";
@@ -393,6 +393,7 @@ export async function createNote(boxID: string, bookID: string, piece: string[],
         if (content) break;
     }
 
+    attr["custom-card-priority"] = "40";
     if (content) {
         attr["alias"] = bookName + "," + content;
         content = `[${point}]${content}`;
