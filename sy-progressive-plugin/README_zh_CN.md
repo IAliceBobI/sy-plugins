@@ -264,10 +264,10 @@
 # 打赏、鼓励、催更 🎉
 
 <div>
-<img src="https://player-pubpic.oss-cn-beijing.aliyuncs.com/static/wx.png" alt="alipay" width="180" />
+<img src="https://player-pubpic.oss-cn-beijing.aliyuncs.com/static/wx1.png" alt="alipay" width="180" />
 </div>
 <div>
-<img src="https://player-pubpic.oss-cn-beijing.aliyuncs.com/static/zfb.jpg" alt="wechat" width="180" />
+<img src="https://player-pubpic.oss-cn-beijing.aliyuncs.com/static/zfb1.jpg" alt="wechat" width="180" />
 </div>
 
 **[或者移步，爱发电](https://afdian.net/a/playerv5)**
