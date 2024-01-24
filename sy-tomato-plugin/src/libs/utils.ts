@@ -498,6 +498,9 @@ export const siyuan = {
     async getBlockKramdown(id: string): Promise<GetBlockKramdown> {
         return siyuan.call("/api/block/getBlockKramdown", { id });
     },
+    async refreshVirtualBlockRef() {
+        return siyuan.call("/api/setting/refreshVirtualBlockRef", {});
+    },
     async safeUpdateBlock(id: string, data: string, dataType = "markdown") {
         if (await siyuan.checkBlockExist(id))
             return siyuan.call("/api/block/updateBlock", { id, data, dataType });
@@ -565,8 +568,10 @@ export const siyuan = {
     async getTreeRiffCardsMap(docID: string) {
         return (await siyuan.getTreeRiffCardsAll(docID)).reduce((m, b: any) => {
             const c = b.riffCard as RiffCard;
-            c.due = timeUtil.dateFormatDay(new Date(c.due));
-            m.set(b.id, c);
+            if (c?.due) {
+                c.due = timeUtil.dateFormatDay(new Date(c.due));
+                m.set(b.id, c);
+            }
             return m;
         }, new Map<string, RiffCard>());
     },
