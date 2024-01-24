@@ -1,4 +1,4 @@
-import { IProtyle, Lute, Plugin, Protyle } from "siyuan";
+import { IProtyle, Lute, Plugin } from "siyuan";
 import { EventType, events } from "./libs/Events";
 import { BLOCK_REF, DATA_ID, DATA_SUBTYPE, DATA_TYPE, REF_HIERARCHY } from "./libs/gconst";
 import { NewLute, getID, getSyElement, siyuan, siyuanCache } from "./libs/utils";
@@ -14,30 +14,16 @@ class Tag2RefBox {
     private lute: Lute;
     private docID: string;
     private observer: MutationObserver;
-    protyle: Protyle;
 
     async onload(plugin: Plugin) {
         this.plugin = plugin;
         this.lute = NewLute();
         this.settingCfg = (plugin as any).settingCfg;
-        if (!events.isMobile) {
-            this.plugin.addTopBar({
-                icon: "iconRef",
-                title: "刷新虚拟引用",
-                position: "left",
-                callback: async () => {
-                    await siyuan.refreshVirtualBlockRef();
-                    await siyuan.pushMsg("已刷新，还请您F5刷新编辑器");
-                    // try { this.protyle.reload(true); } catch (_e) { };
-                }
-            });
-        }
         events.addListener("Tomato-Tag2RefBox", (eventType, detail) => {
             if (eventType == EventType.loaded_protyle_static) {
                 navigator.locks.request("Tomato-Tag2RefBox-onload", { ifAvailable: true }, async (lock) => {
                     const protyle: IProtyle = detail.protyle;
                     if (!protyle) return;
-                    this.protyle = detail;
                     const notebookId = protyle.notebookId;
                     const nextDocID = protyle?.block?.rootID;
                     const element = protyle?.wysiwyg?.element;

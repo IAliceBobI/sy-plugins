@@ -1,4 +1,4 @@
-import { IProtyle, Plugin, confirm, openTab } from "siyuan";
+import { IProtyle, Plugin, confirm } from "siyuan";
 import { getCursorElement, siyuan } from "@/libs/utils";
 import "./index.scss";
 import { EventType, events } from "@/libs/Events";
@@ -10,16 +10,6 @@ class CardBox {
 
     async onload(plugin: Plugin) {
         this.plugin = plugin;
-        if (!events.isMobile) {
-            this.plugin.addTopBar({
-                icon: "iconRiffCard",
-                title: "间隔重复",
-                position: "left",
-                callback: () => {
-                    openTab({ app: this.plugin.app, card: { type: "all" } });
-                }
-            });
-        }
         this.plugin.addCommand({
             langKey: "removeBrokenCards",
             hotkey: "",

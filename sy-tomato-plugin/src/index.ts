@@ -15,6 +15,7 @@ import { dailyNoteBox } from "./DailyNoteBox";
 import { cmdBlockBox } from "./CmdBlockBox";
 import { cardPriorityBox } from "./CardPriorityBox";
 import { tag2RefBox } from "./Tag2RefBox";
+import { toolbarBox } from "./ToolbarBox";
 
 export default class ThePlugin extends Plugin {
     private static readonly GLOBAL_THIS: Record<string, any> = globalThis;
@@ -36,7 +37,7 @@ export default class ThePlugin extends Plugin {
         });
 
         this.settingCfg = await this.loadData(STORAGE_SETTINGS);
-        if (!this.settingCfg) this.settingCfg = {} as any;
+        if (!this.settingCfg) this.settingCfg = {} as TomatoSettings;
 
         this.addSettingItem("tomatoClockCheckbox", "* 状态栏番茄钟", true);
         if (this.settingCfg.tomatoClockCheckbox ?? true) await tomatoClock.onload(this);
@@ -58,6 +59,9 @@ export default class ThePlugin extends Plugin {
 
         this.addSettingItem("linkBoxCheckbox", "* 双向互链", false);
         if (this.settingCfg.linkBoxCheckbox ?? false) await linkBox.onload(this);
+
+        this.addSettingItem("toolbarBoxCheckbox", "* 开启toolbar按钮", true, "打开闪卡、刷新虚拟引用");
+        if (this.settingCfg.toolbarBoxCheckbox ?? true) await toolbarBox.onload(this);
 
         this.addSettingItem("dailyNoteBoxCheckbox", "* 移动内容到 daily note", false);
         if (this.settingCfg.dailyNoteBoxCheckbox ?? false) await dailyNoteBox.onload(this);
