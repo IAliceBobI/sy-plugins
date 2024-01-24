@@ -73,6 +73,7 @@ export class SplitSentence {
                 } else {
                     let ps = [row.content];
                     for (const s of "\n。！!？?；;:：") ps = spliyBy(ps, s);
+                    ps = spliyBy(ps, ". ");
                     ps = spliyBy(ps, "……");
                     let blocks: { text: string, id: string }[];
                     if (this.asList == "p") {
@@ -121,6 +122,7 @@ function shouldMove(s: string) {
         || s.startsWith("!")
         || s.startsWith("！")
         || s.startsWith("。")
+        || s.startsWith(". ")
         || s.startsWith("?")
         || s.startsWith("？")
         || s.startsWith(";")
