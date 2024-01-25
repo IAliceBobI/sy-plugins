@@ -78,6 +78,20 @@ class Events {
     }
 
     onload(plugin: Plugin) {
+        if (!navigator.locks) {
+            (navigator as any).locks = {
+                request: function (name: string, options: any, callback: any) {
+                    return new Promise((resolve) => {
+                        const lock = {
+                            name: name,
+                            mode: (options && options.mode) || 'exclusive'
+                        };
+                        resolve(callback(lock));
+                    })
+                }
+            }
+        }
+
         this.plugin = plugin;
         const frontEnd = getFrontend();
         this._isMobile = frontEnd === "mobile" || frontEnd === "browser-mobile";
