@@ -59,6 +59,22 @@ class Progressive {
         this.plugin.eventBus.on("open-menu-content", async ({ detail }) => {
             const menu = detail.menu;
             menu.addItem({
+                icon: "iconAddingBook",
+                label: this.plugin.i18n.addProgressiveReading,
+                accelerator: "",
+                click: async () => {
+                    await this.addProgressiveReadingWithLock();
+                }
+            });
+            menu.addItem({
+                icon: "iconEye",
+                label: this.plugin.i18n.viewAllProgressiveBooks,
+                accelerator: "",
+                click: async () => {
+                    await this.viewAllProgressiveBooks();
+                }
+            });
+            menu.addItem({
                 label: this.plugin.i18n.readThisPiece,
                 icon: "iconCursor",
                 click: () => {
@@ -67,6 +83,14 @@ class Progressive {
                         this.readThisPiece(blockID);
                     }
                 },
+            });
+            menu.addItem({
+                icon: "iconLearn",
+                label: this.plugin.i18n.startToLearn,
+                accelerator: "⌥-",
+                click: () => {
+                    this.startToLearnWithLock();
+                }
             });
         });
         events.addListener("ProgressiveBox", (eventType, detail: Protyle) => {
