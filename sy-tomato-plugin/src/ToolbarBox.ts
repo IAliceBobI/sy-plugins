@@ -1,11 +1,10 @@
-import { Plugin, Protyle, openTab } from "siyuan";
+import { Plugin, openTab } from "siyuan";
 import { events } from "./libs/Events";
 import { siyuan } from "./libs/utils";
 
 class ToolbarBox {
     public plugin: Plugin;
     public settingCfg: TomatoSettings;
-    protyle: Protyle;
 
     async onload(plugin: Plugin) {
         this.plugin = plugin;
@@ -26,8 +25,7 @@ class ToolbarBox {
             position: "left",
             callback: async () => {
                 await siyuan.refreshVirtualBlockRef();
-                await siyuan.pushMsg("已刷新，还请您F5刷新编辑器");
-                // try { this.protyle.reload(true); } catch (_e) { };
+                events.protyleReload();
             }
         });
     }

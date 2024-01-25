@@ -33,6 +33,7 @@ class CmdBlockBox {
 文档A属性、内容将复制到文档B，
 文档A（              ）➡️➡️➡️ 文档B（              ）。`;
                     insertText(blockDiv, txt, protyle);
+                    // protyle.reload(false);
                 }
             }
         }];

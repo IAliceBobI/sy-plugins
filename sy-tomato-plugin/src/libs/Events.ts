@@ -100,6 +100,10 @@ class Events {
             this.invokeCB(EventType.switch_protyle, detail);
         });
     }
+
+    public protyleReload() {
+        ((this.protyle?.protyle as any)?.getInstance() as Protyle)?.reload(true);
+    }
 }
 
 function getCursorBlock() {
