@@ -84,12 +84,12 @@ class Events {
                     return new Promise((resolve) => {
                         const lock = {
                             name: name,
-                            mode: (options && options.mode) || 'exclusive'
+                            mode: (options && options.mode) || "exclusive"
                         };
                         resolve(callback(lock));
-                    })
+                    });
                 }
-            }
+            };
         }
 
         this.plugin = plugin;
