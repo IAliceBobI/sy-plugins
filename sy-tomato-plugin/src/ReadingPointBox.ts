@@ -30,6 +30,16 @@ class ReadingPointBox {
                     }
                 },
             });
+            menu.addItem({
+                label: this.plugin.i18n.showBookmarks,
+                icon: "iconBookmark",
+                click: async () => {
+                    await this.showContentsWithLock();
+                    if (events.isMobile) {
+                        await siyuan.pushMsg("请打开文档树查看。");
+                    }
+                },
+            });
         });
         this.plugin.addCommand({
             langKey: "showBookmarks",
