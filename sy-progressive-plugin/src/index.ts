@@ -36,7 +36,7 @@ export default class ThePlugin extends Plugin {
         if (!this.settingCfg) this.settingCfg = {} as SettingCfgType;
 
         if (this.settingCfg.addQuoteBlock == undefined) this.settingCfg.addQuoteBlock = true;
-        if (this.settingCfg.hideBtnsInFlashCard == undefined) this.settingCfg.hideBtnsInFlashCard = true;
+        if (this.settingCfg.hideBtnsInFlashCard == undefined) this.settingCfg.hideBtnsInFlashCard = false;
         if (this.settingCfg.addCodeBlock == undefined) this.settingCfg.addCodeBlock = false;
         if (this.settingCfg.showLastBlock == undefined) this.settingCfg.showLastBlock = false;
         if (this.settingCfg.cardIndent == undefined) this.settingCfg.cardIndent = false;
@@ -70,7 +70,7 @@ export default class ThePlugin extends Plugin {
         await writingCompareBox.onload(this, this.settingCfg);
 
         this.addSettingItem("addQuoteBlock", "* 制卡时加入引述块", true, "与代码块二选一");
-        this.addSettingItem("hideBtnsInFlashCard", "* 在闪卡内复习整个分片时，隐藏分片下方按钮", true, "");
+        this.addSettingItem("hideBtnsInFlashCard", "* 在闪卡内复习整个分片时，隐藏分片下方按钮", false, "");
         this.addSettingItem("addCodeBlock", "* 制卡时加入代码块", false, "与引述块二选一");
         this.addSettingItem("showLastBlock", "* 显示上一分片最后一个块", false, "当前分片显示上一分片最后一个块内容");
         this.addSettingItem("cardIndent", "* 制作的闪卡，从第二项开始向右缩进", false, "");
