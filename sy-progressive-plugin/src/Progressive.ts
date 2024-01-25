@@ -324,7 +324,7 @@ class Progressive {
             }
 
             dialog.destroy();
-            // await siyuan.setBlockAttrs(bookID, { "custom-sy-readonly": "true" });
+            await siyuan.setBlockAttrs(bookID, { "custom-sy-readonly": "true" });
 
             if (splitLen > 0) {
                 contentBlocks = await this.helper.getDocWordCount(contentBlocks);
