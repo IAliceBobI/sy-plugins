@@ -122,7 +122,7 @@ class CardPriorityBox {
 
     async updateCards(options: ICardData) {
         if (!this.plugin) return options;
-        shuffleArray(options.cards);
+        options.cards = shuffleArray(options.cards);
         const attrMap = (await Promise.all(options.cards.map(card => siyuan.getBlockAttrs(card.blockID))))
             .reduce((map, attr) => {
                 if (attr?.id) {
