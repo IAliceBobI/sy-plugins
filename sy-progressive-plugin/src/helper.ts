@@ -304,15 +304,19 @@ export function rmBadThings(s: string) {
 }
 
 export async function cleanNote(noteID: string, force: boolean) {
-    const tasks = [];
-    for (const row of await siyuan.sql(`select ial,markdown,id from blocks where root_id="${noteID}" and ial like '%${PROG_ORIGIN_TEXT}="1"%'`)) {
+    const id2del = [];
+    for (const row of await siyuan.sql(`select ial,markdown,id from blocks 
+        where root_id="${noteID}" 
+        and (ial like '%${PROG_ORIGIN_TEXT}="1"%' or (markdown='' and content='')) limit 10000`)) {
         const ial: string = row?.ial ?? "";
         const markdown: string = row?.markdown ?? "";
         if (ial.includes(TEMP_CONTENT)) {
-            tasks.push(siyuan.safeDeleteBlock(row.id));
+            id2del.push(row.id);
+        } else if (markdown === '') {
+            id2del.push(row.id);
         } else if (ial.includes(RefIDKey) && ial.includes(PROG_ORIGIN_TEXT)) {
             if (force) {
-                tasks.push(siyuan.deleteBlock(row.id));
+                id2del.push(row.id);
             } else {
                 if (!markdown) continue;
                 if (!markdown.includes("*")) continue;
@@ -323,7 +327,7 @@ export async function cleanNote(noteID: string, force: boolean) {
                         const oriMarkdown = origin?.markdown ?? "";
                         const markdownWithoutStar = markdown.replace(`((${originalID} "*"))`, "");
                         if (rmBadThings(oriMarkdown) == rmBadThings(markdownWithoutStar)) {
-                            tasks.push(siyuan.deleteBlock(row.id)); // delete the same content
+                            id2del.push(row.id); // delete the same content
                         }
                         break;
                     }
@@ -331,7 +335,7 @@ export async function cleanNote(noteID: string, force: boolean) {
             }
         }
     }
-    await Promise.all(tasks);
+    await Promise.all(id2del.map(id => siyuan.deleteBlock(id)));
 }
 
 export async function findPieceDoc(bookID: string, point: number) {
