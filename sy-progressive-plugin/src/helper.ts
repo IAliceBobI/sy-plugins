@@ -312,7 +312,7 @@ export async function cleanNote(noteID: string, force: boolean) {
         const markdown: string = row?.markdown ?? "";
         if (ial.includes(TEMP_CONTENT)) {
             id2del.push(row.id);
-        } else if (markdown === '') {
+        } else if (markdown === "") {
             id2del.push(row.id);
         } else if (ial.includes(RefIDKey) && ial.includes(PROG_ORIGIN_TEXT)) {
             if (force) {
