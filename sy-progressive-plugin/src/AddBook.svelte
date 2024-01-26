@@ -1,7 +1,10 @@
 <script lang="ts">
     import { onMount } from "svelte";
     import { prog } from "./Progressive";
-    import { siyuan } from "../../sy-tomato-plugin/src/libs/utils";
+    import {
+        isValidNumber,
+        siyuan,
+    } from "../../sy-tomato-plugin/src/libs/utils";
     import { WordCountType } from "./helper";
 
     export let bookID: string;
@@ -11,7 +14,7 @@
     let wordCount = 0;
     let headCount = 0;
     let contentBlocks: WordCountType[] = [];
-    let headings = "1,2,3,4,5,6,b";
+    let headingsText = "1,2,3,4,5,6,b";
     let autoCard = false;
     let blockNum = 0;
     let lengthSplit = 0;
@@ -30,38 +33,26 @@
                 if (block.type == "h") headCount++;
             }
         }
+    });
 
-        // const BlockNumInput = dialog.element.querySelector(
-        //     "#" + BlockNumID,
-        // ) as HTMLInputElement;
-        // BlockNumInput.value = "0";
-
-        // const LengthSplitInput = dialog.element.querySelector(
-        //     "#" + LengthSplitID,
-        // ) as HTMLInputElement;
-        // LengthSplitInput.value = "0";
-
-        // const btn = dialog.element.querySelector(
-        //     "#" + btnSplitID,
-        // ) as HTMLButtonElement;
-        // btn.addEventListener("click", async () => {
-        //     const headings = titleInput.value
-        //         .trim()
-        //         .replace(/，/g, ",")
-        //         .split(",")
-        //         .map((i) => i.trim())
-        //         .filter((i) => !!i);
-        //     if (
-        //         !headings.reduce((ret, i) => {
-        //             if (i == "b") return ret;
-        //             const j = Number(i);
-        //             return ret && utils.isValidNumber(j) && j >= 1 && j <= 6;
-        //         }, true)
-        //     ) {
-        //         titleInput.value = "1,2,3,4,5,6,b";
-        //         return;
-        //     }
-        //     headings.sort();
+    async function process() {
+        const headings = headingsText
+            .trim()
+            .replace(/，/g, ",")
+            .split(",")
+            .map((i) => i.trim())
+            .filter((i) => !!i);
+        if (
+            !headings.reduce((ret, i) => {
+                if (i == "b") return ret;
+                const j = Number(i);
+                return ret && isValidNumber(j) && j >= 1 && j <= 6;
+            }, true)
+        ) {
+            headingsText = "1,2,3,4,5,6,b";
+            return;
+        }
+        headings.sort();
 
         //     const splitLen = Number(LengthSplitInput.value.trim());
         //     if (!utils.isValidNumber(splitLen)) {
@@ -108,8 +99,7 @@
         //         await this.storage.toggleAutoCard(bookID, "yes");
         //     }
         //     this.startToLearnWithLock(bookID);
-        // });
-    });
+    }
 </script>
 
 <!-- https://learn.svelte.dev/tutorial/if-blocks -->
@@ -127,13 +117,18 @@
 </div>
 <div class="fn__hr"></div>
 <div class="prog-style__id">1、{prog.plugin.i18n.splitByHeadings}</div>
-<input type="text" class="prog-style__input" bind:value={headings} />
+<input type="text" class="prog-style__input" bind:value={headingsText} />
 <div class="fn__hr"></div>
 <div class="prog-style__id">2、{prog.plugin.i18n.splitByBlockCount}</div>
-<input type="text" class="prog-style__input" bind:value={blockNum} />
+<input type="number" class="prog-style__input" min="0" bind:value={blockNum} />
 <div class="fn__hr"></div>
 <div class="prog-style__id">3、{prog.plugin.i18n.splitByWordCount}</div>
-<input type="text" class="prog-style__input" bind:value={lengthSplit} />
+<input
+    type="number"
+    class="prog-style__input"
+    min="0"
+    bind:value={lengthSplit}
+/>
 <div class="fn__hr"></div>
 <div title="把阅读到的分片设置为闪卡">
     <span class="prog-style__id">{prog.plugin.i18n.autoCard}</span>
@@ -144,7 +139,9 @@
     />
 </div>
 <div class="fn__hr"></div>
-<button class="prog-style__button">{prog.plugin.i18n.addOrReaddDoc}</button>
+<button class="prog-style__button" on:click={process}
+    >{prog.plugin.i18n.addOrReaddDoc}</button
+>
 <div class="fn__hr"></div>
 
 <style>
