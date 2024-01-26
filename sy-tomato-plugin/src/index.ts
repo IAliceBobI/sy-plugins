@@ -79,7 +79,7 @@ export default class ThePlugin extends Plugin {
         this.addSettingItem("cmdBlockBoxCheckbox", "* 命令块", false);
         if (this.settingCfg.cmdBlockBoxCheckbox ?? false) await cmdBlockBox.onload(this);
 
-        this.addSettingItem("listBoxCheckbox", "* 列表工具", true, "取消文档中所有todo任务的勾选");
+        this.addSettingItem("listBoxCheckbox", "* 列表工具", true, "取消文档中所有任务的勾选");
         if (this.settingCfg.listBoxCheckbox ?? true) await listBox.onload(this);
     }
 

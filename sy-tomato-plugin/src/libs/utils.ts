@@ -516,6 +516,9 @@ export const siyuan = {
         if (await siyuan.checkBlockExist(id))
             return siyuan.call("/api/block/updateBlock", { id, data, dataType });
     },
+    async updateBlock(id: string, data: string, dataType = "markdown") {
+        return siyuan.call("/api/block/updateBlock", { id, data, dataType });
+    },
     async getBlockMarkdownAndContent(id: string): Promise<GetBlockMarkdownAndContent> {
         const row = await siyuan.sqlOne(`select markdown, content from blocks where id="${id}"`);
         return { markdown: row?.markdown ?? "", content: row?.content ?? "" };

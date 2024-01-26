@@ -1,5 +1,7 @@
 import { IProtyle, Plugin } from "siyuan";
 import "./index.scss";
+import { siyuan } from "./libs/utils";
+import { zip2ways } from "./libs/functional";
 
 class ListBox {
     private plugin: Plugin;
@@ -31,7 +33,18 @@ class ListBox {
 }
 
 async function uncheckAll(docID: string) {
-    // elect * from blocks where root_id='20240126095806-l5m1c8h' and markdown like "* [X] %"
+    const kramdowns = await Promise.all((await siyuan.sql(`select id from blocks 
+        where type='i' and subType='t' and root_id="${docID}"
+        and markdown like "* [X] %"
+        limit 30000
+    `)).map(b => siyuan.getBlockKramdown(b.id)));
+
+    await Promise.all(kramdowns.map(({ id, kramdown }) => {
+        const newKramdown = kramdown.replace("}[X] ", "}[ ] ");
+        return siyuan.updateBlock(id, newKramdown);
+    }));
+
+    await siyuan.pushMsg(`取消了${kramdowns.length}个任务`);
 }
 
 export const listBox = new ListBox();
