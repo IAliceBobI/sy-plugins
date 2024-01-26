@@ -37,7 +37,6 @@
             [cardElement],
             priority - 1,
         );
-        // events.protyleReload();
         await cardPriorityBox.addBtns(wysiwygElement);
     }
     async function addOne() {
@@ -45,7 +44,6 @@
             [cardElement],
             priority + 1,
         );
-        // events.protyleReload();
         await cardPriorityBox.addBtns(wysiwygElement);
     }
     async function removeCard() {
@@ -59,6 +57,10 @@
         });
     }
     async function updateCard() {
+        await cardPriorityBox.updatePrioritySelected([cardElement], priority);
+        await cardPriorityBox.addBtns(wysiwygElement);
+    }
+    async function updateCardByInput() {
         await cardPriorityBox.updatePrioritySelected(
             [cardElement],
             priority,
@@ -72,12 +74,21 @@
 <!-- https://learn.svelte.dev/tutorial/if-blocks -->
 <div {...controlAttr} class="container">
     <div>
+        <input
+            title="拖动闪卡优先级"
+            type="range"
+            on:click={updateCard}
+            bind:value={priority}
+            min="0"
+            max="100"
+        />
+        {SPACE}
         <button title="闪卡优先级-1" on:click={subOne}>➖</button>
-        {SPACE}
-        <button title="点击修改优先级" bind:this={priText} on:click={updateCard}
-            >{priority}</button
+        <button
+            title="点击修改优先级"
+            bind:this={priText}
+            on:click={updateCardByInput}>{priority}</button
         >
-        {SPACE}
         <button title="闪卡优先级+1" on:click={addOne}>➕</button>
         {SPACE}
         <button title="取消制卡" on:click={removeCard}>🚫</button>
