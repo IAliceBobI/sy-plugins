@@ -1,7 +1,6 @@
 import { IProtyle, Plugin } from "siyuan";
 import "./index.scss";
 import { siyuan } from "./libs/utils";
-import { zip2ways } from "./libs/functional";
 
 class ListBox {
     private plugin: Plugin;
