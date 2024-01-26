@@ -1,16 +1,16 @@
-import { ICardData, IEventBusMap, IProtyle, Plugin, confirm } from "siyuan";
+import { ICardData, IEventBusMap, IProtyle, Plugin } from "siyuan";
 import "./index.scss";
 import { getID, isValidNumber, shuffleArray, siyuan, siyuanCache } from "./libs/utils";
-import { CARD_PRIORITY, CUSTOM_RIFF_DECKS, DATA_NODE_ID, SPACE, TOMATO_CONTROL_ELEMENT } from "./libs/gconst";
+import { CUSTOM_RIFF_DECKS, TOMATO_CONTROL_ELEMENT } from "./libs/gconst";
 import { DialogText } from "./libs/DialogText";
 import { EventType, events } from "./libs/Events";
 import CardPriorityBar from "./CardPriorityBar.svelte"
 
-const CacheMinutes = 5;
+export const CacheMinutes = 5;
 
-export class CardPriorityBox {
-    private plugin: Plugin;
-    private cards: Map<string, RiffCard>;
+class CardPriorityBox {
+    plugin: Plugin;
+    cards: Map<string, RiffCard>;
 
     async onload(plugin: Plugin) {
         this.plugin = plugin;
@@ -73,27 +73,28 @@ export class CardPriorityBox {
         });
     }
 
-    private async updatePrioritySelected(elements: HTMLElement[], priority?: number) {
+    async updatePrioritySelected(elements: HTMLElement[], priority?: number, cb?: Func) {
         const blocks = (await Promise.all(elements.map(div => {
             return getID(div, [CUSTOM_RIFF_DECKS]);
         }).filter(i => !!i).map(id => siyuan.getBlockAttrs(id)))).map(ial => {
             return { ial };
         }).filter(b => !!b.ial[CUSTOM_RIFF_DECKS]);
-        return this.updateDocPriorityBatchDialog(blocks as any, priority);
+        return this.updateDocPriorityBatchDialog(blocks as any, priority, cb);
     }
 
-    private async updateDocPriorityBatchDialog(blocks: Block[], priority?: number) {
-        if (isValidNumber(priority)) {
-            await this.updateDocPriorityLock(priority, blocks);
-        } else {
-            new DialogText(`为${blocks.length}张卡输入新的优先级`, "50", async (priorityTxt: string) => {
+    private async updateDocPriorityBatchDialog(blocks: Block[], priority?: number, cb?: Func) {
+        if (!isValidNumber(priority) || cb) {
+            new DialogText(`为${blocks.length}张卡输入新的优先级`, String(priority), async (priorityTxt: string) => {
                 const priority = Number(priorityTxt);
                 if (isValidNumber(priority)) {
-                    return this.updateDocPriorityLock(priority, blocks);
+                    await this.updateDocPriorityLock(priority, blocks);
+                    await cb();
                 } else {
                     await siyuan.pushMsg(`您的输入有误：${priorityTxt}`);
                 }
             });
+        } else {
+            await this.updateDocPriorityLock(priority, blocks);
         }
     }
 
@@ -135,31 +136,25 @@ export class CardPriorityBox {
         return options;
     }
 
-    private async addBtns(element: HTMLElement) {
-        [...element.querySelectorAll(`[${CUSTOM_RIFF_DECKS}]`)]
-            .map((e: HTMLElement) => {
-                e.querySelectorAll(`[${TOMATO_CONTROL_ELEMENT}]`).forEach(e => e.parentElement.removeChild(e));
-
-                const cardID = e.getAttribute(DATA_NODE_ID);
-                const text = e.textContent;
-
-                let priority = Number(e.getAttribute(CARD_PRIORITY) ?? "50");
-                if (!isValidNumber(priority)) priority = 50;
-
-                const div = e.querySelector(".protyle-attr")?.appendChild(document.createElement("div"));
-                if (div) {
+    async addBtns(wysiwygElement: HTMLElement) {
+        [...wysiwygElement.querySelectorAll(`[${CUSTOM_RIFF_DECKS}]`)]
+            .map((cardElement: HTMLElement) => {
+                cardElement.querySelectorAll(`[${TOMATO_CONTROL_ELEMENT}]`).forEach(e => e.parentElement.removeChild(e));
+                const textContent = cardElement.textContent;
+                const protyleAttrElement = cardElement.querySelector(".protyle-attr");
+                if (protyleAttrElement) {
                     new CardPriorityBar({
-                        target: div,
+                        target: protyleAttrElement,
                         props: {
-                            controlElement: e,
-                            cardPriorityBox: this,
+                            cardElement,
+                            wysiwygElement,
+                            textContent,
                         }
                     });
                 }
             });
     }
 }
-
 
 function readPriority(ial: AttrType) {
     let priority = Number(ial["custom-card-priority"]);

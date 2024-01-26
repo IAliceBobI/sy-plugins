@@ -115,8 +115,12 @@ class Events {
         });
     }
 
-    public protyleReload() {
-        ((this.protyle?.protyle as any)?.getInstance() as Protyle)?.reload(true);
+    public protyleReload(protyle?: Protyle) {
+        if (protyle) {
+            ((protyle.protyle as any)?.getInstance() as Protyle)?.reload(true);
+        } else {
+            ((this.protyle?.protyle as any)?.getInstance() as Protyle)?.reload(true);
+        }
     }
 }
 
