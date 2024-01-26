@@ -56,11 +56,21 @@
         }
         datetimeStr = await siyuan.currentTime(10);
     }
+
+    async function copyID() {
+        await navigator.clipboard.writeText(idMsg);
+        await siyuan.pushMsg(`复制ID(${idMsg})成功`);
+    }
 </script>
 
 <!-- https://learn.svelte.dev/tutorial/if-blocks -->
 <div class="b3-dialog__content">
     <div class="schedule-style__id">{idMsg}</div>
+    <button
+        class="b3-button b3-button--outline"
+        title="复制ID"
+        on:click={copyID}><svg><use xlink:href="#iconCopy"></use></svg></button
+    >
     <div class="fn__hr"></div>
     <input
         type="text"
