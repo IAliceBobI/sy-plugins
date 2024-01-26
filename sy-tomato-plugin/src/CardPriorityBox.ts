@@ -4,7 +4,7 @@ import { getID, isValidNumber, shuffleArray, siyuan, siyuanCache } from "./libs/
 import { CUSTOM_RIFF_DECKS, TOMATO_CONTROL_ELEMENT } from "./libs/gconst";
 import { DialogText } from "./libs/DialogText";
 import { EventType, events } from "./libs/Events";
-import CardPriorityBar from "./CardPriorityBar.svelte"
+import CardPriorityBar from "./CardPriorityBar.svelte";
 
 export const CacheMinutes = 5;
 
