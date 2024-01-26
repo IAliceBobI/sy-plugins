@@ -240,7 +240,7 @@ class Progressive {
         new AddBook({
             target: dialog.element.querySelector("#" + id),
             props: {
-                bookID, bookName, boxID,
+                bookID, bookName, boxID, dialog,
             }
         });
     }

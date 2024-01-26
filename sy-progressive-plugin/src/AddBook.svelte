@@ -6,10 +6,12 @@
         siyuan,
     } from "../../sy-tomato-plugin/src/libs/utils";
     import { WordCountType } from "./helper";
+    import { Dialog } from "siyuan";
 
     export let bookID: string;
     export let bookName: string;
     export let boxID: string;
+    export let dialog: Dialog;
 
     let wordCount = 0;
     let headCount = 0;
@@ -64,27 +66,15 @@
             return;
         }
 
-        //     const splitLen = Number(LengthSplitInput.value.trim());
-        //     if (!utils.isValidNumber(splitLen)) {
-        //         LengthSplitInput.value = "0";
-        //         return;
-        //     }
+        dialog.destroy();
 
-        //     const blockNumber = Number(BlockNumInput.value.trim());
-        //     if (!utils.isValidNumber(blockNumber)) {
-        //         BlockNumInput.value = "0";
-        //         return;
-        //     }
+        await siyuan.setBlockAttrs(bookID, {
+            "custom-sy-readonly": "true",
+        });
 
-        //     dialog.destroy();
-        //     await siyuan.setBlockAttrs(bookID, {
-        //         "custom-sy-readonly": "true",
-        //     });
-
-        //     if (splitLen > 0) {
-        //         contentBlocks =
-        //             await this.helper.getDocWordCount(contentBlocks);
-        //     }
+        if (splitWordNum > 0) {
+            contentBlocks = await this.helper.getDocWordCount(contentBlocks);
+        }
 
         //     await siyuan.pushMsg(this.plugin.i18n.splitByHeadings);
         //     let groups = (
