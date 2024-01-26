@@ -13,8 +13,8 @@ import AddBook from "./AddBook.svelte"
 class Progressive {
     private static readonly GLOBAL_THIS: Record<string, any> = globalThis;
     plugin: Plugin;
-    private storage: help.Storage;
-    private helper: help.Helper;
+    storage: help.Storage;
+    helper: help.Helper;
     private openedTabs?: ITab;
     private settings: SettingCfgType;
     private lute: Lute;
@@ -272,7 +272,7 @@ class Progressive {
         }
     }
 
-    private async startToLearnWithLock(bookID?: string) {
+    async startToLearnWithLock(bookID?: string) {
         return navigator.locks.request(constants.StartToLearnLock, { ifAvailable: true }, async (lock) => {
             if (lock) {
                 await siyuan.pushMsg(this.plugin.i18n.openingDocPieceForYou);

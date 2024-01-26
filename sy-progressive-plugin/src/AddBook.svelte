@@ -5,7 +5,12 @@
         isValidNumber,
         siyuan,
     } from "../../sy-tomato-plugin/src/libs/utils";
-    import { WordCountType } from "./helper";
+    import {
+        ContentLenGroup,
+        HeadingGroup,
+        WordCountType,
+        splitByBlockCount,
+    } from "./helper";
     import { Dialog } from "siyuan";
 
     export let bookID: string;
@@ -73,32 +78,33 @@
         });
 
         if (splitWordNum > 0) {
-            contentBlocks = await this.helper.getDocWordCount(contentBlocks);
+            contentBlocks = await prog.helper.getDocWordCount(contentBlocks);
         }
 
-        //     await siyuan.pushMsg(this.plugin.i18n.splitByHeadings);
-        //     let groups = (
-        //         await new help.HeadingGroup(
-        //             contentBlocks,
-        //             headings,
-        //             bookID,
-        //         ).init()
-        //     ).split();
-        //     groups = help.splitByBlockCount(groups, blockNumber);
-        //     if (splitLen > 0) {
-        //         await siyuan.pushMsg(
-        //             this.plugin.i18n.splitByWordCount + ":" + splitLen,
-        //         );
-        //         groups = new help.ContentLenGroup(groups, splitLen).split();
-        //     }
-        //     await this.storage.saveIndex(bookID, groups);
-        //     await this.storage.resetBookReadingPoint(bookID);
-        //     if (!autoCardBox.checked) {
-        //         await this.storage.toggleAutoCard(bookID, "no");
-        //     } else {
-        //         await this.storage.toggleAutoCard(bookID, "yes");
-        //     }
-        //     this.startToLearnWithLock(bookID);
+        await siyuan.pushMsg(prog.plugin.i18n.splitByHeadings);
+
+        let groups = (
+            await new HeadingGroup(contentBlocks, headings, bookID).init()
+        ).split(); // heading
+
+        groups = splitByBlockCount(groups, blockNum); // block count
+
+        // word num
+        if (splitWordNum > 0) {
+            await siyuan.pushMsg(
+                prog.plugin.i18n.splitByWordCount + ":" + splitWordNum,
+            );
+            groups = new ContentLenGroup(groups, splitWordNum).split();
+        }
+
+        await prog.storage.saveIndex(bookID, groups);
+        await prog.storage.resetBookReadingPoint(bookID);
+        if (!autoCard) {
+            await prog.storage.toggleAutoCard(bookID, "no");
+        } else {
+            await prog.storage.toggleAutoCard(bookID, "yes");
+        }
+        prog.startToLearnWithLock(bookID);
     }
 </script>
 
