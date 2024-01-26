@@ -28,7 +28,7 @@
 
         if (cardPriorityBox.cards?.has(cardID)) {
             priText.title = `${JSON.stringify(cardPriorityBox.cards.get(cardID))}【${CacheMinutes}分钟缓存】【点击修改】`;
-            priText.innerHTML = `<strong>${priority}</strong>`;
+            priText.style.fontWeight = "bold";
         }
     });
 
