@@ -8,10 +8,11 @@ import * as help from "./helper";
 import * as constants from "./constants";
 import { BlockNodeEnum, DATA_NODE_ID, DATA_TYPE, MarkKey, PARAGRAPH_INDEX, PROG_ORIGIN_TEXT, RefIDKey } from "../../sy-tomato-plugin/src/libs/gconst";
 import { SplitSentence } from "./SplitSentence";
+import AddBook from "./AddBook.svelte"
 
 class Progressive {
     private static readonly GLOBAL_THIS: Record<string, any> = globalThis;
-    private plugin: Plugin;
+    plugin: Plugin;
     private storage: help.Storage;
     private helper: help.Helper;
     private openedTabs?: ITab;
@@ -229,122 +230,18 @@ class Progressive {
         await this.addProgressiveReadingDialog(bookID, row["content"], boxID);
     }
 
-    private async addProgressiveReadingDialog(bookID: string, bookName: string, _boxID: string) {
-        const autoCardID = utils.newID();
-        const titleSplitID = utils.newID();
-        const BlockNumID = utils.newID();
-        const LengthSplitID = utils.newID();
-        const btnSplitID = utils.newID();
-        const statisticDivID = utils.newID();
+    private async addProgressiveReadingDialog(bookID: string, bookName: string, boxID: string) {
+        const id = utils.newID();
         const dialog = new Dialog({
             title: this.plugin.i18n.addProgressiveReading,
-            content: `<div class="b3-dialog__content">
-                <div class="fn__hr"></div>
-                <div class="prog-style__id">《${bookName}》</div>
-                <div class="fn__hr"></div>
-                <div class="prog-style__id" id="${statisticDivID}"></div>
-                <div class="fn__hr"></div>
-                <div class="prog-style__id">1、${this.plugin.i18n.splitByHeadings}</div>
-                <input type="text" id="${titleSplitID}" class="prog-style__input"/>
-                <div class="fn__hr"></div>
-                <div class="prog-style__id">2、${this.plugin.i18n.splitByBlockCount}</div>
-                <input type="text" id="${BlockNumID}" class="prog-style__input"/>
-                <div class="fn__hr"></div>
-                <div class="prog-style__id">3、${this.plugin.i18n.splitByWordCount}</div>
-                <input type="text" id="${LengthSplitID}" class="prog-style__input"/>
-                <div class="fn__hr"></div>
-                <span class="prog-style__id">${this.plugin.i18n.autoCard}</span>
-                <input type="checkbox" id="${autoCardID}" class="prog-style__checkbox"/>
-                <div class="fn__hr"></div>
-                <button id="${btnSplitID}" class="prog-style__button">${this.plugin.i18n.addOrReaddDoc}</button>
-                <div class="fn__hr"></div>
-            </div>`,
+            content: `<div class="b3-dialog__content" id="${id}"></div>`,
             width: events.isMobile ? "92vw" : "560px",
         });
-
-        const statisticDiv = dialog.element.querySelector("#" + statisticDivID) as HTMLDivElement;
-        statisticDiv.innerHTML = "统计中……";
-        let contentBlocks: help.WordCountType[] = await siyuan.getChildBlocks(bookID) as unknown as help.WordCountType[];
-        const { wordCount } = await siyuan.getBlocksWordCount([bookID]);
-        let headCount = 0;
-        for (const block of contentBlocks) {
-            if (block.type == "h") headCount++;
-        }
-        statisticDiv.innerHTML = `
-            总字数：${wordCount}<br>
-            各级标题数：${headCount}<br>
-            总块数：${contentBlocks.length}<br>
-            平均每个标题下有：${Math.ceil(contentBlocks.length / (headCount == 0 ? 1 : headCount))}块<br>
-            平均每个块有：${Math.ceil(wordCount / contentBlocks.length)}字`;
-
-        const titleInput = dialog.element.querySelector("#" + titleSplitID) as HTMLInputElement;
-        titleInput.value = "1,2,3,4,5,6,b";
-
-        const autoCardBox = dialog.element.querySelector("#" + autoCardID) as HTMLInputElement;
-        autoCardBox.checked = false;
-        autoCardBox.title = "把阅读到的分片设置为闪卡";
-        autoCardBox.addEventListener("change", () => {
-            if (autoCardBox.checked) {
-                autoCardBox.checked = true;
-            } else {
-                autoCardBox.checked = false;
+        new AddBook({
+            target: dialog.element.querySelector("#" + id),
+            props: {
+                bookID, bookName, boxID,
             }
-        });
-
-        const BlockNumInput = dialog.element.querySelector("#" + BlockNumID) as HTMLInputElement;
-        BlockNumInput.value = "0";
-
-        const LengthSplitInput = dialog.element.querySelector("#" + LengthSplitID) as HTMLInputElement;
-        LengthSplitInput.value = "0";
-
-        const btn = dialog.element.querySelector("#" + btnSplitID) as HTMLButtonElement;
-        btn.addEventListener("click", async () => {
-            const headings = titleInput.value.trim().replace(/，/g, ",")
-                .split(",").map(i => i.trim()).filter(i => !!i);
-            if (!headings.reduce((ret, i) => {
-                if (i == "b") return ret;
-                const j = Number(i);
-                return ret && utils.isValidNumber(j) && j >= 1 && j <= 6;
-            }, true)) {
-                titleInput.value = "1,2,3,4,5,6,b";
-                return;
-            }
-            headings.sort();
-
-            const splitLen = Number(LengthSplitInput.value.trim());
-            if (!utils.isValidNumber(splitLen)) {
-                LengthSplitInput.value = "0";
-                return;
-            }
-
-            const blockNumber = Number(BlockNumInput.value.trim());
-            if (!utils.isValidNumber(blockNumber)) {
-                BlockNumInput.value = "0";
-                return;
-            }
-
-            dialog.destroy();
-            await siyuan.setBlockAttrs(bookID, { "custom-sy-readonly": "true" });
-
-            if (splitLen > 0) {
-                contentBlocks = await this.helper.getDocWordCount(contentBlocks);
-            }
-
-            await siyuan.pushMsg(this.plugin.i18n.splitByHeadings);
-            let groups = (await new help.HeadingGroup(contentBlocks, headings, bookID).init()).split();
-            groups = help.splitByBlockCount(groups, blockNumber);
-            if (splitLen > 0) {
-                await siyuan.pushMsg(this.plugin.i18n.splitByWordCount + ":" + splitLen);
-                groups = new help.ContentLenGroup(groups, splitLen).split();
-            }
-            await this.storage.saveIndex(bookID, groups);
-            await this.storage.resetBookReadingPoint(bookID);
-            if (!autoCardBox.checked) {
-                await this.storage.toggleAutoCard(bookID, "no");
-            } else {
-                await this.storage.toggleAutoCard(bookID, "yes");
-            }
-            this.startToLearnWithLock(bookID);
         });
     }
 
