@@ -23,6 +23,7 @@ type TomatoSettings = {
     tag2RefBoxCheckbox: boolean,
     toolbarBoxCheckbox: boolean,
     cmdBlockBoxCheckbox: boolean,
+    listBoxCheckbox: boolean,
     "daily-note-box-id": string,
     "tomato-clocks": string,
     "back-link-max-size": number,

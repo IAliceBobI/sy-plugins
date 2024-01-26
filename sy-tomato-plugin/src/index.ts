@@ -16,6 +16,7 @@ import { cmdBlockBox } from "./CmdBlockBox";
 import { cardPriorityBox } from "./CardPriorityBox";
 import { tag2RefBox } from "./Tag2RefBox";
 import { toolbarBox } from "./ToolbarBox";
+import { listBox } from "./ListBox";
 
 export default class ThePlugin extends Plugin {
     private static readonly GLOBAL_THIS: Record<string, any> = globalThis;
@@ -77,6 +78,9 @@ export default class ThePlugin extends Plugin {
 
         this.addSettingItem("cmdBlockBoxCheckbox", "* 命令块", false);
         if (this.settingCfg.cmdBlockBoxCheckbox ?? false) await cmdBlockBox.onload(this);
+
+        this.addSettingItem("listBoxCheckbox", "* 列表工具", true, "取消文档中所有todo任务的勾选");
+        if (this.settingCfg.listBoxCheckbox ?? true) await listBox.onload(this);
     }
 
     private addSettingItem(key: string, title: string, defaultValue: boolean, description = "") {
