@@ -1,44 +1,32 @@
 <script lang="ts">
     import { onMount } from "svelte";
     import { prog } from "./Progressive";
+    import { siyuan } from "../../sy-tomato-plugin/src/libs/utils";
+    import { WordCountType } from "./helper";
 
     export let bookID: string;
     export let bookName: string;
     export let boxID: string;
 
+    let wordCount = 0;
+    let headCount = 0;
+    let contentBlocks: WordCountType[] = [];
+    let headings = "1,2,3,4,5,6,b";
+
     onMount(async () => {
         boxID = boxID;
 
-        // const autoCardID = utils.newID();
-        // const titleSplitID = utils.newID();
-        // const BlockNumID = utils.newID();
-        // const LengthSplitID = utils.newID();
-        // const btnSplitID = utils.newID();
-        // const statisticDivID = utils.newID();
+        contentBlocks = (await siyuan.getChildBlocks(
+            bookID,
+        )) as unknown as WordCountType[];
 
-        // const statisticDiv = dialog.element.querySelector(
-        //     "#" + statisticDivID,
-        // ) as HTMLDivElement;
-        // statisticDiv.innerHTML = "统计中……";
-        // let contentBlocks: help.WordCountType[] = (await siyuan.getChildBlocks(
-        //     bookID,
-        // )) as unknown as help.WordCountType[];
-        // const { wordCount } = await siyuan.getBlocksWordCount([bookID]);
-        // let headCount = 0;
-        // for (const block of contentBlocks) {
-        //     if (block.type == "h") headCount++;
-        // }
-        // statisticDiv.innerHTML = `
-        //     总字数：${wordCount}<br>
-        //     各级标题数：${headCount}<br>
-        //     总块数：${contentBlocks.length}<br>
-        //     平均每个标题下有：${Math.ceil(contentBlocks.length / (headCount == 0 ? 1 : headCount))}块<br>
-        //     平均每个块有：${Math.ceil(wordCount / contentBlocks.length)}字`;
-
-        // const titleInput = dialog.element.querySelector(
-        //     "#" + titleSplitID,
-        // ) as HTMLInputElement;
-        // titleInput.value = "1,2,3,4,5,6,b";
+        {
+            const { wordCount: wc } = await siyuan.getBlocksWordCount([bookID]);
+            wordCount = wc;
+            for (const block of contentBlocks) {
+                if (block.type == "h") headCount++;
+            }
+        }
 
         // const autoCardBox = dialog.element.querySelector(
         //     "#" + autoCardID,
@@ -135,27 +123,39 @@
 </script>
 
 <!-- https://learn.svelte.dev/tutorial/if-blocks -->
-<div>
-    <div class="fn__hr"></div>
-    <div class="prog-style__id">《{bookName}》</div>
-    <div class="fn__hr"></div>
-    <div class="prog-style__id"></div>
-    <div class="fn__hr"></div>
-    <div class="prog-style__id">1、{prog.plugin.i18n.splitByHeadings}</div>
-    <input type="text" class="prog-style__input" />
-    <div class="fn__hr"></div>
-    <div class="prog-style__id">2、{prog.plugin.i18n.splitByBlockCount}</div>
-    <input type="text" class="prog-style__input" />
-    <div class="fn__hr"></div>
-    <div class="prog-style__id">3、{prog.plugin.i18n.splitByWordCount}</div>
-    <input type="text" class="prog-style__input" />
-    <div class="fn__hr"></div>
-    <span class="prog-style__id">{prog.plugin.i18n.autoCard}</span>
-    <input type="checkbox" class="prog-style__checkbox" />
-    <div class="fn__hr"></div>
-    <button class="prog-style__button">{prog.plugin.i18n.addOrReaddDoc}</button>
-    <div class="fn__hr"></div>
+<div class="fn__hr"></div>
+<div class="prog-style__id">《{bookName}》</div>
+<div class="fn__hr"></div>
+<div class="prog-style__id">
+    总字数：{wordCount}<br />
+    各级标题数：{headCount}<br />
+    总块数：{contentBlocks.length}<br />
+    平均每个标题下有：{Math.ceil(
+        contentBlocks.length / (headCount == 0 ? 1 : headCount),
+    )}块<br />
+    平均每个块有：{Math.ceil(wordCount / contentBlocks.length)}字
 </div>
+<div class="fn__hr"></div>
+<div class="prog-style__id">1、{prog.plugin.i18n.splitByHeadings}</div>
+<input type="text" class="prog-style__input" bind:value={headings} />
+<div class="fn__hr"></div>
+<div class="prog-style__id">2、{prog.plugin.i18n.splitByBlockCount}</div>
+<input type="text" class="prog-style__input" />
+<div class="fn__hr"></div>
+<div class="prog-style__id">3、{prog.plugin.i18n.splitByWordCount}</div>
+<input type="text" class="prog-style__input" />
+<div class="fn__hr"></div>
+<span class="prog-style__id" title="把阅读到的分片设置为闪卡"
+    >{prog.plugin.i18n.autoCard}</span
+>
+<input
+    type="checkbox"
+    title="把阅读到的分片设置为闪卡"
+    class="prog-style__checkbox"
+/>
+<div class="fn__hr"></div>
+<button class="prog-style__button">{prog.plugin.i18n.addOrReaddDoc}</button>
+<div class="fn__hr"></div>
 
 <style>
 </style>
