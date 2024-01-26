@@ -555,7 +555,7 @@ export const siyuan = {
     },
     async removeBookmarks(docID: string, keepBlockID: string) {
         const bookmark = "";
-        const rows = await siyuan.sql(`select id from blocks where root_id='${docID}' and ial like '%bookmark=%'`);
+        const rows = await siyuan.sql(`select id from blocks where root_id='${docID}' and ial like '%bookmark=%' limit 1000`);
         for (const row of rows) {
             const id = row["id"];
             if (keepBlockID === id) continue;

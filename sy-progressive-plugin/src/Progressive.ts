@@ -621,10 +621,6 @@ class Progressive {
         btns.push(help.tempContent(this.helper.getReadingBtns2(bookID, noteID, point)));
         btns.push(help.tempContent(this.helper.getReadingBtns3(bookID, noteID, point), id));
         await siyuan.appendBlock(btns.join("\n"), noteID);
-        // const rows = await siyuan.sql(`select id from blocks where ial like '%${IN_PIECE_REF}="1"%' and root_id="${noteID}"`);
-        // for (const row of rows.reverse()) {
-        //     try { await siyuan.safeMoveBlockAfter(row.id, id); } catch (_e) { }
-        // }
     }
 
     private async fullfilContent(bookID: string, piecePre: string[], piece: string[], noteID: string) {
