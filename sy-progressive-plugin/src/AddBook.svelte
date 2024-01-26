@@ -17,7 +17,7 @@
     let headingsText = "1,2,3,4,5,6,b";
     let autoCard = false;
     let blockNum = 0;
-    let lengthSplit = 0;
+    let splitWordNum = 0;
 
     onMount(async () => {
         boxID = boxID;
@@ -53,6 +53,16 @@
             return;
         }
         headings.sort();
+
+        if (!isValidNumber(splitWordNum)) {
+            splitWordNum = 0;
+            return;
+        }
+
+        if (!isValidNumber(blockNum)) {
+            blockNum = 0;
+            return;
+        }
 
         //     const splitLen = Number(LengthSplitInput.value.trim());
         //     if (!utils.isValidNumber(splitLen)) {
@@ -127,7 +137,7 @@
     type="number"
     class="prog-style__input"
     min="0"
-    bind:value={lengthSplit}
+    bind:value={splitWordNum}
 />
 <div class="fn__hr"></div>
 <div title="把阅读到的分片设置为闪卡">
