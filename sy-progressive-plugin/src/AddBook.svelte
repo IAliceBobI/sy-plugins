@@ -12,6 +12,9 @@
     let headCount = 0;
     let contentBlocks: WordCountType[] = [];
     let headings = "1,2,3,4,5,6,b";
+    let autoCard = false;
+    let blockNum = 0;
+    let lengthSplit = 0;
 
     onMount(async () => {
         boxID = boxID;
@@ -27,19 +30,6 @@
                 if (block.type == "h") headCount++;
             }
         }
-
-        // const autoCardBox = dialog.element.querySelector(
-        //     "#" + autoCardID,
-        // ) as HTMLInputElement;
-        // autoCardBox.checked = false;
-        // autoCardBox.title = "把阅读到的分片设置为闪卡";
-        // autoCardBox.addEventListener("change", () => {
-        //     if (autoCardBox.checked) {
-        //         autoCardBox.checked = true;
-        //     } else {
-        //         autoCardBox.checked = false;
-        //     }
-        // });
 
         // const BlockNumInput = dialog.element.querySelector(
         //     "#" + BlockNumID,
@@ -140,19 +130,19 @@
 <input type="text" class="prog-style__input" bind:value={headings} />
 <div class="fn__hr"></div>
 <div class="prog-style__id">2、{prog.plugin.i18n.splitByBlockCount}</div>
-<input type="text" class="prog-style__input" />
+<input type="text" class="prog-style__input" bind:value={blockNum} />
 <div class="fn__hr"></div>
 <div class="prog-style__id">3、{prog.plugin.i18n.splitByWordCount}</div>
-<input type="text" class="prog-style__input" />
+<input type="text" class="prog-style__input" bind:value={lengthSplit} />
 <div class="fn__hr"></div>
-<span class="prog-style__id" title="把阅读到的分片设置为闪卡"
-    >{prog.plugin.i18n.autoCard}</span
->
-<input
-    type="checkbox"
-    title="把阅读到的分片设置为闪卡"
-    class="prog-style__checkbox"
-/>
+<div title="把阅读到的分片设置为闪卡">
+    <span class="prog-style__id">{prog.plugin.i18n.autoCard}</span>
+    <input
+        type="checkbox"
+        class="prog-style__checkbox"
+        bind:checked={autoCard}
+    />
+</div>
 <div class="fn__hr"></div>
 <button class="prog-style__button">{prog.plugin.i18n.addOrReaddDoc}</button>
 <div class="fn__hr"></div>
