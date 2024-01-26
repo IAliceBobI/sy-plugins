@@ -4,10 +4,11 @@ import { getID, isValidNumber, shuffleArray, siyuan, siyuanCache } from "./libs/
 import { CARD_PRIORITY, CUSTOM_RIFF_DECKS, DATA_NODE_ID, SPACE, TOMATO_CONTROL_ELEMENT } from "./libs/gconst";
 import { DialogText } from "./libs/DialogText";
 import { EventType, events } from "./libs/Events";
+import CardPriorityBar from "./CardPriorityBar.svelte"
 
 const CacheMinutes = 5;
 
-class CardPriorityBox {
+export class CardPriorityBox {
     private plugin: Plugin;
     private cards: Map<string, RiffCard>;
 
@@ -147,48 +148,12 @@ class CardPriorityBox {
 
                 const div = e.querySelector(".protyle-attr")?.appendChild(document.createElement("div"));
                 if (div) {
-                    div.setAttribute(TOMATO_CONTROL_ELEMENT, "1");
-                    div.style.display = "flex";
-
-                    const subDiv = div.appendChild(document.createElement("div"));
-                    const subOne = subDiv.appendChild(document.createElement("a"));
-                    const priText = subDiv.appendChild(document.createElement("span"));
-                    const addOne = subDiv.appendChild(document.createElement("a"));
-                    const spanSpace = subDiv.appendChild(document.createElement("span"));
-                    const rmCard = subDiv.appendChild(document.createElement("a"));
-
-
-                    priText.textContent = `${SPACE + priority + SPACE}`;
-                    if (this.cards?.has(cardID)) {
-                        priText.title = `${JSON.stringify(this.cards.get(cardID))}【${CacheMinutes}分钟缓存】`;
-                        priText.innerHTML = `<strong>${priText.textContent}</strong>`;
-                    }
-                    spanSpace.textContent = SPACE;
-
-                    addOne.title = "闪卡优先级+1";
-                    addOne.textContent = "➕";
-
-                    subOne.title = "闪卡优先级-1";
-                    subOne.textContent = "➖";
-
-                    rmCard.title = "取消制卡";
-                    rmCard.textContent = "🚫";
-
-                    addOne.addEventListener("click", async () => {
-                        await this.updatePrioritySelected([e], priority + 1);
-                        await this.addBtns(element);
-                    });
-                    subOne.addEventListener("click", async () => {
-                        await this.updatePrioritySelected([e], priority - 1);
-                        await this.addBtns(element);
-                    });
-                    rmCard.addEventListener("click", () => {
-                        confirm("删除闪卡", text, async () => {
-                            await siyuan.removeRiffCards([cardID]);
-                            e.querySelectorAll(`[${TOMATO_CONTROL_ELEMENT}]`).forEach(e => {
-                                e.parentElement.removeChild(e);
-                            });
-                        });
+                    new CardPriorityBar({
+                        target: div,
+                        props: {
+                            controlElement: e,
+                            cardPriorityBox: this,
+                        }
                     });
                 }
             });
