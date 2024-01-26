@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { onMount } from "svelte";
+    import { onDestroy, onMount } from "svelte";
     import { prog } from "./Progressive";
     import {
         isValidNumber,
@@ -41,6 +41,8 @@
             }
         }
     });
+
+    onDestroy(async () => {});
 
     async function process() {
         const headings = headingsText

@@ -8,7 +8,7 @@ import * as help from "./helper";
 import * as constants from "./constants";
 import { BlockNodeEnum, DATA_NODE_ID, DATA_TYPE, MarkKey, PARAGRAPH_INDEX, PROG_ORIGIN_TEXT, RefIDKey } from "../../sy-tomato-plugin/src/libs/gconst";
 import { SplitSentence } from "./SplitSentence";
-import AddBook from "./AddBook.svelte"
+import AddBook from "./AddBook.svelte";
 
 class Progressive {
     private static readonly GLOBAL_THIS: Record<string, any> = globalThis;
@@ -232,12 +232,17 @@ class Progressive {
 
     private async addProgressiveReadingDialog(bookID: string, bookName: string, boxID: string) {
         const id = utils.newID();
+        let addBook: AddBook;
         const dialog = new Dialog({
             title: this.plugin.i18n.addProgressiveReading,
             content: `<div class="b3-dialog__content" id="${id}"></div>`,
             width: events.isMobile ? "92vw" : "560px",
+            destroyCallback() {
+                addBook?.$destroy();
+                addBook = undefined;
+            },
         });
-        new AddBook({
+        addBook = new AddBook({
             target: dialog.element.querySelector("#" + id),
             props: {
                 bookID, bookName, boxID, dialog,
