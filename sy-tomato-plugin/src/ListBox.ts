@@ -7,8 +7,8 @@ class ListBox {
     async onload(plugin: Plugin) {
         this.plugin = plugin;
         this.plugin.addCommand({
-            langKey: "cardPrioritySet",
-            hotkey: "F6",
+            langKey: "uncheckAll",
+            hotkey: "",
             editorCallback: async (protyle: IProtyle) => {
                 const docID = protyle?.block?.rootID;
                 await uncheckAll(docID);
@@ -18,8 +18,8 @@ class ListBox {
         this.plugin.eventBus.on("open-menu-content", async ({ detail }) => {
             const menu = detail.menu;
             menu.addItem({
-                label: this.plugin.i18n.cardPrioritySet,
-                accelerator: "F6",
+                label: this.plugin.i18n.uncheckAll,
+                accelerator: "",
                 click: async () => {
                     const docID = detail?.protyle?.block?.rootID;
                     await uncheckAll(docID);
@@ -29,8 +29,10 @@ class ListBox {
     }
 
 }
+
 async function uncheckAll(docID: string) {
-    throw new Error("Function not implemented.");
+    // elect * from blocks where root_id='20240126095806-l5m1c8h' and markdown like "* [X] %"
 }
+
 export const listBox = new ListBox();
 
