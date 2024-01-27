@@ -83,39 +83,74 @@
 
 <!-- https://learn.svelte.dev/tutorial/if-blocks -->
 {#if books}
-    {#each books.slice().reverse() as book}
-        <div class="prog-style__container_div">
-            <p class="prog-style__id">
-                {book.row.content}
-            </p>
-            <p class="prog-style__id">
-                {Math.ceil(
-                    (book.bookInfo.point / book.bookIndex.length) * 100,
-                )}%
-            </p>
-            <button
-                class="prog-style__button"
-                on:click={() => btnStartToLearn(book.bookID)}
-                >{prog.plugin.i18n.Reading}</button
-            >
-            <label title={prog.plugin.i18n.ignoreTxt + book.bookInfo.ignored}>
-                <input type="checkbox" bind:checked={book.ignored} />
-            </label>
-            <label title={prog.plugin.i18n.autoCard + book.bookInfo.autoCard}>
-                <input type="checkbox" bind:checked={book.autoCard} />
-            </label>
-            <button
-                class="prog-style__button"
-                on:click={() => btnAddProgressiveReadingWithLock(book.bookID)}
-                >{prog.plugin.i18n.Repiece}</button
-            >
-            <button
-                class="prog-style__button"
-                on:click={() => btnConfirm(book.bookID, book.row.content)}
-                >{prog.plugin.i18n.Delete}</button
-            >
-        </div>
-    {/each}
+    <table>
+        <thead>
+            <tr>
+                <th>书名</th>
+                <th>进度</th>
+                <th>忽略</th>
+                <th>制卡</th>
+                <th>阅读</th>
+                <th>分片</th>
+                <th>删除</th>
+            </tr>
+        </thead>
+        <tbody>
+            {#each books.slice().reverse() as book}
+                <tr>
+                    <td class="prog-style__id">
+                        {book.row.content}
+                    </td>
+                    <td class="prog-style__id">
+                        {Math.ceil(
+                            (book.bookInfo.point / book.bookIndex.length) * 100,
+                        )}%
+                    </td>
+                    <td
+                        class="prog-style__id"
+                        title={prog.plugin.i18n.ignoreTxt +
+                            book.bookInfo.ignored}
+                    >
+                        <input type="checkbox" bind:checked={book.ignored} />
+                    </td>
+                    <td
+                        class="prog-style__id"
+                        title={prog.plugin.i18n.autoCard +
+                            book.bookInfo.autoCard}
+                    >
+                        <input type="checkbox" bind:checked={book.autoCard} />
+                    </td>
+                    <td>
+                        <button
+                            title="阅读《{book.row.content}》"
+                            class="prog-style__button"
+                            on:click={() => btnStartToLearn(book.bookID)}
+                            >📖</button
+                        >
+                    </td>
+                    <td>
+                        <button
+                            title="重新分片《{book.row.content}》"
+                            class="prog-style__button"
+                            on:click={() =>
+                                btnAddProgressiveReadingWithLock(book.bookID)}
+                            >🍕</button
+                        >
+                    </td>
+                    <td>
+                        <button
+                            title="删除《{book.row
+                                .content}》（不删除已经产生的文件）"
+                            class="prog-style__button"
+                            on:click={() =>
+                                btnConfirm(book.bookID, book.row.content)}
+                            >🗑️</button
+                        >
+                    </td>
+                </tr>
+            {/each}
+        </tbody>
+    </table>
 {:else}
     <h1>加载中……</h1>
 {/if}
