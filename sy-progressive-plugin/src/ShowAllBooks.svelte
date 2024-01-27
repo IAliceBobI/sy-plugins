@@ -1,32 +1,29 @@
 <script lang="ts">
     import { onDestroy, onMount } from "svelte";
     import { Dialog } from "siyuan";
+    import { chunks, siyuan } from "../../sy-tomato-plugin/src/libs/utils";
+    import { prog } from "./Progressive";
+    import { BookInfo } from "./helper";
+
+    type TaskType = [string, BookInfo, string[][], Block];
 
     export let dialog: Dialog;
 
-    let wordCount = 0;
+    let books: TaskType[];
 
     onMount(async () => {
-        // const tasks = Object.entries(this.storage.booksInfos())
-        //     .filter(([_bookID]) => {
-        //         // if(_bookID=="20231124021105-errwtja")
-        //         return true;
-        //     })
-        //     .map(([bookID]) => {
-        //         const bookInfo = this.storage.booksInfo(bookID);
-        //         const idx = this.storage.loadBookIndexIfNeeded(bookID);
-        //         const row = siyuan.sqlOne(
-        //             `select content from blocks where type='d' and id="${bookID}"`,
-        //         );
-        //         return [bookID, bookInfo, idx, row];
-        //     })
-        //     .flat();
-        // const books = utils.chunks(await Promise.all(tasks), 4) as [
-        //     string,
-        //     help.BookInfo,
-        //     string[][],
-        //     Block,
-        // ][];
+        const tasks = Object.entries(prog.storage.booksInfos())
+            .map(([bookID]) => {
+                const bookInfo = prog.storage.booksInfo(bookID);
+                const idx = prog.storage.loadBookIndexIfNeeded(bookID);
+                const row = siyuan.sqlOne(
+                    `select content from blocks where type='d' and id="${bookID}"`,
+                );
+                return [bookID, bookInfo, idx, row];
+            })
+            .flat();
+        books = chunks(await Promise.all(tasks), 4) as TaskType[];
+
         // for (const [bookID, bookInfo, idx, row] of books.reverse()) {
         //     const subDiv = help.appendChild(div, "div", "", [
         //         "prog-style__container_div",
@@ -99,10 +96,33 @@
     });
 
     onDestroy(async () => {});
+
+    async function btnStartToLearn(bookID: string) {
+        await prog.startToLearnWithLock(bookID);
+        dialog.destroy();
+    }
 </script>
 
 <!-- https://learn.svelte.dev/tutorial/if-blocks -->
-<div class="fn__hr"></div>
+{#if books}
+    {#each books as [bookID, bookInfo, idx, { content: name }]}
+        <div class="prog-style__container_div">
+            <p class="prog-style__id">
+                {name}
+            </p>
+            <p class="prog-style__id">
+                {Math.ceil((bookInfo.point / idx.length) * 100)}%
+            </p>
+            <button
+                class="prog-style__button"
+                on:click={() => btnStartToLearn(bookID)}
+                >{prog.plugin.i18n.Reading}</button
+            >
+        </div>
+    {/each}
+{:else}
+    <h1>加载中……</h1>
+{/if}
 
 <style>
 </style>
