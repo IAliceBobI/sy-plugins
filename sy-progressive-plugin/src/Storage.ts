@@ -22,7 +22,7 @@ export class Storage {
                 if (v.ignored === "yes") v.ignored = true;
                 else v.ignored = false;
             }
-        })
+        });
     }
 
     async updateBookInfoTime(docID: string) {

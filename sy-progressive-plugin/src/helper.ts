@@ -2,6 +2,7 @@ import { BlockNodeEnum, DATA_TYPE, IDLen, MarkKey, PARAGRAPH_INDEX, PROG_ORIGIN_
 import { siyuan, styleColor } from "../../sy-tomato-plugin/src/libs/utils";
 import * as utils from "../../sy-tomato-plugin/src/libs/utils";
 import { IProtyle, Lute, Plugin } from "siyuan";
+import { HtmlCBType } from "./constants";
 
 export function tempContent(content: string, id?: string) { // for btns and split lines
     if (!id) return content + `\n{: ${MarkKey}="${TEMP_CONTENT}"}`;

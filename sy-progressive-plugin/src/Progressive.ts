@@ -10,6 +10,7 @@ import { SplitSentence } from "./SplitSentence";
 import AddBook from "./AddBook.svelte";
 import ShowAllBooks from "./ShowAllBooks.svelte";
 import { Storage } from "./Storage";
+import { HtmlCBType } from "./constants";
 
 class Progressive {
     private static readonly GLOBAL_THIS: Record<string, any> = globalThis;

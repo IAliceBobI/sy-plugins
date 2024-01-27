@@ -44,24 +44,4 @@ type BookInfo = {
 
 type BookInfos = { [key: string]: BookInfo };
 
-enum HtmlCBType {
-    previous = 0,
-    deleteAndNext = 1,
-    AddDocCard = 2,
-    // saveDoc = 3,
-    quit = 4,
-    nextBook = 5,
-    next = 6,
-    ignoreBook = 7,
-    fullfilContent = 8,
-    cleanUnchanged = 9,
-    DelDocCard = 10,
-    deleteAndExit = 11,
-    openFlashcardTab = 12,
-    deleteAndBack = 13,
-    viewContents = 14,
-    splitByPunctuations = 15,
-    splitByPunctuationsList = 16,
-    splitByPunctuationsListCheck = 17,
-    cleanOriginText = 18,
-}
+
