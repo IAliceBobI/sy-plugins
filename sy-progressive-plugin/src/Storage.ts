@@ -33,24 +33,31 @@ export class Storage {
         this.updateBookInfo(docID, { point: 0 } as any);
     }
 
-    async toggleIgnoreBook(bookID: string) {
-        const info = await this.booksInfo(bookID);
-        if (!info.ignored) {
-            await this.updateBookInfo(bookID, { ignored: true } as any);
-            await siyuan.pushMsg(this.plugin.i18n.msgIgnoreBook);
+    async setIgnoreBook(bookID: string, v?: boolean) {
+        if (v === undefined) {
+            const info = await this.booksInfo(bookID);
+            if (!info.ignored) {
+                await this.updateBookInfo(bookID, { ignored: true } as any);
+                await siyuan.pushMsg(this.plugin.i18n.msgIgnoreBook);
+            } else {
+                await this.updateBookInfo(bookID, { ignored: false } as any);
+                await siyuan.pushMsg(this.plugin.i18n.msgPushBook);
+            }
         } else {
-            await this.updateBookInfo(bookID, { ignored: false } as any);
-            await siyuan.pushMsg(this.plugin.i18n.msgPushBook);
+            await this.updateBookInfo(bookID, { ignored: v } as any);
+            if (v) {
+                await siyuan.pushMsg(this.plugin.i18n.msgIgnoreBook);
+            } else {
+                await siyuan.pushMsg(this.plugin.i18n.msgPushBook);
+            }
         }
     }
 
-    async toggleShowLastBlock(bookID: string) {
-        const info = await this.booksInfo(bookID);
-        if (!info.showLastBlock) {
-            await this.updateBookInfo(bookID, { showLastBlock: true } as any);
+    async setShowLastBlock(bookID: string, v: boolean) {
+        await this.updateBookInfo(bookID, { showLastBlock: v } as any);
+        if (v) {
             await siyuan.pushMsg("显示上一分片最后一个内容块");
         } else {
-            await this.updateBookInfo(bookID, { showLastBlock: false } as any);
             await siyuan.pushMsg("取消显示上一分片最后一个内容块");
         }
     }

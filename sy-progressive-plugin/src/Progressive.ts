@@ -457,7 +457,7 @@ class Progressive {
                 await siyuan.removeRiffCards([noteID]);
                 break;
             case HtmlCBType.ignoreBook:
-                await this.storage.toggleIgnoreBook(bookID);
+                await this.storage.setIgnoreBook(bookID);
                 break;
             case HtmlCBType.fullfilContent: {
                 const index = await this.storage.loadBookIndexIfNeeded(bookID);

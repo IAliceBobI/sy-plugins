@@ -112,7 +112,7 @@
                             type="checkbox"
                             bind:checked={book.bookInfo.ignored}
                             on:click={() =>
-                                prog.storage.toggleIgnoreBook(book.bookID)}
+                                prog.storage.setIgnoreBook(book.bookID)}
                         />
                     </td>
                     <td
@@ -136,7 +136,10 @@
                             type="checkbox"
                             bind:checked={book.bookInfo.showLastBlock}
                             on:click={() =>
-                                prog.storage.toggleShowLastBlock(book.bookID)}
+                                prog.storage.setShowLastBlock(
+                                    book.bookID,
+                                    book.bookInfo.showLastBlock,
+                                )}
                         />
                     </td>
                     <td
