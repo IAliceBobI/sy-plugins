@@ -58,7 +58,13 @@ class Tag2RefBox {
             .filter(e => e.childElementCount == 0)
             .map((e: HTMLElement) => { return { e, text: e.textContent || e.innerText }; })
             .map(({ e, text }) => { return { e, text: text?.replace(/\u200B/g, "")?.trim() }; })
-            .filter(({ text }) => !!text);
+            .filter(({ text }) => !!text)
+            .filter(({ text }) => {
+                return !text.endsWith(".xhtml")
+                    && !text.endsWith(".html")
+                    && !text.startsWith("@")
+                    && !text.startsWith("tag");
+            });
 
         const cursorID = events.lastBlockID;
         const nodes = new Map<string, HTMLElement>();
