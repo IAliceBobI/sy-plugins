@@ -4,6 +4,7 @@
     import { chunks, siyuan } from "../../sy-tomato-plugin/src/libs/utils";
     import { prog } from "./Progressive";
     import { BookInfo } from "./helper";
+    import { reverse } from "dns";
 
     type TaskType = [string, BookInfo, string[][], Block];
 
@@ -23,76 +24,6 @@
             })
             .flat();
         books = chunks(await Promise.all(tasks), 4) as TaskType[];
-
-        // for (const [bookID, bookInfo, idx, row] of books.reverse()) {
-        //     const subDiv = help.appendChild(div, "div", "", [
-        //         "prog-style__container_div",
-        //     ]);
-        //     let name = bookID;
-        //     if (row) name = row["content"];
-        //     const progress = `${Math.ceil((bookInfo.point / idx.length) * 100)}%`;
-        //     help.appendChild(subDiv, "p", name, ["prog-style__id"]);
-        //     help.appendChild(subDiv, "p", progress, ["prog-style__id"]);
-        //     help.appendChild(
-        //         subDiv,
-        //         "button",
-        //         this.plugin.i18n.Reading,
-        //         ["prog-style__button"],
-        //         () => {
-        //             this.startToLearnWithLock(bookID);
-        //             dialog.destroy();
-        //         },
-        //     );
-        //     help.appendChild(
-        //         subDiv,
-        //         "button",
-        //         this.plugin.i18n.ignoreTxt + ` ${bookInfo.ignored}`,
-        //         ["prog-style__button"],
-        //         () => {
-        //             this.storage.toggleIgnoreBook(bookID);
-        //             dialog.destroy();
-        //             this.viewAllProgressiveBooks();
-        //         },
-        //     );
-        //     help.appendChild(
-        //         subDiv,
-        //         "button",
-        //         this.plugin.i18n.autoCard + ` ${bookInfo.autoCard}`,
-        //         ["prog-style__button"],
-        //         () => {
-        //             this.storage.toggleAutoCard(bookID);
-        //             dialog.destroy();
-        //             this.viewAllProgressiveBooks();
-        //         },
-        //     );
-        //     help.appendChild(
-        //         subDiv,
-        //         "button",
-        //         this.plugin.i18n.Repiece,
-        //         ["prog-style__button"],
-        //         () => {
-        //             this.addProgressiveReadingWithLock(bookID);
-        //             dialog.destroy();
-        //         },
-        //     );
-        //     help.appendChild(
-        //         subDiv,
-        //         "button",
-        //         this.plugin.i18n.Delete,
-        //         ["prog-style__button"],
-        //         () => {
-        //             confirm(
-        //                 "⚠️",
-        //                 "只删除记录与辅助数据，不删除分片，不删除闪卡等。<br>删除：" +
-        //                     name,
-        //                 async () => {
-        //                     await this.storage.removeIndex(bookID);
-        //                     div.removeChild(subDiv);
-        //                 },
-        //             );
-        //         },
-        //     );
-        // }
     });
 
     onDestroy(async () => {});
@@ -115,14 +46,19 @@
         prog.addProgressiveReadingWithLock(bookID);
         dialog.destroy();
     }
-    async function btnConfirm(bookID: string) {
+    async function btnConfirm(bookID: string, name: string) {
         confirm(
             "⚠️",
             "只删除记录与辅助数据，不删除分片，不删除闪卡等。<br>删除：" + name,
             async () => {
                 await prog.storage.removeIndex(bookID);
-                dialog.destroy();
-                prog.viewAllProgressiveBooks();
+                const idx = books.findIndex((book) => {
+                    if (book[0] == bookID) return true;
+                });
+                if (idx != -1) {
+                    books.splice(idx, 1);
+                    books = books;
+                }
             },
         );
     }
@@ -130,7 +66,9 @@
 
 <!-- https://learn.svelte.dev/tutorial/if-blocks -->
 {#if books}
-    {#each books as [bookID, bookInfo, idx, { content: name }]}
+    {#each books
+        .slice()
+        .reverse() as [bookID, bookInfo, idx, { content: name }]}
         <div class="prog-style__container_div">
             <p class="prog-style__id">
                 {name}
@@ -160,7 +98,7 @@
             >
             <button
                 class="prog-style__button"
-                on:click={() => btnConfirm(bookID)}
+                on:click={() => btnConfirm(bookID, name)}
                 >{prog.plugin.i18n.Delete}</button
             >
         </div>
