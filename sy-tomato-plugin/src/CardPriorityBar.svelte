@@ -74,14 +74,7 @@
 <!-- https://learn.svelte.dev/tutorial/if-blocks -->
 <div {...controlAttr} class="container">
     <div>
-        <input
-            title="拖动闪卡优先级"
-            type="range"
-            on:click={updateCard}
-            bind:value={priority}
-            min="0"
-            max="100"
-        />
+        <button title="取消制卡" on:click={removeCard}>🚫</button>
         {SPACE}
         <button title="闪卡优先级-1" on:click={subOne}>➖</button>
         <button
@@ -91,7 +84,15 @@
         >
         <button title="闪卡优先级+1" on:click={addOne}>➕</button>
         {SPACE}
-        <button title="取消制卡" on:click={removeCard}>🚫</button>
+        <input
+            title="拖动闪卡优先级"
+            type="range"
+            on:click={updateCard}
+            bind:value={priority}
+            min="0"
+            max="100"
+        />
+        {SPACE.repeat(6)}
     </div>
 </div>
 
