@@ -561,12 +561,12 @@ class Progressive {
     }
 
     private async trySplitSentence(info: BookInfo, noteID: string) {
-        await siyuan.pushMsg("开始尝试自动断句")
+        await siyuan.pushMsg("开始尝试自动断句");
         for (let i = 0; i < 3; i++) {
             await utils.sleep(3000);
             if (await this.doSplitSentence(info, noteID)) break;
         }
-        await siyuan.pushMsg("结束自动断句")
+        await siyuan.pushMsg("结束自动断句");
     }
 
     private async getBook2Learn(bookID?: string): Promise<BookInfo> {
