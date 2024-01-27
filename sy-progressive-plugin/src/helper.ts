@@ -50,11 +50,11 @@ export class Storage {
 
     async toggleIgnoreBook(bookID: string) {
         const info = await this.booksInfo(bookID);
-        if (info.ignored == "no") {
-            await this.updateBookInfo(bookID, { ignored: "yes" });
+        if (!info.ignored) {
+            await this.updateBookInfo(bookID, { ignored: true } as any);
             await siyuan.pushMsg(this.plugin.i18n.msgIgnoreBook);
         } else {
-            await this.updateBookInfo(bookID, { ignored: "no" });
+            await this.updateBookInfo(bookID, { ignored: false } as any);
             await siyuan.pushMsg(this.plugin.i18n.msgPushBook);
         }
     }
@@ -62,36 +62,35 @@ export class Storage {
     async toggleAutoCard(bookID: string, opt?: string) {
         const info = await this.booksInfo(bookID);
         if (opt) {
-            await this.updateBookInfo(bookID, { autoCard: opt });
+            await this.updateBookInfo(bookID, { autoCard: opt } as any);
         } else {
-            if (info.autoCard == "no") {
-                await this.updateBookInfo(bookID, { autoCard: "yes" });
+            if (!info.autoCard) {
+                await this.updateBookInfo(bookID, { autoCard: true } as any);
                 await siyuan.pushMsg(this.plugin.i18n.msgAutoCard);
             } else {
-                await this.updateBookInfo(bookID, { autoCard: "no" });
+                await this.updateBookInfo(bookID, { autoCard: false } as any);
                 await siyuan.pushMsg(this.plugin.i18n.msgNotAutoCard);
             }
         }
     }
 
     private async updateBookInfo(docID: string, opt: BookInfo) {
-        if (!docID) return;
-        if (docID.length != "20231218000645-9aaaltd".length) return;
+        if (docID?.length !== "20231218000645-9aaaltd".length) return;
         const info = await this.booksInfo(docID);
-        info.time = await siyuan.currentTimeMs();
-        if (opt.autoCard) info.autoCard = opt.autoCard;
-        if (opt.ignored) info.ignored = opt.ignored;
-        if (opt.bookID) info.bookID = opt.bookID;
+        if (typeof (opt.autoCard) === "boolean") info.autoCard = opt.autoCard;
+        if (typeof (opt.ignored) === "boolean") info.ignored = opt.ignored;
+        if (typeof (opt.showLastBlock) === "boolean") info.showLastBlock = opt.showLastBlock;
         if (utils.isValidNumber(opt.point)) info.point = opt.point;
+        info.time = await siyuan.currentTimeMs();
         this.booksInfos()[docID] = info;
         return this.saveBookInfos();
     }
 
     async booksInfo(docID: string): Promise<BookInfo> {
-        if (!docID) return {};
+        if (!docID) return {} as any;
         let info = this.booksInfos()[docID];
         if (!info) {
-            info = { point: 0, bookID: docID, time: await siyuan.currentTimeMs(), ignored: "no", autoCard: "yes" };
+            info = { point: 0, bookID: docID, time: await siyuan.currentTimeMs(), ignored: false } as any;
             this.booksInfos()[docID] = info;
         }
         if (!info.boxID) {
@@ -115,7 +114,7 @@ export class Storage {
 
     async gotoBlock(bookID: string, point: number) {
         if (point >= 0) {
-            await this.updateBookInfo(bookID, { point });
+            await this.updateBookInfo(bookID, { point } as any);
         }
     }
 

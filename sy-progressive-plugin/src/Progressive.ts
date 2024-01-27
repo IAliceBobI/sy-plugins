@@ -368,7 +368,7 @@ class Progressive {
                 await this.addAndClose(await openTab({
                     app: this.plugin.app, doc: { id: noteID },
                     afterOpen: () => {
-                        if (bookInfo.autoCard == "yes") {
+                        if (bookInfo.autoCard) {
                             setTimeout(() => {
                                 siyuan.addRiffCards([noteID]);
                             }, 500);
@@ -542,7 +542,7 @@ class Progressive {
         await siyuan.insertBlockAsChildOf(allContent.filter(i => !!i).join("\n\n"), noteID);
     }
 
-    private async getBook2Learn(bookID?: string): Promise<help.BookInfo> {
+    private async getBook2Learn(bookID?: string): Promise<BookInfo> {
         if (bookID) {
             return this.storage.booksInfo(bookID);
         }
@@ -551,7 +551,7 @@ class Progressive {
         let miniID = "";
         for (const id in infos) {
             const { time, ignored } = infos[id];
-            if (ignored == "yes") continue;
+            if (ignored) continue;
             if (time < miniTime) {
                 miniTime = time;
                 miniID = id;
