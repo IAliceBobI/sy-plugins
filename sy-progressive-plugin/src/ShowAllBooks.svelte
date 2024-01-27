@@ -53,11 +53,9 @@
     }
     async function btnToggleIgnoreBook(bookID: string) {
         await prog.storage.toggleIgnoreBook(bookID);
-        await loadBooks();
     }
     async function btnToggleAutoCard(bookID: string) {
         await prog.storage.toggleAutoCard(bookID);
-        await loadBooks();
     }
     async function btnAddProgressiveReadingWithLock(bookID: string) {
         prog.addProgressiveReadingWithLock(bookID);
@@ -111,14 +109,22 @@
                         title={prog.plugin.i18n.ignoreTxt +
                             book.bookInfo.ignored}
                     >
-                        <input type="checkbox" bind:checked={book.ignored} />
+                        <input
+                            type="checkbox"
+                            bind:checked={book.ignored}
+                            on:click={() => btnToggleIgnoreBook(book.bookID)}
+                        />
                     </td>
                     <td
                         class="prog-style__id"
                         title={prog.plugin.i18n.autoCard +
                             book.bookInfo.autoCard}
                     >
-                        <input type="checkbox" bind:checked={book.autoCard} />
+                        <input
+                            type="checkbox"
+                            bind:checked={book.autoCard}
+                            on:click={() => btnToggleAutoCard(book.bookID)}
+                        />
                     </td>
                     <td>
                         <button
