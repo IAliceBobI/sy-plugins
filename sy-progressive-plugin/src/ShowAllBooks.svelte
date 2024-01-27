@@ -3,15 +3,12 @@
     import { Dialog, confirm } from "siyuan";
     import { chunks, siyuan } from "../../sy-tomato-plugin/src/libs/utils";
     import { prog } from "./Progressive";
-    import { BookInfo } from "./helper";
 
     type TaskType = {
         bookID: string;
         bookInfo: BookInfo;
         row: Block;
         bookIndex: string[][];
-        ignored: boolean;
-        autoCard: boolean;
     };
 
     export let dialog: Dialog;
@@ -39,8 +36,6 @@
             ret.bookInfo = b as any;
             ret.bookIndex = c as any;
             ret.row = d as any;
-            ret.ignored = ret.bookInfo.ignored === "yes";
-            ret.autoCard = ret.bookInfo.autoCard === "yes";
             return ret;
         });
     }
@@ -111,7 +106,7 @@
                     >
                         <input
                             type="checkbox"
-                            bind:checked={book.ignored}
+                            bind:checked={book.bookInfo.ignored}
                             on:click={() => btnToggleIgnoreBook(book.bookID)}
                         />
                     </td>
@@ -122,7 +117,7 @@
                     >
                         <input
                             type="checkbox"
-                            bind:checked={book.autoCard}
+                            bind:checked={book.bookInfo.autoCard}
                             on:click={() => btnToggleAutoCard(book.bookID)}
                         />
                     </td>

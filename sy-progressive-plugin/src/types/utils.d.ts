@@ -29,3 +29,15 @@ type SettingCfgType = {
 }
 
 type AsList = "p" | "l" | "t";
+
+type WordCountType = { id: string; count: number; type: string; subType: string };
+
+type BookInfo = {
+    time: number,
+    boxID: string,
+    point: number,
+    bookID: string,
+    ignored: boolean,
+    autoCard: boolean,
+    showLastBlock: boolean,
+};

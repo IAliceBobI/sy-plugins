@@ -5,12 +5,7 @@
         isValidNumber,
         siyuan,
     } from "../../sy-tomato-plugin/src/libs/utils";
-    import {
-        ContentLenGroup,
-        HeadingGroup,
-        WordCountType,
-        splitByBlockCount,
-    } from "./helper";
+    import { ContentLenGroup, HeadingGroup, splitByBlockCount } from "./helper";
     import { Dialog } from "siyuan";
 
     export let bookID: string;

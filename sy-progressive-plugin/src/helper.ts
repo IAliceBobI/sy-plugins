@@ -4,15 +4,6 @@ import * as utils from "../../sy-tomato-plugin/src/libs/utils";
 import * as constants from "./constants";
 import { IProtyle, Lute, Plugin } from "siyuan";
 
-export type WordCountType = { id: string; count: number; type: string; subType: string };
-export type BookInfo = {
-    time?: number,
-    boxID?: string,
-    point?: number,
-    bookID?: string,
-    ignored?: string,
-    autoCard?: string,
-};
 export type BookInfos = { [key: string]: BookInfo };
 
 export enum HtmlCBType {
@@ -50,11 +41,11 @@ export class Storage {
     }
 
     async updateBookInfoTime(docID: string) {
-        this.updateBookInfo(docID, {});
+        this.updateBookInfo(docID, {} as any);
     }
 
     async resetBookReadingPoint(docID: string) {
-        this.updateBookInfo(docID, { point: 0 });
+        this.updateBookInfo(docID, { point: 0 } as any);
     }
 
     async toggleIgnoreBook(bookID: string) {

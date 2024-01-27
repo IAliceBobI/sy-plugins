@@ -204,7 +204,7 @@ class Progressive {
         }
     }
 
-      async addProgressiveReadingWithLock(bookID?: string) {
+    async addProgressiveReadingWithLock(bookID?: string) {
         return navigator.locks.request(constants.AddProgressiveReadingLock, { ifAvailable: true }, async (lock) => {
             if (lock) {
                 await this.addProgressiveReading(bookID, events.boxID);
@@ -528,8 +528,9 @@ class Progressive {
 
     private async fullfilContent(bookID: string, piecePre: string[], piece: string[], noteID: string) {
         this.storage.updateBookInfoTime(bookID);
+        const info = await this.storage.booksInfo(bookID);
         const allContent = [];
-        if (this.settings.showLastBlock && piecePre.length > 0) {
+        if (info.showLastBlock && piecePre.length > 0) {
             const lastID = piecePre[piecePre.length - 1];
             allContent.push(await help.copyBlock(lastID, this.lute, "custom-prog-piece-previous"));
         }
@@ -559,10 +560,10 @@ class Progressive {
         if (miniID) {
             return this.storage.booksInfo(miniID);
         }
-        return {};
+        return {} as any;
     }
 
-      async viewAllProgressiveBooks() {
+    async viewAllProgressiveBooks() {
         const id = utils.newID();
         let s: ShowAllBooks;
         const dialog = new Dialog({
