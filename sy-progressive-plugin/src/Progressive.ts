@@ -204,7 +204,7 @@ class Progressive {
         }
     }
 
-    private async addProgressiveReadingWithLock(bookID?: string) {
+      async addProgressiveReadingWithLock(bookID?: string) {
         return navigator.locks.request(constants.AddProgressiveReadingLock, { ifAvailable: true }, async (lock) => {
             if (lock) {
                 await this.addProgressiveReading(bookID, events.boxID);
@@ -562,7 +562,7 @@ class Progressive {
         return {};
     }
 
-    private async viewAllProgressiveBooks() {
+      async viewAllProgressiveBooks() {
         const id = utils.newID();
         let s: ShowAllBooks;
         const dialog = new Dialog({

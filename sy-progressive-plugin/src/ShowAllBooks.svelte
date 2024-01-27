@@ -1,6 +1,6 @@
 <script lang="ts">
     import { onDestroy, onMount } from "svelte";
-    import { Dialog } from "siyuan";
+    import { Dialog, confirm } from "siyuan";
     import { chunks, siyuan } from "../../sy-tomato-plugin/src/libs/utils";
     import { prog } from "./Progressive";
     import { BookInfo } from "./helper";
@@ -101,6 +101,31 @@
         await prog.startToLearnWithLock(bookID);
         dialog.destroy();
     }
+    async function btnToggleIgnoreBook(bookID: string) {
+        prog.storage.toggleIgnoreBook(bookID);
+        dialog.destroy();
+        prog.viewAllProgressiveBooks();
+    }
+    async function btnToggleAutoCard(bookID: string) {
+        prog.storage.toggleAutoCard(bookID);
+        dialog.destroy();
+        prog.viewAllProgressiveBooks();
+    }
+    async function btnAddProgressiveReadingWithLock(bookID: string) {
+        prog.addProgressiveReadingWithLock(bookID);
+        dialog.destroy();
+    }
+    async function btnConfirm(bookID: string) {
+        confirm(
+            "⚠️",
+            "只删除记录与辅助数据，不删除分片，不删除闪卡等。<br>删除：" + name,
+            async () => {
+                await prog.storage.removeIndex(bookID);
+                dialog.destroy();
+                prog.viewAllProgressiveBooks();
+            },
+        );
+    }
 </script>
 
 <!-- https://learn.svelte.dev/tutorial/if-blocks -->
@@ -117,6 +142,26 @@
                 class="prog-style__button"
                 on:click={() => btnStartToLearn(bookID)}
                 >{prog.plugin.i18n.Reading}</button
+            >
+            <button
+                class="prog-style__button"
+                on:click={() => btnToggleIgnoreBook(bookID)}
+                >{prog.plugin.i18n.ignoreTxt + bookInfo.ignored}</button
+            >
+            <button
+                class="prog-style__button"
+                on:click={() => btnToggleAutoCard(bookID)}
+                >{prog.plugin.i18n.autoCard + bookInfo.autoCard}</button
+            >
+            <button
+                class="prog-style__button"
+                on:click={() => btnAddProgressiveReadingWithLock(bookID)}
+                >{prog.plugin.i18n.Repiece}</button
+            >
+            <button
+                class="prog-style__button"
+                on:click={() => btnConfirm(bookID)}
+                >{prog.plugin.i18n.Delete}</button
             >
         </div>
     {/each}
