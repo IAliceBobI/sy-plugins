@@ -97,11 +97,7 @@
 
         await prog.storage.saveIndex(bookID, groups);
         await prog.storage.resetBookReadingPoint(bookID);
-        if (!autoCard) {
-            await prog.storage.toggleAutoCard(bookID, "no");
-        } else {
-            await prog.storage.toggleAutoCard(bookID, "yes");
-        }
+        await prog.storage.toggleAutoCard(bookID, autoCard);
         prog.startToLearnWithLock(bookID);
     }
 </script>

@@ -44,9 +44,20 @@ export class Storage {
         }
     }
 
-    async toggleAutoCard(bookID: string, opt?: string) {
+    async toggleShowLastBlock(bookID: string) {
         const info = await this.booksInfo(bookID);
-        if (opt) {
+        if (!info.showLastBlock) {
+            await this.updateBookInfo(bookID, { showLastBlock: true } as any);
+            await siyuan.pushMsg("显示上一分片最后一个内容块");
+        } else {
+            await this.updateBookInfo(bookID, { showLastBlock: false } as any);
+            await siyuan.pushMsg("不显示上一分片最后一个内容块");
+        }
+    }
+
+    async toggleAutoCard(bookID: string, opt?: boolean) {
+        const info = await this.booksInfo(bookID);
+        if (typeof opt === "boolean") {
             await this.updateBookInfo(bookID, { autoCard: opt } as any);
         } else {
             if (!info.autoCard) {
@@ -72,10 +83,17 @@ export class Storage {
     }
 
     async booksInfo(docID: string): Promise<BookInfo> {
-        if (!docID) return {} as any;
+        if (!docID) return {} as BookInfo;
         let info = this.booksInfos()[docID];
         if (!info) {
-            info = { point: 0, bookID: docID, time: await siyuan.currentTimeMs(), ignored: false } as any;
+            info = {
+                point: 0,
+                bookID: docID,
+                time: await siyuan.currentTimeMs(),
+                ignored: false,
+                showLastBlock: false,
+                autoCard: false,
+            } as BookInfo;
             this.booksInfos()[docID] = info;
         }
         if (!info.boxID) {

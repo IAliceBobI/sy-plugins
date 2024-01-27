@@ -48,16 +48,11 @@
         await prog.startToLearnWithLock(bookID);
         dialog.destroy();
     }
-    async function btnToggleIgnoreBook(bookID: string) {
-        await prog.storage.toggleIgnoreBook(bookID);
-    }
-    async function btnToggleAutoCard(bookID: string) {
-        await prog.storage.toggleAutoCard(bookID);
-    }
     async function btnAddProgressiveReadingWithLock(bookID: string) {
         prog.addProgressiveReadingWithLock(bookID);
         dialog.destroy();
     }
+
     async function btnConfirm(bookID: string, name: string) {
         confirm(
             "⚠️",
@@ -85,6 +80,7 @@
                 <th>进度</th>
                 <th>忽略</th>
                 <th>制卡</th>
+                <th>末尾</th>
                 <th>阅读</th>
                 <th>分片</th>
                 <th>删除</th>
@@ -112,7 +108,8 @@
                         <input
                             type="checkbox"
                             bind:checked={book.bookInfo.ignored}
-                            on:click={() => btnToggleIgnoreBook(book.bookID)}
+                            on:click={() =>
+                                prog.storage.toggleIgnoreBook(book.bookID)}
                         />
                     </td>
                     <td
@@ -123,7 +120,20 @@
                         <input
                             type="checkbox"
                             bind:checked={book.bookInfo.autoCard}
-                            on:click={() => btnToggleAutoCard(book.bookID)}
+                            on:click={() =>
+                                prog.storage.toggleAutoCard(book.bookID)}
+                        />
+                    </td>
+                    <td
+                        class="prog-style__id"
+                        title={"显示上一分片最后一个内容块" +
+                            book.bookInfo.showLastBlock}
+                    >
+                        <input
+                            type="checkbox"
+                            bind:checked={book.bookInfo.showLastBlock}
+                            on:click={() =>
+                                prog.storage.toggleShowLastBlock(book.bookID)}
                         />
                     </td>
                     <td>
