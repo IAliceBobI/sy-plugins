@@ -10,6 +10,8 @@
         bookInfo: BookInfo;
         row: Block;
         bookIndex: string[][];
+        ignored: boolean;
+        autoCard: boolean;
     };
 
     export let dialog: Dialog;
@@ -37,6 +39,8 @@
             ret.bookInfo = b as any;
             ret.bookIndex = c as any;
             ret.row = d as any;
+            ret.ignored = ret.bookInfo.ignored === "yes";
+            ret.autoCard = ret.bookInfo.autoCard === "yes";
             return ret;
         });
     }
@@ -79,37 +83,35 @@
 
 <!-- https://learn.svelte.dev/tutorial/if-blocks -->
 {#if books}
-    {#each books.slice().reverse() as { bookID, bookInfo, bookIndex, row }}
+    {#each books.slice().reverse() as book}
         <div class="prog-style__container_div">
             <p class="prog-style__id">
-                {row.content}
+                {book.row.content}
             </p>
             <p class="prog-style__id">
-                {Math.ceil((bookInfo.point / bookIndex.length) * 100)}%
+                {Math.ceil(
+                    (book.bookInfo.point / book.bookIndex.length) * 100,
+                )}%
             </p>
             <button
                 class="prog-style__button"
-                on:click={() => btnStartToLearn(bookID)}
+                on:click={() => btnStartToLearn(book.bookID)}
                 >{prog.plugin.i18n.Reading}</button
             >
+            <label title={prog.plugin.i18n.ignoreTxt + book.bookInfo.ignored}>
+                <input type="checkbox" bind:checked={book.ignored} />
+            </label>
+            <label title={prog.plugin.i18n.autoCard + book.bookInfo.autoCard}>
+                <input type="checkbox" bind:checked={book.autoCard} />
+            </label>
             <button
                 class="prog-style__button"
-                on:click={() => btnToggleIgnoreBook(bookID)}
-                >{prog.plugin.i18n.ignoreTxt + bookInfo.ignored}</button
-            >
-            <button
-                class="prog-style__button"
-                on:click={() => btnToggleAutoCard(bookID)}
-                >{prog.plugin.i18n.autoCard + bookInfo.autoCard}</button
-            >
-            <button
-                class="prog-style__button"
-                on:click={() => btnAddProgressiveReadingWithLock(bookID)}
+                on:click={() => btnAddProgressiveReadingWithLock(book.bookID)}
                 >{prog.plugin.i18n.Repiece}</button
             >
             <button
                 class="prog-style__button"
-                on:click={() => btnConfirm(bookID, row.content)}
+                on:click={() => btnConfirm(book.bookID, book.row.content)}
                 >{prog.plugin.i18n.Delete}</button
             >
         </div>
