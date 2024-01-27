@@ -11,6 +11,8 @@
         bookIndex: string[][];
     };
 
+    const MAXBOOKNAME = 10;
+
     export let dialog: Dialog;
 
     let books: TaskType[];
@@ -91,8 +93,11 @@
         <tbody>
             {#each books.slice().reverse() as book}
                 <tr>
-                    <td class="prog-style__id">
-                        {book.row.content}
+                    <td class="prog-style__id" title={book.row.content}>
+                        {book.row.content.slice(
+                            0,
+                            MAXBOOKNAME,
+                        )}{#if book.row.content.length > MAXBOOKNAME}...{/if}
                     </td>
                     <td class="prog-style__id">
                         {Math.ceil(
