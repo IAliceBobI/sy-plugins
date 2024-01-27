@@ -161,7 +161,7 @@
                             on:click={() =>
                                 prog.storage.setAutoSplitSentence(
                                     book.bookID,
-                                    book.bookInfo.autoSplitSentenceP,
+                                    !book.bookInfo.autoSplitSentenceP,
                                     "p",
                                 )}
                         />
@@ -178,7 +178,7 @@
                             on:click={() =>
                                 prog.storage.setAutoSplitSentence(
                                     book.bookID,
-                                    book.bookInfo.autoSplitSentenceT,
+                                    !book.bookInfo.autoSplitSentenceT,
                                     "t",
                                 )}
                         />
@@ -195,7 +195,7 @@
                             on:click={() =>
                                 prog.storage.setAutoSplitSentence(
                                     book.bookID,
-                                    book.bookInfo.autoSplitSentenceI,
+                                    !book.bookInfo.autoSplitSentenceI,
                                     "i",
                                 )}
                         />

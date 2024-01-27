@@ -64,14 +64,29 @@ export class Storage {
 
     async setAutoSplitSentence(bookID: string, v: boolean, t: AsList) {
         const info = await this.booksInfo(bookID);
+        info.autoSplitSentenceP = false;
+        info.autoSplitSentenceT = false;
+        info.autoSplitSentenceI = false;
         if (t == "p") {
             await this.updateBookInfo(bookID, { autoSplitSentenceP: v } as any);
             if (v) {
                 await siyuan.pushMsg("自动断句P");
-                info.autoSplitSentenceI = false;
-                info.autoSplitSentenceT = false;
             } else {
                 await siyuan.pushMsg("取消自动断句P");
+            }
+        } else if (t == "t") {
+            await this.updateBookInfo(bookID, { autoSplitSentenceT: v } as any);
+            if (v) {
+                await siyuan.pushMsg("自动断句T");
+            } else {
+                await siyuan.pushMsg("取消自动断句T");
+            }
+        } else if (t == "i") {
+            await this.updateBookInfo(bookID, { autoSplitSentenceI: v } as any);
+            if (v) {
+                await siyuan.pushMsg("自动断句I");
+            } else {
+                await siyuan.pushMsg("取消自动断句I");
             }
         }
     }
