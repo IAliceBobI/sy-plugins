@@ -38,7 +38,6 @@ export default class ThePlugin extends Plugin {
         if (this.settingCfg.addQuoteBlock == undefined) this.settingCfg.addQuoteBlock = true;
         if (this.settingCfg.hideBtnsInFlashCard == undefined) this.settingCfg.hideBtnsInFlashCard = false;
         if (this.settingCfg.addCodeBlock == undefined) this.settingCfg.addCodeBlock = false;
-        if (this.settingCfg.showLastBlock == undefined) this.settingCfg.showLastBlock = false;
         if (this.settingCfg.cardIndent == undefined) this.settingCfg.cardIndent = false;
         if (this.settingCfg.openCardsOnOpenPiece == undefined) this.settingCfg.openCardsOnOpenPiece = false;
         if (this.settingCfg.cardUnderPiece == undefined) this.settingCfg.cardUnderPiece = false;
@@ -72,7 +71,6 @@ export default class ThePlugin extends Plugin {
         this.addSettingItem("addQuoteBlock", "* 制卡时加入引述块", true, "与代码块二选一");
         this.addSettingItem("hideBtnsInFlashCard", "* 在闪卡内复习整个分片时，隐藏分片下方按钮", false, "");
         this.addSettingItem("addCodeBlock", "* 制卡时加入代码块", false, "与引述块二选一");
-        this.addSettingItem("showLastBlock", "* 显示上一分片最后一个块", false, "当前分片显示上一分片最后一个块内容");
         this.addSettingItem("cardIndent", "* 制作的闪卡，从第二项开始向右缩进", false, "");
         this.addSettingItem("openCardsOnOpenPiece", "* 打开分片的同时打开cards文档", false, "'cards-'前缀文件: 每本书用于保存闪卡的文件");
         this.addSettingItem("cardUnderPiece", "* 分片内制卡，放于分片的子文档内", false, "");

@@ -5,7 +5,6 @@ type SettingCfgType = {
     cardUnderPiece: boolean;
     addCodeBlock: boolean,
     addQuoteBlock: boolean,
-    showLastBlock: boolean,
     openCardsOnOpenPiece: boolean,
     cardIndent: boolean,
     addIndex2paragraph: boolean,
