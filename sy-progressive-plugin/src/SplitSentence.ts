@@ -66,7 +66,7 @@ export class SplitSentence {
                     return { attrLine, newID };
                 };
                 const ATTR_LINE = `{: ${RefIDKey}="${ref}" ${PARAGRAPH_INDEX}="${idx}" ${PROG_ORIGIN_TEXT}="1"}`;
-                if (row.type == "h") {
+                if (row.type == "h" || isPic(row.markdown)) {
                     const { newID, attrLine } = getAttrLine();
                     this.textAreas.push({
                         blocks: [{ text: row.markdown + `\n${attrLine}`, id: newID }],
@@ -108,6 +108,11 @@ export class SplitSentence {
         }
         return true;
     }
+}
+
+function isPic(markdown: string) {
+    const len = [...markdown.matchAll(/!\[.*?\]\(.*?\)/g)].length;
+    return len > 0;
 }
 
 function shouldMove(s: string) {
