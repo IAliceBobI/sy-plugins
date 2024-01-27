@@ -12,7 +12,17 @@ export class Storage {
 
     async onLayoutReady() {
         // load only need once, save many
-        return this.plugin.loadData(constants.STORAGE_BOOKS);
+        await this.plugin.loadData(constants.STORAGE_BOOKS);
+        Object.entries(this.booksInfos()).forEach(([_k, v]) => {
+            if (typeof v.autoCard === "string") {
+                if (v.autoCard === "yes") v.autoCard = true;
+                else v.autoCard = false;
+            }
+            if (typeof v.ignored === "string") {
+                if (v.ignored === "yes") v.ignored = true;
+                else v.ignored = false;
+            }
+        })
     }
 
     async updateBookInfoTime(docID: string) {
@@ -52,9 +62,9 @@ export class Storage {
     private async updateBookInfo(docID: string, opt: BookInfo) {
         if (docID?.length !== "20231218000645-9aaaltd".length) return;
         const info = await this.booksInfo(docID);
-        if (typeof (opt.autoCard) === "boolean") info.autoCard = opt.autoCard;
-        if (typeof (opt.ignored) === "boolean") info.ignored = opt.ignored;
-        if (typeof (opt.showLastBlock) === "boolean") info.showLastBlock = opt.showLastBlock;
+        if (typeof opt.autoCard === "boolean") info.autoCard = opt.autoCard;
+        if (typeof opt.ignored === "boolean") info.ignored = opt.ignored;
+        if (typeof opt.showLastBlock === "boolean") info.showLastBlock = opt.showLastBlock;
         if (utils.isValidNumber(opt.point)) info.point = opt.point;
         info.time = await siyuan.currentTimeMs();
         this.booksInfos()[docID] = info;
