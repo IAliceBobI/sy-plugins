@@ -28,7 +28,7 @@ type SettingCfgType = {
     btnDeleteExit: boolean;
 }
 
-type AsList = "p" | "l" | "t";
+type AsList = "p" | "i" | "t";
 
 type WordCountType = { id: string; count: number; type: string; subType: string };
 
@@ -40,7 +40,9 @@ type BookInfo = {
     ignored: boolean,
     autoCard: boolean,
     showLastBlock: boolean,
-    autoSplitSentence: boolean,
+    autoSplitSentenceP: boolean,
+    autoSplitSentenceI: boolean,
+    autoSplitSentenceT: boolean,
 };
 
 type BookInfos = { [key: string]: BookInfo };

@@ -487,7 +487,7 @@ class Progressive {
                 break;
             }
             case HtmlCBType.splitByPunctuationsList: {
-                const s = new SplitSentence(this.plugin, noteID, "l");
+                const s = new SplitSentence(this.plugin, noteID, "i");
                 await s.split();
                 await s.insert();
                 await help.cleanNote(noteID, true);
@@ -541,6 +541,9 @@ class Progressive {
             allContent.push(await help.copyBlock(id, this.lute, PROG_ORIGIN_TEXT, idx));
         }
         await siyuan.insertBlockAsChildOf(allContent.filter(i => !!i).join("\n\n"), noteID);
+        if (info.autoSplitSentenceP) {
+            console.log("xxxxp")
+        }
     }
 
     private async getBook2Learn(bookID?: string): Promise<BookInfo> {

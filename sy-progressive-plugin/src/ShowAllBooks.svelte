@@ -81,7 +81,9 @@
                 <th>忽略</th>
                 <th>制卡</th>
                 <th>末尾</th>
-                <th>断句</th>
+                <th>断句p</th>
+                <th>断句t</th>
+                <th>断句i</th>
                 <th>阅读</th>
                 <th>分片</th>
                 <th>删除</th>
@@ -139,14 +141,49 @@
                     </td>
                     <td
                         class="prog-style__id"
-                        title={"自动断句" + !!book.bookInfo.autoSplitSentence}
+                        title={"自动断句为段落块" +
+                            !!book.bookInfo.autoSplitSentenceP}
                     >
                         <input
                             type="checkbox"
-                            bind:checked={book.bookInfo.autoSplitSentence}
+                            bind:checked={book.bookInfo.autoSplitSentenceP}
                             on:click={() =>
-                                prog.storage.toggleAutoSplitSentence(
+                                prog.storage.setAutoSplitSentence(
                                     book.bookID,
+                                    book.bookInfo.autoSplitSentenceP,
+                                    "p",
+                                )}
+                        />
+                    </td>
+                    <td
+                        class="prog-style__id"
+                        title={"自动断句为任务列表" +
+                            !!book.bookInfo.autoSplitSentenceT}
+                    >
+                        <input
+                            type="checkbox"
+                            bind:checked={book.bookInfo.autoSplitSentenceT}
+                            on:click={() =>
+                                prog.storage.setAutoSplitSentence(
+                                    book.bookID,
+                                    book.bookInfo.autoSplitSentenceT,
+                                    "t",
+                                )}
+                        />
+                    </td>
+                    <td
+                        class="prog-style__id"
+                        title={"自动断句为无序列表" +
+                            !!book.bookInfo.autoSplitSentenceI}
+                    >
+                        <input
+                            type="checkbox"
+                            bind:checked={book.bookInfo.autoSplitSentenceI}
+                            on:click={() =>
+                                prog.storage.setAutoSplitSentence(
+                                    book.bookID,
+                                    book.bookInfo.autoSplitSentenceI,
+                                    "i",
                                 )}
                         />
                     </td>

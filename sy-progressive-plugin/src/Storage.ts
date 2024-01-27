@@ -55,14 +55,17 @@ export class Storage {
         }
     }
 
-    async toggleAutoSplitSentence(bookID: string) {
+    async setAutoSplitSentence(bookID: string, v: boolean, t: AsList) {
         const info = await this.booksInfo(bookID);
-        if (!info.autoSplitSentence) {
-            await this.updateBookInfo(bookID, { autoSplitSentence: true } as any);
-            await siyuan.pushMsg("自动断句");
-        } else {
-            await this.updateBookInfo(bookID, { autoSplitSentence: false } as any);
-            await siyuan.pushMsg("取消自动断句");
+        if (t == "p") {
+            await this.updateBookInfo(bookID, { autoSplitSentenceP: v } as any);
+            if (v) {
+                await siyuan.pushMsg("自动断句P");
+                info.autoSplitSentenceI = false;
+                info.autoSplitSentenceT = false;
+            } else {
+                await siyuan.pushMsg("取消自动断句P");
+            }
         }
     }
 
@@ -87,7 +90,9 @@ export class Storage {
         if (typeof opt.autoCard === "boolean") info.autoCard = opt.autoCard;
         if (typeof opt.ignored === "boolean") info.ignored = opt.ignored;
         if (typeof opt.showLastBlock === "boolean") info.showLastBlock = opt.showLastBlock;
-        if (typeof opt.autoSplitSentence === "boolean") info.autoSplitSentence = opt.autoSplitSentence;
+        if (typeof opt.autoSplitSentenceP === "boolean") info.autoSplitSentenceP = opt.autoSplitSentenceP;
+        if (typeof opt.autoSplitSentenceT === "boolean") info.autoSplitSentenceT = opt.autoSplitSentenceT;
+        if (typeof opt.autoSplitSentenceI === "boolean") info.autoSplitSentenceI = opt.autoSplitSentenceI;
         if (utils.isValidNumber(opt.point)) info.point = opt.point;
         info.time = await siyuan.currentTimeMs();
         this.booksInfos()[docID] = info;
@@ -105,7 +110,9 @@ export class Storage {
                 ignored: false,
                 showLastBlock: false,
                 autoCard: false,
-                autoSplitSentence: false,
+                autoSplitSentenceP: false,
+                autoSplitSentenceT: false,
+                autoSplitSentenceI: false,
             } as BookInfo;
             this.booksInfos()[docID] = info;
         }
