@@ -2,7 +2,6 @@ import { Dialog, Menu, Plugin, openTab, confirm, ITab, Lute, IProtyle, Protyle }
 import "./index.scss";
 import { EventType, events } from "../../sy-tomato-plugin/src/libs/Events";
 import { siyuan, timeUtil } from "../../sy-tomato-plugin/src/libs/utils";
-import { HtmlCBType } from "./helper";
 import * as utils from "../../sy-tomato-plugin/src/libs/utils";
 import * as help from "./helper";
 import * as constants from "./constants";

@@ -146,3 +146,7 @@ export function preSave(groups: WordCountType[][]) {
     }
     return [newGroups, pieces.join("#")];
 }
+
+export function bookCacheKey(bookID: string) {
+    return bookID + "_cache";
+}

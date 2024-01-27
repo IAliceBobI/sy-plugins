@@ -3,32 +3,6 @@ import { siyuan, styleColor } from "../../sy-tomato-plugin/src/libs/utils";
 import * as utils from "../../sy-tomato-plugin/src/libs/utils";
 import { IProtyle, Lute, Plugin } from "siyuan";
 
-export enum HtmlCBType {
-    previous = 0,
-    deleteAndNext = 1,
-    AddDocCard = 2,
-    // saveDoc = 3,
-    quit = 4,
-    nextBook = 5,
-    next = 6,
-    ignoreBook = 7,
-    fullfilContent = 8,
-    cleanUnchanged = 9,
-    DelDocCard = 10,
-    deleteAndExit = 11,
-    openFlashcardTab = 12,
-    deleteAndBack = 13,
-    viewContents = 14,
-    splitByPunctuations = 15,
-    splitByPunctuationsList = 16,
-    splitByPunctuationsListCheck = 17,
-    cleanOriginText = 18,
-}
-
-export function bookCacheKey(bookID: string) {
-    return bookID + "_cache";
-}
-
 export function tempContent(content: string, id?: string) { // for btns and split lines
     if (!id) return content + `\n{: ${MarkKey}="${TEMP_CONTENT}"}`;
     else return content + `\n{: id="${id}" ${MarkKey}="${TEMP_CONTENT}"}`;
@@ -281,6 +255,29 @@ export async function createNote(boxID: string, bookID: string, piece: string[],
     attr[MarkKey] = getDocIalPieces(bookID, point);
     await siyuan.setBlockAttrs(docID, attr);
     return docID;
+}
+
+export function appendChild(parent: HTMLElement, type: string, textContent: string, classList: string[], click?: any) {
+    const elem = document.createElement(type);
+    elem.textContent = textContent;
+    parent.appendChild(elem);
+    for (const cls of classList) if (cls) elem.classList.add(cls);
+    if (click) elem.addEventListener("click", click);
+    return elem;
+}
+
+export function isProtylePiece(protyle: IProtyle) {
+    const div = protyle?.element?.querySelector(`[${MarkKey}]`) as HTMLDivElement;
+    const attr = div?.getAttribute(MarkKey) ?? "";
+    const pieceLen = getDocIalPieces("20231229160401-0lfc8qj", 0).length;
+    return { isPiece: attr.startsWith(TEMP_CONTENT + "#") && attr.length >= pieceLen, markKey: attr };
+}
+
+export function isProtyleKeyDoc(protyle: IProtyle) {
+    const div = protyle?.element?.querySelector(`[${MarkKey}]`) as HTMLDivElement;
+    const attr = div?.getAttribute(MarkKey) ?? "";
+    const fake = getDocIalKeysDoc("20231229160401-0lfc8qj", 0);
+    return { isKeyDoc: attr.includes(fake.split("#", 1)[0] + "#" + TEMP_CONTENT + "#") && attr.length >= fake.length, keyDocAttr: attr };
 }
 
 export class Helper {
@@ -690,134 +687,4 @@ ${this.btnNextBook(bookID, noteID, point)}
         await siyuan.pushMsg(this.plugin.i18n.countingFinished, 3000);
         return content;
     }
-}
-
-export class ContentLenGroup {
-    private groups: WordCountType[][];
-    private accCount: number;
-    private maxCount: number;
-    private collect: WordCountType[][];
-    private list: WordCountType[];
-    constructor(groups: WordCountType[][], maxCount: number) {
-        this.groups = groups;
-        this.accCount = 0;
-        this.collect = [];
-        this.list = [];
-        this.maxCount = maxCount;
-    }
-    private newList() {
-        if (this.list.length > 0) {
-            this.collect.push(this.list);
-            this.list = [];
-            this.accCount = 0;
-        }
-    }
-    private add(wc: WordCountType) {
-        this.list.push(wc);
-        if (wc.type !== "h") this.accCount += wc.count;
-        if (this.accCount >= this.maxCount) {
-            this.newList();
-        }
-    }
-    private splitPiece(wc: WordCountType[]): WordCountType[][] {
-        this.collect = [];
-        for (const line of wc) {
-            this.add(line);
-        }
-        this.newList();
-        return this.collect;
-    }
-    split() {
-        const list = [];
-        for (const piece of this.groups) {
-            list.push(...this.splitPiece(piece));
-        }
-        return list;
-    }
-}
-
-export class HeadingGroup {
-    private wordCount: WordCountType[];
-    private group: WordCountType[][];
-    private list: WordCountType[];
-    private lastType: string;
-    private bookID: string;
-    private headings: string[];
-    constructor(wordCount: WordCountType[], headings: string[], bookID: string) {
-        this.wordCount = wordCount;
-        this.group = [];
-        this.list = [];
-        this.headings = headings;
-        this.bookID = bookID;
-    }
-    public async init() {
-        if (this.headings.includes("b")) {
-            utils.arrayRemove(this.headings, "b");
-            this.headings.push("7");
-
-            const blocks = await siyuan.sql(`select id from blocks where root_id='${this.bookID}' and markdown like "**%**" limit 10000`);
-            const s = new Set(blocks.map(b => b.id));
-            this.wordCount.forEach(e => {
-                if (s.has(e.id)) {
-                    e.type = "h";
-                    e.subType = "h7";
-                }
-            });
-        }
-        this.headings = this.headings.map(i => `h${i}`);
-        return this;
-    }
-    private add(wc: WordCountType) {
-        this.getList(wc).push(wc);
-        this.lastType = wc.type;
-    }
-    private next() {
-        if (this.list.length > 0) {
-            this.group.push(this.list);
-            this.list = [];
-        }
-    }
-    private shouldNext(wc: WordCountType) {
-        if (wc.type === "h" && this.headings.includes(wc.subType) && this.lastType != "h") {
-            return true;
-        }
-        return false;
-    }
-    private getList(wc: WordCountType) {
-        if (this.shouldNext(wc)) {
-            this.next();
-        }
-        return this.list;
-    }
-    split() {
-        if (this.headings.length == 0) return [this.wordCount];
-        for (const wc of this.wordCount) {
-            this.add(wc);
-        }
-        this.next();
-        return this.group;
-    }
-}
-
-export function appendChild(parent: HTMLElement, type: string, textContent: string, classList: string[], click?: any) {
-    const elem = document.createElement(type);
-    elem.textContent = textContent;
-    parent.appendChild(elem);
-    for (const cls of classList) if (cls) elem.classList.add(cls);
-    if (click) elem.addEventListener("click", click);
-    return elem;
-}
-
-export function isProtylePiece(protyle: IProtyle) {
-    const div = protyle?.element?.querySelector(`[${MarkKey}]`) as HTMLDivElement;
-    const attr = div?.getAttribute(MarkKey) ?? "";
-    const pieceLen = getDocIalPieces("20231229160401-0lfc8qj", 0).length;
-    return { isPiece: attr.startsWith(TEMP_CONTENT + "#") && attr.length >= pieceLen, markKey: attr };
-}
-
-export function isProtyleKeyDoc(protyle: IProtyle) {
-    const div = protyle?.element?.querySelector(`[${MarkKey}]`) as HTMLDivElement;
-    const attr = div?.getAttribute(MarkKey) ?? "";
-    const fake = getDocIalKeysDoc("20231229160401-0lfc8qj", 0);
-    return { isKeyDoc: attr.includes(fake.split("#", 1)[0] + "#" + TEMP_CONTENT + "#") && attr.length >= fake.length, keyDocAttr: attr };
 }
