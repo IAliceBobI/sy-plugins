@@ -81,6 +81,7 @@
                 <th>忽略</th>
                 <th>制卡</th>
                 <th>末尾</th>
+                <th>断句</th>
                 <th>阅读</th>
                 <th>分片</th>
                 <th>删除</th>
@@ -103,7 +104,7 @@
                     <td
                         class="prog-style__id"
                         title={prog.plugin.i18n.ignoreTxt +
-                            book.bookInfo.ignored}
+                            !!book.bookInfo.ignored}
                     >
                         <input
                             type="checkbox"
@@ -115,7 +116,7 @@
                     <td
                         class="prog-style__id"
                         title={prog.plugin.i18n.autoCard +
-                            book.bookInfo.autoCard}
+                            !!book.bookInfo.autoCard}
                     >
                         <input
                             type="checkbox"
@@ -127,13 +128,26 @@
                     <td
                         class="prog-style__id"
                         title={"显示上一分片最后一个内容块" +
-                            book.bookInfo.showLastBlock}
+                            !!book.bookInfo.showLastBlock}
                     >
                         <input
                             type="checkbox"
                             bind:checked={book.bookInfo.showLastBlock}
                             on:click={() =>
                                 prog.storage.toggleShowLastBlock(book.bookID)}
+                        />
+                    </td>
+                    <td
+                        class="prog-style__id"
+                        title={"自动断句" + !!book.bookInfo.autoSplitSentence}
+                    >
+                        <input
+                            type="checkbox"
+                            bind:checked={book.bookInfo.autoSplitSentence}
+                            on:click={() =>
+                                prog.storage.toggleAutoSplitSentence(
+                                    book.bookID,
+                                )}
                         />
                     </td>
                     <td>

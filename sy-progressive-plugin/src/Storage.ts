@@ -51,7 +51,18 @@ export class Storage {
             await siyuan.pushMsg("显示上一分片最后一个内容块");
         } else {
             await this.updateBookInfo(bookID, { showLastBlock: false } as any);
-            await siyuan.pushMsg("不显示上一分片最后一个内容块");
+            await siyuan.pushMsg("取消显示上一分片最后一个内容块");
+        }
+    }
+
+    async toggleAutoSplitSentence(bookID: string) {
+        const info = await this.booksInfo(bookID);
+        if (!info.autoSplitSentence) {
+            await this.updateBookInfo(bookID, { autoSplitSentence: true } as any);
+            await siyuan.pushMsg("自动断句");
+        } else {
+            await this.updateBookInfo(bookID, { autoSplitSentence: false } as any);
+            await siyuan.pushMsg("取消自动断句");
         }
     }
 
@@ -76,6 +87,7 @@ export class Storage {
         if (typeof opt.autoCard === "boolean") info.autoCard = opt.autoCard;
         if (typeof opt.ignored === "boolean") info.ignored = opt.ignored;
         if (typeof opt.showLastBlock === "boolean") info.showLastBlock = opt.showLastBlock;
+        if (typeof opt.autoSplitSentence === "boolean") info.autoSplitSentence = opt.autoSplitSentence;
         if (utils.isValidNumber(opt.point)) info.point = opt.point;
         info.time = await siyuan.currentTimeMs();
         this.booksInfos()[docID] = info;
@@ -93,6 +105,7 @@ export class Storage {
                 ignored: false,
                 showLastBlock: false,
                 autoCard: false,
+                autoSplitSentence: false,
             } as BookInfo;
             this.booksInfos()[docID] = info;
         }

@@ -40,6 +40,7 @@ type BookInfo = {
     ignored: boolean,
     autoCard: boolean,
     showLastBlock: boolean,
+    autoSplitSentence: boolean,
 };
 
 type BookInfos = { [key: string]: BookInfo };
