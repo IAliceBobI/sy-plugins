@@ -4,15 +4,23 @@
     import { chunks, siyuan } from "../../sy-tomato-plugin/src/libs/utils";
     import { prog } from "./Progressive";
     import { BookInfo } from "./helper";
-    import { reverse } from "dns";
 
-    type TaskType = [string, BookInfo, string[][], Block];
+    type TaskType = {
+        bookID: string;
+        bookInfo: BookInfo;
+        row: Block;
+        bookIndex: string[][];
+    };
 
     export let dialog: Dialog;
 
     let books: TaskType[];
 
     onMount(async () => {
+        await loadBooks();
+    });
+
+    async function loadBooks() {
         const tasks = Object.entries(prog.storage.booksInfos())
             .map(([bookID]) => {
                 const bookInfo = prog.storage.booksInfo(bookID);
@@ -23,8 +31,15 @@
                 return [bookID, bookInfo, idx, row];
             })
             .flat();
-        books = chunks(await Promise.all(tasks), 4) as TaskType[];
-    });
+        books = chunks(await Promise.all(tasks), 4).map(([a, b, c, d]) => {
+            const ret = {} as TaskType;
+            ret.bookID = a as any;
+            ret.bookInfo = b as any;
+            ret.bookIndex = c as any;
+            ret.row = d as any;
+            return ret;
+        });
+    }
 
     onDestroy(async () => {});
 
@@ -33,14 +48,12 @@
         dialog.destroy();
     }
     async function btnToggleIgnoreBook(bookID: string) {
-        prog.storage.toggleIgnoreBook(bookID);
-        dialog.destroy();
-        prog.viewAllProgressiveBooks();
+        await prog.storage.toggleIgnoreBook(bookID);
+        await loadBooks();
     }
     async function btnToggleAutoCard(bookID: string) {
-        prog.storage.toggleAutoCard(bookID);
-        dialog.destroy();
-        prog.viewAllProgressiveBooks();
+        await prog.storage.toggleAutoCard(bookID);
+        await loadBooks();
     }
     async function btnAddProgressiveReadingWithLock(bookID: string) {
         prog.addProgressiveReadingWithLock(bookID);
@@ -66,15 +79,13 @@
 
 <!-- https://learn.svelte.dev/tutorial/if-blocks -->
 {#if books}
-    {#each books
-        .slice()
-        .reverse() as [bookID, bookInfo, idx, { content: name }]}
+    {#each books.slice().reverse() as { bookID, bookInfo, bookIndex, row }}
         <div class="prog-style__container_div">
             <p class="prog-style__id">
-                {name}
+                {row.content}
             </p>
             <p class="prog-style__id">
-                {Math.ceil((bookInfo.point / idx.length) * 100)}%
+                {Math.ceil((bookInfo.point / bookIndex.length) * 100)}%
             </p>
             <button
                 class="prog-style__button"
@@ -98,7 +109,7 @@
             >
             <button
                 class="prog-style__button"
-                on:click={() => btnConfirm(bookID, name)}
+                on:click={() => btnConfirm(bookID, row.content)}
                 >{prog.plugin.i18n.Delete}</button
             >
         </div>
