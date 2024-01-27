@@ -41,3 +41,5 @@ type BookInfo = {
     autoCard: boolean,
     showLastBlock: boolean,
 };
+
+type BookInfos = { [key: string]: BookInfo };

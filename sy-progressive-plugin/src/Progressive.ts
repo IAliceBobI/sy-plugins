@@ -10,11 +10,12 @@ import { BlockNodeEnum, DATA_NODE_ID, DATA_TYPE, MarkKey, PARAGRAPH_INDEX, PROG_
 import { SplitSentence } from "./SplitSentence";
 import AddBook from "./AddBook.svelte";
 import ShowAllBooks from "./ShowAllBooks.svelte";
+import { Storage } from "./Storage";
 
 class Progressive {
     private static readonly GLOBAL_THIS: Record<string, any> = globalThis;
     plugin: Plugin;
-    storage: help.Storage;
+    storage: Storage;
     helper: help.Helper;
     private openedTabs?: ITab;
     private settings: SettingCfgType;
@@ -27,7 +28,7 @@ class Progressive {
         this.plugin = plugin;
         this.lute = utils.NewLute();
         this.settings = settings;
-        this.storage = new help.Storage(plugin);
+        this.storage = new Storage(plugin);
         this.helper = new help.Helper(plugin, this.settings);
         await this.storage.onLayoutReady();
         if (!events.isMobile) {
