@@ -98,11 +98,13 @@
                             MAXBOOKNAME,
                         )}{#if book.row.content.length > MAXBOOKNAME}...{/if}
                     </td>
+
                     <td class="prog-style__id">
                         {Math.ceil(
                             (book.bookInfo.point / book.bookIndex.length) * 100,
                         )}%
                     </td>
+
                     <td
                         class="prog-style__id"
                         title={prog.plugin.i18n.ignoreTxt +
@@ -112,9 +114,13 @@
                             type="checkbox"
                             bind:checked={book.bookInfo.ignored}
                             on:click={() =>
-                                prog.storage.setIgnoreBook(book.bookID)}
+                                prog.storage.setIgnoreBook(
+                                    book.bookID,
+                                    !book.bookInfo.ignored,
+                                )}
                         />
                     </td>
+
                     <td
                         class="prog-style__id"
                         title={prog.plugin.i18n.autoCard +
@@ -127,6 +133,7 @@
                                 prog.storage.toggleAutoCard(book.bookID)}
                         />
                     </td>
+
                     <td
                         class="prog-style__id"
                         title={"显示上一分片最后一个内容块" +
@@ -138,10 +145,11 @@
                             on:click={() =>
                                 prog.storage.setShowLastBlock(
                                     book.bookID,
-                                    book.bookInfo.showLastBlock,
+                                    !book.bookInfo.showLastBlock,
                                 )}
                         />
                     </td>
+
                     <td
                         class="prog-style__id"
                         title={"自动断句为段落块" +
@@ -158,6 +166,7 @@
                                 )}
                         />
                     </td>
+
                     <td
                         class="prog-style__id"
                         title={"自动断句为任务列表" +
@@ -174,6 +183,7 @@
                                 )}
                         />
                     </td>
+
                     <td
                         class="prog-style__id"
                         title={"自动断句为无序列表" +
@@ -190,6 +200,7 @@
                                 )}
                         />
                     </td>
+
                     <td>
                         <button
                             title="阅读《{book.row.content}》"
