@@ -480,29 +480,30 @@ class Progressive {
                 await this.openContentsLock(bookID);
                 break;
             case HtmlCBType.splitByPunctuations: {
-                const s = new SplitSentence(this.plugin, noteID, "p");
-                await s.split();
-                await s.insert();
-                await help.cleanNote(noteID, true);
+                await this.splitAndClean(noteID, "p");
                 break;
             }
             case HtmlCBType.splitByPunctuationsList: {
-                const s = new SplitSentence(this.plugin, noteID, "i");
-                await s.split();
-                await s.insert();
-                await help.cleanNote(noteID, true);
+                await this.splitAndClean(noteID, "i");
                 break;
             }
             case HtmlCBType.splitByPunctuationsListCheck: {
-                const s = new SplitSentence(this.plugin, noteID, "t");
-                await s.split();
-                await s.insert();
-                await help.cleanNote(noteID, true);
+                await this.splitAndClean(noteID, "t");
                 break;
             }
             default:
                 throw "Invalid HtmlCBType " + cbType;
         }
+    }
+
+    private async splitAndClean(noteID: string, t: AsList) {
+        const s = new SplitSentence(this.plugin, noteID, t);
+        if (await s.split()) {
+            await s.insert();
+            await help.cleanNote(noteID, true);
+            return true;
+        }
+        return false;
     }
 
     private async addAndClose(tab?: ITab) {
@@ -541,9 +542,31 @@ class Progressive {
             allContent.push(await help.copyBlock(id, this.lute, PROG_ORIGIN_TEXT, idx));
         }
         await siyuan.insertBlockAsChildOf(allContent.filter(i => !!i).join("\n\n"), noteID);
-        if (info.autoSplitSentenceP) {
-            console.log("xxxxp")
+
+        if (info.autoSplitSentenceP || info.autoSplitSentenceT || info.autoSplitSentenceI) {
+            await this.trySplitSentence(info, noteID);
         }
+    }
+
+    private async doSplitSentence(info: BookInfo, noteID: string) {
+        let ret = false;
+        if (info.autoSplitSentenceP) {
+            ret = await this.splitAndClean(noteID, "p");
+        } else if (info.autoSplitSentenceI) {
+            ret = await this.splitAndClean(noteID, "i");
+        } else if (info.autoSplitSentenceT) {
+            ret = await this.splitAndClean(noteID, "t");
+        }
+        return ret;
+    }
+
+    private async trySplitSentence(info: BookInfo, noteID: string) {
+        await siyuan.pushMsg("开始尝试自动断句")
+        for (let i = 0; i < 3; i++) {
+            await utils.sleep(3000);
+            if (await this.doSplitSentence(info, noteID)) break;
+        }
+        await siyuan.pushMsg("结束自动断句")
     }
 
     private async getBook2Learn(bookID?: string): Promise<BookInfo> {

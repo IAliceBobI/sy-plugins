@@ -38,12 +38,12 @@ export class SplitSentence {
     }
 
     async split() {
-        const msg = "请重新插入原文";
+        const msg = "【尝试分片】请等待索引建立……";
         {
             const rows = await siyuan.sql(`select id from blocks where ial like '%${PROG_ORIGIN_TEXT}="1"%' and root_id="${this.noteID}" limit 1`);
             if (rows.length == 0) {
                 await siyuan.pushMsg(msg);
-                return;
+                return false;
             }
         }
         const rows = (await Promise.all((await siyuan.getChildBlocks(this.noteID))
@@ -106,6 +106,7 @@ export class SplitSentence {
                 }
             }
         }
+        return true;
     }
 }
 
