@@ -38,6 +38,7 @@
             ret.bookInfo = b as any;
             ret.bookIndex = c as any;
             ret.row = d as any;
+            if (!ret.row.content) ret.row.content = "(找不到此书籍)";
             return ret;
         });
     }

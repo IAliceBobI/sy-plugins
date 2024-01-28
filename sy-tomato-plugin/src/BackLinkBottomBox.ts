@@ -51,6 +51,9 @@ class BKMaker implements IBKMaker {
                 this.container = document.createElement("div");
                 new BackLinkBottom({
                     target: this.container,
+                    props: {
+                        maker: this,
+                    }
                 });
                 this.container.setAttribute(BKMAKER_ADD, "1");
                 this.container.classList.add("protyle-wysiwyg");
