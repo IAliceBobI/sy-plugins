@@ -26,7 +26,7 @@ class ToolbarBox {
             callback: async () => {
                 await siyuan.refreshVirtualBlockRef();
                 events.protyleReload();
-                await siyuan.pushMsg("已经刷新虚拟引用");
+                await siyuan.pushMsg("已经刷新虚拟引用", 2000);
             }
         });
     }
