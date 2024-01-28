@@ -4,7 +4,7 @@
     import { MENTION_COUTING_SPAN, icon } from "./libs/bkUtils";
     import { Dialog } from "siyuan";
     import { SEARCH_HELP } from "./constants";
-    import { BLOCK_REF, DATA_ID, DATA_TYPE } from "./libs/gconst";
+    import { BLOCK_REF, DATA_ID, DATA_TYPE, SPACE } from "./libs/gconst";
     import { BKMaker } from "./BackLinkBottomBox";
 
     const QUERYABLE_ELEMENT = "QUERYABLE_ELEMENT";
@@ -155,15 +155,8 @@
         // searchInDiv(self, newValue.trim());
     }
 
-    function createEyeBtn() {
-        const btn = document.createElement("button");
-        btn.title = "隐藏";
-        btn.classList.add("b3-button");
-        btn.classList.add("b3-button--text");
-        btn.style.border = "none";
-        btn.style.outline = "none";
-        btn.innerHTML = icon("Eye");
-        return btn;
+    function getHideableID(idx: number) {
+        return `tomatoHideableDiv${idx}`;
     }
 </script>
 
@@ -214,19 +207,25 @@
     </label>
 </div>
 
-{#each backLinks as backLink}
+{#each backLinks as backLink, i}
     <hr />
-    <div {...queryableElementAttr} class="bk_one_line">
+    <div id={getHideableID(i)} {...queryableElementAttr} class="bk_one_line">
         <div class="fn__flex-column">
-            <button class="bk_label b3-button b3-button--text" title="隐藏"
-                >{@html icon("Eyeoff")}</button
+            <button
+                class="gap bk_label b3-button b3-button--text"
+                title="隐藏"
+                on:click={() => {
+                    autoRefreshChecked = false;
+                    document.getElementById(getHideableID(i)).style.display =
+                        "none";
+                }}>{@html icon("Eyeoff")}</button
             >
             <button
-                class="bk_label b3-button b3-button--text"
+                class="gap bk_label b3-button b3-button--text"
                 title="复制到文档">{@html icon("Copy")}</button
             >
             <button
-                class="bk_label b3-button b3-button--text"
+                class="gap bk_label b3-button b3-button--text"
                 title="移动到文档">{@html icon("Move")}</button
             >
         </div>
@@ -235,6 +234,9 @@
 {/each}
 
 <style>
+    .gap {
+        margin: auto;
+    }
     .bk_one_line {
         display: flex;
     }
