@@ -1,7 +1,7 @@
-import { BlockNodeEnum, DATA_TYPE, IDLen, MarkKey, PARAGRAPH_INDEX, PROG_ORIGIN_TEXT, RefIDKey, TEMP_CONTENT } from "../../sy-tomato-plugin/src/libs/gconst";
+import { IDLen, MarkKey, PROG_ORIGIN_TEXT, PROG_PIECE_PREVIOUS, RefIDKey, TEMP_CONTENT } from "../../sy-tomato-plugin/src/libs/gconst";
 import { siyuan, styleColor } from "../../sy-tomato-plugin/src/libs/utils";
 import * as utils from "../../sy-tomato-plugin/src/libs/utils";
-import { IProtyle, Lute, Plugin } from "siyuan";
+import { IProtyle, Plugin } from "siyuan";
 import { HtmlCBType } from "./constants";
 
 export function tempContent(content: string, id?: string) { // for btns and split lines
@@ -118,32 +118,6 @@ export function splitByBlockCount(groups: WordCountType[][], blockNumber: number
     return tmp;
 }
 
-export async function copyBlock(id: string, lute: Lute, mark?: string, idx?: { i: number }) {
-    const { div: tempDiv } = await utils.getBlockDiv(id);
-    if (tempDiv.getAttribute(MarkKey)) return "";
-    if (idx && tempDiv.getAttribute(DATA_TYPE) != BlockNodeEnum.NODE_HEADING) {
-        const editableDiv = utils.getContenteditableElement(tempDiv);
-        if (editableDiv) {
-            const idxSpan = editableDiv.insertBefore(document.createElement("span"), editableDiv.firstChild) as HTMLSpanElement;
-            if (idxSpan) {
-                idxSpan.setAttribute(DATA_TYPE, "text");
-                // idxSpan.style.backgroundColor = "var(--b3-font-background3)";
-                // idxSpan.style.color = "var(--b3-font-color7)";
-                idxSpan.textContent = `[${idx.i}]`;
-                tempDiv.setAttribute(PARAGRAPH_INDEX, String(idx.i));
-                idx.i++;
-            }
-        }
-    }
-    const txt = tempDiv.textContent.replace(/\u200B/g, "").trim();
-    if (!txt || txt == "*") return "";
-    await utils.cleanDiv(tempDiv, true, true);
-    tempDiv.setAttribute(RefIDKey, id);
-    if (mark) tempDiv.setAttribute(mark, "1");
-    const md = lute.BlockDOM2Md(tempDiv.outerHTML);
-    return md.trim();
-}
-
 export function rmBadThings(s: string) {
     return s.replace(/[​]+/g, "").trim();
 }
@@ -151,11 +125,14 @@ export function rmBadThings(s: string) {
 export async function cleanNote(noteID: string, force: boolean) {
     const id2del = [];
     for (const row of await siyuan.sql(`select ial,markdown,id from blocks 
-        where root_id="${noteID}" 
-        and (ial like '%${PROG_ORIGIN_TEXT}="1"%' or (markdown='' and content='')) limit 10000`)) {
+        where root_id="${noteID}" and (
+            ial like '%${PROG_PIECE_PREVIOUS}="1"%' 
+            or ial like '%${PROG_ORIGIN_TEXT}="1"%' 
+            or (markdown='' and content='')
+        ) limit 10000`)) {
         const ial: string = row?.ial ?? "";
         const markdown: string = row?.markdown ?? "";
-        if (ial.includes(TEMP_CONTENT)) {
+        if (ial.includes(TEMP_CONTENT) || ial.includes(PROG_PIECE_PREVIOUS)) {
             id2del.push(row.id);
         } else if (markdown === "") {
             id2del.push(row.id);

@@ -47,6 +47,7 @@ export const RefIDKey = "custom-progref"; // for content
 export const TEMP_CONTENT = "插件管理勿改managedByPluginDoNotModify";
 export const IN_PIECE_REF = "custom-in-piece-ref";
 export const PROG_ORIGIN_TEXT = "custom-prog-origin-text";
+export const PROG_PIECE_PREVIOUS = "custom-prog-piece-previous";
 export const REF_HIERARCHY = "custom-ref-hierarchy";
 export const ORIGIN_HPATH = "custom-origin-hpath";
 export const REF_HPATH = "custom-ref-hpath";

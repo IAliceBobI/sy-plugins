@@ -318,7 +318,7 @@ export const siyuan = {
             });
             const json = await data.json();
             if (json?.code && json?.code != 0) {
-                console.warn(`p5: ${json?.code} ${json?.msg} ${reqData}`);
+                console.warn(`p5: ${json?.code} ${json?.msg} ${JSON.stringify(reqData)}`);
                 return null;
             }
             if (json?.data === undefined)

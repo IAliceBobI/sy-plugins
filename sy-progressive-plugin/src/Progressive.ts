@@ -5,7 +5,7 @@ import { siyuan, timeUtil } from "../../sy-tomato-plugin/src/libs/utils";
 import * as utils from "../../sy-tomato-plugin/src/libs/utils";
 import * as help from "./helper";
 import * as constants from "./constants";
-import { BlockNodeEnum, DATA_NODE_ID, DATA_TYPE, MarkKey, PARAGRAPH_INDEX, PROG_ORIGIN_TEXT, RefIDKey } from "../../sy-tomato-plugin/src/libs/gconst";
+import { BlockNodeEnum, DATA_NODE_ID, DATA_TYPE, MarkKey, PARAGRAPH_INDEX, PROG_ORIGIN_TEXT, PROG_PIECE_PREVIOUS, RefIDKey } from "../../sy-tomato-plugin/src/libs/gconst";
 import { SplitSentence } from "./SplitSentence";
 import AddBook from "./AddBook.svelte";
 import ShowAllBooks from "./ShowAllBooks.svelte";
@@ -18,7 +18,7 @@ class Progressive {
     storage: Storage;
     helper: help.Helper;
     private openedTabs?: ITab;
-    private settings: SettingCfgType;
+    settings: SettingCfgType;
     private lute: Lute;
     private docID: string;
     private observer: MutationObserver;
@@ -496,14 +496,15 @@ class Progressive {
         }
     }
 
-    private async splitAndClean(noteID: string, t: AsList) {
+    private async splitAndClean(noteID: string, t: AsList, ids?: string[]) {
         const s = new SplitSentence(this.plugin, noteID, t);
-        if (await s.split()) {
-            await s.insert();
+        if (ids?.length > 0) {
+            await s.splitByIDs(ids);
+        } else {
+            await s.split();
             await help.cleanNote(noteID, true);
-            return true;
         }
-        return false;
+        await s.insert();
     }
 
     private async addAndClose(tab?: ITab) {
@@ -531,42 +532,58 @@ class Progressive {
     private async fullfilContent(bookID: string, piecePre: string[], piece: string[], noteID: string) {
         this.storage.updateBookInfoTime(bookID);
         const info = await this.storage.booksInfo(bookID);
+
         const allContent = [];
         if (info.showLastBlock && piecePre.length > 0) {
             const lastID = piecePre[piecePre.length - 1];
-            allContent.push(await help.copyBlock(lastID, this.lute, "custom-prog-piece-previous"));
+            allContent.push(await this.copyBlock(lastID, [PROG_PIECE_PREVIOUS]));
         }
-        let idx: { i: number };
-        if (this.settings.addIndex2paragraph) idx = { i: 1 };
-        for (const id of piece) {
-            allContent.push(await help.copyBlock(id, this.lute, PROG_ORIGIN_TEXT, idx));
-        }
-        await siyuan.insertBlockAsChildOf(allContent.filter(i => !!i).join("\n\n"), noteID);
 
-        if (info.autoSplitSentenceP || info.autoSplitSentenceT || info.autoSplitSentenceI) {
-            await this.trySplitSentence(info, noteID);
-        }
-    }
-
-    private async doSplitSentence(info: BookInfo, noteID: string) {
-        let ret = false;
         if (info.autoSplitSentenceP) {
-            ret = await this.splitAndClean(noteID, "p");
+            await this.splitAndClean(noteID, "p", piece);
         } else if (info.autoSplitSentenceI) {
-            ret = await this.splitAndClean(noteID, "i");
+            await this.splitAndClean(noteID, "i", piece);
         } else if (info.autoSplitSentenceT) {
-            ret = await this.splitAndClean(noteID, "t");
+            await this.splitAndClean(noteID, "t", piece);
+        } else {
+            let idx: { i: number } = { i: 1 };
+            for (const id of piece) {
+                allContent.push(await this.copyBlock(id, [PROG_ORIGIN_TEXT], idx));
+            }
         }
-        return ret;
+
+        if (allContent.length > 0) {
+            await siyuan.insertBlockAsChildOf(allContent.filter(i => !!i).join("\n\n"), noteID);
+        }
     }
 
-    private async trySplitSentence(info: BookInfo, noteID: string) {
-        await siyuan.pushMsg("开始尝试自动断句");
-        for (let i = 0; i < 3; i++) {
-            await utils.sleep(3000);
-            if (await this.doSplitSentence(info, noteID)) break;
+    private async copyBlock(id: string, mark: string[] = [], idx?: { i: number }) {
+        const { div: tempDiv } = await utils.getBlockDiv(id);
+        if (!tempDiv) return "";
+        if (tempDiv.getAttribute(MarkKey)) return "";
+        if (idx && tempDiv.getAttribute(DATA_TYPE) != BlockNodeEnum.NODE_HEADING) {
+            tempDiv.setAttribute(PARAGRAPH_INDEX, String(idx.i));
+            if (this.settings.addIndex2paragraph) {
+                const editableDiv = utils.getContenteditableElement(tempDiv);
+                if (editableDiv) {
+                    const idxSpan = editableDiv.insertBefore(document.createElement("span"), editableDiv.firstChild) as HTMLSpanElement;
+                    if (idxSpan) {
+                        idxSpan.setAttribute(DATA_TYPE, "text");
+                        // idxSpan.style.backgroundColor = "var(--b3-font-background3)";
+                        // idxSpan.style.color = "var(--b3-font-color7)";
+                        idxSpan.textContent = `[${idx.i}]`;
+                        idx.i++;
+                    }
+                }
+            }
         }
-        await siyuan.pushMsg("结束自动断句");
+        const txt = tempDiv.textContent.replace(/\u200B/g, "").trim();
+        if (!txt || txt == "*") return "";
+        await utils.cleanDiv(tempDiv, true, true);
+        tempDiv.setAttribute(RefIDKey, id);
+        mark.forEach(m => tempDiv.setAttribute(m, "1"));
+        const md = this.lute.BlockDOM2Md(tempDiv.outerHTML);
+        return md.trim();
     }
 
     private async getBook2Learn(bookID?: string): Promise<BookInfo> {

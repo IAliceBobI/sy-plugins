@@ -1,11 +1,11 @@
 import { PARAGRAPH_INDEX, PROG_ORIGIN_TEXT, RefIDKey, SPACE } from "../../sy-tomato-plugin/src/libs/gconst";
 import { NewNodeID, siyuan } from "../../sy-tomato-plugin/src/libs/utils";
 import { Plugin, openTab } from "siyuan";
+import { prog } from "./Progressive";
 
 export class SplitSentence {
     private asList: AsList;
     private noteID: string;
-    private lastID: string;
     private textAreas: { blocks: { text: string, id: string }[], ref: string }[];
     plugin: Plugin;
 
@@ -17,7 +17,7 @@ export class SplitSentence {
 
     async insert() {
         return navigator.locks.request("prog.SplitSentence.insert", { ifAvailable: true }, async (lock) => {
-            if (lock && this.lastID) {
+            if (lock) {
                 let firstID: string;
                 const mdList: string[] = [];
                 for (const b of this.textAreas) {
@@ -26,7 +26,7 @@ export class SplitSentence {
                     }
                     mdList.push(b.blocks.map(i => i.text).join(""));
                 }
-                await siyuan.insertBlockAfter(mdList.join("\n\n"), this.lastID);
+                await siyuan.insertBlockAsChildOf(mdList.join("\n\n"), this.noteID);
                 if (firstID) {
                     setTimeout(() => {
                         openTab({ app: this.plugin.app, doc: { id: firstID, action: ["cb-get-all", "cb-get-focus"] } });
@@ -46,64 +46,72 @@ export class SplitSentence {
                 return false;
             }
         }
-        const rows = (await Promise.all((await siyuan.getChildBlocks(this.noteID))
-            .filter(i => i.type != "html" && i.type != "t" && i.type != "s")
-            .map(b => siyuan.sqlOne(`select id,content,ial,type,markdown from blocks 
-            where id="${b.id}"
-            and content != "" and content is not null
-            and ial like '%${PROG_ORIGIN_TEXT}="1"%'`)))).filter(i => i.content);
+        const chilrenIDs = (await siyuan.getChildBlocks(this.noteID)).map(c => c.id);
+        return this.splitByIDs(chilrenIDs, ` and ial like '%${PROG_ORIGIN_TEXT}="1"%'`);
+    }
+
+    async splitByIDs(chilrenIDs: string[], like = "") {
+        const rows = (await Promise.all(chilrenIDs
+            .map(id => siyuan.sqlOne(`select id,content,ial,type,markdown from blocks 
+            where id="${id}"
+            and type != "html" and type != "t" and type != "s"
+            and content != "" and content is not null`+ like)))).filter(b => !!b.markdown);
         this.textAreas = [];
         if (rows.length == 0) {
-            await siyuan.pushMsg(msg);
+            await siyuan.pushMsg("目前找不到分片内容");
         }
+        let i = 1;
         for (const row of rows) {
-            this.lastID = row.id;
-            const { ref, idx } = getIDFromIAL(row.ial);
-            if (ref) {
-                const getAttrLine = () => {
-                    const newID = NewNodeID();
-                    const attrLine = `{: id="${newID}" ${RefIDKey}="${ref}" ${PARAGRAPH_INDEX}="${idx}" ${PROG_ORIGIN_TEXT}="1"}`;
-                    return { attrLine, newID };
-                };
-                const ATTR_LINE = `{: ${RefIDKey}="${ref}" ${PARAGRAPH_INDEX}="${idx}" ${PROG_ORIGIN_TEXT}="1"}`;
-                if (row.type == "h" || isPic(row.markdown)) {
-                    const { newID, attrLine } = getAttrLine();
-                    this.textAreas.push({
-                        blocks: [{ text: row.markdown + `\n${attrLine}`, id: newID }],
-                        ref,
-                    });
-                } else {
-                    let ps = [row.content];
-                    for (const s of "\n。！!？?；;:：") ps = spliyBy(ps, s);
-                    ps = spliyBy(ps, ". ");
-                    ps = spliyBy(ps, "……");
-                    let blocks: { text: string, id: string }[];
-                    if (this.asList == "p") {
-                        blocks = ps.map(i => i.trim())
-                            .filter(i => i.length > 0)
-                            .map(i => {
-                                const { newID, attrLine } = getAttrLine();
-                                return { text: SPACE.repeat(2) + i + ` ((${ref} "*"))\n${attrLine}\n`, id: newID };
-                            });
-                        const { newID } = getAttrLine();
-                        blocks.push({ text: `{: id="${newID}"}\n`, id: newID });
-                    } else if (this.asList == "t") {
-                        blocks = ps.map(i => {
-                            const { newID, attrLine } = getAttrLine();
-                            return { text: `* ${ATTR_LINE}[ ] ` + i + ` ((${ref} "*"))\n\t${attrLine}\n`, id: newID };
-                        });
-                        const { newID, attrLine } = getAttrLine();
-                        blocks.push({ text: `${attrLine}\n`, id: newID });
-                    } else {
-                        blocks = ps.map(i => {
-                            const { newID, attrLine } = getAttrLine();
-                            return { text: `* ${ATTR_LINE} ` + i + ` ((${ref} "*"))\n\t${attrLine}\n`, id: newID };
-                        });
-                        const { newID, attrLine } = getAttrLine();
-                        blocks.push({ text: `${attrLine}\n`, id: newID });
-                    }
-                    this.textAreas.push({ blocks, ref });
+            let { ref, idx } = getIDFromIAL(row.ial);
+            if (!ref) ref = row.id;
+            if (!idx) idx = String(i++);
+            const getAttrLine = () => {
+                const newID = NewNodeID();
+                const attrLine = `{: id="${newID}" ${RefIDKey}="${ref}" ${PARAGRAPH_INDEX}="${idx}" ${PROG_ORIGIN_TEXT}="1"}`;
+                return { attrLine, newID };
+            };
+            const ATTR_LINE = `{: ${RefIDKey}="${ref}" ${PARAGRAPH_INDEX}="${idx}" ${PROG_ORIGIN_TEXT}="1"}`;
+
+            if (row.type == "h" || isPic(row.markdown)) {
+                const { newID, attrLine } = getAttrLine();
+                this.textAreas.push({
+                    blocks: [{ text: row.markdown + `\n${attrLine}`, id: newID }],
+                    ref,
+                });
+            } else {
+                let ps = [row.content];
+                if (prog.settings.addIndex2paragraph && !ps[0].startsWith("[")) {
+                    ps[0] = `[${i}]` + ps[0];
                 }
+                for (const s of "\n。！!？?；;:：") ps = spliyBy(ps, s);
+                ps = spliyBy(ps, ". ");
+                ps = spliyBy(ps, "……");
+                let blocks: { text: string, id: string }[];
+                if (this.asList == "p") {
+                    blocks = ps.map(i => i.trim())
+                        .filter(i => i.length > 0)
+                        .map(i => {
+                            const { newID, attrLine } = getAttrLine();
+                            return { text: SPACE.repeat(2) + i + ` ((${ref} "*"))\n${attrLine}\n`, id: newID };
+                        });
+                    const { newID } = getAttrLine();
+                    blocks.push({ text: `{: id="${newID}"}\n`, id: newID });
+                } else if (this.asList == "t") {
+                    blocks = ps.map(i => {
+                        const { newID, attrLine } = getAttrLine();
+                        return { text: `* ${ATTR_LINE}[ ] ` + i + ` ((${ref} "*"))\n\t${attrLine}\n`, id: newID };
+                    });
+                    const { newID, attrLine } = getAttrLine();
+                    blocks.push({ text: `${attrLine}\n`, id: newID });
+                } else {
+                    blocks = ps.map(i => {
+                        const { newID, attrLine } = getAttrLine();
+                        return { text: `* ${ATTR_LINE} ` + i + ` ((${ref} "*"))\n\t${attrLine}\n`, id: newID };
+                    });
+                    const { newID, attrLine } = getAttrLine();
+                    blocks.push({ text: `${attrLine}\n`, id: newID });
+                }
+                this.textAreas.push({ blocks, ref });
             }
         }
         return true;
