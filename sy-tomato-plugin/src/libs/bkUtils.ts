@@ -11,22 +11,6 @@ export function setReadonly(e: HTMLElement, all = false) {
     return e;
 }
 
-export const QUERYABLE_ELEMENT = "QUERYABLE_ELEMENT";
-
-export function markQueryable(e: HTMLElement) {
-    e.setAttribute(QUERYABLE_ELEMENT, "1");
-}
-
-export function hr() {
-    return document.createElement("hr");
-}
-
-export function createSpan(innerHTML: string) {
-    const span = document.createElement("span");
-    span.innerHTML = innerHTML;
-    return span;
-}
-
 // export function refTag(id: string, text: string, count: number, len?: number): HTMLSpanElement {
 //     const span = document.createElement("span") as HTMLSpanElement;
 //     const refSpan = span.appendChild(document.createElement("span"));
@@ -165,6 +149,8 @@ export async function getBackLinks(self: IBKMaker) {
     });
 }
 
+export const MENTION_COUTING_SPAN = "MENTION_COUTING_SPAN";
+
 export async function integrateCounting(self: IBKMaker) {
     self.container.querySelector(`[${MENTION_COUTING_SPAN}]`)?.appendChild(self.mentionCounting);
 }
@@ -188,21 +174,6 @@ function refreshTopDiv(self: IBKMaker, topDiv: HTMLDivElement, allRefs: RefColle
         d.appendChild(createSpan(WEB_SPACE.repeat(2)));
     }
 }
-
-
-// function freeze(self: IBKMaker) {
-//     self.shouldFreeze = true;
-//     self.freezeCheckBox.checked = false;
-//     // self.label.querySelector("svg").classList.remove("fn__rotate")
-//     self.label.innerHTML = `<span>${icon("Focus", 15)} 停止</span>`;
-// }
-
-// function unfreeze(self: IBKMaker) {
-//     self.shouldFreeze = false;
-//     self.freezeCheckBox.checked = true;
-//     // self.label.querySelector("svg").classList.add("fn__rotate")
-//     self.label.innerHTML = `<span>${icon("Refresh", 15)} 自动</span>`;
-// }
 
 function searchInDiv(self: IBKMaker, query: string) {
     const se = new SearchEngine(true);
@@ -281,123 +252,3 @@ async function path2div(self: IBKMaker, docBlock: HTMLElement, blockPaths: Block
     return div;
 }
 
-// function addRefreshCheckBox(self: IBKMaker, topDiv: HTMLDivElement) {
-//     self.label = topDiv.appendChild(document.createElement("label"));
-//     {
-//         // self.label.innerHTML = icon("Refresh", 15)
-//         self.label.classList.add("b3-label");
-//         self.label.classList.add("b3-label__text");
-//         self.label.classList.add("b3-label--noborder");
-//         topDiv.appendChild(createSpan(WEB_SPACE.repeat(1)));
-//     }
-
-//     self.freezeCheckBox = topDiv.appendChild(document.createElement("input"));
-//     {
-//         self.freezeCheckBox.title = "是否自动刷新";
-//         self.freezeCheckBox.type = "checkbox";
-//         self.freezeCheckBox.classList.add("b3-switch");
-//         unfreeze(self);
-//         self.freezeCheckBox.addEventListener("change", () => {
-//             if (!self.freezeCheckBox.checked) freeze(self);
-//             else unfreeze(self);
-//         });
-//         topDiv.appendChild(createSpan(WEB_SPACE.repeat(2)));
-//     }
-// }
-
-// function addMentionCheckBox(self: IBKMaker, topDiv: HTMLDivElement) {
-//     const label = topDiv.appendChild(document.createElement("label"));
-//     label.innerText = "提及数上限：";
-//     label.classList.add("b3-label");
-//     label.classList.add("b3-label__text");
-//     label.classList.add("b3-label--noborder");
-//     const mentionInput = topDiv.appendChild(document.createElement("input"));
-//     mentionInput.title = "设置至多显示的提及数";
-//     mentionInput.classList.add("b3-text-field");
-//     mentionInput.size = 1;
-//     mentionInput.value = String(self.mentionCount);
-//     mentionInput.addEventListener("focus", () => {
-//         freeze(self);
-//     });
-//     mentionInput.addEventListener("blur", () => {
-//         unfreeze(self);
-//     });
-//     mentionInput.addEventListener("input", () => {
-//         const n = Number(mentionInput.value.trim());
-//         if (isValidNumber(n) && n > 0) {
-//             self.mentionCount = n;
-//         } else {
-//             self.mentionCount = 0;
-//         }
-//     });
-//     topDiv.appendChild(createSpan(WEB_SPACE.repeat(2)));
-// }
-export const MENTION_COUTING_SPAN = "MENTION_COUTING_SPAN";
-
-// function initBtnDiv(self: IBKMaker, topDiv: HTMLDivElement) {
-//     topDiv.appendChild(hr());
-//     addRefreshCheckBox(self, topDiv);
-//     addMentionCheckBox(self, topDiv);
-//     {
-//         const help = topDiv.appendChild(document.createElement("span"));
-//         help.classList.add("b3-label__text");
-//         help.title = "点击查看：搜索语法";
-//         help.innerHTML = icon("Help", 16);
-//         help.addEventListener("click", () => { new Dialog({ title: "搜索语法", content: SEARCH_HELP }); });
-//         topDiv.appendChild(createSpan(WEB_SPACE.repeat(1)));
-//     }
-//     const query = topDiv.appendChild(document.createElement("input"));
-//     {
-//         query.title = "必须包含AA、BB，DD与EE至少包含一个，但不能包含CC";
-//         query.classList.add("b3-text-field");
-//         query.size = 15;
-//         query.placeholder = "AA BB !CC DD|EE";
-//         query.addEventListener("focus", () => { freeze(self); });
-//         query.addEventListener("input", (event) => {
-//             const newValue: string = (event.target as any).value;
-//             searchInDiv(self, newValue.trim());
-//         });
-//         topDiv.appendChild(createSpan(WEB_SPACE.repeat(1)));
-//     }
-//     // {
-//     //     const btn = topDiv.appendChild(document.createElement("button")) as HTMLButtonElement;
-//     //     btn.title = "粘贴内容到搜索框，并锁定";
-//     //     btn.classList.add("b3-button");
-//     //     btn.classList.add("b3-button--outline");
-//     //     btn.addEventListener("click", () => {
-//     //         freeze(self);
-//     //         navigator.clipboard.readText().then(t => {
-//     //             query.value = t;
-//     //             searchInDiv(self, query.value);
-//     //         });
-//     //     });
-//     //     btn.innerHTML = icon("Paste");
-//     //     topDiv.appendChild(createSpan(WEB_SPACE.repeat(2)));
-//     // }
-//     // {
-//     //     const btn = topDiv.appendChild(document.createElement("button")) as HTMLButtonElement;
-//     //     btn.title = "复制搜索框内容到剪贴板";
-//     //     btn.classList.add("b3-button");
-//     //     btn.classList.add("b3-button--outline");
-//     //     btn.addEventListener("click", async () => {
-//     //         navigator.clipboard.writeText(query.value);
-//     //     });
-//     //     btn.innerHTML = icon("Copy");
-//     //     topDiv.appendChild(createSpan(WEB_SPACE.repeat(2)));
-//     // }
-//     // {
-//     //     const btn = topDiv.appendChild(document.createElement("button")) as HTMLButtonElement;
-//     //     btn.title = "清空搜索框，并解除锁定";
-//     //     btn.classList.add("b3-button");
-//     //     btn.classList.add("b3-button--outline");
-//     //     btn.addEventListener("click", () => {
-//     //         unfreeze(self);
-//     //         query.value = "";
-//     //         searchInDiv(self, query.value);
-//     //     });
-//     //     btn.innerHTML = icon("Trashcan");
-//     //     topDiv.appendChild(createSpan(WEB_SPACE.repeat(2)));
-//     // }
-//     const container_mention_counting = topDiv.appendChild(document.createElement("span"));
-//     container_mention_counting.setAttribute(MENTION_COUTING_SPAN, "1");
-// }

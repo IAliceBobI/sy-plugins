@@ -1,24 +1,19 @@
 <script lang="ts">
     import { onDestroy, onMount } from "svelte";
     import { siyuanCache } from "./libs/utils";
-    import {
-        IBKMaker,
-        icon,
-        MENTION_COUTING_SPAN,
-        QUERYABLE_ELEMENT,
-    } from "./libs/bkUtils";
+    import { IBKMaker, MENTION_COUTING_SPAN, icon } from "./libs/bkUtils";
     import { Dialog } from "siyuan";
     import { SEARCH_HELP } from "./constants";
     import { BLOCK_REF, DATA_ID, DATA_TYPE } from "./libs/gconst";
 
+    const QUERYABLE_ELEMENT = "QUERYABLE_ELEMENT";
     const ICONS_SIZE = 13;
-    export let maker: IBKMaker;
-
-    let autoRefreshChecked: boolean;
-    $: if (autoRefreshChecked != null) maker.shouldFreeze = !autoRefreshChecked;
-
     const mentionCountingSpanAttr = {};
     const queryableElementAttr = {};
+
+    export let maker: IBKMaker;
+    let autoRefreshChecked: boolean;
+    $: if (autoRefreshChecked != null) maker.shouldFreeze = !autoRefreshChecked;
     let backLinks: Backlink[] = [] as any;
     const allRefs: RefCollector = new Map();
 
