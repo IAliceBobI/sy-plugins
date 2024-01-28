@@ -64,16 +64,9 @@ export class SplitSentence {
         for (const row of rows) {
             let { ref, idx } = getIDFromIAL(row.ial);
             if (!ref) ref = row.id;
-            if (!idx) idx = String(i++);
-            const getAttrLine = () => {
-                const newID = NewNodeID();
-                const attrLine = `{: id="${newID}" ${RefIDKey}="${ref}" ${PARAGRAPH_INDEX}="${idx}" ${PROG_ORIGIN_TEXT}="1"}`;
-                return { attrLine, newID };
-            };
-            const ATTR_LINE = `{: ${RefIDKey}="${ref}" ${PARAGRAPH_INDEX}="${idx}" ${PROG_ORIGIN_TEXT}="1"}`;
-
+            if (!idx) idx = String(i);
             if (row.type == "h" || isPic(row.markdown)) {
-                const { newID, attrLine } = getAttrLine();
+                const { newID, attrLine } = getAttrLineWithID(ref, idx);
                 this.textAreas.push({
                     blocks: [{ text: row.markdown + `\n${attrLine}`, id: newID }],
                     ref,
@@ -91,32 +84,43 @@ export class SplitSentence {
                     blocks = ps.map(i => i.trim())
                         .filter(i => i.length > 0)
                         .map(i => {
-                            const { newID, attrLine } = getAttrLine();
+                            const { newID, attrLine } = getAttrLineWithID(ref, idx);
                             return { text: SPACE.repeat(2) + i + ` ((${ref} "*"))\n${attrLine}\n`, id: newID };
                         });
-                    const { newID } = getAttrLine();
+                    const { newID } = getAttrLineWithID(ref, idx);
                     blocks.push({ text: `{: id="${newID}"}\n`, id: newID });
                 } else if (this.asList == "t") {
                     blocks = ps.map(i => {
-                        const { newID, attrLine } = getAttrLine();
-                        return { text: `* ${ATTR_LINE}[ ] ` + i + ` ((${ref} "*"))\n\t${attrLine}\n`, id: newID };
+                        const { newID, attrLine } = getAttrLineWithID(ref, idx);
+                        return { text: `* ${getAttrLine(ref, idx)}[ ] ` + i + ` ((${ref} "*"))\n\t${attrLine}\n`, id: newID };
                     });
-                    const { newID, attrLine } = getAttrLine();
+                    const { newID, attrLine } = getAttrLineWithID(ref, idx);
                     blocks.push({ text: `${attrLine}\n`, id: newID });
                 } else {
                     blocks = ps.map(i => {
-                        const { newID, attrLine } = getAttrLine();
-                        return { text: `* ${ATTR_LINE} ` + i + ` ((${ref} "*"))\n\t${attrLine}\n`, id: newID };
+                        const { newID, attrLine } = getAttrLineWithID(ref, idx);
+                        return { text: `* ${getAttrLine(ref, idx)} ` + i + ` ((${ref} "*"))\n\t${attrLine}\n`, id: newID };
                     });
-                    const { newID, attrLine } = getAttrLine();
+                    const { newID, attrLine } = getAttrLineWithID(ref, idx);
                     blocks.push({ text: `${attrLine}\n`, id: newID });
                 }
                 this.textAreas.push({ blocks, ref });
+                i++;
             }
         }
         return true;
     }
 }
+
+function getAttrLine(ref: string, idx: string) {
+    return `{: ${RefIDKey}="${ref}" ${PARAGRAPH_INDEX}="${idx}" ${PROG_ORIGIN_TEXT}="1"}`;
+};
+
+function getAttrLineWithID(ref: string, idx: string) {
+    const newID = NewNodeID();
+    const attrLine = `{: id="${newID}" ${RefIDKey}="${ref}" ${PARAGRAPH_INDEX}="${idx}" ${PROG_ORIGIN_TEXT}="1"}`;
+    return { attrLine, newID };
+};
 
 function isPic(markdown: string) {
     const len = [...markdown.matchAll(/!\[.*?\]\(.*?\)/g)].length;
