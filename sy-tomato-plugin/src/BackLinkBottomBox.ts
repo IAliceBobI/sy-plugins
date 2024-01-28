@@ -2,7 +2,6 @@ import { IProtyle, Plugin } from "siyuan";
 import { EventType, events } from "./libs/Events";
 import { MaxCache } from "./libs/cache";
 import {
-    IBKMaker,
     deleteSelf, getLastElementID,
     integrateCounting,
     shouldInsertDiv
@@ -14,7 +13,7 @@ import BackLinkBottom from "./BackLinkBottom.svelte";
 const BKMAKER_ADD = "BKMAKER_ADD";
 const CACHE_LIMIT = 100;
 
-class BKMaker implements IBKMaker {
+export class BKMaker {
     public shouldFreeze: boolean;
     public mentionCount: number;
 
