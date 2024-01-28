@@ -1,7 +1,7 @@
 <script lang="ts">
     import { onDestroy, onMount } from "svelte";
     import { siyuanCache } from "./libs/utils";
-    import { IBKMaker, icon } from "./libs/bkUtils";
+    import { IBKMaker, icon, MENTION_COUTING_SPAN } from "./libs/bkUtils";
     import { Dialog } from "siyuan";
     import { SEARCH_HELP } from "./constants";
 
@@ -11,7 +11,10 @@
     let autoRefreshChecked: boolean;
     $: if (autoRefreshChecked != null) maker.shouldFreeze = !autoRefreshChecked;
 
+    const mentionCountingSpanAttr = {};
+
     onMount(async () => {
+        mentionCountingSpanAttr[MENTION_COUTING_SPAN] = "1";
         console.log(maker);
         autoRefreshChecked = !maker.shouldFreeze;
         await getBackLinks();
@@ -23,6 +26,12 @@
     }
 
     onDestroy(() => {});
+
+    async function search(event: Event) {
+        const newValue: string = (event.target as any).value;
+        console.log(newValue);
+        // searchInDiv(self, newValue.trim());
+    }
 </script>
 
 <!-- https://learn.svelte.dev/tutorial/if-blocks -->
@@ -63,8 +72,12 @@
         >
         <input
             class="b3-text-field"
+            title="必须包含AA、BB，DD与EE至少包含一个，但不能包含CC"
+            placeholder="AA BB !CC DD|EE"
             on:focus={() => (autoRefreshChecked = false)}
+            on:input={search}
         />
+        <span {...mentionCountingSpanAttr}></span>
     </label>
 </div>
 <hr />

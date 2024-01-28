@@ -360,72 +360,72 @@ async function path2div(self: IBKMaker, docBlock: HTMLElement, blockPaths: Block
 //     });
 //     topDiv.appendChild(createSpan(WEB_SPACE.repeat(2)));
 // }
-const MENTION_COUTING_SPAN = "MENTION_COUTING_SPAN";
+export const MENTION_COUTING_SPAN = "MENTION_COUTING_SPAN";
 
-function initBtnDiv(self: IBKMaker, topDiv: HTMLDivElement) {
-    topDiv.appendChild(hr());
-    addRefreshCheckBox(self, topDiv);
-    addMentionCheckBox(self, topDiv);
-    {
-        const help = topDiv.appendChild(document.createElement("span"));
-        help.classList.add("b3-label__text");
-        help.title = "点击查看：搜索语法";
-        help.innerHTML = icon("Help", 16);
-        help.addEventListener("click", () => { new Dialog({ title: "搜索语法", content: SEARCH_HELP }); });
-        topDiv.appendChild(createSpan(WEB_SPACE.repeat(1)));
-    }
-    const query = topDiv.appendChild(document.createElement("input"));
-    {
-        query.title = "必须包含AA、BB，DD与EE至少包含一个，但不能包含CC";
-        query.classList.add("b3-text-field");
-        query.size = 15;
-        query.placeholder = "AA BB !CC DD|EE";
-        query.addEventListener("focus", () => { freeze(self); });
-        query.addEventListener("input", (event) => {
-            const newValue: string = (event.target as any).value;
-            searchInDiv(self, newValue.trim());
-        });
-        topDiv.appendChild(createSpan(WEB_SPACE.repeat(1)));
-    }
-    // {
-    //     const btn = topDiv.appendChild(document.createElement("button")) as HTMLButtonElement;
-    //     btn.title = "粘贴内容到搜索框，并锁定";
-    //     btn.classList.add("b3-button");
-    //     btn.classList.add("b3-button--outline");
-    //     btn.addEventListener("click", () => {
-    //         freeze(self);
-    //         navigator.clipboard.readText().then(t => {
-    //             query.value = t;
-    //             searchInDiv(self, query.value);
-    //         });
-    //     });
-    //     btn.innerHTML = icon("Paste");
-    //     topDiv.appendChild(createSpan(WEB_SPACE.repeat(2)));
-    // }
-    // {
-    //     const btn = topDiv.appendChild(document.createElement("button")) as HTMLButtonElement;
-    //     btn.title = "复制搜索框内容到剪贴板";
-    //     btn.classList.add("b3-button");
-    //     btn.classList.add("b3-button--outline");
-    //     btn.addEventListener("click", async () => {
-    //         navigator.clipboard.writeText(query.value);
-    //     });
-    //     btn.innerHTML = icon("Copy");
-    //     topDiv.appendChild(createSpan(WEB_SPACE.repeat(2)));
-    // }
-    // {
-    //     const btn = topDiv.appendChild(document.createElement("button")) as HTMLButtonElement;
-    //     btn.title = "清空搜索框，并解除锁定";
-    //     btn.classList.add("b3-button");
-    //     btn.classList.add("b3-button--outline");
-    //     btn.addEventListener("click", () => {
-    //         unfreeze(self);
-    //         query.value = "";
-    //         searchInDiv(self, query.value);
-    //     });
-    //     btn.innerHTML = icon("Trashcan");
-    //     topDiv.appendChild(createSpan(WEB_SPACE.repeat(2)));
-    // }
-    const container_mention_counting = topDiv.appendChild(document.createElement("span"));
-    container_mention_counting.setAttribute(MENTION_COUTING_SPAN, "1");
-}
+// function initBtnDiv(self: IBKMaker, topDiv: HTMLDivElement) {
+//     topDiv.appendChild(hr());
+//     addRefreshCheckBox(self, topDiv);
+//     addMentionCheckBox(self, topDiv);
+//     {
+//         const help = topDiv.appendChild(document.createElement("span"));
+//         help.classList.add("b3-label__text");
+//         help.title = "点击查看：搜索语法";
+//         help.innerHTML = icon("Help", 16);
+//         help.addEventListener("click", () => { new Dialog({ title: "搜索语法", content: SEARCH_HELP }); });
+//         topDiv.appendChild(createSpan(WEB_SPACE.repeat(1)));
+//     }
+//     const query = topDiv.appendChild(document.createElement("input"));
+//     {
+//         query.title = "必须包含AA、BB，DD与EE至少包含一个，但不能包含CC";
+//         query.classList.add("b3-text-field");
+//         query.size = 15;
+//         query.placeholder = "AA BB !CC DD|EE";
+//         query.addEventListener("focus", () => { freeze(self); });
+//         query.addEventListener("input", (event) => {
+//             const newValue: string = (event.target as any).value;
+//             searchInDiv(self, newValue.trim());
+//         });
+//         topDiv.appendChild(createSpan(WEB_SPACE.repeat(1)));
+//     }
+//     // {
+//     //     const btn = topDiv.appendChild(document.createElement("button")) as HTMLButtonElement;
+//     //     btn.title = "粘贴内容到搜索框，并锁定";
+//     //     btn.classList.add("b3-button");
+//     //     btn.classList.add("b3-button--outline");
+//     //     btn.addEventListener("click", () => {
+//     //         freeze(self);
+//     //         navigator.clipboard.readText().then(t => {
+//     //             query.value = t;
+//     //             searchInDiv(self, query.value);
+//     //         });
+//     //     });
+//     //     btn.innerHTML = icon("Paste");
+//     //     topDiv.appendChild(createSpan(WEB_SPACE.repeat(2)));
+//     // }
+//     // {
+//     //     const btn = topDiv.appendChild(document.createElement("button")) as HTMLButtonElement;
+//     //     btn.title = "复制搜索框内容到剪贴板";
+//     //     btn.classList.add("b3-button");
+//     //     btn.classList.add("b3-button--outline");
+//     //     btn.addEventListener("click", async () => {
+//     //         navigator.clipboard.writeText(query.value);
+//     //     });
+//     //     btn.innerHTML = icon("Copy");
+//     //     topDiv.appendChild(createSpan(WEB_SPACE.repeat(2)));
+//     // }
+//     // {
+//     //     const btn = topDiv.appendChild(document.createElement("button")) as HTMLButtonElement;
+//     //     btn.title = "清空搜索框，并解除锁定";
+//     //     btn.classList.add("b3-button");
+//     //     btn.classList.add("b3-button--outline");
+//     //     btn.addEventListener("click", () => {
+//     //         unfreeze(self);
+//     //         query.value = "";
+//     //         searchInDiv(self, query.value);
+//     //     });
+//     //     btn.innerHTML = icon("Trashcan");
+//     //     topDiv.appendChild(createSpan(WEB_SPACE.repeat(2)));
+//     // }
+//     const container_mention_counting = topDiv.appendChild(document.createElement("span"));
+//     container_mention_counting.setAttribute(MENTION_COUTING_SPAN, "1");
+// }
