@@ -58,7 +58,7 @@ export function scanAllRef(allRefs: RefCollector, div: HTMLDivElement, docID: st
 }
 
 export function addRef(txt: string, id: string, allRefs: RefCollector, docID: string) {
-    if (txt == "*" || txt == "@") return;
+    if (txt == "*" || txt == "@" || txt == "@*") return;
     if (id == docID) return;
     if (Array.from(txt.matchAll(/^c?\d{4}-\d{2}-\d{2}(@第\d+周-星期.{1})?$/g)).length > 0) return;
     // if (Array.from(txt.matchAll(/^\[\d+\]/g)).length > 0) return;
