@@ -1,7 +1,12 @@
 <script lang="ts">
     import { onDestroy, onMount } from "svelte";
     import { siyuanCache } from "./libs/utils";
-    import { IBKMaker, icon, MENTION_COUTING_SPAN } from "./libs/bkUtils";
+    import {
+        IBKMaker,
+        icon,
+        MENTION_COUTING_SPAN,
+        QUERYABLE_ELEMENT,
+    } from "./libs/bkUtils";
     import { Dialog } from "siyuan";
     import { SEARCH_HELP } from "./constants";
 
@@ -12,10 +17,12 @@
     $: if (autoRefreshChecked != null) maker.shouldFreeze = !autoRefreshChecked;
 
     const mentionCountingSpanAttr = {};
+    const queryableElementAttr = {};
+    let backLinks: Backlink[] = [] as any;
 
     onMount(async () => {
         mentionCountingSpanAttr[MENTION_COUTING_SPAN] = "1";
-        console.log(maker);
+        queryableElementAttr[QUERYABLE_ELEMENT] = "1";
         autoRefreshChecked = !maker.shouldFreeze;
         await getBackLinks();
     });
@@ -23,6 +30,24 @@
     async function getBackLinks() {
         const allRefs: RefCollector = new Map();
         const backlink2 = await siyuanCache.getBacklink2(6 * 1000, maker.docID);
+
+        const maxCount = maker.settingCfg["back-link-max-size"] ?? 100;
+        backLinks = (
+            await Promise.all(
+                backlink2.backlinks.slice(0, maxCount).map((backlink) => {
+                    return siyuanCache.getBacklinkDoc(
+                        12 * 1000,
+                        maker.docID,
+                        backlink.id,
+                    );
+                }),
+            )
+        )
+            .map((i) => i.backlinks)
+            .flat();
+        for (const backLink of backLinks) {
+            console.log(backLink);
+        }
     }
 
     onDestroy(() => {});
@@ -80,9 +105,11 @@
         <span {...mentionCountingSpanAttr}></span>
     </label>
 </div>
-<hr />
-<div>bbb</div>
-<div>sss</div>
+
+{#each backLinks as backLink}
+    <hr />
+    <div {...queryableElementAttr}>{@html backLink.dom ?? ""}</div>
+{/each}
 
 <style>
     .bk_label {

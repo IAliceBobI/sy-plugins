@@ -144,7 +144,7 @@ export async function getBackLinks(self: IBKMaker) {
     const backlink2 = await siyuanCache.getBacklink2(6 * 1000, self.docID);
     const contentContainer = document.createElement("div");
     const btnDiv = document.createElement("div");
-    initBtnDiv(self, btnDiv);
+    // initBtnDiv(self, btnDiv);
     const topDiv = document.createElement("div");
     self.container.appendChild(topDiv);
     self.container.appendChild(btnDiv);
