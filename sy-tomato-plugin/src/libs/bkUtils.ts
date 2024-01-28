@@ -309,57 +309,57 @@ async function path2div(self: IBKMaker, docBlock: HTMLElement, blockPaths: Block
     return div;
 }
 
-function addRefreshCheckBox(self: IBKMaker, topDiv: HTMLDivElement) {
-    self.label = topDiv.appendChild(document.createElement("label"));
-    {
-        // self.label.innerHTML = icon("Refresh", 15)
-        self.label.classList.add("b3-label");
-        self.label.classList.add("b3-label__text");
-        self.label.classList.add("b3-label--noborder");
-        topDiv.appendChild(createSpan(WEB_SPACE.repeat(1)));
-    }
+// function addRefreshCheckBox(self: IBKMaker, topDiv: HTMLDivElement) {
+//     self.label = topDiv.appendChild(document.createElement("label"));
+//     {
+//         // self.label.innerHTML = icon("Refresh", 15)
+//         self.label.classList.add("b3-label");
+//         self.label.classList.add("b3-label__text");
+//         self.label.classList.add("b3-label--noborder");
+//         topDiv.appendChild(createSpan(WEB_SPACE.repeat(1)));
+//     }
 
-    self.freezeCheckBox = topDiv.appendChild(document.createElement("input"));
-    {
-        self.freezeCheckBox.title = "是否自动刷新";
-        self.freezeCheckBox.type = "checkbox";
-        self.freezeCheckBox.classList.add("b3-switch");
-        unfreeze(self);
-        self.freezeCheckBox.addEventListener("change", () => {
-            if (!self.freezeCheckBox.checked) freeze(self);
-            else unfreeze(self);
-        });
-        topDiv.appendChild(createSpan(WEB_SPACE.repeat(2)));
-    }
-}
+//     self.freezeCheckBox = topDiv.appendChild(document.createElement("input"));
+//     {
+//         self.freezeCheckBox.title = "是否自动刷新";
+//         self.freezeCheckBox.type = "checkbox";
+//         self.freezeCheckBox.classList.add("b3-switch");
+//         unfreeze(self);
+//         self.freezeCheckBox.addEventListener("change", () => {
+//             if (!self.freezeCheckBox.checked) freeze(self);
+//             else unfreeze(self);
+//         });
+//         topDiv.appendChild(createSpan(WEB_SPACE.repeat(2)));
+//     }
+// }
 
-function addMentionCheckBox(self: IBKMaker, topDiv: HTMLDivElement) {
-    const label = topDiv.appendChild(document.createElement("label"));
-    label.innerText = "提及数上限：";
-    label.classList.add("b3-label");
-    label.classList.add("b3-label__text");
-    label.classList.add("b3-label--noborder");
-    const mentionInput = topDiv.appendChild(document.createElement("input"));
-    mentionInput.title = "设置至多显示的提及数";
-    mentionInput.classList.add("b3-text-field");
-    mentionInput.size = 1;
-    mentionInput.value = String(self.mentionCount);
-    mentionInput.addEventListener("focus", () => {
-        freeze(self);
-    });
-    mentionInput.addEventListener("blur", () => {
-        unfreeze(self);
-    });
-    mentionInput.addEventListener("input", () => {
-        const n = Number(mentionInput.value.trim());
-        if (isValidNumber(n) && n > 0) {
-            self.mentionCount = n;
-        } else {
-            self.mentionCount = 0;
-        }
-    });
-    topDiv.appendChild(createSpan(WEB_SPACE.repeat(2)));
-}
+// function addMentionCheckBox(self: IBKMaker, topDiv: HTMLDivElement) {
+//     const label = topDiv.appendChild(document.createElement("label"));
+//     label.innerText = "提及数上限：";
+//     label.classList.add("b3-label");
+//     label.classList.add("b3-label__text");
+//     label.classList.add("b3-label--noborder");
+//     const mentionInput = topDiv.appendChild(document.createElement("input"));
+//     mentionInput.title = "设置至多显示的提及数";
+//     mentionInput.classList.add("b3-text-field");
+//     mentionInput.size = 1;
+//     mentionInput.value = String(self.mentionCount);
+//     mentionInput.addEventListener("focus", () => {
+//         freeze(self);
+//     });
+//     mentionInput.addEventListener("blur", () => {
+//         unfreeze(self);
+//     });
+//     mentionInput.addEventListener("input", () => {
+//         const n = Number(mentionInput.value.trim());
+//         if (isValidNumber(n) && n > 0) {
+//             self.mentionCount = n;
+//         } else {
+//             self.mentionCount = 0;
+//         }
+//     });
+//     topDiv.appendChild(createSpan(WEB_SPACE.repeat(2)));
+// }
 const MENTION_COUTING_SPAN = "MENTION_COUTING_SPAN";
 
 function initBtnDiv(self: IBKMaker, topDiv: HTMLDivElement) {
