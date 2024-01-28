@@ -47,11 +47,7 @@
         }
     }
 
-    async function path2div(
-        docBlock: HTMLElement,
-        blockPaths: BlockPath[],
-        allRefs: RefCollector,
-    ) {
+    async function path2div(docBlock: HTMLElement, blockPaths: BlockPath[]) {
         const div = document.createElement("div") as HTMLDivElement;
         const btn = div.appendChild(createEyeBtn());
         btn.addEventListener("click", () => {
@@ -158,6 +154,17 @@
         console.log(newValue);
         // searchInDiv(self, newValue.trim());
     }
+
+    function createEyeBtn() {
+        const btn = document.createElement("button");
+        btn.title = "隐藏";
+        btn.classList.add("b3-button");
+        btn.classList.add("b3-button--text");
+        btn.style.border = "none";
+        btn.style.outline = "none";
+        btn.innerHTML = icon("Eye");
+        return btn;
+    }
 </script>
 
 <!-- https://learn.svelte.dev/tutorial/if-blocks -->
@@ -209,10 +216,28 @@
 
 {#each backLinks as backLink}
     <hr />
-    <div {...queryableElementAttr}>{@html backLink.dom ?? ""}</div>
+    <div {...queryableElementAttr} class="bk_one_line">
+        <div class="fn__flex-column">
+            <button class="bk_label b3-button b3-button--text" title="隐藏"
+                >{@html icon("Eyeoff")}</button
+            >
+            <button
+                class="bk_label b3-button b3-button--text"
+                title="复制到文档">{@html icon("Copy")}</button
+            >
+            <button
+                class="bk_label b3-button b3-button--text"
+                title="移动到文档">{@html icon("Move")}</button
+            >
+        </div>
+        {@html backLink.dom ?? ""}
+    </div>
 {/each}
 
 <style>
+    .bk_one_line {
+        display: flex;
+    }
     .bk_label {
         border: transparent;
         background-color: transparent;
