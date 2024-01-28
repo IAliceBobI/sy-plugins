@@ -9,6 +9,7 @@
     } from "./libs/bkUtils";
     import { Dialog } from "siyuan";
     import { SEARCH_HELP } from "./constants";
+    import { BLOCK_REF, DATA_ID, DATA_TYPE } from "./libs/gconst";
 
     const ICONS_SIZE = 13;
     export let maker: IBKMaker;
@@ -19,6 +20,7 @@
     const mentionCountingSpanAttr = {};
     const queryableElementAttr = {};
     let backLinks: Backlink[] = [] as any;
+    const allRefs: RefCollector = new Map();
 
     onMount(async () => {
         mentionCountingSpanAttr[MENTION_COUTING_SPAN] = "1";
@@ -28,7 +30,6 @@
     });
 
     async function getBackLinks() {
-        const allRefs: RefCollector = new Map();
         const backlink2 = await siyuanCache.getBacklink2(6 * 1000, maker.docID);
 
         const maxCount = maker.settingCfg["back-link-max-size"] ?? 100;
@@ -46,11 +47,42 @@
             .map((i) => i.backlinks)
             .flat();
         for (const backLink of backLinks) {
-            console.log(backLink);
+            scanAllRef(backLink);
         }
     }
 
     onDestroy(() => {});
+
+    function scanAllRef(backLink: Backlink) {
+        const div = document.createElement("div") as HTMLDivElement;
+        div.innerHTML = backLink.dom ?? "";
+        for (const element of div.querySelectorAll(
+            `[${DATA_TYPE}~="${BLOCK_REF}"]`,
+        )) {
+            const id = element.getAttribute(DATA_ID);
+            const txt = element.textContent;
+            addRef(txt, id);
+        }
+    }
+
+    function addRef(txt: string, id: string) {
+        if (txt == "*" || txt == "@" || txt == "@*") return;
+        if (id == maker.docID) return;
+        if (
+            Array.from(
+                txt.matchAll(/^c?\d{4}-\d{2}-\d{2}(@第\d+周-星期.{1})?$/g),
+            ).length > 0
+        )
+            return;
+
+        const key = id + txt;
+        const c = (allRefs.get(key)?.count ?? 0) + 1;
+        allRefs.set(key, {
+            count: c,
+            text: txt,
+            id,
+        });
+    }
 
     async function search(event: Event) {
         const newValue: string = (event.target as any).value;

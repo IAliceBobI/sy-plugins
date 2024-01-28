@@ -1,8 +1,7 @@
-import { Dialog, Plugin, openTab } from "siyuan";
+import { Plugin, openTab } from "siyuan";
 import { BLOCK_REF, DATA_ID, DATA_NODE_ID, DATA_TYPE, WEB_SPACE } from "./gconst";
 import { SearchEngine } from "./search";
-import { chunks, extractLinks, isValidNumber, siyuanCache } from "./utils";
-import { SEARCH_HELP } from "@/constants";
+import { chunks, extractLinks, siyuanCache } from "./utils";
 
 export function setReadonly(e: HTMLElement, all = false) {
     e.setAttribute("contenteditable", "false");
@@ -28,51 +27,24 @@ export function createSpan(innerHTML: string) {
     return span;
 }
 
-export function refTag(id: string, text: string, count: number, len?: number): HTMLSpanElement {
-    const span = document.createElement("span") as HTMLSpanElement;
-
-    const refSpan = span.appendChild(document.createElement("span"));
-    refSpan.setAttribute(DATA_TYPE, BLOCK_REF);
-    refSpan.setAttribute(DATA_ID, id);
-    refSpan.innerText = text;
-    if (len) {
-        let sliced = text.slice(0, len);
-        if (sliced.length != text.length) sliced += "……";
-        refSpan.innerText = sliced;
-    }
-
-    const countSpan = span.appendChild(document.createElement("span"));
-    if (count > 0) {
-        countSpan.classList.add("tomato-style__code");
-        countSpan.innerText = String(count);
-    }
-    return span;
-}
-
-export function scanAllRef(allRefs: RefCollector, div: HTMLDivElement, docID: string) {
-    for (const element of div.querySelectorAll(`[${DATA_TYPE}~="${BLOCK_REF}"]`)) {
-        const id = element.getAttribute(DATA_ID);
-        const txt = element.textContent;
-        addRef(txt, id, allRefs, docID);
-    }
-}
-
-export function addRef(txt: string, id: string, allRefs: RefCollector, docID: string) {
-    if (txt == "*" || txt == "@" || txt == "@*") return;
-    if (id == docID) return;
-    if (Array.from(txt.matchAll(/^c?\d{4}-\d{2}-\d{2}(@第\d+周-星期.{1})?$/g)).length > 0) return;
-    // if (Array.from(txt.matchAll(/^\[\d+\]/g)).length > 0) return;
-
-    const key = id + txt;
-    const c = (allRefs.get(key)?.count ?? 0) + 1;
-    const span = refTag(id, txt, c);
-    allRefs.set(key, {
-        count: c,
-        lnk: span,
-        text: txt,
-        id,
-    });
-}
+// export function refTag(id: string, text: string, count: number, len?: number): HTMLSpanElement {
+//     const span = document.createElement("span") as HTMLSpanElement;
+//     const refSpan = span.appendChild(document.createElement("span"));
+//     refSpan.setAttribute(DATA_TYPE, BLOCK_REF);
+//     refSpan.setAttribute(DATA_ID, id);
+//     refSpan.innerText = text;
+//     if (len) {
+//         let sliced = text.slice(0, len);
+//         if (sliced.length != text.length) sliced += "……";
+//         refSpan.innerText = sliced;
+//     }
+//     const countSpan = span.appendChild(document.createElement("span"));
+//     if (count > 0) {
+//         countSpan.classList.add("tomato-style__code");
+//         countSpan.innerText = String(count);
+//     }
+//     return span;
+// }
 
 export function deleteSelf(divs: Element[]) {
     divs.forEach(e => e.parentElement?.removeChild(e));
