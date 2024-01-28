@@ -139,17 +139,6 @@ export interface IBKMaker {
     settingCfg: TomatoSettings;
 }
 
-export function init(self: IBKMaker, docID: string, blBox: any) {
-    self.mentionCount = 1;
-    self.docID = docID;
-    self.blBox = blBox;
-    self.shouldFreeze = false;
-    self.mentionCounting = document.createElement("span");
-    self.mentionCounting.classList.add("b3-label__text");
-    self.settingCfg = blBox.settingCfg;
-    self.plugin = blBox.plugin;
-}
-
 export async function getBackLinks(self: IBKMaker) {
     const allRefs: RefCollector = new Map();
     const backlink2 = await siyuanCache.getBacklink2(6 * 1000, self.docID);

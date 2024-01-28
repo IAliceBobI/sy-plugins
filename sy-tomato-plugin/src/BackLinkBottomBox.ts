@@ -3,13 +3,13 @@ import { EventType, events } from "./libs/Events";
 import { MaxCache } from "./libs/cache";
 import {
     IBKMaker,
-    deleteSelf, getBackLinks, getLastElementID,
-    init,
+    deleteSelf, getLastElementID,
     integrateCounting,
     shouldInsertDiv
 } from "./libs/bkUtils";
 import { isValidNumber, siyuanCache } from "./libs/utils";
 import { MarkKey, TEMP_CONTENT } from "./libs/gconst";
+import BackLinkBottom from "./BackLinkBottom.svelte";
 
 const BKMAKER_ADD = "BKMAKER_ADD";
 const CACHE_LIMIT = 100;
@@ -24,7 +24,6 @@ class BKMaker implements IBKMaker {
     public item: HTMLElement;
     public protyle: IProtyle;
     public mentionCounting: HTMLSpanElement;
-    // private scrollTop: number;
 
     public freezeCheckBox: HTMLInputElement;
     public label: HTMLLabelElement;
@@ -32,7 +31,14 @@ class BKMaker implements IBKMaker {
     public plugin: Plugin;
 
     constructor(blBox: BackLinkBottomBox, docID: string) {
-        init(this, docID, blBox);
+        this.mentionCount = 1;
+        this.docID = docID;
+        this.blBox = blBox;
+        this.shouldFreeze = false;
+        this.mentionCounting = document.createElement("span");
+        this.mentionCounting.classList.add("b3-label__text");
+        this.settingCfg = blBox.settingCfg;
+        this.plugin = blBox.plugin;
     }
 
     async doTheWork(item: HTMLElement, protyle: IProtyle) {
@@ -43,7 +49,9 @@ class BKMaker implements IBKMaker {
             if (lock && !this.shouldFreeze && await shouldInsertDiv(getLastElementID(this.item), this.docID)) {
                 // retrieve new data
                 this.container = document.createElement("div");
-                await getBackLinks(this); // start
+                new BackLinkBottom({
+                    target: this.container,
+                });
                 this.container.setAttribute(BKMAKER_ADD, "1");
                 this.container.classList.add("protyle-wysiwyg");
 
@@ -60,22 +68,11 @@ class BKMaker implements IBKMaker {
         });
     }
 
-    // private saveScrollTop() {
-    //     this.scrollTop = this.protyle.contentElement.scrollTop;
-    // }
-
-    // private restoreScrollTop() {
-    //     this.protyle.contentElement.scrollTop = this.scrollTop;
-    // }
-
     private async insertBkPanel(div: HTMLElement) {
-        // this.saveScrollTop();
         this.protyle.wysiwyg.element.style.paddingBottom = "0px";
         div.style.paddingLeft = this.protyle.wysiwyg.element.style.paddingLeft;
         div.style.paddingRight = this.protyle.wysiwyg.element.style.paddingRight;
         this.protyle.wysiwyg.element.insertAdjacentElement("afterend", div);
-        // this.protyle.contentElement.appendChild(div);
-        // this.restoreScrollTop();
     }
 
     async findOrLoadFromCache() {
@@ -166,12 +163,5 @@ async function isBookCard(docID: string): Promise<boolean> {
     const v = attrs[MarkKey] ?? "";
     return v.includes(TEMP_CONTENT);
 }
-
-// async function isDailyCard(docID: string) {
-//     const row = await siyuanCache.sqlOne(60 * 1000, `select hpath from blocks where id = "${docID}"`);
-//     const hpath = row?.hpath ?? "";
-//     if (hpath.startsWith("/daily card")) return true;
-//     return false;
-// }
 
 export const backLinkBottomBox = new BackLinkBottomBox();
