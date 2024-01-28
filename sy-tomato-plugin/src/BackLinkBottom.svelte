@@ -5,10 +5,11 @@
     import { SPACE } from "./libs/gconst";
     export let maker: IBKMaker;
 
-    let autoRefreshChecked = true;
-    $: maker.shouldFreeze = !autoRefreshChecked;
+    let autoRefreshChecked: boolean;
+    $: if (autoRefreshChecked != null) maker.shouldFreeze = !autoRefreshChecked;
 
     onMount(async () => {
+        autoRefreshChecked = !maker.shouldFreeze;
         await getBackLinks();
     });
 
@@ -21,23 +22,35 @@
 </script>
 
 <!-- https://learn.svelte.dev/tutorial/if-blocks -->
+<div>dd</div>
+<hr />
 <div>
-    <!-- svelte-ignore a11y-label-has-associated-control -->
     <label class="b3-label b3-label__text b3-label--noborder">
         {#if !autoRefreshChecked}
-            <span>{@html icon("Focus", 15)}停止</span>
+            {@html icon("Focus", 13)}停止
         {:else}
-            <span>{@html icon("Refresh", 15)}自动</span>
+            {@html icon("Refresh", 13)}自动
         {/if}
+        <input
+            title="是否自动刷新"
+            type="checkbox"
+            class="b3-switch"
+            bind:checked={autoRefreshChecked}
+        />
     </label>
-    <input
-        title="是否自动刷新"
-        type="checkbox"
-        class="b3-switch"
-        bind:checked={autoRefreshChecked}
-        on:change={() => {}}
-    />
+    <label class="b3-label b3-label__text b3-label--noborder">
+        提及数上限：
+        <input >
+    </label>
 </div>
 <hr />
 <div>bbb</div>
 <div>sss</div>
+
+<style>
+    hr {
+        height: 2px;
+        background-color: var(b3-font-color5);
+        width: 100%;
+    }
+</style>
