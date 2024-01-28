@@ -1,10 +1,10 @@
 <script lang="ts">
     import { onDestroy, onMount } from "svelte";
-    import { siyuanCache } from "./libs/utils";
+    import { newID, siyuanCache } from "./libs/utils";
     import { MENTION_COUTING_SPAN, icon } from "./libs/bkUtils";
     import { Dialog } from "siyuan";
     import { SEARCH_HELP } from "./constants";
-    import { BLOCK_REF, DATA_ID, DATA_TYPE, SPACE } from "./libs/gconst";
+    import { BLOCK_REF, DATA_ID, DATA_TYPE } from "./libs/gconst";
     import { BKMaker } from "./BackLinkBottomBox";
 
     const QUERYABLE_ELEMENT = "QUERYABLE_ELEMENT";
@@ -12,10 +12,15 @@
     const mentionCountingSpanAttr = {};
     const queryableElementAttr = {};
 
+    type BacklinkSv = {
+        bk: Backlink;
+        id: string;
+    };
+
     export let maker: BKMaker;
     let autoRefreshChecked: boolean;
     $: if (autoRefreshChecked != null) maker.shouldFreeze = !autoRefreshChecked;
-    let backLinks: Backlink[] = [] as any;
+    let backLinks: BacklinkSv[] = [] as any;
     const allRefs: RefCollector = new Map();
 
     onMount(async () => {
@@ -24,6 +29,8 @@
         autoRefreshChecked = !maker.shouldFreeze;
         await getBackLinks();
     });
+
+    onDestroy(() => {});
 
     async function getBackLinks() {
         const backlink2 = await siyuanCache.getBacklink2(6 * 1000, maker.docID);
@@ -41,19 +48,17 @@
             )
         )
             .map((i) => i.backlinks)
-            .flat();
+            .flat()
+            .map((bk) => {
+                return { bk, id: newID() } as BacklinkSv;
+            });
         for (const backLink of backLinks) {
-            scanAllRef(backLink);
+            scanAllRef(backLink.bk);
+            await path2div(backLink.bk.blockPaths);
         }
     }
 
-    async function path2div(docBlock: HTMLElement, blockPaths: BlockPath[]) {
-        const div = document.createElement("div") as HTMLDivElement;
-        const btn = div.appendChild(createEyeBtn());
-        btn.addEventListener("click", () => {
-            freeze(self);
-            docBlock.style.display = "none";
-        });
+    async function path2div(blockPaths: BlockPath[]) {
         const refPathList: HTMLSpanElement[] = [];
         for (const ret of chunks(
             await Promise.all(
@@ -116,8 +121,6 @@
         return div;
     }
 
-    onDestroy(() => {});
-
     function scanAllRef(backLink: Backlink) {
         const div = document.createElement("div") as HTMLDivElement;
         div.innerHTML = backLink.dom ?? "";
@@ -153,10 +156,6 @@
         const newValue: string = (event.target as any).value;
         console.log(newValue);
         // searchInDiv(self, newValue.trim());
-    }
-
-    function getHideableID(idx: number) {
-        return `tomatoHideableDiv${idx}`;
     }
 </script>
 
@@ -206,30 +205,32 @@
         <span {...mentionCountingSpanAttr}></span>
     </label>
 </div>
-
-{#each backLinks as backLink, i}
-    <hr />
-    <div id={getHideableID(i)} {...queryableElementAttr} class="bk_one_line">
-        <div class="fn__flex-column">
-            <button
-                class="gap bk_label b3-button b3-button--text"
-                title="隐藏"
-                on:click={() => {
-                    autoRefreshChecked = false;
-                    document.getElementById(getHideableID(i)).style.display =
-                        "none";
-                }}>{@html icon("Eyeoff")}</button
-            >
-            <button
-                class="gap bk_label b3-button b3-button--text"
-                title="复制到文档">{@html icon("Copy")}</button
-            >
-            <button
-                class="gap bk_label b3-button b3-button--text"
-                title="移动到文档">{@html icon("Move")}</button
-            >
+<hr />
+{#each backLinks as backLink}
+    <div id={backLink.id} {...queryableElementAttr}>
+        <div class="bk_one_line">
+            <div class="fn__flex-column">
+                <button
+                    class="gap bk_label b3-button b3-button--text"
+                    title="隐藏"
+                    on:click={() => {
+                        autoRefreshChecked = false;
+                        document.getElementById(backLink.id).style.display =
+                            "none";
+                    }}>{@html icon("Eyeoff")}</button
+                >
+                <button
+                    class="gap bk_label b3-button b3-button--text"
+                    title="复制到文档">{@html icon("Copy")}</button
+                >
+                <button
+                    class="gap bk_label b3-button b3-button--text"
+                    title="移动到文档">{@html icon("Move")}</button
+                >
+            </div>
+            {@html backLink.bk.dom ?? ""}
         </div>
-        {@html backLink.dom ?? ""}
+        <hr />
     </div>
 {/each}
 
