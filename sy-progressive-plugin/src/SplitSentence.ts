@@ -114,13 +114,13 @@ export class SplitSentence {
 
 function getAttrLine(ref: string, idx: string) {
     return `{: ${RefIDKey}="${ref}" ${PARAGRAPH_INDEX}="${idx}" ${PROG_ORIGIN_TEXT}="1"}`;
-};
+}
 
 function getAttrLineWithID(ref: string, idx: string) {
     const newID = NewNodeID();
     const attrLine = `{: id="${newID}" ${RefIDKey}="${ref}" ${PARAGRAPH_INDEX}="${idx}" ${PROG_ORIGIN_TEXT}="1"}`;
     return { attrLine, newID };
-};
+}
 
 function isPic(markdown: string) {
     const len = [...markdown.matchAll(/!\[.*?\]\(.*?\)/g)].length;

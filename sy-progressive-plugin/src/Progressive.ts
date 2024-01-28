@@ -546,7 +546,7 @@ class Progressive {
         } else if (info.autoSplitSentenceT) {
             await this.splitAndClean(noteID, "t", piece);
         } else {
-            let idx: { i: number } = { i: 1 };
+            const idx: { i: number } = { i: 1 };
             for (const id of piece) {
                 allContent.push(await this.copyBlock(id, [PROG_ORIGIN_TEXT], idx));
             }
