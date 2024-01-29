@@ -86,17 +86,6 @@ export async function integrateCounting(self: BKMaker) {
     self.container.querySelector(`[${MENTION_COUTING_SPAN}]`)?.appendChild(self.mentionCounting);
 }
 
-function searchInDiv(self: BKMaker, query: string) {
-    const se = new SearchEngine(true);
-    se.setQuery(query);
-    self.container.querySelectorAll(`[${QUERYABLE_ELEMENT}]`).forEach((e: HTMLElement) => {
-        const m = se.match(e.textContent);
-        if (!m) {
-            e.style.display = "none";
-        } else {
-            e.style.display = "";
-        }
-    });
-}
+
 
 

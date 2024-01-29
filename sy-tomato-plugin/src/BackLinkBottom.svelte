@@ -15,6 +15,7 @@
         DATA_TYPE,
     } from "./libs/gconst";
     import { BKMaker } from "./BackLinkBottomBox";
+    import { SearchEngine } from "./libs/search";
 
     const QUERYABLE_ELEMENT = "QUERYABLE_ELEMENT";
     const ICONS_SIZE = 13;
@@ -148,9 +149,21 @@
     }
 
     async function search(event: Event) {
-        const newValue: string = (event.target as any).value;
-        console.log(newValue);
-        // searchInDiv(self, newValue.trim());
+        let query: string = (event.target as any).value;
+        query = query.trim();
+        if (!query) return;
+        const se = new SearchEngine(true);
+        se.setQuery(query);
+        maker.container
+            .querySelectorAll(`[${QUERYABLE_ELEMENT}]`)
+            .forEach((e: HTMLElement) => {
+                const m = se.match(e.textContent);
+                if (!m) {
+                    e.style.display = "none";
+                } else {
+                    e.style.display = "";
+                }
+            });
     }
 
     async function getRootID(dataNodeID: string) {
