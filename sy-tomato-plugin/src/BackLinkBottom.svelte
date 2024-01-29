@@ -40,8 +40,9 @@
     export let maker: BKMaker;
     let autoRefreshChecked: boolean;
     $: if (autoRefreshChecked != null) maker.shouldFreeze = !autoRefreshChecked;
-    let backLinks: BacklinkSv[] = [] as any;
-    let allRefs: RefCollector = new Map();
+    let backLinks: BacklinkSv[] = [];
+    let linkItems: LinkItem[] = [];
+    const allRefs: RefCollector = new Map();
 
     onMount(async () => {
         mentionCountingSpanAttr[MENTION_COUTING_SPAN] = "1";
@@ -95,8 +96,8 @@
 
         await Promise.all(backLinks.map((backLink) => path2div(backLink)));
         backLinks.forEach((backLink) => scanAllRef(backLink.bk.dom));
-        backLinks = backLinks;
-        allRefs = allRefs;
+        backLinks = [...backLinks];
+        linkItems = [...allRefs.values()];
 
         if (maker.mentionCount > 0) {
             const mentions: BacklinkSv[] = [];
@@ -123,7 +124,7 @@
             await Promise.all(mentions.map((m) => path2div(m)));
             mentions.forEach((m) => scanAllRef(m.bk.dom));
             backLinks = [...backLinks, ...mentions];
-            allRefs = allRefs;
+            linkItems = [...allRefs.values()];
         }
     }
 
@@ -257,7 +258,7 @@
 
 <!-- https://learn.svelte.dev/tutorial/if-blocks -->
 <div>
-    {#each [...allRefs.values()] as { text, id, count, attrs }}
+    {#each linkItems as { text, id, count, attrs }}
         <label {...attrs} class="b3-label b3-label__text b3-label--noborder">
             <button
                 {...attrs}
