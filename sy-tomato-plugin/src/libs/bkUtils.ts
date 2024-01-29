@@ -78,21 +78,6 @@ export async function getBackLinks(self: BKMaker) {
         }
         self.mentionCounting.innerText = "";
     }
-    // self.container.querySelectorAll(`[${DATA_TYPE}~="${BLOCK_REF}"]`).forEach((e: HTMLElement) => {
-    //     const btn = document.createElement("button") as HTMLButtonElement;
-    //     btn.setAttribute(DATA_ID, e.getAttribute(DATA_ID));
-    //     btn.style.border = "transparent";
-    //     btn.style.background = "var(--b3-button)";
-    //     btn.style.color = "var(--b3-protyle-inline-blockref-color)";
-    //     btn.textContent = e.textContent;
-    //     btn.addEventListener("click", () => {
-    //         setTimeout(() => {
-    //             openTab({ app: self.plugin.app, doc: { id: e.getAttribute(DATA_ID), action: ["cb-get-all", "cb-get-focus"] } });
-    //         }, 2500);
-    //         window.location.href = "siyuan://blocks/" + e.getAttribute(DATA_ID);
-    //     });
-    //     e.parentElement.replaceChild(btn, e);
-    // });
 }
 
 export const MENTION_COUTING_SPAN = "MENTION_COUTING_SPAN";

@@ -39,6 +39,23 @@
         queryableElementAttr[QUERYABLE_ELEMENT] = "1";
         autoRefreshChecked = !maker.shouldFreeze;
         await getBackLinks();
+
+        // maker.container
+        //     .querySelectorAll(`[${DATA_TYPE}~="${BLOCK_REF}"]`)
+        //     .forEach((e: HTMLElement) => {
+        //         const btn = document.createElement(
+        //             "button",
+        //         ) as HTMLButtonElement;
+        //         btn.style.border = "transparent";
+        //         btn.style.background = "transparent";
+        //         btn.style.color = "var(--b3-protyle-inline-blockref-color)";
+        //         btn.textContent = e.textContent;
+        //         btn.setAttribute(DATA_ID, e.getAttribute(DATA_ID));
+        //         btn.addEventListener("click", () => {
+        //             refClick(e.getAttribute(DATA_ID));
+        //         });
+        //         e.parentElement.replaceChild(btn, e);
+        //     });
     });
 
     onDestroy(() => {});
