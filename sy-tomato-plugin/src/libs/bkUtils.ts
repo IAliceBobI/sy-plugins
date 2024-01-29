@@ -1,7 +1,7 @@
-import {   openTab } from "siyuan";
+import { openTab } from "siyuan";
 import { BLOCK_REF, DATA_ID, DATA_NODE_ID, DATA_TYPE, WEB_SPACE } from "./gconst";
 import { SearchEngine } from "./search";
-import {   siyuanCache } from "./utils";
+import { siyuanCache } from "./utils";
 import { BKMaker } from "@/BackLinkBottomBox";
 
 export function setReadonly(e: HTMLElement, all = false) {
@@ -11,25 +11,6 @@ export function setReadonly(e: HTMLElement, all = false) {
     });
     return e;
 }
-
-// export function refTag(id: string, text: string, count: number, len?: number): HTMLSpanElement {
-//     const span = document.createElement("span") as HTMLSpanElement;
-//     const refSpan = span.appendChild(document.createElement("span"));
-//     refSpan.setAttribute(DATA_TYPE, BLOCK_REF);
-//     refSpan.setAttribute(DATA_ID, id);
-//     refSpan.innerText = text;
-//     if (len) {
-//         let sliced = text.slice(0, len);
-//         if (sliced.length != text.length) sliced += "……";
-//         refSpan.innerText = sliced;
-//     }
-//     const countSpan = span.appendChild(document.createElement("span"));
-//     if (count > 0) {
-//         countSpan.classList.add("tomato-style__code");
-//         countSpan.innerText = String(count);
-//     }
-//     return span;
-// }
 
 export function deleteSelf(divs: Element[]) {
     divs.forEach(e => e.parentElement?.removeChild(e));
@@ -43,14 +24,6 @@ export function icon(name: string, size?: number) {
 }
 
 export async function shouldInsertDiv(lastID: string, docID: string) {
-    // const totalLen = self.protyle.contentElement.scrollHeight;
-    // const scrollPosition = self.protyle.contentElement.scrollTop;
-    // const winHeight = window.innerHeight;
-    // if (1000 + scrollPosition + winHeight >= totalLen) {
-    //     l(`${1000 + scrollPosition + winHeight} > ${totalLen}`)
-    //     return true;
-    // }
-    // return false;
     const allIDs = await siyuanCache.getTailChildBlocks(2500, docID, 5);
     for (const { id } of allIDs) {
         if (id === lastID) {
@@ -83,7 +56,7 @@ export function createEyeBtn() {
 
 export const MENTION_CACHE_TIME = 1 * 60 * 1000;
 
-export async function getBackLinks(self: IBKMaker) {
+export async function getBackLinks(self: BKMaker) {
     const allRefs: RefCollector = new Map();
     const backlink2 = await siyuanCache.getBacklink2(6 * 1000, self.docID);
     const contentContainer = document.createElement("div");
@@ -143,7 +116,7 @@ export async function integrateCounting(self: BKMaker) {
     self.container.querySelector(`[${MENTION_COUTING_SPAN}]`)?.appendChild(self.mentionCounting);
 }
 
-function refreshTopDiv(self: IBKMaker, topDiv: HTMLDivElement, allRefs: RefCollector) {
+function refreshTopDiv(self: BKMaker, topDiv: HTMLDivElement, allRefs: RefCollector) {
     topDiv.innerHTML = "";
     for (const { lnk, id } of allRefs.values()) {
         const d = topDiv.appendChild(document.createElement("span"));
@@ -163,7 +136,7 @@ function refreshTopDiv(self: IBKMaker, topDiv: HTMLDivElement, allRefs: RefColle
     }
 }
 
-function searchInDiv(self: IBKMaker, query: string) {
+function searchInDiv(self: BKMaker, query: string) {
     const se = new SearchEngine(true);
     se.setQuery(query);
     self.container.querySelectorAll(`[${QUERYABLE_ELEMENT}]`).forEach((e: HTMLElement) => {
@@ -176,7 +149,7 @@ function searchInDiv(self: IBKMaker, query: string) {
     });
 }
 
-async function fillContent(self: IBKMaker, backlinksInDoc: Backlink, allRefs: RefCollector, tc: HTMLElement) {
+async function fillContent(self: BKMaker, backlinksInDoc: Backlink, allRefs: RefCollector, tc: HTMLElement) {
     const temp = document.createElement("div") as HTMLDivElement;
     markQueryable(temp);
     const div = document.createElement("div") as HTMLDivElement;

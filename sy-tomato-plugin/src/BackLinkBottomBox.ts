@@ -45,6 +45,7 @@ export class BKMaker {
         this.protyle = protyle;
         const divs = await this.findOrLoadFromCache();
         await navigator.locks.request("BackLinkBottomBox-BKMakerLock" + this.docID, { ifAvailable: true }, async (lock) => {
+            this.protyle.wysiwyg.element.style.paddingBottom = "0px";
             if (lock && !this.shouldFreeze && await shouldInsertDiv(getLastElementID(this.item), this.docID)) {
                 // retrieve new data
                 this.container = document.createElement("div");

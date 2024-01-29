@@ -59,100 +59,21 @@
             });
         for (const backLink of bks) {
             scanAllRef(backLink.bk);
-            await path2div(backLink);
+            path2div(backLink);
         }
         backLinks = bks;
     }
 
-    async function path2div(backlinkSv: BacklinkSv) {
+    function path2div(backlinkSv: BacklinkSv) {
         for (let i = 0; i < backlinkSv.bk.blockPaths.length; i++) {
             const blockPath = backlinkSv.bk.blockPaths[i];
-            if (i == backlinkSv.bk.blockPaths.length - 1) {
-                blockPath.name = "[...]";
-            } else {
-                console.log(blockPath);
+            if (blockPath.type == BlockNodeEnum.NODE_DOCUMENT) {
+                const fileName = blockPath.name.split("/").pop();
+                addRef(fileName, blockPath.id);
+            } else if (blockPath.type == BlockNodeEnum.NODE_HEADING) {
+                addRef(blockPath.name, blockPath.id);
             }
         }
-
-        // const paths = await aFlatChunkMap<{
-        //     refPath: BlockPath;
-        //     div: HTMLDivElement;
-        // }>(
-        //     blockPaths.map((refPath, idx, arr) => {
-        //         if (idx == arr.length - 1) {
-        //             return [refPath, { div: "[...]" }];
-        //         } else {
-        //             return [
-        //                 refPath,
-        //                 siyuanCache.getBlockDiv(MENTION_CACHE_TIME, refPath.id),
-        //             ];
-        //         }
-        //     }),
-        //     2,
-        //     (ts) => {
-        //         return { refPath: ts[0], div: ts[1].div };
-        //     },
-        // );
-        // for (const { refPath, div } of paths) {
-        //     console.log(refPath, div);
-        // }
-        // for (const ret of chunks(
-        //     await Promise.all(
-        //         blockPaths
-        //             .map((refPath) => {
-        //                 return [
-        //                     refPath,
-        //                     siyuanCache.getBlockKramdown(
-        //                         MENTION_CACHE_TIME,
-        //                         refPath.id,
-        //                     ),
-        //                 ];
-        //             })
-        //             .flat(),
-        //     ),
-        //     2,
-        // )) {
-        //     const [refPath, { kramdown: _kramdown }] = ret as [
-        //         BlockPath,
-        //         GetBlockKramdown,
-        //     ];
-        // if (refPath.type == "NodeDocument") {
-        //     if (refPath.id == self.docID) break;
-        //     const fileName = refPath.name.split("/").pop();
-        //     refPathList.push(refTag(refPath.id, fileName, 0));
-        //     addRef(fileName, refPath.id, allRefs, self.docID);
-        //     continue;
-        // }
-        // if (refPath.type == "NodeHeading") {
-        //     refPathList.push(refTag(refPath.id, refPath.name, 0));
-        //     addRef(refPath.name, refPath.id, allRefs, self.docID);
-        // } else {
-        //     refPathList.push(refTag(refPath.id, refPath.name, 0, 15));
-        // }
-        // let kramdown = _kramdown;
-        // if (refPath.type == "NodeListItem" && kramdown) {
-        //     kramdown = kramdown.split("\n")[0];
-        // }
-        // if (kramdown) {
-        //     const { idLnks } = extractLinks(kramdown);
-        //     for (const idLnk of idLnks) {
-        //         addRef(idLnk.txt, idLnk.id, allRefs, self.docID);
-        //     }
-        // }
-        // }
-        // refPathList.forEach((s, idx, arr) => {
-        //     s = s.cloneNode(true) as HTMLScriptElement;
-        //     if (idx < arr.length - 1) {
-        //         s.appendChild(createSpan("  ➡  "));
-        //     } else {
-        //         const e = s.querySelector(`[${DATA_ID}]`);
-        //         if (e) {
-        //             e.textContent = "[...]";
-        //         }
-        //     }
-        //     div.appendChild(s);
-        // });
-        // return div;
     }
 
     function scanAllRef(backLink: Backlink) {
@@ -195,7 +116,7 @@
     function refClick(id: string) {
         openTab({
             app: maker.plugin.app,
-            doc: { id },
+            doc: { id, action: ["cb-get-hl", "cb-get-context"], zoomIn: false },
         });
     }
 </script>
@@ -270,22 +191,33 @@
                 >
             </div>
             <div>
-                {#each backLink.bk.blockPaths as blockPath}
-                    <span title={blockPath.name} class="  b3-label__text">
-                        {#if blockPath.type == BlockNodeEnum.NODE_DOCUMENT}
+                {#each backLink.bk.blockPaths as blockPath, i}
+                    <span
+                        title={blockPath.name}
+                        class="bk_label b3-label__text"
+                    >
+                        {#if i == backLink.bk.blockPaths.length - 1}
                             <button
                                 class="bk_label b3-label__text"
                                 on:click={() => refClick(blockPath.id)}
-                                >{blockPath.name.split("/").pop()}</button
+                                >[...]</button
                             >
                         {:else}
-                            <button
-                                class="bk_label b3-label__text"
-                                on:click={() => refClick(blockPath.id)}
-                                >{blockPath.name}</button
-                            >
+                            {#if blockPath.type == BlockNodeEnum.NODE_DOCUMENT}
+                                <button
+                                    class="bk_label b3-label__text"
+                                    on:click={() => refClick(blockPath.id)}
+                                    >{blockPath.name.split("/").pop()}</button
+                                >
+                            {:else}
+                                <button
+                                    class="bk_label b3-label__text"
+                                    on:click={() => refClick(blockPath.id)}
+                                    >{blockPath.name}</button
+                                >
+                            {/if}
+                            ➡️
                         {/if}
-                        ➡️
                     </span>
                 {/each}
                 {@html backLink.bk.dom ?? ""}
