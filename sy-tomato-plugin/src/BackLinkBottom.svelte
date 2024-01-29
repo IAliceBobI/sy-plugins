@@ -25,6 +25,7 @@
     type BacklinkSv = {
         bk: Backlink;
         id: string;
+        attrs: LinkElementAttr;
     };
 
     export let maker: BKMaker;
@@ -63,7 +64,7 @@
             .map((i) => i.backlinks)
             .flat()
             .map((bk) => {
-                return { bk, id: newID() } as BacklinkSv;
+                return { bk, id: newID(), attrs: {} } as BacklinkSv;
             });
 
         await Promise.all(backLinks.map((backLink) => path2div(backLink)));
@@ -77,6 +78,7 @@
             if (blockPath.type == BlockNodeEnum.NODE_DOCUMENT) {
                 const fileName = blockPath.name.split("/").pop();
                 await addRef(fileName, blockPath.id);
+                backlinkSv.attrs.isThisDoc = blockPath.id == maker.docID;
             } else if (blockPath.type == BlockNodeEnum.NODE_HEADING) {
                 await addRef(blockPath.name, blockPath.id);
             } else {
@@ -110,10 +112,6 @@
         )
             return;
         if (!dataNodeID) dataNodeID = id;
-        const row = await siyuanCache.sqlOne(
-            MENTION_CACHE_TIME,
-            `select root_id from blocks where id="${dataNodeID}"`,
-        );
         const key = id + txt;
         const value: LinkItem =
             allRefs.get(key) ??
@@ -125,7 +123,8 @@
             value.text = txt;
             value.attrs = {
                 isThisDoc:
-                    (row?.root_id ?? "") == maker.docID || id == maker.docID,
+                    id == maker.docID ||
+                    (await getRootID(dataNodeID)) == maker.docID,
             };
             allRefs.set(key, value);
         }
@@ -135,6 +134,14 @@
         const newValue: string = (event.target as any).value;
         console.log(newValue);
         // searchInDiv(self, newValue.trim());
+    }
+
+    async function getRootID(dataNodeID: string) {
+        const row = await siyuanCache.sqlOne(
+            MENTION_CACHE_TIME,
+            `select root_id from blocks where id="${dataNodeID}"`,
+        );
+        return row?.root_id ?? "";
     }
 
     function refClick(id: string) {
@@ -148,7 +155,7 @@
 <!-- https://learn.svelte.dev/tutorial/if-blocks -->
 <div>
     {#each [...allRefs.values()] as { text, id, count, attrs }}
-        <label class="b3-label b3-label__text b3-label--noborder">
+        <label {...attrs} class="b3-label b3-label__text b3-label--noborder">
             <button
                 {...attrs}
                 class="bk_label b3-label__text"
@@ -204,7 +211,7 @@
     <hr />
 </div>
 {#each backLinks as backLink}
-    <div id={backLink.id} {...queryableElementAttr}>
+    <div id={backLink.id} {...queryableElementAttr} {...backLink.attrs}>
         <div class="bk_one_line">
             <div class="fn__flex-column">
                 <button
@@ -228,11 +235,13 @@
             <div>
                 {#each backLink.bk.blockPaths as blockPath, i}
                     <span
+                        {...backLink.attrs}
                         title={blockPath.name}
                         class="bk_label b3-label__text"
                     >
                         {#if i == backLink.bk.blockPaths.length - 1}
                             <button
+                                {...backLink.attrs}
                                 class="bk_label b3-label__text"
                                 on:click={() => refClick(blockPath.id)}
                                 >[...]</button
@@ -240,12 +249,14 @@
                         {:else}
                             {#if blockPath.type == BlockNodeEnum.NODE_DOCUMENT}
                                 <button
+                                    {...backLink.attrs}
                                     class="bk_label b3-label__text"
                                     on:click={() => refClick(blockPath.id)}
                                     >{blockPath.name.split("/").pop()}</button
                                 >
                             {:else}
                                 <button
+                                    {...backLink.attrs}
                                     class="bk_label b3-label__text"
                                     on:click={() => refClick(blockPath.id)}
                                     >{blockPath.name}</button
@@ -263,7 +274,7 @@
 {/each}
 
 <style>
-    button[isThisDoc="true"] {
+    [isThisDoc="true"] {
         color: var(--b3-font-color7);
     }
     .bk_ref_count {
