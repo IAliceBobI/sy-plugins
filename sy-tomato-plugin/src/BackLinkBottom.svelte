@@ -1,6 +1,13 @@
 <script lang="ts">
     import { onDestroy, onMount } from "svelte";
-    import { getID, newID, siyuanCache } from "./libs/utils";
+    import {
+        NewLute,
+        cleanDiv,
+        getID,
+        newID,
+        siyuan,
+        siyuanCache,
+    } from "./libs/utils";
     import {
         MENTION_CACHE_TIME,
         MENTION_COUTING_SPAN,
@@ -22,6 +29,7 @@
     const BACKLINK_CACHE_TIME = 6 * 1000;
     const mentionCountingSpanAttr = {};
     const queryableElementAttr = {};
+    const lute = NewLute();
 
     type BacklinkSv = {
         bk: Backlink;
@@ -199,7 +207,14 @@
         }
     }
 
-    async function copy2doc(domStr: string) {}
+    async function copy2doc(domStr: string) {
+        if (!domStr) return;
+        let div = document.createElement("div") as HTMLDivElement;
+        div.innerHTML = domStr ?? "";
+        cleanDiv(div.firstElementChild as any, false, false);
+        const md = lute.BlockDOM2Md(div.innerHTML);
+        await siyuan.appendBlock(md, maker.docID);
+    }
 
     async function move2doc(domStr: string) {}
 </script>
