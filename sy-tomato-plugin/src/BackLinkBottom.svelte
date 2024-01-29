@@ -187,7 +187,11 @@
     async function search(event: Event) {
         let query: string = (event.target as any).value;
         query = query.trim();
-        if (!query) return;
+        if (!query) {
+            autoRefreshChecked = true;
+            return;
+        }
+        autoRefreshChecked = false;
         const se = new SearchEngine(true);
         se.setQuery(query);
         maker.container
