@@ -59,12 +59,13 @@
             });
 
         await Promise.all(backLinks.map((backLink) => path2div(backLink)));
+        backLinks.forEach((backLink) => scanAllRef(backLink.bk.dom));
         backLinks = backLinks;
         allRefs = allRefs;
     }
 
     async function path2div(backlinkSv: BacklinkSv) {
-        for (const blockPath of backlinkSv.bk.blockPaths) {
+        for (const blockPath of backlinkSv.bk.blockPaths.slice(0, -1)) {
             if (blockPath.type == BlockNodeEnum.NODE_DOCUMENT) {
                 const fileName = blockPath.name.split("/").pop();
                 addRef(fileName, blockPath.id);
