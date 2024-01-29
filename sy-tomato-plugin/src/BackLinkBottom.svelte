@@ -411,6 +411,6 @@
         background-color: transparent;
     }
     input[type="number"] {
-        width: 6%;
+        width: 10%;
     }
 </style>
