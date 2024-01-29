@@ -140,8 +140,8 @@
             <span class="bk_ref_count">{count}</span>
         </label>
     {/each}
+    <hr />
 </div>
-<hr />
 <div>
     <label class="b3-label b3-label__text b3-label--noborder">
         {#if !autoRefreshChecked}
@@ -184,8 +184,8 @@
         />
         <span {...mentionCountingSpanAttr}></span>
     </label>
+    <hr />
 </div>
-<hr />
 {#each backLinks as backLink}
     <div id={backLink.id} {...queryableElementAttr}>
         <div class="bk_one_line">
@@ -261,11 +261,5 @@
     }
     input[type="number"] {
         width: 6%;
-    }
-    hr {
-        height: 2px;
-        color: var(b3-font-color5);
-        background-color: var(b3-font-color5);
-        width: 100%;
     }
 </style>
