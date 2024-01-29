@@ -1,7 +1,11 @@
 <script lang="ts">
     import { onDestroy, onMount } from "svelte";
     import { getID, newID, siyuanCache } from "./libs/utils";
-    import { MENTION_COUTING_SPAN, icon } from "./libs/bkUtils";
+    import {
+        MENTION_CACHE_TIME,
+        MENTION_COUTING_SPAN,
+        icon,
+    } from "./libs/bkUtils";
     import { Dialog, openTab } from "siyuan";
     import { SEARCH_HELP } from "./constants";
     import {
@@ -14,6 +18,7 @@
 
     const QUERYABLE_ELEMENT = "QUERYABLE_ELEMENT";
     const ICONS_SIZE = 13;
+    const BACKLINK_CACHE_TIME = 6 * 1000;
     const mentionCountingSpanAttr = {};
     const queryableElementAttr = {};
 
@@ -38,14 +43,17 @@
     onDestroy(() => {});
 
     async function getBackLinks() {
-        const backlink2 = await siyuanCache.getBacklink2(6 * 1000, maker.docID);
+        const backlink2 = await siyuanCache.getBacklink2(
+            BACKLINK_CACHE_TIME,
+            maker.docID,
+        );
 
         const maxCount = maker.settingCfg["back-link-max-size"] ?? 100;
         backLinks = (
             await Promise.all(
                 backlink2.backlinks.slice(0, maxCount).map((backlink) => {
                     return siyuanCache.getBacklinkDoc(
-                        12 * 1000,
+                        2 * BACKLINK_CACHE_TIME,
                         maker.docID,
                         backlink.id,
                     );
@@ -68,20 +76,20 @@
         for (const blockPath of backlinkSv.bk.blockPaths.slice(0, -1)) {
             if (blockPath.type == BlockNodeEnum.NODE_DOCUMENT) {
                 const fileName = blockPath.name.split("/").pop();
-                addRef(fileName, blockPath.id);
+                await addRef(fileName, blockPath.id);
             } else if (blockPath.type == BlockNodeEnum.NODE_HEADING) {
-                addRef(blockPath.name, blockPath.id);
+                await addRef(blockPath.name, blockPath.id);
             } else {
                 const { dom } = await siyuanCache.getBlockDOM(
-                    12 * 1000,
+                    2 * BACKLINK_CACHE_TIME,
                     blockPath.id,
                 );
-                scanAllRef(dom);
+                await scanAllRef(dom);
             }
         }
     }
 
-    function scanAllRef(domStr: string) {
+    async function scanAllRef(domStr: string) {
         const div = document.createElement("div") as HTMLDivElement;
         div.innerHTML = domStr ?? "";
         for (const element of div.querySelectorAll(
@@ -89,13 +97,12 @@
         )) {
             const id = element.getAttribute(DATA_ID);
             const txt = element.textContent;
-            addRef(txt, id, getID(element));
+            await addRef(txt, id, getID(element));
         }
     }
 
-    function addRef(txt: string, id: string, dataNodeID?: string) {
+    async function addRef(txt: string, id: string, dataNodeID?: string) {
         if (txt == "*" || txt == "@" || txt == "@*") return;
-        if (id == maker.docID) return;
         if (
             Array.from(
                 txt.matchAll(/^c?\d{4}-\d{2}-\d{2}(@第\d+周-星期.{1})?$/g),
@@ -103,6 +110,10 @@
         )
             return;
         if (!dataNodeID) dataNodeID = id;
+        const row = await siyuanCache.sqlOne(
+            MENTION_CACHE_TIME,
+            `select root_id from blocks where id="${dataNodeID}"`,
+        );
         const key = id + txt;
         const value: linkItem =
             allRefs.get(key) ?? ({ count: 0, dataNodeIDSet: new Set() } as any);
@@ -111,6 +122,7 @@
             value.dataNodeIDSet.add(dataNodeID);
             value.id = id;
             value.text = txt;
+            value.isThisDoc = (row?.root_id ?? "") == maker.docID;
             allRefs.set(key, value);
         }
     }
