@@ -1,16 +1,16 @@
 <script lang="ts">
     import { onDestroy, onMount } from "svelte";
     import { newID, siyuanCache } from "./libs/utils";
-    import {
-        MENTION_CACHE_TIME,
-        MENTION_COUTING_SPAN,
-        icon,
-    } from "./libs/bkUtils";
-    import { Dialog } from "siyuan";
+    import { MENTION_COUTING_SPAN, icon } from "./libs/bkUtils";
+    import { Dialog, openTab } from "siyuan";
     import { SEARCH_HELP } from "./constants";
-    import { BLOCK_REF, DATA_ID, DATA_TYPE } from "./libs/gconst";
+    import {
+        BLOCK_REF,
+        BlockNodeEnum,
+        DATA_ID,
+        DATA_TYPE,
+    } from "./libs/gconst";
     import { BKMaker } from "./BackLinkBottomBox";
-    import { aFlatChunkMap } from "./libs/functional";
 
     const QUERYABLE_ELEMENT = "QUERYABLE_ELEMENT";
     const ICONS_SIZE = 13;
@@ -41,7 +41,7 @@
         const backlink2 = await siyuanCache.getBacklink2(6 * 1000, maker.docID);
 
         const maxCount = maker.settingCfg["back-link-max-size"] ?? 100;
-        backLinks = (
+        const bks = (
             await Promise.all(
                 backlink2.backlinks.slice(0, maxCount).map((backlink) => {
                     return siyuanCache.getBacklinkDoc(
@@ -57,17 +57,18 @@
             .map((bk) => {
                 return { bk, id: newID() } as BacklinkSv;
             });
-        for (const backLink of backLinks) {
+        for (const backLink of bks) {
             scanAllRef(backLink.bk);
-            // await path2div(backLink);
+            await path2div(backLink);
         }
+        backLinks = bks;
     }
 
     async function path2div(backlinkSv: BacklinkSv) {
         for (let i = 0; i < backlinkSv.bk.blockPaths.length; i++) {
             const blockPath = backlinkSv.bk.blockPaths[i];
             if (i == backlinkSv.bk.blockPaths.length - 1) {
-                console.log(blockPath);
+                blockPath.name = "[...]";
             } else {
                 console.log(blockPath);
             }
@@ -190,6 +191,13 @@
         console.log(newValue);
         // searchInDiv(self, newValue.trim());
     }
+
+    function refClick(id: string) {
+        openTab({
+            app: maker.plugin.app,
+            doc: { id },
+        });
+    }
 </script>
 
 <!-- https://learn.svelte.dev/tutorial/if-blocks -->
@@ -261,7 +269,27 @@
                     title="移动到文档">{@html icon("Move")}</button
                 >
             </div>
-            {@html backLink.bk.dom ?? ""}
+            <div>
+                {#each backLink.bk.blockPaths as blockPath}
+                    <span title={blockPath.name} class="  b3-label__text">
+                        {#if blockPath.type == BlockNodeEnum.NODE_DOCUMENT}
+                            <button
+                                class="bk_label b3-label__text"
+                                on:click={() => refClick(blockPath.id)}
+                                >{blockPath.name.split("/").pop()}</button
+                            >
+                        {:else}
+                            <button
+                                class="bk_label b3-label__text"
+                                on:click={() => refClick(blockPath.id)}
+                                >{blockPath.name}</button
+                            >
+                        {/if}
+                        ➡️
+                    </span>
+                {/each}
+                {@html backLink.bk.dom ?? ""}
+            </div>
         </div>
         <hr />
     </div>
