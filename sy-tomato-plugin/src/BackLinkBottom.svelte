@@ -99,6 +99,7 @@
         allRefs = allRefs;
 
         if (maker.mentionCount > 0) {
+            const mentions: BacklinkSv[] = [];
             let count = 0;
             outer: for (const mention of backlink2.backmentions) {
                 const mentionDoc = await siyuanCache.getBackmentionDoc(
@@ -107,19 +108,22 @@
                     mention.id,
                 );
                 for (const mentionItem of mentionDoc.backmentions) {
-                    contentContainer.appendChild(hr());
-                    await fillContent(
-                        self,
-                        mentionItem,
-                        allRefs,
-                        contentContainer,
-                    );
+                    mentions.push({
+                        bk: mentionItem,
+                        id: newID(),
+                        attrs: {},
+                    } as BacklinkSv);
                     ++count;
-                    self.mentionCounting.innerText = `提及读取中：${count}`;
-                    if (count >= self.mentionCount) break outer;
+                    maker.mentionCounting.innerText = `提及读取中：${count}`;
+                    if (count >= maker.mentionCount) break outer;
                 }
             }
-            self.mentionCounting.innerText = "";
+            maker.mentionCounting.innerText = "";
+
+            await Promise.all(mentions.map((m) => path2div(m)));
+            mentions.forEach((m) => scanAllRef(m.bk.dom));
+            backLinks = [...backLinks, ...mentions];
+            allRefs = allRefs;
         }
     }
 
