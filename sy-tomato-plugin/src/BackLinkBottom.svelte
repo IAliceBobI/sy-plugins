@@ -26,7 +26,7 @@
     let autoRefreshChecked: boolean;
     $: if (autoRefreshChecked != null) maker.shouldFreeze = !autoRefreshChecked;
     let backLinks: BacklinkSv[] = [] as any;
-    const allRefs: RefCollector = new Map();
+    let allRefs: RefCollector = new Map();
 
     onMount(async () => {
         mentionCountingSpanAttr[MENTION_COUTING_SPAN] = "1";
@@ -57,21 +57,20 @@
             .map((bk) => {
                 return { bk, id: newID() } as BacklinkSv;
             });
-        for (const backLink of bks) {
-            scanAllRef(backLink.bk);
-            path2div(backLink);
-        }
-        backLinks = bks;
+
+        await Promise.all(bks.map((backLink) => path2div(backLink)));
+        bks.map((backLink) => scanAllRef(backLink.bk));
+        allRefs = allRefs;
     }
 
-    function path2div(backlinkSv: BacklinkSv) {
-        for (let i = 0; i < backlinkSv.bk.blockPaths.length; i++) {
-            const blockPath = backlinkSv.bk.blockPaths[i];
+    async function path2div(backlinkSv: BacklinkSv) {
+        for (const blockPath of backlinkSv.bk.blockPaths) {
             if (blockPath.type == BlockNodeEnum.NODE_DOCUMENT) {
                 const fileName = blockPath.name.split("/").pop();
                 addRef(fileName, blockPath.id);
             } else if (blockPath.type == BlockNodeEnum.NODE_HEADING) {
                 addRef(blockPath.name, blockPath.id);
+            } else {
             }
         }
     }
@@ -122,7 +121,11 @@
 </script>
 
 <!-- https://learn.svelte.dev/tutorial/if-blocks -->
-<div>dd</div>
+<div>
+    {#each [...allRefs.values()] as { text, id, count }}
+        <button on:click={() => refClick(id)}>{text}</button>
+    {/each}
+</div>
 <hr />
 <div>
     <label class="b3-label b3-label__text b3-label--noborder">
