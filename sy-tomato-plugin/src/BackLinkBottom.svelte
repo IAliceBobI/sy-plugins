@@ -198,6 +198,10 @@
                 });
         }
     }
+
+    async function copy2doc(domStr: string) {}
+
+    async function move2doc(domStr: string) {}
 </script>
 
 <!-- https://learn.svelte.dev/tutorial/if-blocks -->
@@ -280,11 +284,15 @@
                 >
                 <button
                     class="gap bk_label b3-button b3-button--text"
-                    title="复制到文档">{@html icon("Copy")}</button
+                    title="复制到文档"
+                    on:click={async () => await copy2doc(backLink.bk.dom)}
+                    >{@html icon("Copy")}</button
                 >
                 <button
                     class="gap bk_label b3-button b3-button--text"
-                    title="移动到文档">{@html icon("Move")}</button
+                    title="移动到文档"
+                    on:click={async () => await move2doc(backLink.bk.dom)}
+                    >{@html icon("Move")}</button
                 >
             </div>
             <div>
