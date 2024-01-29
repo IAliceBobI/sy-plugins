@@ -20,7 +20,7 @@ export function zipAnyArrays(...arrays: any[][]): any[][] {
 }
 
 export function flatChunkMap<M>(array: any[], num: number, map: (ts: any[]) => M) {
-    array = array.flat()
+    array = array.flat();
     const newArr: M[] = [];
     for (let i = 0; i < array.length; i += num) {
         const part = array.slice(i, i + num);
