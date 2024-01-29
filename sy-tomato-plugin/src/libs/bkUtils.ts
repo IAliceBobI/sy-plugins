@@ -1,16 +1,15 @@
-import { openTab } from "siyuan";
-import { BLOCK_REF, DATA_ID, DATA_NODE_ID, DATA_TYPE, WEB_SPACE } from "./gconst";
+import { DATA_NODE_ID } from "./gconst";
 import { SearchEngine } from "./search";
 import { siyuanCache } from "./utils";
 import { BKMaker } from "@/BackLinkBottomBox";
 
-export function setReadonly(e: HTMLElement, all = false) {
-    e.setAttribute("contenteditable", "false");
-    if (all) e.querySelectorAll('[contenteditable="true"]')?.forEach(sub => {
-        sub?.setAttribute("contenteditable", "false");
-    });
-    return e;
-}
+// export function setReadonly(e: HTMLElement, all = false) {
+//     e.setAttribute("contenteditable", "false");
+//     if (all) e.querySelectorAll('[contenteditable="true"]')?.forEach(sub => {
+//         sub?.setAttribute("contenteditable", "false");
+//     });
+//     return e;
+// }
 
 export function deleteSelf(divs: Element[]) {
     divs.forEach(e => e.parentElement?.removeChild(e));
@@ -33,25 +32,14 @@ export async function shouldInsertDiv(lastID: string, docID: string) {
     return false;
 }
 
-export function getSecondLastElementID(item: HTMLElement) {
-    let last = item.lastElementChild.previousElementSibling as HTMLElement;
-    if (!last) last = item.lastElementChild as HTMLElement;
-    return last.getAttribute(DATA_NODE_ID);
-}
+// export function getSecondLastElementID(item: HTMLElement) {
+//     let last = item.lastElementChild.previousElementSibling as HTMLElement;
+//     if (!last) last = item.lastElementChild as HTMLElement;
+//     return last.getAttribute(DATA_NODE_ID);
+// }
 
 export function getLastElementID(item: HTMLElement) {
     return item.lastElementChild.getAttribute(DATA_NODE_ID);
-}
-
-export function createEyeBtn() {
-    const btn = document.createElement("button");
-    btn.title = "隐藏";
-    btn.classList.add("b3-button");
-    btn.classList.add("b3-button--text");
-    btn.style.border = "none";
-    btn.style.outline = "none";
-    btn.innerHTML = icon("Eye");
-    return btn;
 }
 
 export const MENTION_CACHE_TIME = 1 * 60 * 1000;
@@ -90,50 +78,27 @@ export async function getBackLinks(self: BKMaker) {
         }
         self.mentionCounting.innerText = "";
     }
-
-    refreshTopDiv(self, topDiv, allRefs);
-
-    self.container.querySelectorAll(`[${DATA_TYPE}~="${BLOCK_REF}"]`).forEach((e: HTMLElement) => {
-        const btn = document.createElement("button") as HTMLButtonElement;
-        btn.setAttribute(DATA_ID, e.getAttribute(DATA_ID));
-        btn.style.border = "transparent";
-        btn.style.background = "var(--b3-button)";
-        btn.style.color = "var(--b3-protyle-inline-blockref-color)";
-        btn.textContent = e.textContent;
-        btn.addEventListener("click", () => {
-            setTimeout(() => {
-                openTab({ app: self.plugin.app, doc: { id: e.getAttribute(DATA_ID), action: ["cb-get-all", "cb-get-focus"] } });
-            }, 2500);
-            window.location.href = "siyuan://blocks/" + e.getAttribute(DATA_ID);
-        });
-        e.parentElement.replaceChild(btn, e);
-    });
+    // self.container.querySelectorAll(`[${DATA_TYPE}~="${BLOCK_REF}"]`).forEach((e: HTMLElement) => {
+    //     const btn = document.createElement("button") as HTMLButtonElement;
+    //     btn.setAttribute(DATA_ID, e.getAttribute(DATA_ID));
+    //     btn.style.border = "transparent";
+    //     btn.style.background = "var(--b3-button)";
+    //     btn.style.color = "var(--b3-protyle-inline-blockref-color)";
+    //     btn.textContent = e.textContent;
+    //     btn.addEventListener("click", () => {
+    //         setTimeout(() => {
+    //             openTab({ app: self.plugin.app, doc: { id: e.getAttribute(DATA_ID), action: ["cb-get-all", "cb-get-focus"] } });
+    //         }, 2500);
+    //         window.location.href = "siyuan://blocks/" + e.getAttribute(DATA_ID);
+    //     });
+    //     e.parentElement.replaceChild(btn, e);
+    // });
 }
 
 export const MENTION_COUTING_SPAN = "MENTION_COUTING_SPAN";
 
 export async function integrateCounting(self: BKMaker) {
     self.container.querySelector(`[${MENTION_COUTING_SPAN}]`)?.appendChild(self.mentionCounting);
-}
-
-function refreshTopDiv(self: BKMaker, topDiv: HTMLDivElement, allRefs: RefCollector) {
-    topDiv.innerHTML = "";
-    for (const { lnk, id } of allRefs.values()) {
-        const d = topDiv.appendChild(document.createElement("span"));
-        markQueryable(d);
-        const btn = d.appendChild(createEyeBtn());
-        btn.addEventListener("click", () => {
-            freeze(self);
-            self.container.querySelectorAll(`[${QUERYABLE_ELEMENT}]`).forEach((e: HTMLElement) => {
-                const divs = e.querySelectorAll(`[${DATA_ID}="${id}"]`);
-                if (divs.length > 0) {
-                    e.style.display = "none";
-                }
-            });
-        });
-        d.appendChild(lnk);
-        d.appendChild(createSpan(WEB_SPACE.repeat(2)));
-    }
 }
 
 function searchInDiv(self: BKMaker, query: string) {
@@ -147,17 +112,6 @@ function searchInDiv(self: BKMaker, query: string) {
             e.style.display = "";
         }
     });
-}
-
-async function fillContent(self: BKMaker, backlinksInDoc: Backlink, allRefs: RefCollector, tc: HTMLElement) {
-    const temp = document.createElement("div") as HTMLDivElement;
-    markQueryable(temp);
-    const div = document.createElement("div") as HTMLDivElement;
-    div.innerHTML = backlinksInDoc?.dom ?? "";
-    scanAllRef(allRefs, div, self.docID);
-    temp.appendChild(await path2div(self, temp, backlinksInDoc?.blockPaths ?? [], allRefs));
-    temp.appendChild(div);
-    tc.appendChild(temp);
 }
 
 
