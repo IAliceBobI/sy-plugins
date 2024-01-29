@@ -1,5 +1,4 @@
 import { DATA_NODE_ID } from "./gconst";
-import { SearchEngine } from "./search";
 import { siyuanCache } from "./utils";
 import { BKMaker } from "@/BackLinkBottomBox";
 

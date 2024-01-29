@@ -211,12 +211,16 @@
         if (!domStr) return;
         let div = document.createElement("div") as HTMLDivElement;
         div.innerHTML = domStr ?? "";
-        cleanDiv(div.firstElementChild as any, false, false);
+        const [id] = await cleanDiv(div.firstElementChild as any, false, false);
         const md = lute.BlockDOM2Md(div.innerHTML);
         await siyuan.appendBlock(md, maker.docID);
+        return id;
     }
 
-    async function move2doc(domStr: string) {}
+    async function move2doc(domStr: string) {
+        const id = await copy2doc(domStr);
+        if (id) await siyuan.safeUpdateBlock(id, "");
+    }
 </script>
 
 <!-- https://learn.svelte.dev/tutorial/if-blocks -->
