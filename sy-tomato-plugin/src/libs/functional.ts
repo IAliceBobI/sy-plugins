@@ -19,3 +19,18 @@ export function zipAnyArrays(...arrays: any[][]): any[][] {
     return zipped;
 }
 
+export function flatChunkMap<M>(array: any[], num: number, map: (ts: any[]) => M) {
+    array = array.flat()
+    const newArr: M[] = [];
+    for (let i = 0; i < array.length; i += num) {
+        const part = array.slice(i, i + num);
+        if (part.length > 0) {
+            newArr.push(map(part));
+        }
+    }
+    return newArr;
+}
+
+export async function aFlatChunkMap<M>(array: any[], num: number, map: (ts: any[]) => M) {
+    return flatChunkMap(await Promise.all(array.flat()), num, map);
+}

@@ -1,11 +1,16 @@
 <script lang="ts">
     import { onDestroy, onMount } from "svelte";
     import { newID, siyuanCache } from "./libs/utils";
-    import { MENTION_COUTING_SPAN, icon } from "./libs/bkUtils";
+    import {
+        MENTION_CACHE_TIME,
+        MENTION_COUTING_SPAN,
+        icon,
+    } from "./libs/bkUtils";
     import { Dialog } from "siyuan";
     import { SEARCH_HELP } from "./constants";
     import { BLOCK_REF, DATA_ID, DATA_TYPE } from "./libs/gconst";
     import { BKMaker } from "./BackLinkBottomBox";
+    import { aFlatChunkMap } from "./libs/functional";
 
     const QUERYABLE_ELEMENT = "QUERYABLE_ELEMENT";
     const ICONS_SIZE = 13;
@@ -59,66 +64,81 @@
     }
 
     async function path2div(blockPaths: BlockPath[]) {
-        const refPathList: HTMLSpanElement[] = [];
-        for (const ret of chunks(
-            await Promise.all(
-                blockPaths
-                    .map((refPath) => {
-                        return [
-                            refPath,
-                            siyuanCache.getBlockKramdown(
-                                MENTION_CACHE_TIME,
-                                refPath.id,
-                            ),
-                        ];
-                    })
-                    .flat(),
-            ),
+        const paths = await aFlatChunkMap<{
+            refPath: BlockPath;
+            div: HTMLDivElement;
+        }>(
+            blockPaths.map((refPath) => {
+                return [
+                    refPath,
+                    siyuanCache.getBlockDiv(MENTION_CACHE_TIME, refPath.id),
+                ];
+            }),
             2,
-        )) {
-            const [refPath, { kramdown: _kramdown }] = ret as [
-                BlockPath,
-                GetBlockKramdown,
-            ];
-            if (refPath.type == "NodeDocument") {
-                if (refPath.id == self.docID) break;
-                const fileName = refPath.name.split("/").pop();
-                refPathList.push(refTag(refPath.id, fileName, 0));
-                addRef(fileName, refPath.id, allRefs, self.docID);
-                continue;
-            }
-
-            if (refPath.type == "NodeHeading") {
-                refPathList.push(refTag(refPath.id, refPath.name, 0));
-                addRef(refPath.name, refPath.id, allRefs, self.docID);
-            } else {
-                refPathList.push(refTag(refPath.id, refPath.name, 0, 15));
-            }
-
-            let kramdown = _kramdown;
-            if (refPath.type == "NodeListItem" && kramdown) {
-                kramdown = kramdown.split("\n")[0];
-            }
-            if (kramdown) {
-                const { idLnks } = extractLinks(kramdown);
-                for (const idLnk of idLnks) {
-                    addRef(idLnk.txt, idLnk.id, allRefs, self.docID);
-                }
-            }
+            (ts) => {
+                return { refPath: ts[0], div: ts[1].div };
+            },
+        );
+        for (const { refPath, div } of paths) {
         }
-        refPathList.forEach((s, idx, arr) => {
-            s = s.cloneNode(true) as HTMLScriptElement;
-            if (idx < arr.length - 1) {
-                s.appendChild(createSpan("  ➡  "));
-            } else {
-                const e = s.querySelector(`[${DATA_ID}]`);
-                if (e) {
-                    e.textContent = "[...]";
-                }
-            }
-            div.appendChild(s);
-        });
-        return div;
+
+        // for (const ret of chunks(
+        //     await Promise.all(
+        //         blockPaths
+        //             .map((refPath) => {
+        //                 return [
+        //                     refPath,
+        //                     siyuanCache.getBlockKramdown(
+        //                         MENTION_CACHE_TIME,
+        //                         refPath.id,
+        //                     ),
+        //                 ];
+        //             })
+        //             .flat(),
+        //     ),
+        //     2,
+        // )) {
+        //     const [refPath, { kramdown: _kramdown }] = ret as [
+        //         BlockPath,
+        //         GetBlockKramdown,
+        //     ];
+        // if (refPath.type == "NodeDocument") {
+        //     if (refPath.id == self.docID) break;
+        //     const fileName = refPath.name.split("/").pop();
+        //     refPathList.push(refTag(refPath.id, fileName, 0));
+        //     addRef(fileName, refPath.id, allRefs, self.docID);
+        //     continue;
+        // }
+        // if (refPath.type == "NodeHeading") {
+        //     refPathList.push(refTag(refPath.id, refPath.name, 0));
+        //     addRef(refPath.name, refPath.id, allRefs, self.docID);
+        // } else {
+        //     refPathList.push(refTag(refPath.id, refPath.name, 0, 15));
+        // }
+        // let kramdown = _kramdown;
+        // if (refPath.type == "NodeListItem" && kramdown) {
+        //     kramdown = kramdown.split("\n")[0];
+        // }
+        // if (kramdown) {
+        //     const { idLnks } = extractLinks(kramdown);
+        //     for (const idLnk of idLnks) {
+        //         addRef(idLnk.txt, idLnk.id, allRefs, self.docID);
+        //     }
+        // }
+        // }
+        // refPathList.forEach((s, idx, arr) => {
+        //     s = s.cloneNode(true) as HTMLScriptElement;
+        //     if (idx < arr.length - 1) {
+        //         s.appendChild(createSpan("  ➡  "));
+        //     } else {
+        //         const e = s.querySelector(`[${DATA_ID}]`);
+        //         if (e) {
+        //             e.textContent = "[...]";
+        //         }
+        //     }
+        //     div.appendChild(s);
+        // });
+        // return div;
     }
 
     function scanAllRef(backLink: Backlink) {

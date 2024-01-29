@@ -801,6 +801,7 @@ export const siyuanCache = {
     sql: createCache(siyuan.sql),
     getBlockAttrs: createCache(siyuan.getBlockAttrs),
     getTreeRiffCardsMap: createCache(siyuan.getTreeRiffCardsMap),
+    getBlockDiv: createCache(getBlockDiv),
 };
 
 export function createCache
