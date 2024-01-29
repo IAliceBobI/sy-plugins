@@ -4,8 +4,9 @@ type eventCB = (eventType: string, detail: any) => any;
 
 type Func = (...args: any[]) => any;
 
-type linkItem = { text: string, count: number, id: string, dataNodeIDSet: Set<string>, isThisDoc: boolean };
-type RefCollector = Map<string, linkItem>;
+type LinkElementAttr = { isThisDoc: boolan }
+type LinkItem = { text: string, count: number, id: string, dataNodeIDSet: Set<string>, attrs: LinkElementAttr };
+type RefCollector = Map<string, LinkItem>;
 type Overlays = { overlays: Overlay[], originWidth: number }
 type Overlay = { left: number, top: number, width: number, height: number, angle: number, cID: string };
 

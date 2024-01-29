@@ -115,14 +115,18 @@
             `select root_id from blocks where id="${dataNodeID}"`,
         );
         const key = id + txt;
-        const value: linkItem =
-            allRefs.get(key) ?? ({ count: 0, dataNodeIDSet: new Set() } as any);
+        const value: LinkItem =
+            allRefs.get(key) ??
+            ({ count: 0, dataNodeIDSet: new Set(), attrs: {} } as LinkItem);
         if (!value.dataNodeIDSet.has(dataNodeID)) {
             value.count += 1;
             value.dataNodeIDSet.add(dataNodeID);
             value.id = id;
             value.text = txt;
-            value.isThisDoc = (row?.root_id ?? "") == maker.docID;
+            value.attrs = {
+                isThisDoc:
+                    (row?.root_id ?? "") == maker.docID || id == maker.docID,
+            };
             allRefs.set(key, value);
         }
     }
@@ -143,9 +147,10 @@
 
 <!-- https://learn.svelte.dev/tutorial/if-blocks -->
 <div>
-    {#each [...allRefs.values()] as { text, id, count }}
+    {#each [...allRefs.values()] as { text, id, count, attrs }}
         <label class="b3-label b3-label__text b3-label--noborder">
             <button
+                {...attrs}
                 class="bk_label b3-label__text"
                 on:click={() => refClick(id)}>{text}</button
             >
@@ -258,6 +263,9 @@
 {/each}
 
 <style>
+    button[isThisDoc="true"] {
+        color: var(--b3-font-color7);
+    }
     .bk_ref_count {
         color: var(--b3-font-color8);
     }
