@@ -59,29 +59,42 @@
             });
         for (const backLink of backLinks) {
             scanAllRef(backLink.bk);
-            await path2div(backLink.bk.blockPaths);
+            // await path2div(backLink);
         }
     }
 
-    async function path2div(blockPaths: BlockPath[]) {
-        const paths = await aFlatChunkMap<{
-            refPath: BlockPath;
-            div: HTMLDivElement;
-        }>(
-            blockPaths.map((refPath) => {
-                return [
-                    refPath,
-                    siyuanCache.getBlockDiv(MENTION_CACHE_TIME, refPath.id),
-                ];
-            }),
-            2,
-            (ts) => {
-                return { refPath: ts[0], div: ts[1].div };
-            },
-        );
-        for (const { refPath, div } of paths) {
+    async function path2div(backlinkSv: BacklinkSv) {
+        for (let i = 0; i < backlinkSv.bk.blockPaths.length; i++) {
+            const blockPath = backlinkSv.bk.blockPaths[i];
+            if (i == backlinkSv.bk.blockPaths.length - 1) {
+                console.log(blockPath);
+            } else {
+                console.log(blockPath);
+            }
         }
 
+        // const paths = await aFlatChunkMap<{
+        //     refPath: BlockPath;
+        //     div: HTMLDivElement;
+        // }>(
+        //     blockPaths.map((refPath, idx, arr) => {
+        //         if (idx == arr.length - 1) {
+        //             return [refPath, { div: "[...]" }];
+        //         } else {
+        //             return [
+        //                 refPath,
+        //                 siyuanCache.getBlockDiv(MENTION_CACHE_TIME, refPath.id),
+        //             ];
+        //         }
+        //     }),
+        //     2,
+        //     (ts) => {
+        //         return { refPath: ts[0], div: ts[1].div };
+        //     },
+        // );
+        // for (const { refPath, div } of paths) {
+        //     console.log(refPath, div);
+        // }
         // for (const ret of chunks(
         //     await Promise.all(
         //         blockPaths
