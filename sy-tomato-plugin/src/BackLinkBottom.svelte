@@ -1,6 +1,6 @@
 <script lang="ts">
     import { onDestroy, onMount } from "svelte";
-    import { newID, siyuanCache } from "./libs/utils";
+    import { getID, newID, siyuanCache } from "./libs/utils";
     import { MENTION_COUTING_SPAN, icon } from "./libs/bkUtils";
     import { Dialog, openTab } from "siyuan";
     import { SEARCH_HELP } from "./constants";
@@ -59,10 +59,6 @@
             });
 
         await Promise.all(backLinks.map((backLink) => path2div(backLink)));
-        backLinks.forEach((backLink) => {
-            scanAllRef(backLink.bk.dom);
-        });
-
         backLinks = backLinks;
         allRefs = allRefs;
     }
@@ -92,11 +88,11 @@
         )) {
             const id = element.getAttribute(DATA_ID);
             const txt = element.textContent;
-            addRef(txt, id);
+            addRef(txt, id, getID(element));
         }
     }
 
-    function addRef(txt: string, id: string) {
+    function addRef(txt: string, id: string, dataNodeID?: string) {
         if (txt == "*" || txt == "@" || txt == "@*") return;
         if (id == maker.docID) return;
         if (
@@ -105,14 +101,17 @@
             ).length > 0
         )
             return;
-
+        if (!dataNodeID) dataNodeID = id;
         const key = id + txt;
-        const c = (allRefs.get(key)?.count ?? 0) + 1;
-        allRefs.set(key, {
-            count: c,
-            text: txt,
-            id,
-        });
+        const value: linkItem =
+            allRefs.get(key) ?? ({ count: 0, dataNodeIDSet: new Set() } as any);
+        if (!value.dataNodeIDSet.has(dataNodeID)) {
+            value.count += 1;
+            value.dataNodeIDSet.add(dataNodeID);
+            value.id = id;
+            value.text = txt;
+            allRefs.set(key, value);
+        }
     }
 
     async function search(event: Event) {
@@ -132,7 +131,13 @@
 <!-- https://learn.svelte.dev/tutorial/if-blocks -->
 <div>
     {#each [...allRefs.values()] as { text, id, count }}
-        <button on:click={() => refClick(id)}>{text}</button>
+        <label class="b3-label b3-label__text b3-label--noborder">
+            <button
+                class="bk_label b3-label__text"
+                on:click={() => refClick(id)}>{text}</button
+            >
+            <span class="bk_ref_count">{count}</span>
+        </label>
     {/each}
 </div>
 <hr />
@@ -240,6 +245,9 @@
 {/each}
 
 <style>
+    .bk_ref_count {
+        color: var(--b3-font-color8);
+    }
     .gap {
         margin: auto;
     }
