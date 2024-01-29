@@ -97,6 +97,30 @@
         backLinks.forEach((backLink) => scanAllRef(backLink.bk.dom));
         backLinks = backLinks;
         allRefs = allRefs;
+
+        if (maker.mentionCount > 0) {
+            let count = 0;
+            outer: for (const mention of backlink2.backmentions) {
+                const mentionDoc = await siyuanCache.getBackmentionDoc(
+                    MENTION_CACHE_TIME,
+                    maker.docID,
+                    mention.id,
+                );
+                for (const mentionItem of mentionDoc.backmentions) {
+                    contentContainer.appendChild(hr());
+                    await fillContent(
+                        self,
+                        mentionItem,
+                        allRefs,
+                        contentContainer,
+                    );
+                    ++count;
+                    self.mentionCounting.innerText = `提及读取中：${count}`;
+                    if (count >= self.mentionCount) break outer;
+                }
+            }
+            self.mentionCounting.innerText = "";
+        }
     }
 
     async function path2div(backlinkSv: BacklinkSv) {

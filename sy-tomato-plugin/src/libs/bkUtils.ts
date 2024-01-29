@@ -43,48 +43,8 @@ export function getLastElementID(item: HTMLElement) {
 
 export const MENTION_CACHE_TIME = 1 * 60 * 1000;
 
-export async function getBackLinks(self: BKMaker) {
-    const allRefs: RefCollector = new Map();
-    const backlink2 = await siyuanCache.getBacklink2(6 * 1000, self.docID);
-    const contentContainer = document.createElement("div");
-    const btnDiv = document.createElement("div");
-    // initBtnDiv(self, btnDiv);
-    const topDiv = document.createElement("div");
-    self.container.appendChild(topDiv);
-    self.container.appendChild(btnDiv);
-    self.container.appendChild(contentContainer);
-
-    const maxCount = self.settingCfg["back-link-max-size"] ?? 100;
-    for (const backlinkDoc of await Promise.all(backlink2.backlinks.slice(0, maxCount).map((backlink) => {
-        return siyuanCache.getBacklinkDoc(12 * 1000, self.docID, backlink.id);
-    }))) {
-        for (const backlinksInDoc of backlinkDoc.backlinks) {
-            contentContainer.appendChild(hr());
-            await fillContent(self, backlinksInDoc, allRefs, contentContainer);
-        }
-    }
-    if (self.mentionCount > 0) {
-        let count = 0;
-        outer: for (const mention of backlink2.backmentions) {
-            const mentionDoc = await siyuanCache.getBackmentionDoc(MENTION_CACHE_TIME, self.docID, mention.id);
-            for (const mentionItem of mentionDoc.backmentions) {
-                contentContainer.appendChild(hr());
-                await fillContent(self, mentionItem, allRefs, contentContainer);
-                ++count;
-                self.mentionCounting.innerText = `提及读取中：${count}`;
-                if (count >= self.mentionCount) break outer;
-            }
-        }
-        self.mentionCounting.innerText = "";
-    }
-}
-
 export const MENTION_COUTING_SPAN = "MENTION_COUTING_SPAN";
 
 export async function integrateCounting(self: BKMaker) {
     self.container.querySelector(`[${MENTION_COUTING_SPAN}]`)?.appendChild(self.mentionCounting);
 }
-
-
-
-
