@@ -150,6 +150,15 @@
             doc: { id, action: ["cb-get-hl", "cb-get-context"], zoomIn: false },
         });
     }
+
+    function hideThis() {
+        autoRefreshChecked = false;
+        maker.container
+            .querySelectorAll('[isThisDoc="true"]')
+            .forEach((e: HTMLElement) => {
+                e.style.display = "none";
+            });
+    }
 </script>
 
 <!-- https://learn.svelte.dev/tutorial/if-blocks -->
@@ -167,6 +176,13 @@
     <hr />
 </div>
 <div>
+    <label class="b3-label b3-label__text b3-label--noborder">
+        <button
+            title="隐藏本文档链接"
+            class="bk_label b3-label__text"
+            on:click={hideThis}>{@html icon("Eyeoff", ICONS_SIZE)}</button
+        >
+    </label>
     <label class="b3-label b3-label__text b3-label--noborder">
         {#if !autoRefreshChecked}
             {@html icon("Focus", ICONS_SIZE)}停止
