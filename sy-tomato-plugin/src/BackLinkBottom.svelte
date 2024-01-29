@@ -152,12 +152,21 @@
     }
 
     function hideThis() {
-        autoRefreshChecked = false;
-        maker.container
-            .querySelectorAll('[isThisDoc="true"]')
-            .forEach((e: HTMLElement) => {
-                e.style.display = "none";
-            });
+        if (autoRefreshChecked) {
+            autoRefreshChecked = false;
+            maker.container
+                .querySelectorAll('[isThisDoc="true"]')
+                .forEach((e: HTMLElement) => {
+                    e.style.display = "none";
+                });
+        } else {
+            autoRefreshChecked = true;
+            maker.container
+                .querySelectorAll('[isThisDoc="true"]')
+                .forEach((e: HTMLElement) => {
+                    e.style.display = "";
+                });
+        }
     }
 </script>
 
