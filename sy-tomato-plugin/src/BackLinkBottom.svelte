@@ -304,14 +304,19 @@
                 <button
                     class="gap bk_label b3-button b3-button--text"
                     title="复制到文档"
-                    on:click={async () => await copy2doc(backLink.bk.dom)}
-                    >{@html icon("Copy")}</button
+                    on:click={async () => {
+                        await copy2doc(backLink.bk.dom);
+                    }}>{@html icon("Copy")}</button
                 >
                 <button
                     class="gap bk_label b3-button b3-button--text"
                     title="移动到文档"
-                    on:click={async () => await move2doc(backLink.bk.dom)}
-                    >{@html icon("Move")}</button
+                    on:click={async () => {
+                        autoRefreshChecked = false;
+                        document.getElementById(backLink.id).style.display =
+                            "none";
+                        await move2doc(backLink.bk.dom);
+                    }}>{@html icon("Move")}</button
                 >
             </div>
             <div>
