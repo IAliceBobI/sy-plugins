@@ -41,7 +41,7 @@
         const backlink2 = await siyuanCache.getBacklink2(6 * 1000, maker.docID);
 
         const maxCount = maker.settingCfg["back-link-max-size"] ?? 100;
-        const bks = (
+        backLinks = (
             await Promise.all(
                 backlink2.backlinks.slice(0, maxCount).map((backlink) => {
                     return siyuanCache.getBacklinkDoc(
@@ -58,8 +58,12 @@
                 return { bk, id: newID() } as BacklinkSv;
             });
 
-        await Promise.all(bks.map((backLink) => path2div(backLink)));
-        bks.map((backLink) => scanAllRef(backLink.bk));
+        await Promise.all(backLinks.map((backLink) => path2div(backLink)));
+        backLinks.forEach((backLink) => {
+            scanAllRef(backLink.bk.dom);
+        });
+
+        backLinks = backLinks;
         allRefs = allRefs;
     }
 
@@ -71,13 +75,18 @@
             } else if (blockPath.type == BlockNodeEnum.NODE_HEADING) {
                 addRef(blockPath.name, blockPath.id);
             } else {
+                const { dom } = await siyuanCache.getBlockDOM(
+                    12 * 1000,
+                    blockPath.id,
+                );
+                scanAllRef(dom);
             }
         }
     }
 
-    function scanAllRef(backLink: Backlink) {
+    function scanAllRef(domStr: string) {
         const div = document.createElement("div") as HTMLDivElement;
-        div.innerHTML = backLink.dom ?? "";
+        div.innerHTML = domStr ?? "";
         for (const element of div.querySelectorAll(
             `[${DATA_TYPE}~="${BLOCK_REF}"]`,
         )) {
