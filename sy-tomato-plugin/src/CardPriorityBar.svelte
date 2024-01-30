@@ -32,21 +32,24 @@
         }
     });
 
-    async function subOne() {
+    async function subOne(event: MouseEvent) {
+        event.stopPropagation();
         await cardPriorityBox.updatePrioritySelected(
             [cardElement],
             priority - 1,
         );
         await cardPriorityBox.addBtns(wysiwygElement);
     }
-    async function addOne() {
+    async function addOne(event: MouseEvent) {
+        event.stopPropagation();
         await cardPriorityBox.updatePrioritySelected(
             [cardElement],
             priority + 1,
         );
         await cardPriorityBox.addBtns(wysiwygElement);
     }
-    async function removeCard() {
+    async function removeCard(event: MouseEvent) {
+        event.stopPropagation();
         confirm("删除闪卡", textContent, async () => {
             await siyuan.removeRiffCards([cardID]);
             cardElement
@@ -56,11 +59,13 @@
                 });
         });
     }
-    async function updateCard() {
+    async function updateCard(event: MouseEvent) {
+        event.stopPropagation();
         await cardPriorityBox.updatePrioritySelected([cardElement], priority);
         await cardPriorityBox.addBtns(wysiwygElement);
     }
-    async function updateCardByInput() {
+    async function updateCardByInput(event: MouseEvent) {
+        event.stopPropagation();
         await cardPriorityBox.updatePrioritySelected(
             [cardElement],
             priority,
