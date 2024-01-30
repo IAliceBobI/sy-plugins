@@ -73,7 +73,7 @@ class PieceSummaryBox {
                 await siyuan.appendBlock(md, summaryID);
                 await openTab({
                     app: this.plugin.app,
-                    doc: { id: newID, action: ["cb-get-focus", "cb-get-all"] },
+                    doc: { id: newID, action: ["cb-get-hl", "cb-get-context"], zoomIn: false },
                     position: "right"
                 });
             }

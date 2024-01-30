@@ -28,10 +28,8 @@ export class SplitSentence {
                 }
                 await siyuan.insertBlockAsChildOf(mdList.join("\n\n"), this.noteID);
                 if (firstID) {
-                    setTimeout(() => {
-                        openTab({ app: this.plugin.app, doc: { id: firstID, action: ["cb-get-all", "cb-get-focus"] } });
-                    }, 1000);
-                    window.location.href = "siyuan://blocks/" + firstID;
+                    openTab({ app: this.plugin.app, doc: { id: firstID, action: ["cb-get-hl", "cb-get-context"], zoomIn: false } });
+                    // window.location.href = "siyuan://blocks/" + firstID;
                 }
             }
         });
