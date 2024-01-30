@@ -28,7 +28,7 @@ export class SplitSentence {
                 }
                 await siyuan.insertBlockAsChildOf(mdList.join("\n\n"), this.noteID);
                 if (firstID) {
-                    openTab({ app: this.plugin.app, doc: { id: firstID, action: ["cb-get-hl", "cb-get-context"], zoomIn: false } });
+                    openTab({ app: this.plugin.app, doc: { id: firstID, action: ["cb-get-hl", "cb-get-context", "cb-get-focus"], zoomIn: false } });
                     // window.location.href = "siyuan://blocks/" + firstID;
                 }
             }
