@@ -125,17 +125,25 @@ class CardPriorityBox {
 
     async updateCards(options: ICardData) {
         if (!this.plugin) return options;
-        const len = options.cards.length;
+        let len = options.cards.length;
         if (len <= 1) return options;
         options.cards = shuffleArray(options.cards);
-        const attrMap = (await Promise.all(options.cards.map(card => siyuan.getBlockAttrs(card.blockID))))
-            .reduce((map, attr) => {
-                if (attr?.id) {
-                    map.set(attr.id, readPriority(attr));
-                }
-                return map;
-            }, new Map<string, number>());
+        const attrList = await Promise.all(options.cards.map(card => siyuan.getBlockAttrs(card.blockID)));
+
+        resumeCardsDeleteAttr(attrList);
+
+        const [attrMap, stopSet] = attrList.reduce(([attrMap, stopSet], attr) => {
+            if (attr?.id) {
+                const p = readPriority(attr);
+                attrMap.set(attr.id, readPriority(attr));
+                if (p == -1) stopSet.add(attr.id)
+            }
+            return [attrMap, stopSet];
+        }, [new Map<string, number>(), new Set<string>()]);
         options.cards.sort((a, b) => attrMap.get(b.blockID) - attrMap.get(a.blockID));
+        const stoped = options.cards.filter(card => stopSet.has(card.blockID));
+        const available = options.cards.filter(card => !stopSet.has(card.blockID));
+        len = available.length;
         const n = Math.floor(len * 5 / 100);
         if (n > 0 && len > n) {
             const lastN = options.cards.slice(len - n);
@@ -145,20 +153,19 @@ class CardPriorityBox {
                 options.cards.splice(randPosition, 0, e);
             }
         }
+        options.cards.push(...stoped);
         return options;
     }
 
     async resumeCards(wysiwygElement: HTMLElement) {
-        const now = await siyuan.currentTime();
-        const newAttrs = {} as AttrType;
-        newAttrs["custom-card-priority-stop"] = "";
-        const tasks = [...wysiwygElement.querySelectorAll(`[${CARD_PRIORITY_STOP}]`)]
-            .filter((cardElement: HTMLElement) => {
-                const date = cardElement.getAttribute(CARD_PRIORITY_STOP);
-                return date && now >= date;
-            }).map((cardElement: HTMLElement) => cardElement.getAttribute(DATA_NODE_ID))
-            .map(id => siyuan.setBlockAttrs(id, newAttrs));
-        await Promise.all(tasks);
+        return resumeCardsDeleteAttr(
+            [...wysiwygElement.querySelectorAll(`[${CARD_PRIORITY_STOP}]`)]
+                .map((e: HTMLElement) => {
+                    return {
+                        "custom-card-priority-stop": e.getAttribute(CARD_PRIORITY_STOP),
+                        id: e.getAttribute(DATA_NODE_ID)
+                    } as AttrType;
+                }));
     }
 
     async addBtns(wysiwygElement: HTMLElement) {
@@ -181,7 +188,26 @@ class CardPriorityBox {
     }
 }
 
+async function resumeCardsDeleteAttr(attrList: AttrType[]) {
+    const now = await siyuan.currentTime();
+    const newAttrs = {} as AttrType;
+    newAttrs["custom-card-priority-stop"] = "";
+    const tasks = attrList.filter(attrList => {
+        const date = attrList["custom-card-priority-stop"];
+        if (date && now >= date) {
+            delete attrList["custom-card-priority-stop"];
+            return true;
+        }
+        return false;
+    })
+        .map(attrList => siyuan.setBlockAttrs(attrList.id, newAttrs));
+    return Promise.all(tasks);
+}
+
 function readPriority(ial: AttrType) {
+    if (ial["custom-card-priority-stop"]) {
+        return -1;
+    }
     let priority = Number(ial["custom-card-priority"]);
     if (!isValidNumber(priority)) {
         priority = 50;
