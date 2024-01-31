@@ -136,7 +136,7 @@ class CardPriorityBox {
             if (attr?.id) {
                 const p = readPriority(attr);
                 attrMap.set(attr.id, readPriority(attr));
-                if (p == -1) stopSet.add(attr.id)
+                if (p == -1) stopSet.add(attr.id);
             }
             return [attrMap, stopSet];
         }, [new Map<string, number>(), new Set<string>()]);
