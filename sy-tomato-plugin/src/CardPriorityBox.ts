@@ -1,7 +1,7 @@
 import { ICardData, IEventBusMap, IProtyle, Plugin } from "siyuan";
 import "./index.scss";
 import { getID, isValidNumber, shuffleArray, siyuan, siyuanCache } from "./libs/utils";
-import { CUSTOM_RIFF_DECKS, TOMATO_CONTROL_ELEMENT } from "./libs/gconst";
+import { CARD_PRIORITY_STOP, CUSTOM_RIFF_DECKS, DATA_NODE_ID, TOMATO_CONTROL_ELEMENT } from "./libs/gconst";
 import { DialogText } from "./libs/DialogText";
 import { EventType, events } from "./libs/Events";
 import CardPriorityBar from "./CardPriorityBar.svelte";
@@ -57,6 +57,7 @@ class CardPriorityBox {
                             this.cards = map;
                         });
                         await this.addBtns(element);
+                        await this.resumeCards(element);
                     }
                 });
             }
@@ -145,6 +146,19 @@ class CardPriorityBox {
             }
         }
         return options;
+    }
+
+    async resumeCards(wysiwygElement: HTMLElement) {
+        const now = await siyuan.currentTime();
+        const newAttrs = {} as AttrType;
+        newAttrs["custom-card-priority-stop"] = "";
+        const tasks = [...wysiwygElement.querySelectorAll(`[${CARD_PRIORITY_STOP}]`)]
+            .filter((cardElement: HTMLElement) => {
+                const date = cardElement.getAttribute(CARD_PRIORITY_STOP);
+                return date && now >= date;
+            }).map((cardElement: HTMLElement) => cardElement.getAttribute(DATA_NODE_ID))
+            .map(id => siyuan.setBlockAttrs(id, newAttrs));
+        await Promise.all(tasks);
     }
 
     async addBtns(wysiwygElement: HTMLElement) {

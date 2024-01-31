@@ -55,9 +55,9 @@
         event.stopPropagation();
         const id = getID(cardElement, [CUSTOM_RIFF_DECKS]);
         if (!id) return;
-        const newAttrs = {} as AttrType;
         const attrs = await siyuan.getBlockAttrs(id);
         if (attrs[CARD_PRIORITY_STOP]) {
+            const newAttrs = {} as AttrType;
             newAttrs["custom-card-priority-stop"] = "";
             await siyuan.setBlockAttrs(id, newAttrs);
             await siyuan.pushMsg("继续闪卡");
