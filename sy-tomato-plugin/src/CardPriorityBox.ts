@@ -1,6 +1,6 @@
 import { ICardData, IEventBusMap, IProtyle, Plugin } from "siyuan";
 import "./index.scss";
-import { getID, isValidNumber, shuffleArray, siyuan, siyuanCache } from "./libs/utils";
+import { getID, isValidNumber, shuffleArray, siyuan, siyuanCache, timeUtil } from "./libs/utils";
 import { CARD_PRIORITY_STOP, CUSTOM_RIFF_DECKS, DATA_NODE_ID, TOMATO_CONTROL_ELEMENT } from "./libs/gconst";
 import { DialogText } from "./libs/DialogText";
 import { EventType, events } from "./libs/Events";
@@ -43,6 +43,15 @@ class CardPriorityBox {
                     this.updatePrioritySelected([detail.element]);
                 },
             });
+            menu.addItem({
+                label: "当前文档与子文档的闪卡全部暂停",
+                click: async () => {
+                    const docID = detail?.protyle?.block?.rootID;
+                    if (!docID) return;
+                    const blocks = await siyuan.getTreeRiffCardsAll(docID);
+                    await this.stopCards(blocks);
+                },
+            });
         });
 
         events.addListener("Tomato-CardPriorityBox", (eventType, detail) => {
@@ -72,6 +81,29 @@ class CardPriorityBox {
                 this.updatePrioritySelected(detail.blockElements);
             }
         });
+    }
+
+    async stopCards(blocks: Block[], wysiwygElement?: HTMLElement) {
+        new DialogText(
+            `准备暂停${blocks.length}个闪卡，请先设置闪卡恢复日期`,
+            await siyuan.currentTime(10),
+            async (datetimeStr: string) => {
+                const tidiedStr =
+                    timeUtil.makesureDateTimeFormat(datetimeStr);
+                if (tidiedStr) {
+                    const attrs = {} as AttrType;
+                    attrs["custom-card-priority-stop"] = datetimeStr;
+                    for (const b of blocks) {
+                        const ial = b.ial as unknown as AttrType;
+                        await siyuan.setBlockAttrs(ial.id, attrs);
+                    }
+                    await siyuan.pushMsg("暂停闪卡到：" + datetimeStr);
+                } else {
+                    await siyuan.pushMsg("输入格式错误");
+                }
+                if (wysiwygElement) await cardPriorityBox.addBtns(wysiwygElement);
+            },
+        );
     }
 
     async updatePrioritySelected(elements: HTMLElement[], priority?: number, cb?: Func) {

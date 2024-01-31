@@ -10,8 +10,7 @@
         SPACE,
         TOMATO_CONTROL_ELEMENT,
     } from "./libs/gconst";
-    import { getID, isValidNumber, siyuan, timeUtil } from "./libs/utils";
-    import { DialogText } from "./libs/DialogText";
+    import { getID, isValidNumber, siyuan } from "./libs/utils";
 
     export let wysiwygElement: HTMLElement;
     export let cardElement: HTMLElement;
@@ -63,22 +62,9 @@
             await siyuan.pushMsg("继续闪卡");
             await cardPriorityBox.addBtns(wysiwygElement);
         } else {
-            new DialogText(
-                "准备暂停，请先设置闪卡恢复日期",
-                await siyuan.currentTime(60 * 60 * 24 * 2),
-                async (datetimeStr: string) => {
-                    const tidiedStr =
-                        timeUtil.makesureDateTimeFormat(datetimeStr);
-                    if (tidiedStr) {
-                        const attrs = {} as AttrType;
-                        attrs["custom-card-priority-stop"] = datetimeStr;
-                        await siyuan.setBlockAttrs(id, attrs);
-                        await siyuan.pushMsg("暂停闪卡到：" + datetimeStr);
-                    } else {
-                        await siyuan.pushMsg("输入格式错误");
-                    }
-                    await cardPriorityBox.addBtns(wysiwygElement);
-                },
+            await cardPriorityBox.stopCards(
+                [{ ial: { id } }] as any,
+                wysiwygElement,
             );
         }
     }
