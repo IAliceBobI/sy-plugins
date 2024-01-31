@@ -1,13 +1,11 @@
 import { IProtyle, Plugin, confirm } from "siyuan";
-import { getCursorElement, siyuan } from "@/libs/utils";
+import { siyuan } from "@/libs/utils";
 import "./index.scss";
 import { EventType, events } from "@/libs/Events";
-import { BlockNodeEnum, CUSTOM_RIFF_DECKS, DATA_NODE_ID, DATA_NODE_INDEX, DATA_TYPE } from "./libs/gconst";
 
 class CardBox {
     private plugin: Plugin;
     private delCardFunc: Func;
-
     async onload(plugin: Plugin) {
         this.plugin = plugin;
         this.plugin.addCommand({
@@ -32,13 +30,6 @@ class CardBox {
             },
         });
         this.plugin.addCommand({
-            langKey: "addFlashCard",
-            hotkey: "⌘1",
-            callback: async () => {
-                await this.addFlashCard(getCursorElement() as any);
-            },
-        });
-        this.plugin.addCommand({
             langKey: "delCard",
             hotkey: "⌘9",
             callback: async () => {
@@ -48,16 +39,6 @@ class CardBox {
                     siyuan.pushMsg("复习闪卡时，才能使用此功能。");
                 }
             },
-        });
-        this.plugin.eventBus.on("open-menu-content", async ({ detail }) => {
-            const menu = detail.menu;
-            menu.addItem({
-                label: this.plugin.i18n.addFlashCard,
-                icon: "iconFlashcard",
-                click: () => {
-                    this.addFlashCard(detail.element);
-                },
-            });
         });
         events.addListener("CardBox", (eventType, detail) => {
             if (eventType == EventType.loaded_protyle_static || eventType == EventType.switch_protyle) {
@@ -104,44 +85,6 @@ class CardBox {
             }
         });
     }
-
-    blockIconEvent(detail: any) {
-        if (!this.plugin) return;
-        detail.menu.addItem({
-            iconHTML: "",
-            label: this.plugin.i18n.addFlashCard,
-            click: () => {
-                for (const element of detail.blockElements) {
-                    this.addFlashCard(element);
-                    break;
-                }
-            }
-        });
-    }
-
-    private async addFlashCard(element: HTMLElement) {
-        if (!element) return;
-        const { id, isCard } = findListTypeByElement(element);
-        if (!isCard) {
-            await siyuan.addRiffCards([id]);
-        } else {
-            await siyuan.removeRiffCards([id]);
-        }
-    }
 }
 
 export const cardBox = new CardBox();
-
-function findListTypeByElement(e: HTMLElement) {
-    let id: string;
-    let isCard: boolean;
-    for (let i = 0; i < 1000 && e; i++, e = e.parentElement) {
-        const tmpID = e.getAttribute(DATA_NODE_ID);
-        const dataType = e.getAttribute(DATA_TYPE);
-        if (tmpID && e.hasAttribute(DATA_NODE_INDEX) && dataType == BlockNodeEnum.NODE_LIST) {
-            id = tmpID;
-            isCard = e.hasAttribute(CUSTOM_RIFF_DECKS);
-        }
-    }
-    return { id, isCard };
-}

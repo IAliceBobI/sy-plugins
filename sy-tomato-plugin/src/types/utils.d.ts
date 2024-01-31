@@ -15,6 +15,7 @@ type TomatoSettings = {
     scheduleCheckbox: boolean,
     readingPointBoxCheckbox: boolean,
     cardBoxCheckbox: boolean,
+    cardAddListBoxCheckbox: boolean,
     cardPriorityBoxCheckbox: boolean,
     cpBoxCheckbox: boolean,
     linkBoxCheckbox: boolean,

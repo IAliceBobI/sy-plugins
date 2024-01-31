@@ -7,6 +7,7 @@ import { readingPointBox } from "./ReadingPointBox";
 import { cpBox } from "./CpBox";
 import { backLinkBottomBox } from "./BackLinkBottomBox";
 import { cardBox } from "./CardBox";
+import { cardAddListBox } from "./CardAddListBox";
 import { EventType, events } from "@/libs/Events";
 import { STORAGE_SETTINGS } from "./constants";
 import { siyuan } from "@/libs/utils";
@@ -43,14 +44,20 @@ export default class ThePlugin extends Plugin {
         this.addSettingItem("tomatoClockCheckbox", "* 状态栏番茄钟", true);
         if (this.settingCfg.tomatoClockCheckbox ?? true) await tomatoClock.onload(this);
 
-        this.addSettingItem("scheduleCheckbox", "* 内容提醒", true);
-        if (this.settingCfg.scheduleCheckbox ?? true) await schedule.onload(this);
+        this.addSettingItem("toolbarBoxCheckbox", "* 开启toolbar按钮", true, "打开闪卡、刷新虚拟引用");
+        if (this.settingCfg.toolbarBoxCheckbox ?? true) await toolbarBox.onload(this);
 
         this.addSettingItem("readingPointBoxCheckbox", "* 阅读点", true);
         if (this.settingCfg.readingPointBoxCheckbox ?? true) await readingPointBox.onload(this);
 
+        this.addSettingItem("scheduleCheckbox", "* 内容提醒", false);
+        if (this.settingCfg.scheduleCheckbox ?? false) await schedule.onload(this);
+
         this.addSettingItem("cardBoxCheckbox", "* 闪卡工具", false);
         if (this.settingCfg.cardBoxCheckbox ?? false) await cardBox.onload(this);
+
+        this.addSettingItem("cardAddListBoxCheckbox", "* 快速列表制卡", false);
+        if (this.settingCfg.cardAddListBoxCheckbox ?? false) await cardAddListBox.onload(this);
 
         this.addSettingItem("cardPriorityBoxCheckbox", "* 闪卡优先级", false);
         if (this.settingCfg.cardPriorityBoxCheckbox ?? false) await cardPriorityBox.onload(this);
@@ -60,9 +67,6 @@ export default class ThePlugin extends Plugin {
 
         this.addSettingItem("linkBoxCheckbox", "* 双向互链", false);
         if (this.settingCfg.linkBoxCheckbox ?? false) await linkBox.onload(this);
-
-        this.addSettingItem("toolbarBoxCheckbox", "* 开启toolbar按钮", true, "打开闪卡、刷新虚拟引用");
-        if (this.settingCfg.toolbarBoxCheckbox ?? true) await toolbarBox.onload(this);
 
         this.addSettingItem("dailyNoteBoxCheckbox", "* 移动内容到 daily note", false);
         if (this.settingCfg.dailyNoteBoxCheckbox ?? false) await dailyNoteBox.onload(this);
@@ -79,8 +83,8 @@ export default class ThePlugin extends Plugin {
         this.addSettingItem("cmdBlockBoxCheckbox", "* 命令块", false);
         if (this.settingCfg.cmdBlockBoxCheckbox ?? false) await cmdBlockBox.onload(this);
 
-        this.addSettingItem("listBoxCheckbox", "* 列表工具", true, "取消文档中所有任务的勾选");
-        if (this.settingCfg.listBoxCheckbox ?? true) await listBox.onload(this);
+        this.addSettingItem("listBoxCheckbox", "* 列表工具", false, "取消文档中所有任务的勾选");
+        if (this.settingCfg.listBoxCheckbox ?? false) await listBox.onload(this);
     }
 
     private addSettingItem(key: string, title: string, defaultValue: boolean, description = "") {
@@ -105,7 +109,7 @@ export default class ThePlugin extends Plugin {
         readingPointBox.blockIconEvent(detail);
         schedule.blockIconEvent(detail);
         linkBox.blockIconEvent(detail);
-        cardBox.blockIconEvent(detail);
+        cardAddListBox.blockIconEvent(detail);
         cardPriorityBox.blockIconEvent(detail);
         imgOverlayBox.blockIconEvent(detail);
         dailyNoteBox.blockIconEvent(detail);
