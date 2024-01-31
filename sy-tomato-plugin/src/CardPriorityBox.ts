@@ -124,6 +124,8 @@ class CardPriorityBox {
 
     async updateCards(options: ICardData) {
         if (!this.plugin) return options;
+        const len = options.cards.length;
+        if (len <= 1) return options;
         options.cards = shuffleArray(options.cards);
         const attrMap = (await Promise.all(options.cards.map(card => siyuan.getBlockAttrs(card.blockID))))
             .reduce((map, attr) => {
@@ -133,6 +135,15 @@ class CardPriorityBox {
                 return map;
             }, new Map<string, number>());
         options.cards.sort((a, b) => attrMap.get(b.blockID) - attrMap.get(a.blockID));
+        const n = Math.min(Math.floor(len / 5), 5);
+        if (n > 0 && len > n) {
+            const lastN = options.cards.slice(len - n);
+            options.cards = options.cards.slice(0, len - n);
+            for (const e of lastN) {
+                const randPosition = Math.floor(Math.random() * (len / 3))
+                options.cards.splice(randPosition, 0, e);
+            }
+        }
         return options;
     }
 
