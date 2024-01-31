@@ -18,6 +18,7 @@ import { cardPriorityBox } from "./CardPriorityBox";
 import { tag2RefBox } from "./Tag2RefBox";
 import { toolbarBox } from "./ToolbarBox";
 import { listBox } from "./ListBox";
+import { cardRemoveBox } from "./CardRemoveBox";
 
 export default class ThePlugin extends Plugin {
     private static readonly GLOBAL_THIS: Record<string, any> = globalThis;
@@ -55,6 +56,9 @@ export default class ThePlugin extends Plugin {
 
         this.addSettingItem("cardBoxCheckbox", "* 闪卡工具", false);
         if (this.settingCfg.cardBoxCheckbox ?? false) await cardBox.onload(this);
+
+        this.addSettingItem("cardRemoveBoxCheckbox", "* 取消当前文档内所有闪卡", false);
+        if (this.settingCfg.cardRemoveBoxCheckbox ?? false) await cardRemoveBox.onload(this);
 
         this.addSettingItem("cardAddListBoxCheckbox", "* 快速列表制卡", false);
         if (this.settingCfg.cardAddListBoxCheckbox ?? false) await cardAddListBox.onload(this);
