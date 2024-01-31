@@ -135,7 +135,7 @@ class CardPriorityBox {
                 return map;
             }, new Map<string, number>());
         options.cards.sort((a, b) => attrMap.get(b.blockID) - attrMap.get(a.blockID));
-        const n = Math.min(Math.floor(len / 5), 5);
+        const n = Math.floor(len * 5 / 100);
         if (n > 0 && len > n) {
             const lastN = options.cards.slice(len - n);
             options.cards = options.cards.slice(0, len - n);
