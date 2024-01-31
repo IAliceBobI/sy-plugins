@@ -140,7 +140,7 @@ class CardPriorityBox {
             const lastN = options.cards.slice(len - n);
             options.cards = options.cards.slice(0, len - n);
             for (const e of lastN) {
-                const randPosition = Math.floor(Math.random() * (len / 3))
+                const randPosition = Math.floor(Math.random() * (len / 3));
                 options.cards.splice(randPosition, 0, e);
             }
         }
