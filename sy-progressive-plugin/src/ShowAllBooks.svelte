@@ -77,6 +77,7 @@
     <table>
         <thead>
             <tr>
+                <th>序号</th>
                 <th>书名</th>
                 <th>进度</th>
                 <th>忽略</th>
@@ -91,8 +92,12 @@
             </tr>
         </thead>
         <tbody>
-            {#each books.slice().reverse() as book}
+            {#each books.slice().reverse() as book, i}
                 <tr>
+                    <td class="prog-style__id">
+                        {i + 1}
+                    </td>
+
                     <td class="prog-style__id" title={book.row.content}>
                         {book.row.content.slice(
                             0,
