@@ -61,7 +61,7 @@
             async () => {
                 await prog.storage.removeIndex(bookID);
                 const idx = books.findIndex((book) => {
-                    if (book[0] == bookID) return true;
+                    if (book.bookID == bookID) return true;
                 });
                 if (idx != -1) {
                     books.splice(idx, 1);
