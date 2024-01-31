@@ -4,11 +4,14 @@
     import { CacheMinutes, cardPriorityBox } from "./CardPriorityBox";
     import {
         CARD_PRIORITY,
+        CARD_PRIORITY_STOP,
+        CUSTOM_RIFF_DECKS,
         DATA_NODE_ID,
         SPACE,
         TOMATO_CONTROL_ELEMENT,
     } from "./libs/gconst";
-    import { isValidNumber, siyuan } from "./libs/utils";
+    import { getID, isValidNumber, siyuan, timeUtil } from "./libs/utils";
+    import { DialogText } from "./libs/DialogText";
 
     export let wysiwygElement: HTMLElement;
     export let cardElement: HTMLElement;
@@ -48,6 +51,37 @@
         );
         await cardPriorityBox.addBtns(wysiwygElement);
     }
+    async function stopCard(event: MouseEvent) {
+        event.stopPropagation();
+        const id = getID(cardElement, [CUSTOM_RIFF_DECKS]);
+        if (!id) return;
+        const newAttrs = {} as AttrType;
+        const attrs = await siyuan.getBlockAttrs(id);
+        if (attrs[CARD_PRIORITY_STOP]) {
+            newAttrs["custom-card-priority-stop"] = "";
+            await siyuan.setBlockAttrs(id, newAttrs);
+            await siyuan.pushMsg("继续闪卡");
+            await cardPriorityBox.addBtns(wysiwygElement);
+        } else {
+            new DialogText(
+                "准备暂停，请先设置闪卡恢复日期",
+                await siyuan.currentTime(60 * 60 * 24 * 2),
+                async (datetimeStr: string) => {
+                    const tidiedStr =
+                        timeUtil.makesureDateTimeFormat(datetimeStr);
+                    if (tidiedStr) {
+                        const attrs = {} as AttrType;
+                        attrs["custom-card-priority-stop"] = datetimeStr;
+                        await siyuan.setBlockAttrs(id, attrs);
+                        await siyuan.pushMsg("暂停闪卡到：" + datetimeStr);
+                    } else {
+                        await siyuan.pushMsg("输入格式错误");
+                    }
+                    await cardPriorityBox.addBtns(wysiwygElement);
+                },
+            );
+        }
+    }
     async function removeCard(event: MouseEvent) {
         event.stopPropagation();
         confirm("删除闪卡", textContent, async () => {
@@ -80,6 +114,8 @@
 <div {...controlAttr} class="container">
     <div>
         <button title="取消制卡" on:click={removeCard}>🚫</button>
+        {SPACE}
+        <button title="暂停/继续" on:click={stopCard}>🛑</button>
         {SPACE}
         <button title="闪卡优先级-1" on:click={subOne}>➖</button>
         <button
