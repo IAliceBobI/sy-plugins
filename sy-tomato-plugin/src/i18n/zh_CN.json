@@ -40,5 +40,6 @@
   "previousNote": "上一个日志",
   "nextNote": "下一个日志",
   "cardPrioritySet": "为当前文档与其子文档内，所有闪卡设置优先级",
-  "uncheckAll": "取勾当前文档所有todo任务"
+  "uncheckAll": "取勾当前文档所有todo任务",
+  "refreshVirRef": "刷新虚拟引用"
 }

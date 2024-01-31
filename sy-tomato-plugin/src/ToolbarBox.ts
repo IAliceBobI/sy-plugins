@@ -19,17 +19,25 @@ class ToolbarBox {
                 }
             });
         }
+
         this.plugin.addTopBar({
             icon: "iconRef",
-            title: "刷新虚拟引用",
+            title: this.plugin.i18n.refreshVirRef,
             position: "left",
-            callback: async () => {
-                await siyuan.refreshVirtualBlockRef();
-                events.protyleReload();
-                await siyuan.pushMsg("已经刷新虚拟引用", 2000);
-            }
+            callback: refreshVirRef,
+        });
+        this.plugin.addCommand({
+            langKey: "refreshVirRef",
+            hotkey: "",
+            callback: refreshVirRef,
         });
     }
+}
+
+async function refreshVirRef() {
+    await siyuan.refreshVirtualBlockRef();
+    events.protyleReload();
+    await siyuan.pushMsg("已经刷新虚拟引用", 2000);
 }
 
 export const toolbarBox = new ToolbarBox();
