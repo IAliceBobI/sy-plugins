@@ -86,7 +86,7 @@ class CardPriorityBox {
     async stopCards(blocks: Block[], wysiwygElement?: HTMLElement) {
         new DialogText(
             `准备暂停${blocks.length}个闪卡，请先设置闪卡恢复日期`,
-            await siyuan.currentTime(10),
+            await siyuan.currentTime(2 * 24 * 60 * 60),
             async (datetimeStr: string) => {
                 const tidiedStr =
                     timeUtil.makesureDateTimeFormat(datetimeStr);
