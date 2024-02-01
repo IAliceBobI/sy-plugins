@@ -174,18 +174,18 @@ class CardPriorityBox {
         }, [new Map<string, number>(), new Set<string>()]);
         options.cards.sort((a, b) => attrMap.get(b.blockID) - attrMap.get(a.blockID));
         const stoped = options.cards.filter(card => stopSet.has(card.blockID));
-        const available = options.cards.filter(card => !stopSet.has(card.blockID));
+        let available = options.cards.filter(card => !stopSet.has(card.blockID));
         len = available.length;
         const n = Math.floor(len * 5 / 100);
         if (n > 0 && len > n) {
-            const lastN = options.cards.slice(len - n);
-            options.cards = options.cards.slice(0, len - n);
+            const lastN = available.slice(len - n);
+            available = available.slice(0, len - n);
             for (const e of lastN) {
                 const randPosition = Math.floor(Math.random() * (len / 3));
-                options.cards.splice(randPosition, 0, e);
+                available.splice(randPosition, 0, e);
             }
         }
-        options.cards.push(...stoped);
+        options.cards = [...available, ...stoped];
         return options;
     }
 
