@@ -41,7 +41,6 @@ export default class ThePlugin extends Plugin {
         if (this.settingCfg.cardIndent == undefined) this.settingCfg.cardIndent = false;
         if (this.settingCfg.openCardsOnOpenPiece == undefined) this.settingCfg.openCardsOnOpenPiece = false;
         if (this.settingCfg.cardUnderPiece == undefined) this.settingCfg.cardUnderPiece = false;
-        if (this.settingCfg.addIndex2paragraph == undefined) this.settingCfg.addIndex2paragraph = false;
 
         if (this.settingCfg.btnViewContents == undefined) this.settingCfg.btnViewContents = true;
         if (this.settingCfg.btnPrevious == undefined) this.settingCfg.btnPrevious = true;
@@ -74,7 +73,6 @@ export default class ThePlugin extends Plugin {
         this.addSettingItem("cardIndent", "* 制作的闪卡，从第二项开始向右缩进", false, "");
         this.addSettingItem("openCardsOnOpenPiece", "* 打开分片的同时打开cards文档", false, "'cards-'前缀文件: 每本书用于保存闪卡的文件");
         this.addSettingItem("cardUnderPiece", "* 分片内制卡，放于分片的子文档内", false, "");
-        this.addSettingItem("addIndex2paragraph", "* 新建分片时，给段落标上序号", false, "");
 
         this.addSettingItem("btnViewContents", "* 打开目录", true, "🗂");
         this.addSettingItem("btnPrevious", "* 上一个分片", true, "⬅");

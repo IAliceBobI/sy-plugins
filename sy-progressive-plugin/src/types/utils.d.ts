@@ -7,7 +7,6 @@ type SettingCfgType = {
     addQuoteBlock: boolean,
     openCardsOnOpenPiece: boolean,
     cardIndent: boolean,
-    addIndex2paragraph: boolean,
     btnViewContents: boolean,
     btnSplitByPunctuationsListCheck: boolean;
     btnFullfilContent: boolean;
@@ -43,6 +42,7 @@ type BookInfo = {
     autoSplitSentenceP: boolean,
     autoSplitSentenceI: boolean,
     autoSplitSentenceT: boolean,
+    addIndex2paragraph: boolean,
 };
 
 type BookInfos = { [key: string]: BookInfo };

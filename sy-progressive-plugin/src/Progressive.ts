@@ -480,15 +480,15 @@ class Progressive {
                 await this.openContentsLock(bookID);
                 break;
             case HtmlCBType.splitByPunctuations: {
-                await this.splitAndClean(noteID, "p");
+                await this.splitAndClean(bookID, noteID, "p");
                 break;
             }
             case HtmlCBType.splitByPunctuationsList: {
-                await this.splitAndClean(noteID, "i");
+                await this.splitAndClean(bookID, noteID, "i");
                 break;
             }
             case HtmlCBType.splitByPunctuationsListCheck: {
-                await this.splitAndClean(noteID, "t");
+                await this.splitAndClean(bookID, noteID, "t");
                 break;
             }
             default:
@@ -496,8 +496,8 @@ class Progressive {
         }
     }
 
-    private async splitAndClean(noteID: string, t: AsList, ids?: string[]) {
-        const s = new SplitSentence(this.plugin, noteID, t);
+    private async splitAndClean(bookID: string, noteID: string, t: AsList, ids?: string[]) {
+        const s = new SplitSentence(bookID, this.plugin, noteID, t);
         if (ids?.length > 0) {
             await s.splitByIDs(ids);
         } else {
@@ -536,19 +536,19 @@ class Progressive {
         const allContent = [];
         if (info.showLastBlock && piecePre.length > 0) {
             const lastID = piecePre[piecePre.length - 1];
-            allContent.push(await this.copyBlock(lastID, [PROG_PIECE_PREVIOUS]));
+            allContent.push(await this.copyBlock(info, lastID, [PROG_PIECE_PREVIOUS]));
         }
 
         if (info.autoSplitSentenceP) {
-            await this.splitAndClean(noteID, "p", piece);
+            await this.splitAndClean(bookID, noteID, "p", piece);
         } else if (info.autoSplitSentenceI) {
-            await this.splitAndClean(noteID, "i", piece);
+            await this.splitAndClean(bookID, noteID, "i", piece);
         } else if (info.autoSplitSentenceT) {
-            await this.splitAndClean(noteID, "t", piece);
+            await this.splitAndClean(bookID, noteID, "t", piece);
         } else {
             const idx: { i: number } = { i: 1 };
             for (const id of piece) {
-                allContent.push(await this.copyBlock(id, [PROG_ORIGIN_TEXT], idx));
+                allContent.push(await this.copyBlock(info, id, [PROG_ORIGIN_TEXT], idx));
             }
         }
 
@@ -557,13 +557,13 @@ class Progressive {
         }
     }
 
-    private async copyBlock(id: string, mark: string[] = [], idx?: { i: number }) {
+    private async copyBlock(info: BookInfo, id: string, mark: string[] = [], idx?: { i: number }) {
         const { div: tempDiv } = await utils.getBlockDiv(id);
         if (!tempDiv) return "";
         if (tempDiv.getAttribute(MarkKey)) return "";
         if (idx && tempDiv.getAttribute(DATA_TYPE) != BlockNodeEnum.NODE_HEADING) {
             tempDiv.setAttribute(PARAGRAPH_INDEX, String(idx.i));
-            if (this.settings.addIndex2paragraph) {
+            if (info.addIndex2paragraph) {
                 const editableDiv = utils.getContenteditableElement(tempDiv);
                 if (editableDiv) {
                     const idxSpan = editableDiv.insertBefore(document.createElement("span"), editableDiv.firstChild) as HTMLSpanElement;

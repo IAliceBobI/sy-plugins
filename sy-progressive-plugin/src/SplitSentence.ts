@@ -6,13 +6,15 @@ import { prog } from "./Progressive";
 export class SplitSentence {
     private asList: AsList;
     private noteID: string;
+    private bookID: string;
     private textAreas: { blocks: { text: string, id: string }[], ref: string }[];
     plugin: Plugin;
 
-    constructor(plugin: Plugin, noteID: string, asList: AsList) {
+    constructor(bookID: string, plugin: Plugin, noteID: string, asList: AsList) {
         this.noteID = noteID;
         this.asList = asList;
         this.plugin = plugin;
+        this.bookID = bookID;
     }
 
     async insert(open = true) {
@@ -49,6 +51,7 @@ export class SplitSentence {
     }
 
     async splitByIDs(chilrenIDs: string[], like = "") {
+        const bookInfo = await prog.storage.booksInfo(this.bookID);
         const rows = (await Promise.all(chilrenIDs
             .map(id => siyuan.sqlOne(`select id,content,ial,type,markdown from blocks 
             where id="${id}"
@@ -71,7 +74,7 @@ export class SplitSentence {
                 });
             } else {
                 let ps = [row.content];
-                if (prog.settings.addIndex2paragraph && !ps[0].startsWith("[")) {
+                if (bookInfo.addIndex2paragraph && !ps[0].startsWith("[")) {
                     ps[0] = `[${i}]` + ps[0];
                 }
                 for (const s of "\n。！!？?；;:：") ps = spliyBy(ps, s);

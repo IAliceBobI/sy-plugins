@@ -106,9 +106,15 @@ export class Storage {
         }
     }
 
+    async setAddingIndex2paragraph(bookID: string, opt: boolean) {
+        await this.updateBookInfo(bookID, { addIndex2paragraph: opt } as BookInfo);
+        await siyuan.pushMsg(`给分片内段落标上序号：${opt}`);
+    }
+
     private async updateBookInfo(docID: string, opt: BookInfo) {
         if (docID?.length !== "20231218000645-9aaaltd".length) return;
         const info = await this.booksInfo(docID);
+        if (typeof opt.addIndex2paragraph === "boolean") info.addIndex2paragraph = opt.addIndex2paragraph;
         if (typeof opt.autoCard === "boolean") info.autoCard = opt.autoCard;
         if (typeof opt.ignored === "boolean") info.ignored = opt.ignored;
         if (typeof opt.showLastBlock === "boolean") info.showLastBlock = opt.showLastBlock;
@@ -135,6 +141,7 @@ export class Storage {
                 autoSplitSentenceP: false,
                 autoSplitSentenceT: false,
                 autoSplitSentenceI: false,
+                addIndex2paragraph: false,
             } as BookInfo;
             this.booksInfos()[docID] = info;
         }

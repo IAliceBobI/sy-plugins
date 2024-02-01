@@ -19,8 +19,10 @@
     let contentBlocks: WordCountType[] = [];
     let headingsText = "1,2,3,4,5,6,b";
     let autoCard = false;
+    let addIndex = false;
     let blockNum = 0;
     let splitWordNum = 0;
+    let splitType: AsList = "no" as any;
 
     onMount(async () => {
         boxID = boxID;
@@ -98,6 +100,10 @@
         await prog.storage.saveIndex(bookID, groups);
         await prog.storage.resetBookReadingPoint(bookID);
         await prog.storage.toggleAutoCard(bookID, autoCard);
+        await prog.storage.setAddingIndex2paragraph(bookID, addIndex);
+        if (splitType == "i" || splitType == "p" || splitType == "t") {
+            await prog.storage.setAutoSplitSentence(bookID, true, splitType);
+        }
         prog.startToLearnWithLock(bookID);
     }
 </script>
@@ -130,14 +136,33 @@
     bind:value={splitWordNum}
 />
 <div class="fn__hr"></div>
-<div title="把阅读到的分片设置为闪卡">
-    <span class="prog-style__id">{prog.plugin.i18n.autoCard}</span>
+<label title={prog.plugin.i18n.autoCard}>
+    把阅读到的分片设置为闪卡
     <input
         type="checkbox"
         class="prog-style__checkbox"
         bind:checked={autoCard}
     />
-</div>
+</label>
+<div class="fn__hr"></div>
+<label>
+    新建分片时，给段落标上序号
+    <input
+        type="checkbox"
+        class="prog-style__checkbox"
+        bind:checked={addIndex}
+    />
+</label>
+<div class="fn__hr"></div>
+{#each ["p", "t", "i", "no"] as t}
+    <label>
+        <input type="radio" name="scoops" value={t} bind:group={splitType} />
+        {t == "no" ? "不断句" : ""}
+        {t == "p" ? "断句为段落块" : ""}
+        {t == "t" ? "断句为任务块" : ""}
+        {t == "i" ? "断句为无序表" : ""}
+    </label><br />
+{/each}
 <div class="fn__hr"></div>
 <button class="prog-style__button" on:click={process}
     >{prog.plugin.i18n.addOrReaddDoc}</button

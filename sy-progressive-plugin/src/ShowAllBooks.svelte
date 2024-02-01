@@ -82,6 +82,7 @@
                 <th>进度</th>
                 <th>忽略</th>
                 <th>制卡</th>
+                <th>标号</th>
                 <th>末尾</th>
                 <th>断句p</th>
                 <th>断句t</th>
@@ -137,6 +138,22 @@
                             bind:checked={book.bookInfo.autoCard}
                             on:click={() =>
                                 prog.storage.toggleAutoCard(book.bookID)}
+                        />
+                    </td>
+
+                    <td
+                        class="prog-style__id"
+                        title={"给分片内段落标上序号" +
+                            book.bookInfo.addIndex2paragraph}
+                    >
+                        <input
+                            type="checkbox"
+                            bind:checked={book.bookInfo.addIndex2paragraph}
+                            on:click={() =>
+                                prog.storage.setAddingIndex2paragraph(
+                                    book.bookID,
+                                    !book.bookInfo.addIndex2paragraph,
+                                )}
                         />
                     </td>
 
