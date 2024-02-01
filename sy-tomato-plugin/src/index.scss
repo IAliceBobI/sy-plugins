@@ -2,7 +2,7 @@
   opacity: 0.3;
 }
 
-.protyle-wysiwyg div[custom-card-priority-stop]::before {
+.protyle-wysiwyg div[custom-card-priority-stop]::after {
   content: attr(custom-card-priority-stop);
   color: var(--b3-font-color5);
 }
