@@ -103,6 +103,10 @@
         await prog.storage.setAddingIndex2paragraph(bookID, addIndex);
         if (splitType == "i" || splitType == "p" || splitType == "t") {
             await prog.storage.setAutoSplitSentence(bookID, true, splitType);
+        } else {
+            await prog.storage.setAutoSplitSentence(bookID, false, "t");
+            await prog.storage.setAutoSplitSentence(bookID, false, "p");
+            await prog.storage.setAutoSplitSentence(bookID, false, "i");
         }
         prog.startToLearnWithLock(bookID);
     }
