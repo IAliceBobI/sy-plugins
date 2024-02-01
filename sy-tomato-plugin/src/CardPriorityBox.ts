@@ -173,7 +173,7 @@ class CardPriorityBox {
             return [attrMap, stopSet];
         }, [new Map<string, number>(), new Set<string>()]);
         options.cards.sort((a, b) => attrMap.get(b.blockID) - attrMap.get(a.blockID));
-        const stoped = options.cards.filter(card => stopSet.has(card.blockID));
+        const stopped = options.cards.filter(card => stopSet.has(card.blockID));
         let available = options.cards.filter(card => !stopSet.has(card.blockID));
         len = available.length;
         const n = Math.floor(len * 5 / 100);
@@ -185,7 +185,7 @@ class CardPriorityBox {
                 available.splice(randPosition, 0, e);
             }
         }
-        options.cards = [...available, ...stoped];
+        options.cards = [...available, ...stopped];
         return options;
     }
 
