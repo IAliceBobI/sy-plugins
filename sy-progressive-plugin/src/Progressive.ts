@@ -504,7 +504,7 @@ class Progressive {
             await s.split();
             await help.cleanNote(noteID, true);
         }
-        await s.insert();
+        await s.insert(false);
     }
 
     private async addAndClose(tab?: ITab) {

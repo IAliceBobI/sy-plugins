@@ -15,7 +15,7 @@ export class SplitSentence {
         this.plugin = plugin;
     }
 
-    async insert() {
+    async insert(open = true) {
         return navigator.locks.request("prog.SplitSentence.insert", { ifAvailable: true }, async (lock) => {
             if (lock) {
                 let firstID: string;
@@ -27,7 +27,7 @@ export class SplitSentence {
                     mdList.push(b.blocks.map(i => i.text).join(""));
                 }
                 await siyuan.insertBlockAsChildOf(mdList.join("\n\n"), this.noteID);
-                if (firstID) {
+                if (firstID && open) {
                     openTab({ app: this.plugin.app, doc: { id: firstID, action: ["cb-get-hl", "cb-get-context", "cb-get-focus"], zoomIn: false } });
                     // window.location.href = "siyuan://blocks/" + firstID;
                 }
