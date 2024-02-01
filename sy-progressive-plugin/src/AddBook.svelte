@@ -104,9 +104,7 @@
         if (splitType == "i" || splitType == "p" || splitType == "t") {
             await prog.storage.setAutoSplitSentence(bookID, true, splitType);
         } else {
-            await prog.storage.setAutoSplitSentence(bookID, false, "t");
-            await prog.storage.setAutoSplitSentence(bookID, false, "p");
-            await prog.storage.setAutoSplitSentence(bookID, false, "i");
+            await prog.storage.disableAutoSplitSentence(bookID);
         }
         prog.startToLearnWithLock(bookID);
     }

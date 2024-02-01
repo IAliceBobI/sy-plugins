@@ -62,6 +62,12 @@ export class Storage {
         }
     }
 
+    async disableAutoSplitSentence(bookID: string) {
+        await this.updateBookInfo(bookID, { autoSplitSentenceP: false } as any);
+        await this.updateBookInfo(bookID, { autoSplitSentenceT: false } as any);
+        await this.updateBookInfo(bookID, { autoSplitSentenceI: false } as any);
+    }
+
     async setAutoSplitSentence(bookID: string, v: boolean, t: AsList) {
         const info = await this.booksInfo(bookID);
         info.autoSplitSentenceP = false;
