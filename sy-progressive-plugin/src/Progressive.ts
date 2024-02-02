@@ -79,7 +79,7 @@ class Progressive {
             menu.addItem({
                 icon: "iconEye",
                 label: this.plugin.i18n.viewAllProgressiveBooks,
-                accelerator: "",
+                accelerator: "⌥=",
                 click: async () => {
                     await this.viewAllProgressiveBooks();
                 }
