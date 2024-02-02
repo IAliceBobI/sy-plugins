@@ -8,6 +8,7 @@
     import { splitByBlockCount } from "./helper";
     import { Dialog } from "siyuan";
     import { ContentLenGroup, HeadingGroup } from "./Split2Pieces";
+    import { MarkBookKey } from "../../sy-tomato-plugin/src/libs/gconst";
 
     export let bookID: string;
     export let bookName: string;
@@ -73,9 +74,12 @@
 
         dialog.destroy();
 
-        await siyuan.setBlockAttrs(bookID, {
-            "custom-sy-readonly": "true",
-        });
+        {
+            const attrs = {} as AttrType;
+            attrs["custom-sy-readonly"] = "true";
+            attrs["custom-progmark"] = MarkBookKey;
+            await siyuan.setBlockAttrs(bookID, attrs);
+        }
 
         if (splitWordNum > 0) {
             contentBlocks = await prog.helper.getDocWordCount(contentBlocks);
