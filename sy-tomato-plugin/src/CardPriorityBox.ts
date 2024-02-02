@@ -89,7 +89,7 @@ class CardPriorityBox {
             "2",
             async (days: string) => {
                 if (isValidNumber(Number(days))) {
-                    let datetimeStr = await siyuan.currentTime(Number(days) * 24 * 60 * 60)
+                    let datetimeStr = await siyuan.currentTime(Number(days) * 24 * 60 * 60);
                     datetimeStr = timeUtil.makesureDateTimeFormat(datetimeStr);
                     if (datetimeStr) {
                         const attrs = {} as AttrType;
