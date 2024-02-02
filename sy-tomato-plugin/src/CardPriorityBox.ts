@@ -85,21 +85,21 @@ class CardPriorityBox {
 
     async stopCards(blocks: Block[], wysiwygElement?: HTMLElement) {
         new DialogText(
-            `准备暂停${blocks.length}个闪卡，请先设置闪卡恢复日期`,
-            await siyuan.currentTime(2 * 24 * 60 * 60),
-            async (datetimeStr: string) => {
-                const tidiedStr =
-                    timeUtil.makesureDateTimeFormat(datetimeStr);
-                if (tidiedStr) {
-                    const attrs = {} as AttrType;
-                    attrs["custom-card-priority-stop"] = datetimeStr;
-                    for (const b of blocks) {
-                        const ial = b.ial as unknown as AttrType;
-                        await siyuan.setBlockAttrs(ial.id, attrs);
+            `准备暂停${blocks.length}个闪卡，请先设置暂停天数`,
+            "2",
+            async (days: string) => {
+                if (isValidNumber(Number(days))) {
+                    let datetimeStr = await siyuan.currentTime(Number(days) * 24 * 60 * 60)
+                    datetimeStr = timeUtil.makesureDateTimeFormat(datetimeStr);
+                    if (datetimeStr) {
+                        const attrs = {} as AttrType;
+                        attrs["custom-card-priority-stop"] = datetimeStr;
+                        for (const b of blocks) {
+                            const ial = b.ial as unknown as AttrType;
+                            await siyuan.setBlockAttrs(ial.id, attrs);
+                        }
+                        await siyuan.pushMsg(`暂停闪卡${days}天`);
                     }
-                    await siyuan.pushMsg("暂停闪卡到：" + datetimeStr);
-                } else {
-                    await siyuan.pushMsg("输入格式错误");
                 }
                 if (wysiwygElement) await cardPriorityBox.addBtns(wysiwygElement);
             },
