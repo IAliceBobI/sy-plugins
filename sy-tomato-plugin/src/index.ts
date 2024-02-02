@@ -81,7 +81,7 @@ export default class ThePlugin extends Plugin {
         this.addSettingItem("backLinkBottomBoxCheckbox", "* 底部反链", false);
         if (this.settingCfg.backLinkBottomBoxCheckbox ?? false) await backLinkBottomBox.onload(this);
 
-        this.addSettingItem("tag2RefBoxCheckbox", "* 自动将标签转为引用（引用也继承标签的层级关系）", false, "请勿匆忙开启！开启会将当前编辑区内的标签转为引用！");
+        this.addSettingItem("tag2RefBoxCheckbox", "* 自动将标签转为引用（引用也继承标签的层级关系）", false, "开启会将当前编辑区内的标签转为引用！tag开头、@开头的标签不会被转。");
         if (this.settingCfg.tag2RefBoxCheckbox ?? false) await tag2RefBox.onload(this);
 
         this.addSettingItem("cmdBlockBoxCheckbox", "* 命令块", false);
