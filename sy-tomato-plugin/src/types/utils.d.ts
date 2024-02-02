@@ -30,6 +30,7 @@ type TomatoSettings = {
     "daily-note-box-id": string,
     "tomato-clocks": string,
     "back-link-max-size": number,
+    "tag-to-ref-add-card": boolean,
 };
 
 type AttrType = {

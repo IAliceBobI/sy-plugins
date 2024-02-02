@@ -19,6 +19,21 @@ class Tag2RefBox {
         this.plugin = plugin;
         this.lute = NewLute();
         this.settingCfg = (plugin as any).settingCfg;
+        this.plugin.setting.addItem({
+            title: "** 添加引用时自动制卡",
+            description: "依赖：自动将标签转为引用",
+            createActionElement: () => {
+                const checkbox = document.createElement("input") as HTMLInputElement;
+                checkbox.type = "checkbox";
+                checkbox.checked = this.settingCfg["tag-to-ref-add-card"] ?? false;
+                checkbox.addEventListener("change", () => {
+                    this.settingCfg["tag-to-ref-add-card"] = checkbox.checked;
+                });
+                checkbox.className = "b3-switch fn__flex-center";
+                return checkbox;
+            },
+        });
+
         events.addListener("Tomato-Tag2RefBox", (eventType, detail) => {
             if (eventType == EventType.loaded_protyle_static) {
                 navigator.locks.request("Tomato-Tag2RefBox-onload", { ifAvailable: true }, async (lock) => {
@@ -86,7 +101,7 @@ class Tag2RefBox {
                     }
                     const span = document.createElement("span") as HTMLSpanElement;
                     span.setAttribute(DATA_TYPE, BLOCK_REF);
-                    const id = await createRefDoc(notebookId, ref);
+                    const id = await this.createRefDoc(notebookId, ref);
                     span.setAttribute(DATA_ID, id);
                     span.setAttribute(DATA_SUBTYPE, "d");
                     span.innerText = ref;
@@ -108,6 +123,17 @@ class Tag2RefBox {
             await siyuan.safeUpdateBlock(nodeID, md);
         }
     }
+
+    private async createRefDoc(notebookId: string, name: string) {
+        const row = await siyuan.sqlOne(`select id from blocks where type='d' and content='${name}' limit 1`);
+        if (row?.id) return row.id;
+        const { path } = await siyuan.getRefCreateSavePath(notebookId);
+        const id = await siyuanCache.createDocWithMdIfNotExists(5000, notebookId, path + name, "");
+        if (this.settingCfg["tag-to-ref-add-card"]) {
+            await siyuan.addRiffCards([id]);
+        }
+        return id;
+    }
 }
 
 async function insertMd(idName: IDName[]) {
@@ -125,13 +151,6 @@ async function insertMd(idName: IDName[]) {
             await siyuan.insertBlockAsChildOf(mdList.join("\n"), idName[0].id);
         }
     }
-}
-
-async function createRefDoc(notebookId: string, name: string) {
-    const row = await siyuan.sqlOne(`select id from blocks where type='d' and content='${name}' limit 1`);
-    if (row?.id) return row.id;
-    const { path } = await siyuan.getRefCreateSavePath(notebookId);
-    return await siyuanCache.createDocWithMdIfNotExists(5000, notebookId, path + name, "");
 }
 
 export const tag2RefBox = new Tag2RefBox();
