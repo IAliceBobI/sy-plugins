@@ -55,8 +55,15 @@ class Progressive {
         this.plugin.addCommand({
             langKey: "startToLearn",
             hotkey: "⌥-",
-            callback: () => {
-                this.startToLearnWithLock();
+            callback: async () => {
+                await this.startToLearnWithLock();
+            },
+        });
+        this.plugin.addCommand({
+            langKey: "viewAllProgressiveBooks",
+            hotkey: "⌥=",
+            callback: async () => {
+                await this.viewAllProgressiveBooks();
             },
         });
         this.plugin.eventBus.on("open-menu-content", async ({ detail }) => {
