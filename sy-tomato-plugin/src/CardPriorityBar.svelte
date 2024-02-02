@@ -124,6 +124,9 @@
 </div>
 
 <style>
+    input {
+        height: 1px;
+    }
     .container {
         border: none;
     }
