@@ -150,6 +150,8 @@ function shouldMove(s: string) {
         || s.startsWith("；")
         || s.startsWith(":")
         || s.startsWith("：")
+        || s.startsWith(">")
+        || s.startsWith("》")
         || s.startsWith("…");
 }
 
