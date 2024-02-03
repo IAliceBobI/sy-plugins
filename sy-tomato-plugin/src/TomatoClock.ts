@@ -41,6 +41,7 @@ class TomatoClock {
                     this.lastStartTime = data.startTime;
                     this.timeoutID = setTimeout(() => {
                         this.showTimeoutDialog(data.minute);
+                        this.lastDelayMinute = 0;
                     }, due - now);
                 }
             }
