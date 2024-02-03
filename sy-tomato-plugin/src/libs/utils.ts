@@ -2,6 +2,13 @@ import { App, Constants, IOperation, Lute, fetchSyncPost, openTab } from "siyuan
 import { v4 as uuid } from "uuid";
 import * as gconst from "./gconst";
 
+export function dom2div(dom: string) {
+    const div = document.createElement("div") as HTMLElement;
+    if (!dom) return div;
+    div.innerHTML = dom;
+    return div.firstElementChild as HTMLElement;
+}
+
 export function arrayRemove<T>(array: T[], element: T) {
     const index = array.indexOf(element);
     if (index !== -1) {

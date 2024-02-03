@@ -3,6 +3,7 @@
     import {
         NewLute,
         cleanDiv,
+        dom2div,
         getID,
         newID,
         siyuan,
@@ -33,6 +34,7 @@
 
     type BacklinkSv = {
         bk: Backlink;
+        bkDiv: HTMLElement;
         id: string;
         attrs: LinkElementAttr;
     };
@@ -91,11 +93,19 @@
             .map((i) => i.backlinks)
             .flat()
             .map((bk) => {
-                return { bk, id: newID(), attrs: {} } as BacklinkSv;
+                const bkDiv = dom2div(bk.dom);
+                return { bk, id: newID(), attrs: {}, bkDiv } as BacklinkSv;
             });
 
         await Promise.all(backLinks.map((backLink) => path2div(backLink)));
-        backLinks.forEach((backLink) => scanAllRef(backLink.bk.dom));
+        backLinks.forEach((backLink) => scanAllRef(backLink.bkDiv));
+
+        const sortDiv = (a: BacklinkSv, b: BacklinkSv) => {
+            const dateA = a.bkDiv.getAttribute("updated");
+            const dateB = b.bkDiv.getAttribute("updated");
+            return -dateA.localeCompare(dateB);
+        };
+        backLinks.sort(sortDiv);
         backLinks = [...backLinks];
         linkItems = [...allRefs.values()];
 
@@ -122,7 +132,7 @@
             maker.mentionCounting.innerText = "";
 
             await Promise.all(mentions.map((m) => path2div(m)));
-            mentions.forEach((m) => scanAllRef(m.bk.dom));
+            mentions.forEach((m) => scanAllRef(dom2div(m.bk.dom)));
             backLinks = [...backLinks, ...mentions];
             linkItems = [...allRefs.values()];
         }
@@ -141,14 +151,12 @@
                     2 * BACKLINK_CACHE_TIME,
                     blockPath.id,
                 );
-                await scanAllRef(dom);
+                await scanAllRef(dom2div(dom));
             }
         }
     }
 
-    async function scanAllRef(domStr: string) {
-        const div = document.createElement("div") as HTMLDivElement;
-        div.innerHTML = domStr ?? "";
+    async function scanAllRef(div: HTMLElement) {
         for (const element of div.querySelectorAll(
             `[${DATA_TYPE}~="${BLOCK_REF}"]`,
         )) {
@@ -247,12 +255,16 @@
         const [id] = await cleanDiv(div.firstElementChild as any, false, false);
         const md = lute.BlockDOM2Md(div.innerHTML);
         await siyuan.appendBlock(md, maker.docID);
+        await siyuan.pushMsg("复制成功", 2000);
         return id;
     }
 
     async function move2doc(domStr: string) {
         const id = await copy2doc(domStr);
-        if (id) await siyuan.safeUpdateBlock(id, "");
+        if (id) {
+            await siyuan.safeUpdateBlock(id, "");
+            await siyuan.pushMsg("移动成功", 2000);
+        }
     }
 </script>
 
