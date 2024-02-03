@@ -13,7 +13,6 @@ class Schedule {
         this.plugin.loadData(STORAGE_SCHEDULE).then(() => {
             this.loopSchedule();
         });
-        this.plugin.data[STORAGE_SCHEDULE] = {};
         this.plugin.addCommand({
             langKey: "schedule",
             hotkey: "⌘3",

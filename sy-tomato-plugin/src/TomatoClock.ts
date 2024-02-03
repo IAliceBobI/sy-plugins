@@ -5,6 +5,7 @@ import {
 } from "siyuan";
 import "./index.scss";
 import { siyuan } from "./libs/utils";
+import { STORAGE_TOMATO_TIME } from "./constants";
 
 
 function formatDuration(milliseconds: number): { minutes: number, seconds: number } {
@@ -14,9 +15,14 @@ function formatDuration(milliseconds: number): { minutes: number, seconds: numbe
     return { minutes, seconds };
 }
 
+type TomatoTime = {
+    minute: number;
+    startTime: number;
+}
+
 class TomatoClock {
     private plugin: Plugin;
-    private timeoutID: number;
+    private timeoutID: any;
     private lastDelayMinute: number;
     private lastStartTime: number;
     private settingCfg: TomatoSettings;
@@ -24,8 +30,21 @@ class TomatoClock {
     async onload(plugin: Plugin) {
         this.plugin = plugin;
         this.lastDelayMinute = 0;
-        this.timeoutID = 0;
         this.settingCfg = (plugin as any).settingCfg;
+        this.plugin.loadData(STORAGE_TOMATO_TIME).then(() => {
+            const data = (this.plugin.data[STORAGE_TOMATO_TIME] ?? {}) as TomatoTime;
+            if (data.minute > 0 && data.startTime > 0) {
+                const due = data.minute * 60 * 1000 + data.startTime;
+                const now = Date.now();
+                if (now < due) {
+                    this.lastDelayMinute = data.minute;
+                    this.lastStartTime = data.startTime;
+                    this.timeoutID = setTimeout(() => {
+                        this.showTimeoutDialog(data.minute);
+                    }, due - now);
+                }
+            }
+        });
 
         let clocks: string = this.settingCfg["tomato-clocks"] ?? "5,10,15,25";
         const washed = [0];
@@ -106,7 +125,8 @@ class TomatoClock {
                 this.timeoutID = setTimeout(() => {
                     this.showTimeoutDialog(minute);
                     this.lastDelayMinute = 0;
-                }, minute * 60 * 1000) as unknown as number;
+                }, minute * 60 * 1000);
+                this.plugin.saveData(STORAGE_TOMATO_TIME, { minute, startTime: this.lastStartTime });
             }
         });
         this.plugin.addStatusBar({

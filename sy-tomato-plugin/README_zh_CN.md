@@ -31,9 +31,9 @@
 
 <img src="assets/tomatoTimeup.png" alt="drawing" width="600"/>
 
-> 支持自定义时长。
-
-> 新本能查看剩余时间。
+> *支持自定义时长。*
+> *重启思源后也会继续倒计时。*
+> *能查看剩余时间。*
 
 > [打不开图片请看这里](https://gitee.com/TokenzQdBN/sy-plugins/blob/main/sy-tomato-plugin/README_zh_CN.md)
 
