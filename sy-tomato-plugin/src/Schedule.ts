@@ -25,6 +25,7 @@ class Schedule {
             const menu = detail.menu;
             menu.addItem({
                 label: this.plugin.i18n.schedule,
+                accelerator: "⌘3",
                 icon: "iconSchedule",
                 click: () => {
                     const blockID = detail?.element?.getAttribute("data-node-id") ?? "";
