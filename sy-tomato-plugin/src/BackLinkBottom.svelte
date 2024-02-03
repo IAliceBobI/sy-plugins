@@ -92,6 +92,7 @@
         )
             .map((i) => i.backlinks)
             .flat()
+            .filter((bk) => !!bk)
             .map((bk) => {
                 const bkDiv = dom2div(bk.dom);
                 return { bk, id: newID(), attrs: {}, bkDiv } as BacklinkSv;
