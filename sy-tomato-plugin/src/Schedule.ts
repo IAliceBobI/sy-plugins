@@ -18,7 +18,7 @@ class Schedule {
             langKey: "schedule",
             hotkey: "⌘3",
             callback: async () => {
-                await this.showScheduleDialog();
+                await this.showScheduleDialog(events.lastBlockID);
             },
         });
         this.plugin.eventBus.on("open-menu-content", async ({ detail }) => {
@@ -28,9 +28,7 @@ class Schedule {
                 icon: "iconSchedule",
                 click: () => {
                     const blockID = detail?.element?.getAttribute("data-node-id") ?? "";
-                    if (blockID) {
-                        this.showScheduleDialog(blockID);
-                    }
+                    this.showScheduleDialog(blockID);
                 },
             });
         });
@@ -43,17 +41,15 @@ class Schedule {
             label: this.plugin.i18n.schedule,
             click: () => {
                 for (const element of detail.blockElements) {
-                    const blockID = getID(element);
-                    if (blockID) {
-                        this.showScheduleDialog(blockID);
-                        break;
-                    }
+                    this.showScheduleDialog(getID(element));
+                    break;
                 }
             }
         });
     }
 
-    private async showScheduleDialog(blockID?: string) {
+    private async showScheduleDialog(blockID: string) {
+        if (!blockID) return;
         const id = newID();
         let d: ScheduleDialog = null;
         const dialog = new Dialog({
@@ -70,23 +66,9 @@ class Schedule {
             props: {
                 plugin: this.plugin,
                 blockID,
-                app: this.plugin.app,
                 dialog,
-                schedule: this,
             }
         });
-    }
-
-    private async addTag(blockID: string, datetime: string) {
-        const { kramdown } = await siyuan.getBlockKramdown(blockID);
-        const parts: string[] = kramdown.split("\n");
-        const lastIdx = parts.length - 2;
-        if (lastIdx >= 0) {
-            // check time tag
-            parts[lastIdx] = parts[lastIdx].replace(/#⏰\/[\d-]+\/[\d:]+#/, "");
-            parts[lastIdx] += `#⏰/${datetime.split(" ").join("/")}#`;
-            await siyuan.safeUpdateBlock(blockID, parts.join("\n"));
-        }
     }
 
     async addSchedule(blockID: string, datetime: string) {
@@ -95,7 +77,7 @@ class Schedule {
         data[blockID] = datetime;
         await this.plugin.saveData(STORAGE_SCHEDULE, data);
         await this.doSchedule(blockID, data);
-        await this.addTag(blockID, datetime);
+        await siyuan.addBookmark(blockID, datetime.split(" ")[0]);
         await siyuan.pushMsg(`<h1>${this.plugin.i18n.scheduleSetSuccess}</h1>
         <br>${this.plugin.i18n.scheduledAt} ${datetime}`, 8 * 1000);
     }
@@ -122,6 +104,7 @@ class Schedule {
         setTimeout(async (blockID: string, theTime: string) => {
             await this.showTimeoutDialog(blockID, theTime);
             delete data[blockID];
+            await siyuan.addBookmark(blockID, "");
             await this.plugin.saveData(STORAGE_SCHEDULE, data);
         }, delay, blockID, data[blockID]);
     }

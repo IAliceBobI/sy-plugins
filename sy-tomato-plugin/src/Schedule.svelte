@@ -1,14 +1,13 @@
 <script lang="ts">
-    import { App, Plugin, Protyle, Dialog } from "siyuan";
+    import { Plugin, Protyle, Dialog } from "siyuan";
     import { onDestroy, onMount } from "svelte";
     import { siyuan, timeUtil } from "@/libs/utils";
     import { events } from "@/libs/Events";
+    import { schedule } from "./Schedule";
 
-    export let app: App;
     export let plugin: Plugin;
     export let blockID: BlockID;
     export let dialog: Dialog;
-    export let schedule: any;
 
     let protyleTarget: HTMLDivElement;
     let protyle: Protyle;
@@ -21,7 +20,7 @@
         if (blockID) {
             idMsg = blockID;
         }
-        protyle = new Protyle(app, protyleTarget, {
+        protyle = new Protyle(plugin.app, protyleTarget, {
             blockId: blockID,
         });
         datetimeStr = await siyuan.currentTime(10);
@@ -65,26 +64,33 @@
 
 <!-- https://learn.svelte.dev/tutorial/if-blocks -->
 <div class="b3-dialog__content">
-    <div class="schedule-style__id">{idMsg}</div>
-    <button
-        class="b3-button b3-button--outline"
-        title="复制ID"
-        on:click={copyID}><svg><use xlink:href="#iconCopy"></use></svg></button
-    >
-    <div class="fn__hr"></div>
-    <input
-        type="text"
-        class="schedule-style__input-field"
-        bind:value={datetimeStr}
-    />
-    {#if blockID}
-        <button class="schedule-style__button" on:click={btnAddADay}
-            >{plugin.i18n.btnAddADay}</button
+    <label>
+        🗞️
+        <span class="schedule-style__id">{idMsg}</span>
+        <button
+            class="b3-button b3-button--outline"
+            title="复制ID"
+            on:click={copyID}
+            ><svg><use xlink:href="#iconCopy"></use></svg></button
         >
-        <button class="schedule-style__button" on:click={btnSchedule}
-            >{plugin.i18n.setDate}</button
-        ><br />
-    {/if}
+    </label>
+    <div class="fn__hr"></div>
+    <label>
+        🗓️
+        <input
+            type="text"
+            class="schedule-style__input-field"
+            bind:value={datetimeStr}
+        />
+        {#if blockID}
+            <button class="schedule-style__button" on:click={btnAddADay}
+                >+24h</button
+            >
+            <button class="schedule-style__button" on:click={btnSchedule}
+                >✅</button
+            ><br />
+        {/if}
+    </label>
     <div class="fn__hr"></div>
     <div id="protyle" style="height: 380px;" bind:this={protyleTarget}></div>
 </div>
