@@ -179,7 +179,7 @@ export function sleep(ms: number): Promise<void> {
 
 export function cleanText(text: string) {
     if (text) {
-        text = text.replace(/\u200B/g, "")?.trim()
+        text = text.replace(/\u200B/g, "")?.trim();
     }
     return text;
 }
