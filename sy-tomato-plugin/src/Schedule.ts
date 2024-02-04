@@ -92,6 +92,7 @@ class Schedule {
             });
             new Protyle(this.plugin.app, dialog.element.querySelector("#protyle"), {
                 blockId: blockID,
+                action: ["cb-get-hl"],
             });
         }
     }

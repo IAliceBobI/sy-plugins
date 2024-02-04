@@ -22,6 +22,15 @@
         }
         protyle = new Protyle(plugin.app, protyleTarget, {
             blockId: blockID,
+            action: ["cb-get-hl"],
+            render: {
+                background: false,
+                title: false,
+                gutter: false,
+                scroll: false,
+                breadcrumb: false,
+                breadcrumbDocName: false,
+            },
         });
         datetimeStr = await siyuan.currentTime(10);
     });
