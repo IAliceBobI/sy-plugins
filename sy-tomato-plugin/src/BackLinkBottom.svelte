@@ -360,79 +360,87 @@
     </label>
     <hr />
 </div>
-{#each backLinks as backLink}
-    <div id={backLink.id} {...queryableElementAttr} {...backLink.attrs}>
-        <div class="bk_one_line">
-            <div class="fn__flex-column">
-                <button
-                    class="gap bk_label b3-button b3-button--text"
-                    title="隐藏"
-                    on:click={() => {
-                        autoRefreshChecked = false;
-                        document.getElementById(backLink.id).style.display =
-                            "none";
-                    }}>{@html icon("Eyeoff")}</button
-                >
-                <button
-                    class="gap bk_label b3-button b3-button--text"
-                    title="移动到文档"
-                    on:click={async () => {
-                        autoRefreshChecked = false;
-                        document.getElementById(backLink.id).style.display =
-                            "none";
-                        await move2doc(backLink.bk.dom);
-                    }}>{@html icon("Move")}</button
-                >
-                <button
-                    class="gap bk_label b3-button b3-button--text"
-                    title="复制到文档"
-                    on:click={async () => {
-                        await copy2doc(backLink.bk.dom);
-                    }}>{@html icon("Copy")}</button
-                >
-            </div>
-            <div>
-                {#each backLink.bk.blockPaths as blockPath, i}
-                    <span
-                        {...backLink.attrs}
-                        title={blockPath.name}
-                        class="bk_label b3-label__text"
+<div class="bk_protyle">
+    {#each backLinks as backLink}
+        <div id={backLink.id} {...queryableElementAttr} {...backLink.attrs}>
+            <div class="bk_one_line">
+                <div class="fn__flex-column">
+                    <button
+                        class="gap bk_label b3-button b3-button--text"
+                        title="隐藏"
+                        on:click={() => {
+                            autoRefreshChecked = false;
+                            document.getElementById(backLink.id).style.display =
+                                "none";
+                        }}>{@html icon("Eyeoff")}</button
                     >
-                        {#if i == backLink.bk.blockPaths.length - 1}
-                            <button
-                                {...backLink.attrs}
-                                class="bk_label b3-label__text"
-                                on:click={() => refClick(blockPath.id)}
-                                >[...]</button
-                            >
-                        {:else}
-                            {#if blockPath.type == BlockNodeEnum.NODE_DOCUMENT}
+                    <button
+                        class="gap bk_label b3-button b3-button--text"
+                        title="移动到文档"
+                        on:click={async () => {
+                            autoRefreshChecked = false;
+                            document.getElementById(backLink.id).style.display =
+                                "none";
+                            await move2doc(backLink.bk.dom);
+                        }}>{@html icon("Move")}</button
+                    >
+                    <button
+                        class="gap bk_label b3-button b3-button--text"
+                        title="复制到文档"
+                        on:click={async () => {
+                            await copy2doc(backLink.bk.dom);
+                        }}>{@html icon("Copy")}</button
+                    >
+                </div>
+                <div>
+                    {#each backLink.bk.blockPaths as blockPath, i}
+                        <span
+                            {...backLink.attrs}
+                            title={blockPath.name}
+                            class="bk_label b3-label__text"
+                        >
+                            {#if i == backLink.bk.blockPaths.length - 1}
                                 <button
                                     {...backLink.attrs}
                                     class="bk_label b3-label__text"
                                     on:click={() => refClick(blockPath.id)}
-                                    >{blockPath.name.split("/").pop()}</button
+                                    >[...]</button
                                 >
                             {:else}
-                                <button
-                                    {...backLink.attrs}
-                                    class="bk_label b3-label__text"
-                                    on:click={() => refClick(blockPath.id)}
-                                    >{blockPath.name}</button
-                                >
+                                {#if blockPath.type == BlockNodeEnum.NODE_DOCUMENT}
+                                    <button
+                                        {...backLink.attrs}
+                                        class="bk_label b3-label__text"
+                                        on:click={() => refClick(blockPath.id)}
+                                        >{blockPath.name
+                                            .split("/")
+                                            .pop()}</button
+                                    >
+                                {:else}
+                                    <button
+                                        {...backLink.attrs}
+                                        class="bk_label b3-label__text"
+                                        on:click={() => refClick(blockPath.id)}
+                                        >{blockPath.name}</button
+                                    >
+                                {/if}
+                                ➡️
                             {/if}
-                            ➡️
-                        {/if}
-                    </span>
-                {/each}
-                <div use:mountProtyle={backLink}></div>
+                        </span>
+                    {/each}
+                    <div use:mountProtyle={backLink}></div>
+                </div>
             </div>
+            <hr />
         </div>
-        <hr />
-    </div>
-{/each}
+    {/each}
+</div>
 
 <style>
+    .bk_protyle {
+        transform: scale(0.7);
+        transform-origin: top left;
+    }
     [isThisDoc="true"] {
         color: var(--b3-font-color7);
     }
