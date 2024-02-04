@@ -609,6 +609,9 @@ export const siyuan = {
     async addRiffCards(blockIDs: Array<string>, deckID = "20230218211946-2kw8jgx") {
         return siyuan.call("/api/riff/addRiffCards", { blockIDs, deckID });
     },
+    async skipReviewRiffCard(cardID: string, deckID = "20230218211946-2kw8jgx") {
+        return siyuan.call("/api/riff/skipReviewRiffCard", { cardID, deckID });
+    },
     async getRiffCards(page = 1, deckID = ""): Promise<GetCardRet> {
         return siyuan.call("/api/riff/getRiffCards", { "id": deckID, page });
     },

@@ -173,19 +173,21 @@ class CardPriorityBox {
             return [attrMap, stopSet];
         }, [new Map<string, number>(), new Set<string>()]);
         options.cards.sort((a, b) => attrMap.get(b.blockID) - attrMap.get(a.blockID));
+
         const stopped = options.cards.filter(card => stopSet.has(card.blockID));
-        let available = options.cards.filter(card => !stopSet.has(card.blockID));
-        len = available.length;
+        await Promise.all(stopped.map(c => siyuan.skipReviewRiffCard(c.cardID)));
+
+        options.cards = options.cards.filter(card => !stopSet.has(card.blockID));
+        len = options.cards.length;
         const n = Math.floor(len * 5 / 100);
         if (n > 0 && len > n) {
-            const lastN = available.slice(len - n);
-            available = available.slice(0, len - n);
+            const lastN = options.cards.slice(len - n);
+            options.cards = options.cards.slice(0, len - n);
             for (const e of lastN) {
                 const randPosition = Math.floor(Math.random() * (len / 3));
-                available.splice(randPosition, 0, e);
+                options.cards.splice(randPosition, 0, e);
             }
         }
-        options.cards = [...available, ...stopped];
         return options;
     }
 
