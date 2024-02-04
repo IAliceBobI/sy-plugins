@@ -177,6 +177,13 @@ export function sleep(ms: number): Promise<void> {
     });
 }
 
+export function cleanText(text: string) {
+    if (text) {
+        text = text.replace(/\u200B/g, "")?.trim()
+    }
+    return text;
+}
+
 export const NewLute: () => Lute = (globalThis as any).Lute.New;
 
 export const NewNodeID: () => string = (globalThis as any).Lute.NewNodeID;

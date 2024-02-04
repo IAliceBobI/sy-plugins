@@ -7,7 +7,7 @@ import {
     shouldInsertDiv
 } from "./libs/bkUtils";
 import { isValidNumber, siyuanCache } from "./libs/utils";
-import { MarkKey, TEMP_CONTENT } from "./libs/gconst";
+import { MarkKey, TEMP_CONTENT, TOMATO_BK_IGNORE } from "./libs/gconst";
 import BackLinkBottom from "./BackLinkBottom.svelte";
 
 const BKMAKER_ADD = "BKMAKER_ADD";
@@ -138,6 +138,7 @@ class BackLinkBottomBox {
                     if (lock) {
                         const protyle = detail.protyle as IProtyle;
                         if (!protyle || !protyle.element) return;
+                        if (protyle.element.getAttribute(TOMATO_BK_IGNORE)) return;
                         if (protyle.element.classList.contains("card__block")) return;
                         const item = protyle.wysiwyg?.element;
                         if (!item) return;
