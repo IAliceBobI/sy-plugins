@@ -1,7 +1,11 @@
 <script lang="ts">
     import { confirm } from "siyuan";
     import { onMount } from "svelte";
-    import { CacheMinutes, cardPriorityBox } from "./CardPriorityBox";
+    import {
+        CacheMinutes,
+        cardPriorityBox,
+        resumeCard,
+    } from "./CardPriorityBox";
     import {
         CARD_PRIORITY,
         CARD_PRIORITY_STOP,
@@ -56,9 +60,7 @@
         if (!id) return;
         const attrs = await siyuan.getBlockAttrs(id);
         if (attrs[CARD_PRIORITY_STOP]) {
-            const newAttrs = {} as AttrType;
-            newAttrs["custom-card-priority-stop"] = "";
-            await siyuan.setBlockAttrs(id, newAttrs);
+            await resumeCard(id);
             await siyuan.pushMsg("继续闪卡");
             await cardPriorityBox.addBtns(wysiwygElement);
         } else {

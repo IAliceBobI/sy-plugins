@@ -92,13 +92,11 @@ class CardPriorityBox {
                     let datetimeStr = await siyuan.currentTime(Number(days) * 24 * 60 * 60);
                     datetimeStr = timeUtil.makesureDateTimeFormat(datetimeStr);
                     if (datetimeStr) {
-                        const attrs = {} as AttrType;
-                        attrs["custom-card-priority-stop"] = datetimeStr;
                         for (const b of blocks) {
                             const ial = b.ial as unknown as AttrType;
-                            await siyuan.setBlockAttrs(ial.id, attrs);
+                            stopCard(ial.id, datetimeStr);
                         }
-                        await siyuan.pushMsg(`暂停闪卡${days}天`);
+                        await siyuan.pushMsg(`暂停${blocks.length}个闪卡${days}天`);
                     }
                 }
                 if (wysiwygElement) await cardPriorityBox.addBtns(wysiwygElement);
@@ -222,10 +220,22 @@ class CardPriorityBox {
     }
 }
 
-async function resumeCardsDeleteAttr(attrList: AttrType[]) {
-    const now = await siyuan.currentTime();
+export async function resumeCard(blockID: string) {
     const newAttrs = {} as AttrType;
     newAttrs["custom-card-priority-stop"] = "";
+    newAttrs.bookmark = "";
+    return siyuan.setBlockAttrs(blockID, newAttrs)
+}
+
+async function stopCard(blockID: string, datetimeStr: string) {
+    const newAttrs = {} as AttrType;
+    newAttrs["custom-card-priority-stop"] = datetimeStr;
+    newAttrs.bookmark = "🛑 Suspended Cards";
+    siyuan.setBlockAttrs(blockID, newAttrs);
+}
+
+async function resumeCardsDeleteAttr(attrList: AttrType[]) {
+    const now = await siyuan.currentTime();
     const tasks = attrList.filter(attrList => {
         const date = attrList["custom-card-priority-stop"];
         if (date && now >= date) {
@@ -234,7 +244,7 @@ async function resumeCardsDeleteAttr(attrList: AttrType[]) {
         }
         return false;
     })
-        .map(attrList => siyuan.setBlockAttrs(attrList.id, newAttrs));
+        .map(attrList => resumeCard(attrList.id));
     return Promise.all(tasks);
 }
 
