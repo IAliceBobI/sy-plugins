@@ -143,16 +143,19 @@
     function mountProtyle(node: HTMLElement, backLink: BacklinkSv) {
         const len = backLink.bk.blockPaths.length;
         if (len > 0) {
-            new Protyle(maker.plugin.app, node, {
-                blockId: backLink.bk.blockPaths[len - 1].id,
-                render: {
-                    background: false,
-                    title: false,
-                    gutter: false,
-                    scroll: false,
-                    breadcrumb: false,
-                    breadcrumbDocName: false,
-                },
+            const blockId = backLink.bk.blockPaths[len - 1].id;
+            maker.blBox.bkProtyleCache.getOrElse(blockId, () => {
+                return new Protyle(maker.plugin.app, node, {
+                    blockId,
+                    render: {
+                        background: false,
+                        title: false,
+                        gutter: false,
+                        scroll: false,
+                        breadcrumb: false,
+                        breadcrumbDocName: false,
+                    },
+                });
             });
         }
     }

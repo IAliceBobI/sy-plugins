@@ -1,14 +1,16 @@
 export class MaxCache<T> {
     private cache: Map<string, { obj: T, timestamp: number }> = new Map();
     private _maxSize: number;
+    private deleteCB?: (t: T) => void;
     public get maxSize(): number {
         return this._maxSize;
     }
     public set maxSize(value: number) {
         this._maxSize = value;
     }
-    constructor(maxSize: number) {
+    constructor(maxSize: number, deleteCB?: (t: T) => void) {
         this.maxSize = maxSize;
+        this.deleteCB = deleteCB;
     }
     /**
      *  add `obj` to cache, drop the old one without return it.
@@ -22,6 +24,7 @@ export class MaxCache<T> {
             Array.from(this.cache.entries()).sort((e1, e2) => {
                 return e1[1].timestamp - e2[1].timestamp;
             }).slice(0, this.cache.size / 2).forEach(e => {
+                if (this.deleteCB) this.deleteCB(e[1].obj);
                 this.cache.delete(e[0]);
             });
         }
@@ -47,7 +50,7 @@ export class MaxCache<T> {
      * @param createValue 
      * @returns 
      */
-    public getOrElse(key: string, createValue: Func): T {
+    public getOrElse(key: string, createValue: () => T): T {
         const v = this.cache.get(key);
         if (!v) {
             return this.add(key, createValue());
