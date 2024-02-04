@@ -144,19 +144,24 @@
         const len = backLink.bk.blockPaths.length;
         if (len > 0) {
             const blockId = backLink.bk.blockPaths[len - 1].id;
-            maker.blBox.bkProtyleCache.getOrElse(blockId, () => {
-                return new Protyle(maker.plugin.app, node, {
-                    blockId,
-                    render: {
-                        background: false,
-                        title: false,
-                        gutter: false,
-                        scroll: false,
-                        breadcrumb: false,
-                        breadcrumbDocName: false,
+            const p = maker.blBox.bkProtyleCache.getOrElse(blockId, () => {
+                return new Protyle(
+                    maker.plugin.app,
+                    document.createElement("div"),
+                    {
+                        blockId,
+                        render: {
+                            background: false,
+                            title: false,
+                            gutter: false,
+                            scroll: false,
+                            breadcrumb: false,
+                            breadcrumbDocName: false,
+                        },
                     },
-                });
+                );
             });
+            node.appendChild(p.protyle.element);
         }
     }
 
