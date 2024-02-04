@@ -224,7 +224,7 @@ export async function resumeCard(blockID: string) {
     const newAttrs = {} as AttrType;
     newAttrs["custom-card-priority-stop"] = "";
     newAttrs.bookmark = "";
-    return siyuan.setBlockAttrs(blockID, newAttrs)
+    return siyuan.setBlockAttrs(blockID, newAttrs);
 }
 
 async function stopCard(blockID: string, datetimeStr: string) {
