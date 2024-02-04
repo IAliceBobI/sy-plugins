@@ -4,6 +4,7 @@
     import { siyuan, timeUtil } from "@/libs/utils";
     import { events } from "@/libs/Events";
     import { schedule } from "./Schedule";
+    import { TOMATO_BK_IGNORE } from "./libs/gconst";
 
     export let plugin: Plugin;
     export let blockID: BlockID;
@@ -13,8 +14,10 @@
     let protyle: Protyle;
     let idMsg: string = "init...";
     let datetimeStr: string = "init...";
+    const attrs = {};
 
     onMount(async () => {
+        attrs[TOMATO_BK_IGNORE] = "1";
         idMsg = plugin.i18n.clickOneBlockFirst;
         if (!blockID) blockID = events.lastBlockID;
         if (blockID) {
@@ -101,5 +104,10 @@
         {/if}
     </label>
     <div class="fn__hr"></div>
-    <div id="protyle" style="height: 380px;" bind:this={protyleTarget}></div>
+    <div
+        id="protyle"
+        style="height: 380px;"
+        bind:this={protyleTarget}
+        {...attrs}
+    ></div>
 </div>
