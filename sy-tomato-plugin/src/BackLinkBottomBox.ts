@@ -106,7 +106,7 @@ class BackLinkBottomBox {
     public plugin: Plugin;
     public settingCfg: TomatoSettings;
     public divCache: MaxCache<HTMLElement> = new MaxCache(CACHE_LIMIT);
-    public bkProtyleCache: MaxCache<Protyle> = new MaxCache(CACHE_LIMIT * 2, (t) => { t.destroy() });
+    public bkProtyleCache: MaxCache<Protyle> = new MaxCache(CACHE_LIMIT * 2, (t) => { t.destroy(); });
     private makerCache: MaxCache<BKMaker> = new MaxCache(CACHE_LIMIT);
     private docID: string;
     private keepAliveID: any;
