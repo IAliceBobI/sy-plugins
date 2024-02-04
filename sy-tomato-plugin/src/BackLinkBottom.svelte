@@ -14,7 +14,7 @@
         MENTION_COUTING_SPAN,
         icon,
     } from "./libs/bkUtils";
-    import { Dialog, openTab } from "siyuan";
+    import { Dialog, Protyle, openTab } from "siyuan";
     import { SEARCH_HELP } from "./constants";
     import {
         BLOCK_REF,
@@ -136,6 +136,24 @@
             mentions.forEach((m) => scanAllRef(dom2div(m.bk.dom)));
             backLinks = [...backLinks, ...mentions];
             linkItems = [...allRefs.values()];
+        }
+    }
+
+    /** @type {import('svelte/action').Action}  */
+    function mountProtyle(node: HTMLElement, backLink: BacklinkSv) {
+        const len = backLink.bk.blockPaths.length;
+        if (len > 0) {
+            new Protyle(maker.plugin.app, node, {
+                blockId: backLink.bk.blockPaths[len - 1].id,
+                render: {
+                    background: false,
+                    title: false,
+                    gutter: false,
+                    scroll: false,
+                    breadcrumb: false,
+                    breadcrumbDocName: false,
+                },
+            });
         }
     }
 
@@ -399,7 +417,7 @@
                         {/if}
                     </span>
                 {/each}
-                {@html backLink.bk.dom ?? ""}
+                <div use:mountProtyle={backLink}></div>
             </div>
         </div>
         <hr />
