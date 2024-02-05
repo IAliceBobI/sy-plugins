@@ -56,9 +56,9 @@ class CardPriorityBox {
             if (isCardUI(detail as any)) {
                 menu.addItem({
                     iconHTML: "🚗🛑",
-                    label: "暂停当前未复习完成的闪卡",
+                    label: "暂停当前所有未复习完成的闪卡",
                     click: async () => {
-
+                        await this.autoStopRestCards();
                     },
                 });
             }
@@ -83,6 +83,10 @@ class CardPriorityBox {
         });
     }
 
+    async autoStopRestCards() {
+
+    }
+
     blockIconEvent(detail: IEventBusMap["click-blockicon"]) {
         if (!this.plugin) return;
         detail.menu.addItem({
@@ -101,6 +105,15 @@ class CardPriorityBox {
                 }
             }
         });
+        if (isCardUI(detail as any)) {
+            detail.menu.addItem({
+                iconHTML: "🚗🛑",
+                label: "暂停当前所有未复习完成的闪卡",
+                click: async () => {
+                    await this.autoStopRestCards();
+                },
+            });
+        }
     }
 
     async stopCard(event: MouseEvent, cardElement: HTMLElement, wysiwygElement?: HTMLElement) {
