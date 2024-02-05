@@ -1,20 +1,14 @@
 <script lang="ts">
     import { confirm } from "siyuan";
     import { onMount } from "svelte";
-    import {
-        CacheMinutes,
-        cardPriorityBox,
-        resumeCard,
-    } from "./CardPriorityBox";
+    import { CacheMinutes, cardPriorityBox } from "./CardPriorityBox";
     import {
         CARD_PRIORITY,
-        CARD_PRIORITY_STOP,
-        CUSTOM_RIFF_DECKS,
         DATA_NODE_ID,
         SPACE,
         TOMATO_CONTROL_ELEMENT,
     } from "./libs/gconst";
-    import { getID, isValidNumber, siyuan } from "./libs/utils";
+    import { isValidNumber, siyuan } from "./libs/utils";
 
     export let wysiwygElement: HTMLElement;
     export let cardElement: HTMLElement;
@@ -55,20 +49,7 @@
         await cardPriorityBox.addBtns(wysiwygElement);
     }
     async function stopCard(event: MouseEvent) {
-        event.stopPropagation();
-        const id = getID(cardElement, [CUSTOM_RIFF_DECKS]);
-        if (!id) return;
-        const attrs = await siyuan.getBlockAttrs(id);
-        if (attrs[CARD_PRIORITY_STOP]) {
-            await resumeCard(id);
-            await siyuan.pushMsg("继续闪卡");
-            await cardPriorityBox.addBtns(wysiwygElement);
-        } else {
-            await cardPriorityBox.stopCards(
-                [{ ial: { id } }] as any,
-                wysiwygElement,
-            );
-        }
+        cardPriorityBox.stopCard(event, cardElement, wysiwygElement);
     }
     async function removeCard(event: MouseEvent) {
         event.stopPropagation();

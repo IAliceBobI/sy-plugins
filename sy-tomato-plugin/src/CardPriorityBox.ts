@@ -76,11 +76,38 @@ class CardPriorityBox {
     blockIconEvent(detail: IEventBusMap["click-blockicon"]) {
         if (!this.plugin) return;
         detail.menu.addItem({
+            iconHTML: "🏆",
             label: "为闪卡设置优先级",
             click: () => {
                 this.updatePrioritySelected(detail.blockElements);
             }
         });
+        detail.menu.addItem({
+            iconHTML: "🛑",
+            label: "闪卡暂停/恢复",
+            click: (_e, event) => {
+                for (const e of detail.blockElements) {
+                    this.stopCard(event, e, detail.protyle?.wysiwyg?.element);
+                }
+            }
+        });
+    }
+
+    async stopCard(event: MouseEvent, cardElement: HTMLElement, wysiwygElement?: HTMLElement) {
+        event.stopPropagation();
+        const id = getID(cardElement, [CUSTOM_RIFF_DECKS]);
+        if (!id) return;
+        const attrs = await siyuan.getBlockAttrs(id);
+        if (attrs[CARD_PRIORITY_STOP]) {
+            await resumeCard(id);
+            await siyuan.pushMsg("继续闪卡");
+            await cardPriorityBox.addBtns(wysiwygElement);
+        } else {
+            await cardPriorityBox.stopCards(
+                [{ ial: { id } }] as any,
+                wysiwygElement,
+            );
+        }
     }
 
     async stopCards(blocks: Block[], wysiwygElement?: HTMLElement) {
@@ -201,6 +228,7 @@ class CardPriorityBox {
     }
 
     async addBtns(wysiwygElement: HTMLElement) {
+        if (!wysiwygElement) return;
         [...wysiwygElement.querySelectorAll(`[${CUSTOM_RIFF_DECKS}]`)]
             .map((cardElement: HTMLElement) => {
                 cardElement.querySelectorAll(`[${TOMATO_CONTROL_ELEMENT}]`).forEach(e => e.parentElement.removeChild(e));
