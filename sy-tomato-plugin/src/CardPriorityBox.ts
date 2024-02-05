@@ -96,7 +96,7 @@ class CardPriorityBox {
             return false;
         }).map(due => {
             return { ial: { id: due.blockID } } as unknown as Block;
-        })
+        });
         await this.stopCards(blocks, protyle?.protyle?.wysiwyg?.element);
     }
 

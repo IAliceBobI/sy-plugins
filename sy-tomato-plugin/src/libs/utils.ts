@@ -23,7 +23,7 @@ export function clone<T>(obj: T): T {
 
 export function isCardUI(protyle: Protyle) {
     const e = protyle?.protyle?.element as HTMLElement;
-    return e?.classList?.contains("card__block")
+    return e?.classList?.contains("card__block");
 }
 
 export function sortedMap<K, V>(map: Map<K, V>, compareFn?: (a: [K, V], b: [K, V]) => number) {
