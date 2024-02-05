@@ -92,7 +92,12 @@ class ReadingPointBox {
         const resp = await siyuan.listDocsByPath(boxID, "/", 256);
         resp.files.reverse();
         for (const file of resp.files) {
-            const fromWhere = `from blocks where path like '${file.path.replace(/\.sy$/, "")}%' and box='${boxID}' and ial like '%bookmark=%'`;
+            const fromWhere = `from blocks 
+                where path like '${file.path.replace(/\.sy$/, "")}%' 
+                and box='${boxID}' 
+                and ial like '%bookmark=%'
+                and ial not like '%bookmark="🛑 Suspended Cards"%'
+            `.replace(/\n/g, " ");
             const rows = await siyuan.sql(`select id ${fromWhere} limit 1`);
             if (rows.length > 0) {
                 const sqlStr = `select * ${fromWhere} order by updated desc`;

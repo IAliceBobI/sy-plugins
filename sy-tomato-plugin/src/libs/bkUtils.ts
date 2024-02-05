@@ -38,7 +38,7 @@ export async function shouldInsertDiv(lastID: string, docID: string) {
 // }
 
 export function getLastElementID(item: HTMLElement) {
-    return item.lastElementChild.getAttribute(DATA_NODE_ID);
+    return item?.lastElementChild?.getAttribute(DATA_NODE_ID) ?? "";
 }
 
 export const MENTION_CACHE_TIME = 1 * 60 * 1000;
