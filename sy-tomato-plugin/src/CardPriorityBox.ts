@@ -1,6 +1,6 @@
-import { ICardData, IEventBusMap, IProtyle, Plugin } from "siyuan";
+import { ICard, ICardData, IEventBusMap, IProtyle, Plugin } from "siyuan";
 import "./index.scss";
-import { getID, isValidNumber, shuffleArray, siyuan, siyuanCache, timeUtil } from "./libs/utils";
+import { clone, getID, isValidNumber, shuffleArray, siyuan, siyuanCache, timeUtil } from "./libs/utils";
 import { CARD_PRIORITY_STOP, CUSTOM_RIFF_DECKS, DATA_NODE_ID, TOMATO_CONTROL_ELEMENT } from "./libs/gconst";
 import { DialogText } from "./libs/DialogText";
 import { EventType, events } from "./libs/Events";
@@ -11,6 +11,7 @@ export const CacheMinutes = 5;
 class CardPriorityBox {
     plugin: Plugin;
     cards: Map<string, RiffCard>;
+    reviewing: ICard[];
 
     async onload(plugin: Plugin) {
         this.plugin = plugin;
@@ -121,7 +122,7 @@ class CardPriorityBox {
                     if (datetimeStr) {
                         for (const b of blocks) {
                             const ial = b.ial as unknown as AttrType;
-                            stopCard(ial.id, datetimeStr);
+                            stopCard(ial.id, datetimeStr).then();
                         }
                         await siyuan.pushMsg(`暂停${blocks.length}个闪卡${days}天`);
                     }
@@ -182,8 +183,8 @@ class CardPriorityBox {
 
     async updateCards(options: ICardData) {
         if (!this.plugin) return options;
-        let len = options.cards.length;
-        if (len <= 1) return options;
+        const OldLen = options.cards.length;
+        if (OldLen <= 1) return options;
         options.cards = shuffleArray(options.cards);
         const attrList = await Promise.all(options.cards.map(card => siyuan.getBlockAttrs(card.blockID)));
 
@@ -203,7 +204,7 @@ class CardPriorityBox {
         await Promise.all(stopped.map(c => siyuan.skipReviewRiffCard(c.cardID)));
 
         options.cards = options.cards.filter(card => !stopSet.has(card.blockID));
-        len = options.cards.length;
+        const len = options.cards.length;
         const n = Math.floor(len * 5 / 100);
         if (n > 0 && len > n) {
             const lastN = options.cards.slice(len - n);
@@ -213,6 +214,7 @@ class CardPriorityBox {
                 options.cards.splice(randPosition, 0, e);
             }
         }
+        this.reviewing = clone(options.cards);
         return options;
     }
 
@@ -300,3 +302,28 @@ function ensureValidPriority(priority: number) {
 }
 
 export const cardPriorityBox = new CardPriorityBox();
+
+// private updateCardStatistic(options: ICardData, OldLen: number) {
+//     options.unreviewedCount = options.cards.length;
+//     for (let i = 0; i < OldLen - options.unreviewedCount; i++) {
+//         const card = options.cards[i];
+//         const cardInfo = this.cards?.get(card.blockID)
+//         if (cardInfo) {
+//             if (cardInfo.reps > 0) {
+//                 options.unreviewedOldCardCount--;
+//                 console.log("cardInfo unreviewedOldCardCount--")
+//             } else {
+//                 options.unreviewedNewCardCount--;
+//                 console.log("cardInfo unreviewedNewCardCount--")
+//             }
+//         } else {
+//             if (options.unreviewedOldCardCount > 0) {
+//                 options.unreviewedOldCardCount--;
+//                 console.log("unreviewedOldCardCount--")
+//             } else {
+//                 options.unreviewedNewCardCount--;
+//                 console.log("unreviewedNewCardCount--")
+//             }
+//         }
+//     }
+// }

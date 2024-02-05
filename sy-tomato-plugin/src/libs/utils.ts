@@ -17,6 +17,10 @@ export function arrayRemove<T>(array: T[], element: T) {
     return array;
 }
 
+export function clone<T>(obj: T): T {
+    return JSON.parse(JSON.stringify(obj));
+}
+
 export function sortedMap<K, V>(map: Map<K, V>, compareFn?: (a: [K, V], b: [K, V]) => number) {
     return new Map([...map.entries()].sort(compareFn));
 }
