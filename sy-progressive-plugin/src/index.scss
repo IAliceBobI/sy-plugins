@@ -1,3 +1,4 @@
+// ref path of original
 .protyle-wysiwyg div[custom-origin-hpath]:not([custom-prog-origin-text])::before {
   content: attr(custom-origin-hpath);
   opacity: 0.5;
@@ -6,6 +7,7 @@
   padding-left: 15px;
 }
 
+// ref path
 .protyle-wysiwyg div[custom-ref-hpath]:not([custom-prog-origin-text]):not([custom-origin-hpath])::before {
   content: attr(custom-ref-hpath);
   opacity: 0.5;
@@ -14,17 +16,20 @@
   padding-left: 15px;
 }
 
+// note in pieces
 .protyle-wysiwyg div[custom-progref][custom-paragraph-index]:not([custom-prog-origin-text]):not([custom-prog-key-note]) {
   color: var(--b3-font-color7);
 }
 
+// last block of the previous piece
 .protyle-wysiwyg div[custom-prog-piece-previous] {
   transform: scale(0.6);
   transform-origin: 0 0;
 }
 
+// key note
 .protyle-wysiwyg div[custom-prog-key-note] {
-  color: var(--b3-font-color8);
+  color: var(--b3-font-color12);
 }
 
 @keyframes progFadeIn {
@@ -40,7 +45,7 @@
 }
 
 .protyle-wysiwyg div[custom-progref] {
-  animation: progFadeIn 0.75s forwards;
+  animation: progFadeIn 0.70s forwards;
 }
 
 .prog-style {
