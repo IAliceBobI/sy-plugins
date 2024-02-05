@@ -1,4 +1,4 @@
-import { App, Constants, IOperation, Lute, fetchSyncPost, openTab } from "siyuan";
+import { App, Constants, IOperation, Lute, Protyle, fetchSyncPost, openTab } from "siyuan";
 import { v4 as uuid } from "uuid";
 import * as gconst from "./gconst";
 
@@ -19,6 +19,11 @@ export function arrayRemove<T>(array: T[], element: T) {
 
 export function clone<T>(obj: T): T {
     return JSON.parse(JSON.stringify(obj));
+}
+
+export function isCardUI(protyle: Protyle) {
+    const e = protyle?.protyle?.element as HTMLElement;
+    return e?.classList?.contains("card__block")
 }
 
 export function sortedMap<K, V>(map: Map<K, V>, compareFn?: (a: [K, V], b: [K, V]) => number) {

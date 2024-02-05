@@ -1,6 +1,6 @@
 import { ICard, ICardData, IEventBusMap, IProtyle, Plugin } from "siyuan";
 import "./index.scss";
-import { clone, getID, isValidNumber, shuffleArray, siyuan, siyuanCache, timeUtil } from "./libs/utils";
+import { clone, getID, isCardUI, isValidNumber, shuffleArray, siyuan, siyuanCache, timeUtil } from "./libs/utils";
 import { CARD_PRIORITY_STOP, CUSTOM_RIFF_DECKS, DATA_NODE_ID, TOMATO_CONTROL_ELEMENT } from "./libs/gconst";
 import { DialogText } from "./libs/DialogText";
 import { EventType, events } from "./libs/Events";
@@ -53,6 +53,15 @@ class CardPriorityBox {
                     await this.stopCards(blocks);
                 },
             });
+            if (isCardUI(detail as any)) {
+                menu.addItem({
+                    iconHTML: "🚗🛑",
+                    label: "暂停当前未复习完成的闪卡",
+                    click: async () => {
+
+                    },
+                });
+            }
         });
 
         events.addListener("Tomato-CardPriorityBox", (eventType, detail) => {

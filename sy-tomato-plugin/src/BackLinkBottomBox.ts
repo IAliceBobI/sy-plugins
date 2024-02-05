@@ -6,7 +6,7 @@ import {
     integrateCounting,
     shouldInsertDiv
 } from "./libs/bkUtils";
-import { isValidNumber, siyuanCache } from "./libs/utils";
+import { isCardUI, isValidNumber, siyuanCache } from "./libs/utils";
 import { MarkKey, TEMP_CONTENT, TOMATO_BK_IGNORE } from "./libs/gconst";
 import BackLinkBottom from "./BackLinkBottom.svelte";
 
@@ -140,7 +140,7 @@ class BackLinkBottomBox {
                         const protyle = detail.protyle as IProtyle;
                         if (!protyle || !protyle.element) return;
                         if (protyle.element.getAttribute(TOMATO_BK_IGNORE)) return;
-                        if (protyle.element.classList.contains("card__block")) return;
+                        if (isCardUI(detail)) return;
                         const item = protyle.wysiwyg?.element;
                         if (!item) return;
                         const nextDocID = protyle.block.rootID ?? "";
