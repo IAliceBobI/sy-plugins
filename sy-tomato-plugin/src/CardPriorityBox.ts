@@ -1,6 +1,6 @@
-import { ICard, ICardData, IEventBusMap, IProtyle, Plugin } from "siyuan";
+import { ICardData, IEventBusMap, IProtyle, Plugin, Protyle } from "siyuan";
 import "./index.scss";
-import { clone, getID, isCardUI, isValidNumber, shuffleArray, siyuan, siyuanCache, timeUtil } from "./libs/utils";
+import { getID, isCardUI, isValidNumber, shuffleArray, siyuan, siyuanCache, timeUtil } from "./libs/utils";
 import { CARD_PRIORITY_STOP, CUSTOM_RIFF_DECKS, DATA_NODE_ID, TOMATO_CONTROL_ELEMENT } from "./libs/gconst";
 import { DialogText } from "./libs/DialogText";
 import { EventType, events } from "./libs/Events";
@@ -11,10 +11,12 @@ export const CacheMinutes = 5;
 class CardPriorityBox {
     plugin: Plugin;
     cards: Map<string, RiffCard>;
-    reviewing: ICard[];
+    beforeReview: Map<string, DueCard>;
 
     async onload(plugin: Plugin) {
         this.plugin = plugin;
+        this.beforeReview = new Map();
+        this.cards = new Map();
         this.plugin.addCommand({
             langKey: "cardPrioritySet",
             hotkey: "F6",
@@ -58,7 +60,7 @@ class CardPriorityBox {
                     iconHTML: "🚗🛑",
                     label: "暂停当前所有未复习完成的闪卡",
                     click: async () => {
-                        await this.autoStopRestCards();
+                        await this.autoStopRestCards(detail as any);
                     },
                 });
             }
@@ -83,8 +85,19 @@ class CardPriorityBox {
         });
     }
 
-    async autoStopRestCards() {
-
+    async autoStopRestCards(protyle: Protyle) {
+        const blocks = (await siyuan.getRiffDueCards()).cards.filter(due => {
+            const oldDue = this.beforeReview.get(due.blockID);
+            if (oldDue) {
+                if (oldDue.state === due.state) {
+                    return true;
+                }
+            }
+            return false;
+        }).map(due => {
+            return { ial: { id: due.blockID } } as unknown as Block;
+        })
+        await this.stopCards(blocks, protyle?.protyle?.wysiwyg?.element);
     }
 
     blockIconEvent(detail: IEventBusMap["click-blockicon"]) {
@@ -110,7 +123,7 @@ class CardPriorityBox {
                 iconHTML: "🚗🛑",
                 label: "暂停当前所有未复习完成的闪卡",
                 click: async () => {
-                    await this.autoStopRestCards();
+                    await this.autoStopRestCards(detail as any);
                 },
             });
         }
@@ -236,7 +249,12 @@ class CardPriorityBox {
                 options.cards.splice(randPosition, 0, e);
             }
         }
-        this.reviewing = clone(options.cards);
+        this.beforeReview = (await siyuan.getRiffDueCards()).cards
+            .filter(c => options.cards.findIndex((v) => v.blockID === c.blockID) >= 0)
+            .reduce((m, c) => {
+                m.set(c.blockID, c);
+                return m;
+            }, new Map());
         return options;
     }
 
