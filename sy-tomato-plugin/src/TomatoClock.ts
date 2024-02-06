@@ -67,7 +67,7 @@ class TomatoClock {
         });
 
         this.plugin.setting.addItem({
-            title: "** 计时后修改背景（据说能提高专注力）",
+            title: "** 计时后修改背景-明亮模式",
             description: "依赖：状态栏番茄钟。比如填入：assets/dd-20240206160021-tz7aefu.jpeg",
             createActionElement: () => {
                 const input = document.createElement("input") as HTMLInputElement;
@@ -81,24 +81,42 @@ class TomatoClock {
             },
         });
 
-        if (this.settingCfg["tomato-clocks-change-bg"]) {
-            events.addListener("TomatoClockBox", (eventType: string, _detail: Protyle) => {
-                if (eventType == EventType.loaded_protyle_static) {
-                    this.maintainBgImg();
-                }
-            });
-        }
+        this.plugin.setting.addItem({
+            title: "** 计时后修改背景-黑暗模式",
+            description: "依赖：状态栏番茄钟。比如填入：assets/dd-20240206160021-tz7aefu.jpeg",
+            createActionElement: () => {
+                const input = document.createElement("input") as HTMLInputElement;
+                input.className = "input";
+                input.value = this.settingCfg["tomato-clocks-change-bg-dark"] ?? "";
+                input.className = "b3-text-field fn__flex-center";
+                input.addEventListener("input", () => {
+                    this.settingCfg["tomato-clocks-change-bg-dark"] = input.value;
+                });
+                return input;
+            },
+        });
+
+        events.addListener("TomatoClockBox", (eventType: string, _detail: Protyle) => {
+            if (eventType == EventType.loaded_protyle_static) {
+                this.maintainBgImg();
+            }
+        });
     }
 
     private maintainBgImg() {
-        if (!this.settingCfg["tomato-clocks-change-bg"]) return;
-        const protyle = events.protyle;
-        const e = protyle?.protyle?.element as HTMLElement;
+        const mode = document.querySelector('[data-theme-mode]')?.getAttribute("data-theme-mode");
+        if (!mode) return;
+        let url = this.settingCfg["tomato-clocks-change-bg"];
+        if (mode == "dark") {
+            url = this.settingCfg["tomato-clocks-change-bg-dark"];
+        }
+        if (!url) return;
+        const e = events?.protyle?.protyle?.element as HTMLElement;
         if (!e) return;
         if (!this.lastDelayMinute) {
             if (e.style.backgroundImage) e.style.backgroundImage = "";
         } else {
-            e.style.backgroundImage = `url('${this.settingCfg["tomato-clocks-change-bg"]}')`;
+            e.style.backgroundImage = `url('${url}')`;
         }
     }
 

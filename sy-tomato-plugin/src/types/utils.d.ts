@@ -30,6 +30,7 @@ type TomatoSettings = {
     "daily-note-box-id": string,
     "tomato-clocks": string,
     "tomato-clocks-change-bg": string,
+    "tomato-clocks-change-bg-dark": string,
     "back-link-max-size": number,
     "back-link-mention-count": number,
     "tag-to-ref-add-card": boolean,
