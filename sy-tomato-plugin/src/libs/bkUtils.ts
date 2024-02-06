@@ -46,5 +46,5 @@ export const MENTION_CACHE_TIME = 1 * 60 * 1000;
 export const MENTION_COUTING_SPAN = "MENTION_COUTING_SPAN";
 
 export function integrateCounting(self: BKMaker) {
-    self.container.querySelector(`[${MENTION_COUTING_SPAN}]`)?.appendChild(self.mentionCounting);
+    self.container?.querySelector(`[${MENTION_COUTING_SPAN}]`)?.appendChild(self.mentionCounting);
 }

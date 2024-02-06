@@ -31,6 +31,7 @@ type TomatoSettings = {
     "tomato-clocks": string,
     "tomato-clocks-change-bg": string,
     "back-link-max-size": number,
+    "back-link-mention-count": number,
     "tag-to-ref-add-card": boolean,
 };
 

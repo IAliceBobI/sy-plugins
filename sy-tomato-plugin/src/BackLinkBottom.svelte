@@ -38,6 +38,7 @@
         bkDiv: HTMLElement;
         id: string;
         attrs: LinkElementAttr;
+        isMention: boolean;
     };
 
     export let maker: BKMaker;
@@ -108,6 +109,7 @@
                         bk: mentionItem,
                         id: newID(),
                         attrs: {},
+                        isMention: true,
                     } as BacklinkSv);
                     ++count;
                     maker.mentionCounting.innerText = `提及读取中：${count}`;
@@ -386,7 +388,7 @@
                                     {...backLink.attrs}
                                     class="bk_label b3-label__text"
                                     on:click={() => refClick(blockPath.id)}
-                                    >[...]</button
+                                    >[{backLink.isMention ? "🇲" : "🇷"}]</button
                                 >
                             {:else}
                                 {#if blockPath.type == BlockNodeEnum.NODE_DOCUMENT}

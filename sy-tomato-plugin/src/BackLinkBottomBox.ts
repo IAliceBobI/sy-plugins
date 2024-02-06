@@ -6,7 +6,7 @@ import {
     integrateCounting,
     shouldInsertDiv
 } from "./libs/bkUtils";
-import { isCardUI, isValidNumber, siyuanCache, sleep } from "./libs/utils";
+import { isCardUI, isValidNumber, siyuanCache } from "./libs/utils";
 import { MarkKey, TEMP_CONTENT, TOMATO_BK_IGNORE } from "./libs/gconst";
 import BackLinkBottom from "./BackLinkBottom.svelte";
 
@@ -30,7 +30,7 @@ export class BKMaker {
     public plugin: Plugin;
 
     constructor(blBox: BackLinkBottomBox, docID: string) {
-        this.mentionCount = 1;
+        this.mentionCount = blBox.settingCfg["back-link-mention-count"] ?? 1;
         this.docID = docID;
         this.blBox = blBox;
         this.shouldFreeze = false;
@@ -113,21 +113,42 @@ class BackLinkBottomBox {
     async onload(plugin: Plugin) {
         this.plugin = plugin;
         this.settingCfg = (plugin as any).settingCfg;
-        const MaxCount = 100;
-        if (!isValidNumber(this.settingCfg["back-link-max-size"])) this.settingCfg["back-link-max-size"] = MaxCount;
+
+        {
+            const MaxCount = 100;
+            if (!isValidNumber(this.settingCfg["back-link-max-size"])) this.settingCfg["back-link-max-size"] = MaxCount;
+            this.plugin.setting.addItem({
+                title: "** 底部反链最大展开的文件数",
+                description: "注意：一个文件中可能有多个反链。所以此设置不等于反链数量。",
+                createActionElement: () => {
+                    const input = document.createElement("input") as HTMLInputElement;
+                    input.className = "input";
+                    input.value = String(this.settingCfg["back-link-max-size"]);
+                    input.className = "b3-text-field fn__flex-center";
+                    input.addEventListener("input", () => {
+                        let c = Number(input.value.trim());
+                        if (!isValidNumber(c)) c = MaxCount;
+                        if (c <= 0) c = MaxCount;
+                        this.settingCfg["back-link-max-size"] = c;
+                    });
+                    return input;
+                },
+            });
+        }
+
         this.plugin.setting.addItem({
-            title: "** 底部反链最大展开的文件数",
-            description: "注意：一个文件中可能有多个反链。所以此设置不等于反链数量。",
+            title: "** 底部反链默认提及数",
+            description: "",
             createActionElement: () => {
                 const input = document.createElement("input") as HTMLInputElement;
                 input.className = "input";
-                input.value = String(this.settingCfg["back-link-max-size"]);
+                input.value = String(this.settingCfg["back-link-mention-count"] ?? "1");
                 input.className = "b3-text-field fn__flex-center";
                 input.addEventListener("input", () => {
                     let c = Number(input.value.trim());
-                    if (!isValidNumber(c)) c = MaxCount;
-                    if (c == 0) c = MaxCount;
-                    this.settingCfg["back-link-max-size"] = c;
+                    if (!isValidNumber(c)) c = 1;
+                    if (c <= 0) c = 1;
+                    this.settingCfg["back-link-mention-count"] = c;
                 });
                 return input;
             },
