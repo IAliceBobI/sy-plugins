@@ -104,7 +104,7 @@ class TomatoClock {
     }
 
     private maintainBgImg() {
-        const mode = document.querySelector('[data-theme-mode]')?.getAttribute("data-theme-mode");
+        const mode = document.querySelector("[data-theme-mode]")?.getAttribute("data-theme-mode");
         if (!mode) return;
         let url = this.settingCfg["tomato-clocks-change-bg"];
         if (mode == "dark") {
