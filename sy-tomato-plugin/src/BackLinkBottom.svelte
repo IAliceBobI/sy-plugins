@@ -21,6 +21,7 @@
         BlockNodeEnum,
         DATA_ID,
         DATA_TYPE,
+        TOMATO_BK_IGNORE,
     } from "./libs/gconst";
     import { BKMaker } from "./BackLinkBottomBox";
     import { SearchEngine } from "./libs/search";
@@ -145,21 +146,19 @@
         if (len > 0) {
             const blockId = backLink.bk.blockPaths[len - 1].id;
             const p = maker.blBox.bkProtyleCache.getOrElse(blockId, () => {
-                return new Protyle(
-                    maker.plugin.app,
-                    document.createElement("div"),
-                    {
-                        blockId,
-                        render: {
-                            background: false,
-                            title: false,
-                            gutter: false,
-                            scroll: false,
-                            breadcrumb: false,
-                            breadcrumbDocName: false,
-                        },
+                const div = document.createElement("div") as HTMLElement;
+                div.setAttribute(TOMATO_BK_IGNORE, "1");
+                return new Protyle(maker.plugin.app, div, {
+                    blockId,
+                    render: {
+                        background: false,
+                        title: false,
+                        gutter: false,
+                        scroll: false,
+                        breadcrumb: false,
+                        breadcrumbDocName: false,
                     },
-                );
+                });
             });
             node.appendChild(p.protyle.element);
         }
