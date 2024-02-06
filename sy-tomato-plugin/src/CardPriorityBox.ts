@@ -217,6 +217,7 @@ class CardPriorityBox {
     }
 
     async updateCards(options: ICardData) {
+        if (!options?.cards?.length) return options;
         if (!this.plugin) return options;
         const OldLen = options.cards.length;
         if (OldLen <= 1) return options;
