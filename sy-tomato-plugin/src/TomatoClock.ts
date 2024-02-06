@@ -98,7 +98,7 @@ class TomatoClock {
         if (!this.lastDelayMinute) {
             if (e.style.backgroundImage) e.style.backgroundImage = "";
         } else {
-            e.style.backgroundImage = `url('${this.settingCfg["tomato-clocks-change-bg"]}')`
+            e.style.backgroundImage = `url('${this.settingCfg["tomato-clocks-change-bg"]}')`;
         }
     }
 
