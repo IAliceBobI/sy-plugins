@@ -1,11 +1,13 @@
 import {
     Dialog,
     Plugin,
+    Protyle,
     showMessage,
 } from "siyuan";
 import "./index.scss";
 import { siyuan } from "./libs/utils";
 import { STORAGE_TOMATO_TIME } from "./constants";
+import { EventType, events } from "./libs/Events";
 
 
 function formatDuration(milliseconds: number): { minutes: number, seconds: number } {
@@ -42,18 +44,20 @@ class TomatoClock {
                     this.timeoutID = setTimeout(() => {
                         this.showTimeoutDialog(data.minute);
                         this.lastDelayMinute = 0;
+                        this.maintainBgImg();
                     }, due - now);
                 }
+                this.maintainBgImg();
             }
         });
-
+        const clocks = this.addStatusIcons();
         this.plugin.setting.addItem({
             title: "** 番茄钟时长(中英文逗号隔开，半角数字)",
             description: "依赖：状态栏番茄钟",
             createActionElement: () => {
                 const input = document.createElement("input") as HTMLInputElement;
                 input.className = "input";
-                input.value = this.getClocks();
+                input.value = clocks;
                 input.className = "b3-text-field fn__flex-center";
                 input.addEventListener("input", () => {
                     this.settingCfg["tomato-clocks"] = input.value;
@@ -63,22 +67,42 @@ class TomatoClock {
         });
 
         this.plugin.setting.addItem({
-            title: "** 修改背景（据说能提高专注力）",
-            description: "依赖：状态栏番茄钟",
+            title: "** 计时后修改背景（据说能提高专注力）",
+            description: "依赖：状态栏番茄钟。比如填入：assets/dd-20240206160021-tz7aefu.jpeg",
             createActionElement: () => {
-                const checkbox = document.createElement("input") as HTMLInputElement;
-                checkbox.type = "checkbox";
-                checkbox.checked = this.settingCfg["tomato-clocks-change-bg"] ?? false;
-                checkbox.addEventListener("change", () => {
-                    this.settingCfg["tomato-clocks-change-bg"] = checkbox.checked;
+                const input = document.createElement("input") as HTMLInputElement;
+                input.className = "input";
+                input.value = this.settingCfg["tomato-clocks-change-bg"] ?? "";
+                input.className = "b3-text-field fn__flex-center";
+                input.addEventListener("input", () => {
+                    this.settingCfg["tomato-clocks-change-bg"] = input.value;
                 });
-                checkbox.className = "b3-switch fn__flex-center";
-                return checkbox;
+                return input;
             },
         });
+
+        if (this.settingCfg["tomato-clocks-change-bg"]) {
+            events.addListener("TomatoClockBox", (eventType: string, _detail: Protyle) => {
+                if (eventType == EventType.loaded_protyle_static) {
+                    this.maintainBgImg();
+                }
+            });
+        }
     }
 
-    private getClocks() {
+    private maintainBgImg() {
+        if (!this.settingCfg["tomato-clocks-change-bg"]) return;
+        const protyle = events.protyle;
+        const e = protyle?.protyle?.element as HTMLElement;
+        if (!e) return;
+        if (!this.lastDelayMinute) {
+            if (e.style.backgroundImage) e.style.backgroundImage = "";
+        } else {
+            e.style.backgroundImage = `url('${this.settingCfg["tomato-clocks-change-bg"]}')`
+        }
+    }
+
+    private addStatusIcons() {
         let clocks: string = this.settingCfg["tomato-clocks"] ?? "5,10,15,25";
         const washed = [0];
         for (const clock of clocks.split(/[,，]/g)) {
@@ -141,12 +165,16 @@ class TomatoClock {
             this.lastStartTime = Date.now();
             if (minute > 0) {
                 showMessage(`${name}🍅${this.plugin.i18n.startCountdown}: ${minute}m`, 5000);
+                this.plugin.saveData(STORAGE_TOMATO_TIME, { minute, startTime: this.lastStartTime });
                 this.timeoutID = setTimeout(() => {
                     this.showTimeoutDialog(minute);
                     this.lastDelayMinute = 0;
+                    this.maintainBgImg();
                 }, minute * 60 * 1000);
-                this.plugin.saveData(STORAGE_TOMATO_TIME, { minute, startTime: this.lastStartTime });
+            } else {
+                this.plugin.saveData(STORAGE_TOMATO_TIME, { minute: 0, startTime: 0 });
             }
+            this.maintainBgImg();
         });
         this.plugin.addStatusBar({
             element: statusIconTemp.content.firstElementChild as HTMLElement,
