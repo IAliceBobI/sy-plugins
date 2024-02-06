@@ -18,18 +18,18 @@
 
 // note in pieces
 .protyle-wysiwyg div[custom-progref][custom-paragraph-index]:not([custom-prog-origin-text]):not([custom-prog-key-note]) {
-  color: var(--b3-font-color12);
+  color: var(--b3-font-color1);
+}
+
+// key note
+.protyle-wysiwyg div[custom-prog-key-note] {
+  color: var(--b3-font-color1);
 }
 
 // last block of the previous piece
 .protyle-wysiwyg div[custom-prog-piece-previous] {
   transform: scale(0.6);
   transform-origin: 0 0;
-}
-
-// key note
-.protyle-wysiwyg div[custom-prog-key-note] {
-  color: var(--b3-font-color12);
 }
 
 @keyframes progFadeIn {
