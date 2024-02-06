@@ -18,12 +18,12 @@
 
 // note in pieces
 .protyle-wysiwyg div[custom-progref][custom-paragraph-index]:not([custom-prog-origin-text]):not([custom-prog-key-note]) {
-  color: var(--b3-font-color1);
+  color: var(--b3-font-color8);
 }
 
 // key note
 .protyle-wysiwyg div[custom-prog-key-note] {
-  color: var(--b3-font-color1);
+  color: var(--b3-font-color8);
 }
 
 // last block of the previous piece
