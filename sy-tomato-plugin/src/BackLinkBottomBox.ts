@@ -6,7 +6,7 @@ import {
     integrateCounting,
     shouldInsertDiv
 } from "./libs/bkUtils";
-import { isCardUI, isValidNumber, siyuanCache } from "./libs/utils";
+import { isCardUI, isValidNumber, siyuanCache, sleep } from "./libs/utils";
 import { MarkKey, TEMP_CONTENT, TOMATO_BK_IGNORE } from "./libs/gconst";
 import BackLinkBottom from "./BackLinkBottom.svelte";
 
@@ -63,7 +63,7 @@ export class BKMaker {
 
                 if (!this.shouldFreeze) {
                     // substitute old for new
-                    this.insertBkPanel(this.container);
+                    await this.insertBkPanel(this.container);
                     integrateCounting(this);
                     deleteSelf(divs);
                 }
