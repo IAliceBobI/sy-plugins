@@ -47,6 +47,38 @@ class TomatoClock {
             }
         });
 
+        this.plugin.setting.addItem({
+            title: "** 番茄钟时长(中英文逗号隔开，半角数字)",
+            description: "依赖：状态栏番茄钟",
+            createActionElement: () => {
+                const input = document.createElement("input") as HTMLInputElement;
+                input.className = "input";
+                input.value = this.getClocks();
+                input.className = "b3-text-field fn__flex-center";
+                input.addEventListener("input", () => {
+                    this.settingCfg["tomato-clocks"] = input.value;
+                });
+                return input;
+            },
+        });
+
+        this.plugin.setting.addItem({
+            title: "** 修改背景（据说能提高专注力）",
+            description: "依赖：状态栏番茄钟",
+            createActionElement: () => {
+                const checkbox = document.createElement("input") as HTMLInputElement;
+                checkbox.type = "checkbox";
+                checkbox.checked = this.settingCfg["tomato-clocks-change-bg"] ?? false;
+                checkbox.addEventListener("change", () => {
+                    this.settingCfg["tomato-clocks-change-bg"] = checkbox.checked;
+                });
+                checkbox.className = "b3-switch fn__flex-center";
+                return checkbox;
+            },
+        });
+    }
+
+    private getClocks() {
         let clocks: string = this.settingCfg["tomato-clocks"] ?? "5,10,15,25";
         const washed = [0];
         for (const clock of clocks.split(/[,，]/g)) {
@@ -62,21 +94,7 @@ class TomatoClock {
             return String(i);
         }).join(",");
         this.settingCfg["tomato-clocks"] = clocks;
-
-        this.plugin.setting.addItem({
-            title: "** 番茄钟时长(中英文逗号隔开，半角数字)",
-            description: "依赖：状态栏番茄钟",
-            createActionElement: () => {
-                const input = document.createElement("input") as HTMLInputElement;
-                input.className = "input";
-                input.value = clocks;
-                input.className = "b3-text-field fn__flex-center";
-                input.addEventListener("input", () => {
-                    this.settingCfg["tomato-clocks"] = input.value;
-                });
-                return input;
-            },
-        });
+        return clocks;
     }
 
     private getRemainingTime() {

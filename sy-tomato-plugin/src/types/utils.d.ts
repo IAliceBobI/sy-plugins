@@ -29,6 +29,7 @@ type TomatoSettings = {
     listBoxCheckbox: boolean,
     "daily-note-box-id": string,
     "tomato-clocks": string,
+    "tomato-clocks-change-bg": boolean,
     "back-link-max-size": number,
     "tag-to-ref-add-card": boolean,
 };
