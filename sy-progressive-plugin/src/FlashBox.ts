@@ -43,21 +43,21 @@ class FlashBox {
             cardType = CardType.B;
         }
         detail.menu.addItem({
-            iconHTML: "",
+            iconHTML: "🗃️",
             label: this.plugin.i18n.insertBlankSpaceCard,
             click: () => {
                 this.makeCard(detail.protyle, cardType);
             }
         });
         detail.menu.addItem({
-            iconHTML: "",
+            iconHTML: "🗓️🗃️🇷",
             label: this.plugin.i18n.send2dailyCard,
             click: () => {
                 this.makeCard(detail.protyle, cardType, getDailyPath());
             }
         });
         detail.menu.addItem({
-            iconHTML: "",
+            iconHTML: "🗓️🗃️",
             label: this.plugin.i18n.send2dailyCardNoRef,
             click: () => {
                 this.makeCard(detail.protyle, cardType, getDailyPath(), true);
