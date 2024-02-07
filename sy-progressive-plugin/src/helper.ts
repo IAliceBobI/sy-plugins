@@ -391,7 +391,7 @@ export class Helper {
         return `<div>
             ${styleColor("var(--b3-card-error-background)", "var(--b3-card-error-color)")}
             <div>
-                <button title="${this.plugin.i18n.deletePieceAndExit}" onclick="${btnID}()" id="btn${btnID}">🏃 🗑</button>
+                <button title="${this.plugin.i18n.deletePieceAndExit}" onclick="${btnID}()" id="btn${btnID}">🗑 🕺</button>
             </div>
             <script>
                 function ${btnID}() {
