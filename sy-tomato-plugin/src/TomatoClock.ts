@@ -2,7 +2,6 @@ import {
     Dialog,
     Plugin,
     Protyle,
-    showMessage,
 } from "siyuan";
 import "./index.scss";
 import { siyuan } from "./libs/utils";
@@ -147,15 +146,18 @@ class TomatoClock {
         return remainingTime;
     }
 
+    private async showRemainingTime() {
+        const name = this.plugin.i18n.name;
+        const { minutes, seconds } = formatDuration(this.getRemainingTime());
+        if (minutes == 0 && seconds == 0) await siyuan.pushMsg(`${name}🍅未开始计时`);
+        else await siyuan.pushMsg(`${name}🍅剩余： ${minutes}分 ${seconds}秒`);
+    }
+
     private addTomatoPeeker() {
         const name = this.plugin.i18n.name;
         const statusIconTemp = document.createElement("template");
         statusIconTemp.innerHTML = `<div class="toolbar__item ariaLabel" aria-label="${name}🍅查看剩余时间"><svg><use xlink:href="#iconEye"></use></svg></div>`;
-        statusIconTemp.content.firstElementChild.addEventListener("click", () => {
-            const { minutes, seconds } = formatDuration(this.getRemainingTime());
-            if (minutes == 0 && seconds == 0) siyuan.pushMsg(`${name}🍅未开始计时`);
-            else siyuan.pushMsg(`${name}🍅剩余： ${minutes}分 ${seconds}秒`);
-        });
+        statusIconTemp.content.firstElementChild.addEventListener("click", this.showRemainingTime.bind(this));
         this.plugin.addStatusBar({
             element: statusIconTemp.content.firstElementChild as HTMLElement,
         });
@@ -174,15 +176,16 @@ class TomatoClock {
         }
         const statusIconTemp = document.createElement("template");
         statusIconTemp.innerHTML = `<div class="toolbar__item ariaLabel" aria-label="${label}"><svg><use xlink:href="#${icon}"></use></svg></div>`;
-        statusIconTemp.content.firstElementChild.addEventListener("click", () => {
+        statusIconTemp.content.firstElementChild.addEventListener("click", async () => {
             clearTimeout(this.timeoutID);
             if (this.lastDelayMinute > 0) {
-                showMessage(`${name}🍅${this.plugin.i18n.cancelLastCountdown}: ${this.lastDelayMinute}m`, 5000);
+                await this.showRemainingTime();
+                await siyuan.pushMsg(`${name}🍅${this.plugin.i18n.cancelLastCountdown}: ${this.lastDelayMinute}m`, 5000);
             }
             this.lastDelayMinute = minute;
             this.lastStartTime = Date.now();
             if (minute > 0) {
-                showMessage(`${name}🍅${this.plugin.i18n.startCountdown}: ${minute}m`, 5000);
+                await siyuan.pushMsg(`${name}🍅${this.plugin.i18n.startCountdown}: ${minute}m`, 5000);
                 this.plugin.saveData(STORAGE_TOMATO_TIME, { minute, startTime: this.lastStartTime });
                 this.timeoutID = setTimeout(() => {
                     this.showTimeoutDialog(minute);
