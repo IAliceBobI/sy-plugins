@@ -422,7 +422,7 @@
 
 <style>
     .bk_protyle {
-        transform: scale(0.98);
+        transform: scale(0.999);
         transform-origin: top left;
         padding-bottom: 100%;
     }
