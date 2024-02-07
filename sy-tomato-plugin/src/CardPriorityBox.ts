@@ -32,6 +32,7 @@ class CardPriorityBox {
             const menu = detail.menu;
             menu.addItem({
                 label: this.plugin.i18n.cardPrioritySet,
+                icon: "iconStar",
                 accelerator: "F6",
                 click: async () => {
                     const docID = detail?.protyle?.block?.rootID;
@@ -42,12 +43,14 @@ class CardPriorityBox {
             });
             menu.addItem({
                 label: "为闪卡设置优先级",
+                icon: "iconStar",
                 click: () => {
                     this.updatePrioritySelected([detail.element]);
                 },
             });
             menu.addItem({
                 label: "当前文档与子文档的闪卡全部暂停",
+                icon: "iconFocus",
                 click: async () => {
                     const docID = detail?.protyle?.block?.rootID;
                     if (!docID) return;

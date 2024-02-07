@@ -14,7 +14,7 @@ class DailyNoteBox {
         if (!this.plugin) return;
         const protyle: IProtyle = detail.protyle;
         detail.menu.addItem({
-            iconHTML: "",
+            iconHTML: "🏑",
             label: this.plugin.i18n.moveBlock2today,
             click: () => {
                 this.findDivs(protyle);

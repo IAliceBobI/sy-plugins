@@ -37,7 +37,7 @@ class Schedule {
     blockIconEvent(detail: any) {
         if (!this.plugin) return;
         detail.menu.addItem({
-            iconHTML: "",
+            iconHTML: "⏰",
             label: this.plugin.i18n.schedule,
             click: () => {
                 for (const element of detail.blockElements) {

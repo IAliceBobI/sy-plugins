@@ -14,14 +14,14 @@ class PieceMovingBox {
         const { isPiece } = isProtylePiece(protyle);
         if (isPiece) {
             detail.menu.addItem({
-                iconHTML: "",
+                iconHTML: "📨⬆️",
                 label: "移动到上一分片内",
                 click: () => {
                     this.move(protyle, -1);
                 }
             });
             detail.menu.addItem({
-                iconHTML: "",
+                iconHTML: "📨⬇️",
                 label: "移动到下一分片内",
                 click: () => {
                     this.move(protyle, 1);

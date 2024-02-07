@@ -20,6 +20,7 @@ class ListBox {
             const menu = detail.menu;
             menu.addItem({
                 label: this.plugin.i18n.uncheckAll,
+                icon: "iconUncheck",
                 accelerator: "",
                 click: async () => {
                     const docID = detail?.protyle?.block?.rootID;
@@ -29,6 +30,17 @@ class ListBox {
         });
     }
 
+    blockIconEvent(detail: any) {
+        if (!this.plugin) return;
+        detail.menu.addItem({
+            iconHTML: "🚫✅",
+            label: this.plugin.i18n.uncheckAll,
+            click: async () => {
+                const docID = detail?.protyle?.block?.rootID;
+                await uncheckAll(docID);
+            }
+        });
+    }
 }
 
 async function uncheckAll(docID: string) {

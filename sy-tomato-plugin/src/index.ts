@@ -118,6 +118,7 @@ export default class ThePlugin extends Plugin {
         imgOverlayBox.blockIconEvent(detail);
         dailyNoteBox.blockIconEvent(detail);
         cmdBlockBox.blockIconEvent(detail);
+        listBox.blockIconEvent(detail);
     }
 
     async updateCards(options: ICardData) {

@@ -63,7 +63,7 @@ class ReadingPointBox {
     blockIconEvent(detail: any) {
         if (!this.plugin) return;
         detail.menu.addItem({
-            iconHTML: "",
+            iconHTML: "🔖",
             label: this.plugin.i18n.addBookmark,
             click: () => {
                 for (const element of detail.blockElements) {
