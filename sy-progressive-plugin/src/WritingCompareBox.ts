@@ -104,7 +104,7 @@ class WritingCompareBox {
             }
 
             await siyuan.insertBlockAsChildOf(mdList.join("\n"), cmpDocID);
-            openTab({ app: this.plugin.app, doc: { id: cmpDocID }, position: "right" });
+            openTab({ app: this.plugin.app, doc: { id: cmpDocID } });
         }
     }
 
@@ -137,7 +137,7 @@ class WritingCompareBox {
                 mdList.push(md);
             }
             await siyuan.insertBlockAsChildOf(mdList.join("\n"), keysDocID);
-            openTab({ app: this.plugin.app, doc: { id: keysDocID }, position: "right" });
+            openTab({ app: this.plugin.app, doc: { id: keysDocID } });
         }
     }
 }
