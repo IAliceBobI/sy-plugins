@@ -5,10 +5,11 @@
     import {
         CARD_PRIORITY,
         DATA_NODE_ID,
-        SPACE,
         TOMATO_CONTROL_ELEMENT,
+        WEB_SPACE,
     } from "./libs/gconst";
     import { isValidNumber, siyuan } from "./libs/utils";
+    import { events } from "./libs/Events";
 
     export let wysiwygElement: HTMLElement;
     export let cardElement: HTMLElement;
@@ -18,6 +19,7 @@
     let controlAttr: AttrType;
     let cardID: string;
     let priority: number;
+    let whiteSpace = WEB_SPACE;
 
     onMount(async () => {
         cardID = cardElement.getAttribute(DATA_NODE_ID);
@@ -30,6 +32,8 @@
             priText.title = `${JSON.stringify(cardPriorityBox.cards.get(cardID))}【${CacheMinutes}分钟缓存】【点击修改】`;
             priText.style.fontWeight = "bold";
         }
+
+        if (events.isMobile) whiteSpace = "";
     });
 
     async function subOne(event: MouseEvent) {
@@ -83,9 +87,7 @@
 <div {...controlAttr} class="container">
     <div>
         <button title="取消制卡" on:click={removeCard}>🚫</button>
-        {SPACE}
-        <button title="暂停/继续" on:click={stopCard}>🛑</button>
-        {SPACE}
+        {@html whiteSpace}
         <button title="闪卡优先级-1" on:click={subOne}>➖</button>
         <button
             title="点击修改优先级"
@@ -93,7 +95,9 @@
             on:click={updateCardByInput}>{priority}</button
         >
         <button title="闪卡优先级+1" on:click={addOne}>➕</button>
-        {SPACE}
+        {@html whiteSpace}
+        <button title="暂停/继续" on:click={stopCard}>🛑</button>
+        {@html whiteSpace}
         <input
             title="拖动闪卡优先级"
             type="range"
@@ -102,7 +106,6 @@
             min="0"
             max="100"
         />
-        {SPACE.repeat(6)}
     </div>
 </div>
 
