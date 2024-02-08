@@ -256,6 +256,11 @@ class FlashBox {
                     e.style.backgroundColor = "";
                 }
             });
+            div.querySelectorAll('[data-type~="prog-marked"]').forEach((e: HTMLElement) => { // for old
+                const v = e.getAttribute("data-type").replace("prog-marked", "");
+                e.setAttribute("data-type", v);
+                e.style.backgroundColor = "";
+            });
             tmpDiv = div;
         } else {
             const [_id, div] = await this.cloneDiv(dom as HTMLDivElement, !noRef);
