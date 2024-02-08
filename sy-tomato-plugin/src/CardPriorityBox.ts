@@ -112,11 +112,11 @@ class CardPriorityBox {
                 if (detail.type === "1" && String(detail.card.state) === "1") {
                     const attr = await siyuan.getBlockAttrs(id);
                     const p = readPriority(attr);
-                    this.updateDocPriorityBatchDialog([{ ial: attr } as any], p + 1)
+                    this.updateDocPriorityBatchDialog([{ ial: attr } as any], p + 1);
                 } else if (detail.type === "4" && String(detail.card.state) === "4") {
                     const attr = await siyuan.getBlockAttrs(id);
                     const p = readPriority(attr);
-                    this.updateDocPriorityBatchDialog([{ ial: attr } as any], p - 1)
+                    this.updateDocPriorityBatchDialog([{ ial: attr } as any], p - 1);
                 }
             });
         }
