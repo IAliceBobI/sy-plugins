@@ -12,9 +12,11 @@ class CardPriorityBox {
     plugin: Plugin;
     cards: Map<string, RiffCard>;
     beforeReview: Map<string, DueCard>;
+    private settingCfg: TomatoSettings;
 
     async onload(plugin: Plugin) {
         this.plugin = plugin;
+        this.settingCfg = (plugin as any).settingCfg;
         this.beforeReview = new Map();
         this.cards = new Map();
         this.plugin.addCommand({
@@ -86,6 +88,38 @@ class CardPriorityBox {
                 });
             }
         });
+
+        this.plugin.setting.addItem({
+            title: "** 连续2次重来加优先级，连续2次简单减优先级",
+            description: "依赖：闪卡优先级。需要思源版本：v2.12.8+",
+            createActionElement: () => {
+                const checkbox = document.createElement("input") as HTMLInputElement;
+                checkbox.type = "checkbox";
+                checkbox.checked = this.settingCfg["auto-card-priority"] ?? false;
+                checkbox.addEventListener("change", () => {
+                    this.settingCfg["auto-card-priority"] = checkbox.checked;
+                });
+                checkbox.className = "b3-switch fn__flex-center";
+                return checkbox;
+            },
+        });
+
+        if (this.settingCfg["auto-card-priority"]) {
+            this.plugin.eventBus.on(EventType.click_flashcard_action as any, async ({ detail }: { detail: { type: string, card: DueCard } }) => {
+                const id = detail?.card?.blockID;
+                if (!id) return;
+                // -1显示答案, -2上一步, -3跳过, 1重来, 2困难, 3良好, 4简单
+                if (detail.type === "1" && String(detail.card.state) === "1") {
+                    const attr = await siyuan.getBlockAttrs(id);
+                    const p = readPriority(attr);
+                    this.updateDocPriorityBatchDialog([{ ial: attr } as any], p + 1)
+                } else if (detail.type === "4" && String(detail.card.state) === "4") {
+                    const attr = await siyuan.getBlockAttrs(id);
+                    const p = readPriority(attr);
+                    this.updateDocPriorityBatchDialog([{ ial: attr } as any], p - 1)
+                }
+            });
+        }
     }
 
     async autoStopRestCards(protyle: Protyle) {
@@ -231,8 +265,8 @@ class CardPriorityBox {
 
         const [attrMap, stopSet] = attrList.reduce(([attrMap, stopSet], attr) => {
             if (attr?.id) {
-                const p = readPriority(attr);
-                attrMap.set(attr.id, readPriority(attr));
+                const p = readPriorityForSorting(attr);
+                attrMap.set(attr.id, p);
                 if (p == -1) stopSet.add(attr.id);
             }
             return [attrMap, stopSet];
@@ -322,10 +356,15 @@ async function resumeCardsDeleteAttr(attrList: AttrType[]) {
     return Promise.all(tasks);
 }
 
-function readPriority(ial: AttrType) {
+function readPriorityForSorting(ial: AttrType) {
     if (ial["custom-card-priority-stop"]) {
         return -1;
     }
+    return readPriority(ial);
+}
+
+function readPriority(ial: AttrType) {
+    if (!ial) return 50;
     let priority = Number(ial["custom-card-priority"]);
     if (!isValidNumber(priority)) {
         priority = 50;

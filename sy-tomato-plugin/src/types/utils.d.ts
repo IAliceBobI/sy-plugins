@@ -34,6 +34,7 @@ type TomatoSettings = {
     "back-link-max-size": number,
     "back-link-mention-count": number,
     "tag-to-ref-add-card": boolean,
+    "auto-card-priority": boolean,
 };
 
 type AttrType = {

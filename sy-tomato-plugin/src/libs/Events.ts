@@ -9,6 +9,7 @@ export enum EventType {
     switch_protyle = "switch-protyle",
     destroy_protyle = "destroy-protyle",
     ws_main = "ws-main",
+    click_flashcard_action = "click-flashcard-action",
     click_blockicon = "click-blockicon",
     click_pdf = "click-pdf",
     click_editortitleicon = "click-editortitleicon",
