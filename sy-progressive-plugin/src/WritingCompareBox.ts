@@ -142,8 +142,8 @@ class WritingCompareBox {
                     const id = div.getAttribute(DATA_NODE_ID);
                     const idx = div.getAttribute(PARAGRAPH_INDEX);
                     const ref = div.getAttribute(RefIDKey);
-                    const md = `{{select * from blocks where id='${id}'}}\n{: ${PROG_KEY_NOTE}="1" ${PARAGRAPH_INDEX}="${idx}" ${RefIDKey}="${ref}" }`
-                    const blank = `{: id="${NewNodeID()}"}`
+                    const md = `{{select * from blocks where id='${id}'}}\n{: ${PROG_KEY_NOTE}="1" ${PARAGRAPH_INDEX}="${idx}" ${RefIDKey}="${ref}" }`;
+                    const blank = `{: id="${NewNodeID()}"}`;
                     mdList.push(md + "\n" + blank);
                 }
             } else {
