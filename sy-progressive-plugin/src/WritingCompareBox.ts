@@ -1,7 +1,7 @@
 import { IProtyle, Lute, Plugin, openTab } from "siyuan";
-import { NewLute, cleanDiv, getBlockDiv, isValidNumber, siyuan } from "../../sy-tomato-plugin/src/libs/utils";
+import { NewLute, NewNodeID, cleanDiv, getBlockDiv, isValidNumber, siyuan } from "../../sy-tomato-plugin/src/libs/utils";
 import { findCompareDoc, findKeysDoc, findPieceDoc, getCompareDoc, getHPathByDocID, getKeysDoc, isProtyleKeyDoc, isProtylePiece } from "./helper";
-import { MarkKey, PROG_KEY_NOTE, PROG_ORIGIN_TEXT, RefIDKey, WEB_ZERO_SPACE } from "../../sy-tomato-plugin/src/libs/gconst";
+import { DATA_NODE_ID, MarkKey, PARAGRAPH_INDEX, PROG_KEY_NOTE, PROG_ORIGIN_TEXT, RefIDKey, WEB_ZERO_SPACE } from "../../sy-tomato-plugin/src/libs/gconst";
 
 class WritingCompareBox {
     private plugin: Plugin;
@@ -21,7 +21,14 @@ class WritingCompareBox {
                     label: "提取笔记",
                     icon: "iconCopy",
                     click: async () => {
-                        await this.extractNotes(protyle.block?.rootID, protyle.notebookId, markKey);
+                        await this.extractNotes(protyle.block?.rootID, protyle.notebookId, markKey, false);
+                    },
+                });
+                menu.addItem({
+                    label: "提取笔记（嵌入）",
+                    icon: "iconCopy",
+                    click: async () => {
+                        await this.extractNotes(protyle.block?.rootID, protyle.notebookId, markKey, true);
                     },
                 });
             } else {
@@ -108,7 +115,7 @@ class WritingCompareBox {
         }
     }
 
-    private async extractNotes(pieceID: string, notebookId: string, markKey: string) {
+    private async extractNotes(pieceID: string, notebookId: string, markKey: string, isEmbedded: boolean) {
         if (!pieceID || !notebookId || !markKey) return;
         const parts = markKey.split("#").pop()?.split(",");
         if (parts.length == 2) {
@@ -130,11 +137,22 @@ class WritingCompareBox {
                 .filter(e => e.div.textContent.replace(new RegExp(WEB_ZERO_SPACE, "g"), "").trim())
                 .map(e => e.div);
             const mdList: string[] = [];
-            for (const div of divs) {
-                await cleanDiv(div, false, false);
-                div.setAttribute(PROG_KEY_NOTE, "1");
-                const md = this.lute.BlockDOM2Md(div.outerHTML);
-                mdList.push(md);
+            if (isEmbedded) {
+                for (const div of divs) {
+                    const id = div.getAttribute(DATA_NODE_ID);
+                    const idx = div.getAttribute(PARAGRAPH_INDEX);
+                    const ref = div.getAttribute(RefIDKey);
+                    const md = `{{select * from blocks where id='${id}'}}\n{: ${PROG_KEY_NOTE}="1" ${PARAGRAPH_INDEX}="${idx}" ${RefIDKey}="${ref}" }`
+                    const blank = `{: id="${NewNodeID()}"}`
+                    mdList.push(md + "\n" + blank);
+                }
+            } else {
+                for (const div of divs) {
+                    await cleanDiv(div, false, false);
+                    div.setAttribute(PROG_KEY_NOTE, "1");
+                    const md = this.lute.BlockDOM2Md(div.outerHTML);
+                    mdList.push(md);
+                }
             }
             await siyuan.insertBlockAsChildOf(mdList.join("\n"), keysDocID);
             openTab({ app: this.plugin.app, doc: { id: keysDocID } });
