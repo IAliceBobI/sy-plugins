@@ -151,7 +151,8 @@ class WritingCompareBox {
                     await cleanDiv(div, false, false);
                     div.setAttribute(PROG_KEY_NOTE, "1");
                     const md = this.lute.BlockDOM2Md(div.outerHTML);
-                    mdList.push(md);
+                    const blank = `{: id="${NewNodeID()}"}`;
+                    mdList.push(md + "\n" + blank);
                 }
             }
             await siyuan.insertBlockAsChildOf(mdList.join("\n"), keysDocID);
