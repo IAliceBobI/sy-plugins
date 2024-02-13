@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "./scripts/test.zsh",
-    "clean": "./scripts/clean.zsh",
-    "lint": "./scripts/lint.zsh"
+    "test": "scripts\\test.ps1",
+    "clean": "scripts\\clean.ps1",
+    "lint": "scripts\\lint.ps1"
   },
   "keywords": [],
   "author": "",
