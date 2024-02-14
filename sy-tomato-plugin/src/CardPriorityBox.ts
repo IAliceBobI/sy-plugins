@@ -192,10 +192,12 @@ class CardPriorityBox {
                     let datetimeStr = await siyuan.currentTime(Number(days) * 24 * 60 * 60);
                     datetimeStr = timeUtil.makesureDateTimeFormat(datetimeStr);
                     if (datetimeStr) {
-                        for (const b of blocks) {
-                            const ial = b.ial as unknown as AttrType;
-                            stopCard(ial.id, datetimeStr).then();
-                        }
+                        const newAttrs = {} as AttrType;
+                        newAttrs["custom-card-priority-stop"] = datetimeStr;
+                        newAttrs.bookmark = "🛑 Suspended Cards";
+                        await siyuan.batchSetBlockAttrs([...blocks.map((b: any) => {
+                            return { id: b.ial.id, attrs: newAttrs };
+                        })]);
                         await siyuan.pushMsg(`暂停${blocks.length}个闪卡${days}天`);
                     }
                 }
@@ -229,6 +231,7 @@ class CardPriorityBox {
         }
     }
 
+    // update the entire doc cards
     private updateDocPriorityLock(newPriority: number, blocks: Block[]): any {
         return navigator.locks.request("CardPriorityBox.updateDocPriorityLock", { ifAvailable: true }, async (lock) => {
             if (lock) {
@@ -333,13 +336,6 @@ export async function resumeCard(blockID: string) {
     newAttrs["custom-card-priority-stop"] = "";
     newAttrs.bookmark = "";
     return siyuan.setBlockAttrs(blockID, newAttrs);
-}
-
-async function stopCard(blockID: string, datetimeStr: string) {
-    const newAttrs = {} as AttrType;
-    newAttrs["custom-card-priority-stop"] = datetimeStr;
-    newAttrs.bookmark = "🛑 Suspended Cards";
-    siyuan.setBlockAttrs(blockID, newAttrs);
 }
 
 async function resumeCardsDeleteAttr(attrList: AttrType[]) {

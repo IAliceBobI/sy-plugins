@@ -31,10 +31,10 @@ $targetDir = Join-Path $env:SYPLUGINDIR $projName
 write-host $targetDir
 write-host $projDir
 
-New-Item -ItemType Directory -Path "$projDir/dev" -ErrorAction SilentlyContinue
+New-Item -ItemType Directory -Path "$projDir\dev" -ErrorAction SilentlyContinue
 
 Remove-Item -Path $targetDir -Recurse -Force -ErrorAction SilentlyContinue
-New-Item -ItemType SymbolicLink -Target "$projDir/dev" -Path $targetDir 
+New-Item -ItemType SymbolicLink -Target "$projDir\dev" -Path $targetDir 
 
 Set-Location -Path $projDir
 pnpm run dev
