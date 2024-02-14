@@ -216,12 +216,14 @@ class CardPriorityBox {
     }
 
     private async updateDocPriorityBatchDialog(blocks: Block[], priority?: number, cb?: Func) {
-        if (!isValidNumber(priority) || cb) {
+        const vp = isValidNumber(priority);
+        if (!vp || cb) {
+            if (!vp) priority = 50;
             new DialogText(`为${blocks.length}张卡输入新的优先级`, String(priority), async (priorityTxt: string) => {
                 const priority = Number(priorityTxt);
                 if (isValidNumber(priority)) {
                     await this.updateDocPriorityLock(priority, blocks);
-                    await cb();
+                    if (cb) await cb();
                 } else {
                     await siyuan.pushMsg(`您的输入有误：${priorityTxt}`);
                 }
@@ -246,14 +248,17 @@ class CardPriorityBox {
 
     private async updateDocPriority(newPriority: number, blocks: Block[]) {
         newPriority = ensureValidPriority(newPriority);
-        const tasks = await Promise.all(blocks.map(block => {
+        const params = blocks.map(block => {
             const ial = block.ial as unknown as AttrType;
             const priority = readPriority(ial);
             if (newPriority != priority) {
-                return setPriority(ial.id, newPriority);
+                const attrs = {} as AttrType;
+                attrs["custom-card-priority"] = String(newPriority);
+                return { id: ial.id, attrs };
             }
-        }).filter(i => !!i));
-        return tasks.length;
+        }).filter(i => !!i);
+        await siyuan.batchSetBlockAttrs(params);
+        return params.length;
     }
 
     async updateCards(options: ICardData) {
@@ -366,12 +371,6 @@ function readPriority(ial: AttrType) {
         priority = 50;
     }
     return priority;
-}
-
-async function setPriority(blockID: string, newPriority: number) {
-    const attr = {} as AttrType;
-    attr["custom-card-priority"] = String(newPriority);
-    return siyuan.setBlockAttrs(blockID, attr);
 }
 
 function ensureValidPriority(priority: number) {
