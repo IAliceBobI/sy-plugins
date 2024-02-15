@@ -48,4 +48,4 @@ git tag v${newVersion}
 git push -f origin v${newVersion}
 git push -f origin main
 
-Set-Location ${projDir}
+Set-Location ${scriptPath}
