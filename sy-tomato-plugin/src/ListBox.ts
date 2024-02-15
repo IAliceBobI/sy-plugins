@@ -28,6 +28,28 @@ class ListBox {
                 },
             });
         });
+
+        this.plugin.addCommand({
+            langKey: "delAllchecked",
+            hotkey: "",
+            editorCallback: async (protyle: IProtyle) => {
+                const docID = protyle?.block?.rootID;
+                await delAllchecked(docID);
+            },
+        });
+        
+        this.plugin.eventBus.on("open-menu-content", async ({ detail }) => {
+            const menu = detail.menu;
+            menu.addItem({
+                label: this.plugin.i18n.delAllchecked,
+                icon: "iconTrashcan",
+                accelerator: "",
+                click: async () => {
+                    const docID = detail?.protyle?.block?.rootID;
+                    await delAllchecked(docID);
+                },
+            });
+        });
     }
 
     blockIconEvent(detail: any) {
@@ -40,7 +62,25 @@ class ListBox {
                 await uncheckAll(docID);
             }
         });
+        detail.menu.addItem({
+            iconHTML: "🧹✅",
+            label: this.plugin.i18n.delAllchecked,
+            click: async () => {
+                const docID = detail?.protyle?.block?.rootID;
+                await delAllchecked(docID);
+            }
+        });
     }
+}
+
+async function delAllchecked(docID: string) {
+    const kramdowns = await Promise.all((await siyuan.sql(`select id from blocks 
+        where type='i' and subType='t' and root_id="${docID}"
+        and markdown like "* [X] %"
+        limit 30000
+    `)).map(b => siyuan.getBlockKramdown(b.id)));
+    await siyuan.safeDeleteBlocks(kramdowns.map(b=>b.id));
+    await siyuan.pushMsg(`删除了${kramdowns.length}个任务`);
 }
 
 async function uncheckAll(docID: string) {

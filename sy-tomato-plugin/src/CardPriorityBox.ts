@@ -91,7 +91,7 @@ class CardPriorityBox {
 
         this.plugin.setting.addItem({
             title: "** 连续2次重来加优先级，连续2次简单减优先级",
-            description: "依赖：闪卡优先级。需要思源版本：v2.12.8+",
+            description: "依赖：闪卡优先级。",
             createActionElement: () => {
                 const checkbox = document.createElement("input") as HTMLInputElement;
                 checkbox.type = "checkbox";
