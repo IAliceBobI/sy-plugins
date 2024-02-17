@@ -15,7 +15,7 @@ class ListBox {
         this.settingCfg = (plugin as any).settingCfg;
         this.plugin.setting.addItem({
             title: "** 阻止连续回车断开列表",
-            description: "依赖：列表工具",
+            description: "依赖：列表工具。若想断开列表：1个shift+enter 然后连续2个enter",
             createActionElement: () => {
                 const checkbox = document.createElement("input") as HTMLInputElement;
                 checkbox.type = "checkbox";
