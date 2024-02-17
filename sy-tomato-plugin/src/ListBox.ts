@@ -1,7 +1,8 @@
 import { IProtyle, Plugin } from "siyuan";
 import "./index.scss";
-import { siyuan } from "./libs/utils";
+import { getContenteditableElement as getContentEditableElement, siyuan } from "./libs/utils";
 import { EventType, events } from "./libs/Events";
+import { BlockNodeEnum, DATA_TYPE, WEB_ZERO_SPACE } from "./libs/gconst";
 
 class ListBox {
     private plugin: Plugin;
@@ -13,7 +14,7 @@ class ListBox {
         this.plugin = plugin;
         this.settingCfg = (plugin as any).settingCfg;
         this.plugin.setting.addItem({
-            title: "** 阻止回车断开列表",
+            title: "** 阻止连续回车断开列表",
             description: "依赖：列表工具",
             createActionElement: () => {
                 const checkbox = document.createElement("input") as HTMLInputElement;
@@ -86,10 +87,13 @@ class ListBox {
                                 this.observer?.disconnect();
                                 this.observer = new MutationObserver((mutationsList) => {
                                     mutationsList
-                                        .map(i => i.previousSibling)
-                                        .forEach((e: HTMLElement) => insertSpace(e));
+                                        .map(e => [...e.addedNodes.values()])
+                                        .flat()
+                                        .filter(e => e instanceof HTMLElement)
+                                        .filter((e: HTMLElement) => e.getAttribute(DATA_TYPE) == BlockNodeEnum.NODE_LIST_ITEM)
+                                        .forEach(e => insertZSpace(e as any));
                                 });
-                                this.observer.observe(element, { childList: true });
+                                this.observer.observe(element, { subtree: true, childList: true });
                             }
                         }
                     });
@@ -144,8 +148,12 @@ async function uncheckAll(docID: string) {
     await siyuan.pushMsg(`取消了${kramdowns.length}个任务`);
 }
 
-function insertSpace(e: HTMLElement) {
-    console.log(e);
+function insertZSpace(e: HTMLElement) {
+    const content = getContentEditableElement(e);
+    if (content?.textContent === "") {
+        content.textContent = WEB_ZERO_SPACE;
+        document.getSelection().collapse(content, 1);
+    }
 }
 
 export const listBox = new ListBox();
