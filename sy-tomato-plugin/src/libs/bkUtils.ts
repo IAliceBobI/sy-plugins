@@ -1,3 +1,4 @@
+import { isIterable } from "./functional";
 import { DATA_NODE_ID } from "./gconst";
 import { siyuanCache } from "./utils";
 import { BKMaker } from "@/BackLinkBottomBox";
@@ -23,9 +24,11 @@ export function icon(name: string, size?: number) {
 
 export async function shouldInsertDiv(lastID: string, docID: string) {
     const allIDs = await siyuanCache.getTailChildBlocks(2500, docID, 5);
-    for (const { id } of allIDs) {
-        if (id === lastID) {
-            return true;
+    if (isIterable(allIDs)) {
+        for (const { id } of allIDs) {
+            if (id === lastID) {
+                return true;
+            }
         }
     }
     return false;

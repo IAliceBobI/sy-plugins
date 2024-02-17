@@ -1,12 +1,32 @@
 import { IProtyle, Plugin } from "siyuan";
 import "./index.scss";
 import { siyuan } from "./libs/utils";
+import { EventType, events } from "./libs/Events";
 
 class ListBox {
     private plugin: Plugin;
+    public settingCfg: TomatoSettings;
+    private docID: string;
+    private observer: MutationObserver;
 
     async onload(plugin: Plugin) {
         this.plugin = plugin;
+        this.settingCfg = (plugin as any).settingCfg;
+        this.plugin.setting.addItem({
+            title: "** 阻止回车断开列表",
+            description: "依赖：列表工具",
+            createActionElement: () => {
+                const checkbox = document.createElement("input") as HTMLInputElement;
+                checkbox.type = "checkbox";
+                checkbox.checked = this.settingCfg["dont-break-list"] ?? false;
+                checkbox.addEventListener("change", () => {
+                    this.settingCfg["dont-break-list"] = checkbox.checked;
+                });
+                checkbox.className = "b3-switch fn__flex-center";
+                return checkbox;
+            },
+        });
+
         this.plugin.addCommand({
             langKey: "uncheckAll",
             hotkey: "",
@@ -37,7 +57,7 @@ class ListBox {
                 await delAllchecked(docID);
             },
         });
-        
+
         this.plugin.eventBus.on("open-menu-content", async ({ detail }) => {
             const menu = detail.menu;
             menu.addItem({
@@ -50,6 +70,32 @@ class ListBox {
                 },
             });
         });
+
+        if (this.settingCfg["dont-break-list"]) {
+            events.addListener("Tomato-ListBox-ListAsFile", (eventType, detail) => {
+                if (eventType == EventType.loaded_protyle_static) {
+                    navigator.locks.request("Tomato-ListBox-ListAsFile-onload", { ifAvailable: true }, async (lock) => {
+                        const protyle: IProtyle = detail.protyle;
+                        if (!protyle) return;
+                        const notebookId = protyle.notebookId;
+                        const nextDocID = protyle?.block?.rootID;
+                        const element = protyle?.wysiwyg?.element;
+                        if (lock && element && nextDocID && notebookId) {
+                            if (this.docID != nextDocID) {
+                                this.docID = nextDocID;
+                                this.observer?.disconnect();
+                                this.observer = new MutationObserver((mutationsList) => {
+                                    mutationsList
+                                        .map(i => i.previousSibling)
+                                        .forEach((e: HTMLElement) => insertSpace(e));
+                                });
+                                this.observer.observe(element, { childList: true });
+                            }
+                        }
+                    });
+                }
+            });
+        }
     }
 
     blockIconEvent(detail: any) {
@@ -79,7 +125,7 @@ async function delAllchecked(docID: string) {
         and markdown like "* [X] %"
         limit 30000
     `)).map(b => siyuan.getBlockKramdown(b.id)));
-    await siyuan.safeDeleteBlocks(kramdowns.map(b=>b.id));
+    await siyuan.safeDeleteBlocks(kramdowns.map(b => b.id));
     await siyuan.pushMsg(`删除了${kramdowns.length}个任务`);
 }
 
@@ -96,6 +142,10 @@ async function uncheckAll(docID: string) {
     }));
 
     await siyuan.pushMsg(`取消了${kramdowns.length}个任务`);
+}
+
+function insertSpace(e: HTMLElement) {
+    console.log(e);
 }
 
 export const listBox = new ListBox();

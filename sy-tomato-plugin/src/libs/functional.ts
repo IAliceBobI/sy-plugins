@@ -34,3 +34,20 @@ export function flatChunkMap<M>(array: any[], num: number, map: (ts: any[]) => M
 export async function aFlatChunkMap<M>(array: any[], num: number, map: (ts: any[]) => M) {
     return flatChunkMap(await Promise.all(array.flat()), num, map);
 }
+
+export function isIterable(obj: any): boolean {
+    if (obj == null) return obj;
+
+    // Check if the object has the Symbol.iterator property
+    if (typeof obj[Symbol.iterator] === "function") {
+        return true;
+    }
+
+    // Check if the object has the @@iterator method
+    if (typeof obj["@@iterator"] === "function") {
+        return true;
+    }
+
+    // If neither is present, the object is not iterable
+    return false;
+}
