@@ -45,6 +45,15 @@ export async function cleanDiv(div: HTMLDivElement, setRef: boolean, setOrigin: 
         e.removeAttribute(gconst.CUSTOM_RIFF_DECKS);
     });
     let setTheRef = false;
+    const getContext = async (id: string) => {
+        const parts = (await siyuan.getBlockBreadcrumb(id)).slice(0, -1).map(i => i.name);
+        if (parts.length > 0) {
+            const file = parts[0].split("/").pop();
+            parts[0] = file;
+            return parts.join("::");
+        }
+        return id;
+    };
     if (setOrigin) {
         const originID = div.getAttribute(gconst.RefIDKey) ?? "";
         if (originID) {
@@ -64,7 +73,7 @@ export async function cleanDiv(div: HTMLDivElement, setRef: boolean, setOrigin: 
                 });
                 setTheRef = true;
             }
-            const path = (await siyuan.getBlockBreadcrumb(originID)).slice(0, -1).map(i => i.name).join("::");
+            const path = await getContext(originID);
             if (path) {
                 div.setAttribute(gconst.ORIGIN_HPATH, path);
             }
@@ -84,7 +93,7 @@ export async function cleanDiv(div: HTMLDivElement, setRef: boolean, setOrigin: 
         } else {
             setTheRef = true;
         }
-        const path = (await siyuan.getBlockBreadcrumb(id)).slice(0, -1).map(i => i.name).join("::");
+        const path = await getContext(id);
         if (path) {
             div.setAttribute(gconst.REF_HPATH, path);
         }
