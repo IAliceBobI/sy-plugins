@@ -408,7 +408,7 @@
                                         >{blockPath.name}</button
                                     >
                                 {/if}
-                                ➡️
+                                <span class="bk_label b3-label__text">__</span>
                             {/if}
                         </span>
                     {/each}
