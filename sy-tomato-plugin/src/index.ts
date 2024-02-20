@@ -19,6 +19,7 @@ import { tag2RefBox } from "./Tag2RefBox";
 import { toolbarBox } from "./ToolbarBox";
 import { listBox } from "./ListBox";
 import { cardRemoveBox } from "./CardRemoveBox";
+import { hotMenuBox } from "./HotMenuBox";
 
 export default class ThePlugin extends Plugin {
     private static readonly GLOBAL_THIS: Record<string, any> = globalThis;
@@ -81,6 +82,9 @@ export default class ThePlugin extends Plugin {
         this.addSettingItem("backLinkBottomBoxCheckbox", "* 底部反链", false);
         if (this.settingCfg.backLinkBottomBoxCheckbox ?? false) await backLinkBottomBox.onload(this);
 
+        this.addSettingItem("hotMenuBoxCheckbox", "* 快捷菜单", false, "反链收集、百度千帆AI");
+        if (this.settingCfg.hotMenuBoxCheckbox ?? false) await hotMenuBox.onload(this);
+
         this.addSettingItem("tag2RefBoxCheckbox", "* 自动将标签转为引用（引用也继承标签的层级关系）", false, "开启会将当前编辑区内的标签转为引用！tag开头、@开头的标签不会被转。");
         if (this.settingCfg.tag2RefBoxCheckbox ?? false) await tag2RefBox.onload(this);
 
@@ -119,6 +123,7 @@ export default class ThePlugin extends Plugin {
         dailyNoteBox.blockIconEvent(detail);
         cmdBlockBox.blockIconEvent(detail);
         listBox.blockIconEvent(detail);
+        hotMenuBox.blockIconEvent(detail);
     }
 
     async updateCards(options: ICardData) {

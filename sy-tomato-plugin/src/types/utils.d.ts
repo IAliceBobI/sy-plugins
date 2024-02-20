@@ -23,6 +23,7 @@ type TomatoSettings = {
     dailyNoteBoxCheckbox: boolean,
     imgOverlayCheckbox: boolean,
     backLinkBottomBoxCheckbox: boolean,
+    hotMenuBoxCheckbox: boolean,
     tag2RefBoxCheckbox: boolean,
     toolbarBoxCheckbox: boolean,
     cmdBlockBoxCheckbox: boolean,
@@ -36,6 +37,7 @@ type TomatoSettings = {
     "tag-to-ref-add-card": boolean,
     "auto-card-priority": boolean,
     "dont-break-list": boolean,
+    "ai-return-insert-place": number,
 };
 
 type AttrType = {

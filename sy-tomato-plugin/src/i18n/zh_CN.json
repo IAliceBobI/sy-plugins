@@ -43,5 +43,6 @@
   "uncheckAll": "取消勾选当前文档所有已完成的todo任务",
   "delAllchecked": "删除当前文档所有已完成的todo任务",
   "refreshVirRef": "刷新虚拟引用",
-  "removeDocCards": "取消当前文档内所有闪卡"
+  "removeDocCards": "取消当前文档内所有闪卡",
+  "hotMenu": "快捷菜单"
 }
