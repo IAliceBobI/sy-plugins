@@ -29,6 +29,8 @@
     let selected: HTMLElement[] = [];
     let docID: string;
     let anchorID: string;
+    let apiKey: string;
+    let secretKey: string;
     let insertPlace: number;
     let aiAPI: BaiduAI;
 
@@ -53,12 +55,14 @@
         insertPlace =
             hotMenuBox.settingCfg["ai-return-insert-place"] ??
             getIdx(InsertPlace.here);
-
-        aiAPI = new BaiduAI(
-            hotMenuBox.settingCfg["ernie-bot-4-ak"],
-            hotMenuBox.settingCfg["ernie-bot-4-sk"],
-        );
+        initAI();
     });
+
+    function initAI() {
+        apiKey = hotMenuBox.settingCfg["ernie-bot-4-ak"];
+        secretKey = hotMenuBox.settingCfg["ernie-bot-4-sk"];
+        aiAPI = new BaiduAI(apiKey, secretKey);
+    }
 
     function getAllText() {
         return selected
@@ -192,6 +196,10 @@ ${text}
         destroy();
         return prompt;
     }
+
+    function saveCfg() {
+        hotMenuBox.plugin.saveData(STORAGE_SETTINGS, hotMenuBox.settingCfg);
+    }
 </script>
 
 <!-- https://learn.svelte.dev/tutorial/if-blocks -->
@@ -206,10 +214,30 @@ ${text}
                     >
                 </td>
                 <td>
-                    <input placeholder="API Key" />
+                    <input
+                        bind:value={apiKey}
+                        class="ai-key"
+                        title="API Key"
+                        placeholder="API Key"
+                        on:input={() => {
+                            hotMenuBox.settingCfg["ernie-bot-4-ak"] = apiKey;
+                            saveCfg();
+                            initAI();
+                        }}
+                    />
                 </td>
                 <td>
-                    <input placeholder="Secret Key" />
+                    <input
+                        bind:value={secretKey}
+                        class="ai-key"
+                        title="Secret Key"
+                        placeholder="Secret Key"
+                        on:input={() => {
+                            hotMenuBox.settingCfg["ernie-bot-4-sk"] = secretKey;
+                            saveCfg();
+                            initAI();
+                        }}
+                    />
                 </td>
             </tr>
             <tr>
@@ -220,10 +248,7 @@ ${text}
                         on:change={() => {
                             hotMenuBox.settingCfg["ai-return-insert-place"] =
                                 insertPlace;
-                            hotMenuBox.plugin.saveData(
-                                STORAGE_SETTINGS,
-                                hotMenuBox.settingCfg,
-                            );
+                            saveCfg();
                         }}
                     >
                         {#each [...insertPlaceMap.map.values()] as item}
@@ -326,4 +351,7 @@ ${text}
 </div>
 
 <style>
+    .ai-key {
+        width: 130px;
+    }
 </style>
