@@ -3,6 +3,7 @@ import { getCursorElement, newID } from "./libs/utils";
 import HotMenu from "./HotMenu.svelte";
 import { ChatContext } from "./libs/baiduAI";
 import { addFlashCard } from "./libs/listUtils";
+import { removeDocCards } from "./libs/cardUtils";
 
 class HotMenuBox {
     public plugin: Plugin;
@@ -27,6 +28,13 @@ class HotMenuBox {
             hotkey: "⌘1",
             editorCallback: async () => {
                 await addFlashCard(getCursorElement() as any);
+            },
+        });
+        this.plugin.addCommand({
+            langKey: "removeDocCards",
+            hotkey: "",
+            editorCallback: async (protyle: IProtyle) => {
+                await removeDocCards(protyle.block.rootID);
             },
         });
         this.plugin.eventBus.on("open-menu-content", async ({ detail }) => {

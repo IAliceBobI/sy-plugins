@@ -19,6 +19,7 @@
     import { STORAGE_SETTINGS } from "./constants";
     import { hotMenuBox } from "./HotMenuBox";
     import { addFlashCard, delAllchecked, uncheckAll } from "./libs/listUtils";
+    import { removeDocCards } from "./libs/cardUtils";
 
     enum InsertPlace {
         here = "1#当前位置",
@@ -352,6 +353,16 @@ ${text}
                             await addFlashCard(getCursorElement());
                             destroy();
                         }}>📌🗃️</button
+                    >
+                </td>
+                <td>
+                    <button
+                        title={hotMenuBox.plugin.i18n.removeDocCards}
+                        class="b3-button"
+                        on:click={async () => {
+                            await removeDocCards(protyle.block.rootID);
+                            destroy();
+                        }}>🚫🗃️</button
                     >
                 </td>
             </tr>
