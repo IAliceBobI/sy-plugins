@@ -10,10 +10,10 @@ class HotMenuBox {
     public ctx8k: ChatContext;
 
     async onload(plugin: Plugin) {
-        this.ctx4k = new ChatContext(4000);
-        this.ctx8k = new ChatContext(8000);
         this.plugin = plugin;
         this.settingCfg = (plugin as any).settingCfg;
+        this.ctx4k = new ChatContext(4000);
+        this.ctx8k = new ChatContext(8000);
         this.plugin.addCommand({
             langKey: "hotMenu",
             hotkey: "⌥A",

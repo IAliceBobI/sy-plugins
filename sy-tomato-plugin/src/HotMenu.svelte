@@ -8,7 +8,7 @@
         TOMATO_BK_IGNORE,
     } from "./libs/gconst";
     import { NewNodeID, cleanText, siyuan, siyuanCache } from "./libs/utils";
-    import { ChatContext, chatCompletionsPro } from "./libs/baiduAI";
+    import { BaiduAI, ChatContext } from "./libs/baiduAI";
     import { EnumUtils } from "./libs/EnumUtils";
     import { STORAGE_SETTINGS } from "./constants";
     import { hotMenuBox } from "./HotMenuBox";
@@ -30,6 +30,7 @@
     let docID: string;
     let anchorID: string;
     let insertPlace: number;
+    let aiAPI: BaiduAI;
 
     onMount(async () => {
         element = protyle?.wysiwyg?.element;
@@ -52,6 +53,11 @@
         insertPlace =
             hotMenuBox.settingCfg["ai-return-insert-place"] ??
             getIdx(InsertPlace.here);
+
+        aiAPI = new BaiduAI(
+            hotMenuBox.settingCfg["ernie-bot-4-ak"],
+            hotMenuBox.settingCfg["ernie-bot-4-sk"],
+        );
     });
 
     function getAllText() {
@@ -77,7 +83,7 @@
     async function ai(ctx: ChatContext, text: string) {
         destroy();
         await siyuan.pushMsg(text.slice(0, 100), 2000);
-        const ai = await chatCompletionsPro(ctx, text);
+        const ai = await aiAPI.chatCompletionsPro(ctx, text);
         if (!ai?.usage?.completion_tokens) {
             return siyuan.pushMsg(JSON.stringify(ai));
         }

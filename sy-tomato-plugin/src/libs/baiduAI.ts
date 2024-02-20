@@ -17,6 +17,27 @@ export interface Usage {
     total_tokens: number;
 }
 
+export interface CalcTokensResponse {
+    id: string;
+    object: string;
+    created: number;
+    usage: CalcTokenUsage;
+}
+
+export interface CalcTokenUsage {
+    prompt_tokens: number;
+    total_tokens: number;
+}
+
+type ChatRole = "user" | "assistant"
+type Chat = { role: ChatRole, content: string, tokens: number }
+
+function getTokens(chats: Chat[]) {
+    return chats.reduce((s, i) => {
+        return s + i.tokens;
+    }, 0);
+}
+
 export class BaiduAI {
     private AK: string;
     private SK: string;
@@ -24,7 +45,8 @@ export class BaiduAI {
         this.AK = AK;
         this.SK = SK;
     }
-    async getAccessToken() {
+    private async getAccessToken() {
+        if (!this.AK || !this.SK) return "";
         // https://console.bce.baidu.com/qianfan/overview
         const options = {
             method: "POST",
@@ -43,46 +65,47 @@ export class BaiduAI {
         const data = await response.json();
         return data.access_token;
     }
-}
-
-export interface CalcTokensResponse {
-    id: string;
-    object: string;
-    created: number;
-    usage: CalcTokenUsage;
-}
-
-export interface CalcTokenUsage {
-    prompt_tokens: number;
-    total_tokens: number;
-}
-
-export async function calcTokensErnieBot4(prompt: string, fake = false) {
-    if (fake) return prompt.length;
-    const accessToken = await getAccessToken();
-    const url = `https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/tokenizer/erniebot?access_token=${accessToken}`;
-    const playload = {
-        prompt,
-        model: "ernie-bot-4"
-    };
-    const response = await fetch(url, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify(playload),
-    });
-    const data = await response.json() as CalcTokensResponse;
-    return data.usage.prompt_tokens;
-}
-
-type ChatRole = "user" | "assistant"
-type Chat = { role: ChatRole, content: string, tokens: number }
-
-function getTokens(chats: Chat[]) {
-    return chats.reduce((s, i) => {
-        return s + i.tokens;
-    }, 0);
+    private async calcTokensErnieBot4(prompt: string, fake = false) {
+        if (fake) return prompt.length;
+        const accessToken = await this.getAccessToken();
+        if (!accessToken) return 0;
+        const url = `https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/tokenizer/erniebot?access_token=${accessToken}`;
+        const playload = {
+            prompt,
+            model: "ernie-bot-4"
+        };
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(playload),
+        });
+        const data = await response.json() as CalcTokensResponse;
+        return data.usage.prompt_tokens;
+    }
+    async chatCompletionsPro(ctx: ChatContext, userContent: string) {
+        const accessToken = await this.getAccessToken();
+        if (!accessToken) return {} as AIResponse;
+        const url = `https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/completions_pro?access_token=${accessToken}`;
+        const tokens = await this.calcTokensErnieBot4(userContent);
+        const playload = {
+            system: ctx.system,
+            messages: await ctx.get(userContent, tokens),
+            disable_search: false,
+            enable_citation: false,
+        };
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(playload),
+        });
+        const data = await response.json() as AIResponse;
+        if (data.usage) ctx.add(userContent, data.result, data.usage);
+        return data;
+    }
 }
 
 export class ChatContext {
@@ -111,8 +134,7 @@ export class ChatContext {
         this.chats = this.addContent("user", user, usage.prompt_tokens);
         this.chats = this.addContent("assistant", assistant, usage.completion_tokens);
     }
-    async get(user: string) {
-        const tokens = await calcTokensErnieBot4(user);
+    async get(user: string, tokens: number) {
         return this.addContent("user", user, tokens);
     }
     clear() {
@@ -121,39 +143,3 @@ export class ChatContext {
         return t;
     }
 }
-
-export async function chatCompletionsPro(ctx: ChatContext, userContent: string) {
-    const accessToken = await getAccessToken();
-    const url = `https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/completions_pro?access_token=${accessToken}`;
-    const playload = {
-        system: ctx.system,
-        messages: await ctx.get(userContent),
-        disable_search: false,
-        enable_citation: false,
-    };
-    const response = await fetch(url, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify(playload),
-    });
-    const data = await response.json() as AIResponse;
-    if (data.usage) ctx.add(userContent, data.result, data.usage);
-    return data;
-}
-
-// {
-//     "id": "as-ey7wii65wk",
-//     "object": "chat.completion",
-//     "created": 1708326897,
-//     "result": "2024年2月25日上海气温3~4℃，小雨转晴，无持续风向<3级，空气质量优，空气质量指数25。\n\n\n\n近几日天气信息：\n\n* 2024-02-18：小雨，13~21℃，东风<3级，空气质量优。\n\n* 2024-02-19：小雨，8~21℃，东北风3-4级，空气质量良。\n\n* 2024-02-20：小雨，8~10℃，东北风3-4级，空气质量优。\n\n* 2024-02-21：中雨转小雨，4~11℃，无持续风向<3级，空气质量优。\n\n* 2024-02-22：小雨，4~5℃，无持续风向<3级，空气质量优。\n\n* 2024-02-23：小雨，3~8℃，无持续风向<3级，空气质量优。\n\n* 2024-02-24：小雨，3~5℃，无持续风向<3级，空气质量优。\n\n* **2024-02-25：小雨转晴，3~4℃，无持续风向<3级，空气质量优**。",
-//     "is_truncated": false,
-//     "need_clear_history": false,
-//     "finish_reason": "normal",
-//     "usage": {
-//         "prompt_tokens": 244,
-//         "completion_tokens": 301,
-//         "total_tokens": 545
-//     }
-// }

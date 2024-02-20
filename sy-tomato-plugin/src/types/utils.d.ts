@@ -38,6 +38,8 @@ type TomatoSettings = {
     "auto-card-priority": boolean,
     "dont-break-list": boolean,
     "ai-return-insert-place": number,
+    "ernie-bot-4-ak": string,
+    "ernie-bot-4-sk": string,
 };
 
 type AttrType = {
