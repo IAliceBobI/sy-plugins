@@ -299,20 +299,20 @@ ${text}
             <tr>
                 <td>
                     <button
-                        title="文心一言4"
+                        title="选中内容发给AI，请把问题也一起选中。"
                         class="b3-button"
                         on:click={async () => {
                             await ai(hotMenuBox.ctx4k, "");
-                        }}>文心🤖</button
+                        }}>文心4🤖</button
                     >
                 </td>
                 <td>
                     <button
-                        title="文心一言4(8K)"
+                        title="选中内容发给AI，请把问题也一起选中。"
                         class="b3-button"
                         on:click={async () => {
                             await ai(hotMenuBox.ctx8k, "");
-                        }}>文心🤖8K</button
+                        }}>文心4🤖8K</button
                     >
                 </td>
             </tr>
