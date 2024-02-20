@@ -316,6 +316,17 @@ ${text}
                     >
                 </td>
             </tr>
+            <tr>
+                <td>
+                    <button
+                        title="清空文档并插入反链"
+                        class="b3-button"
+                        on:click={async () => {
+                            siyuan.pushMsg("开发中");
+                        }}>插入反链</button
+                    >
+                </td>
+            </tr>
             <!-- <tr>
                 <td>
                     <button
