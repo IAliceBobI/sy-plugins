@@ -12,6 +12,7 @@
     import { EnumUtils } from "./libs/EnumUtils";
     import { STORAGE_SETTINGS } from "./constants";
     import { hotMenuBox } from "./HotMenuBox";
+    import { delAllchecked, uncheckAll } from "./libs/listUtils";
 
     enum InsertPlace {
         here = "1#当前位置",
@@ -91,6 +92,7 @@
         if (!ai?.usage?.completion_tokens) {
             return siyuan.pushMsg(JSON.stringify(ai));
         }
+        const boxID = events.boxID;
         const newID = NewNodeID();
         const result = `${ai.result}\n${JSON.stringify(ai.usage)}\n{: id="${newID}" }`;
         const open = async () => {
@@ -105,25 +107,24 @@
             });
         };
         if (insertPlace == getIdx(InsertPlace.dailynote)) {
-            const { id } = await siyuan.createDailyNote(events.boxID);
+            const { id } = await siyuan.createDailyNote(boxID);
             await siyuan.appendBlock(result, id);
-            if (id != events.docID) await open();
+            if (id != docID) await open();
         } else if (insertPlace == getIdx(InsertPlace.here)) {
             if (anchorID) await siyuan.insertBlockAfter(result, anchorID);
         } else if (insertPlace == getIdx(InsertPlace.subdoc)) {
-            const docID = await siyuan.getDocIDByBlockID(anchorID);
             const row = await siyuan.getDocRowByBlockID(docID);
             let hpath = row?.hpath;
             if (hpath) {
                 hpath += "/ai";
                 const id = await siyuanCache.createDocWithMdIfNotExists(
                     6000,
-                    events.boxID,
+                    boxID,
                     hpath,
                     "",
                 );
                 await siyuan.appendBlock(result, id);
-                if (id != events.docID) await open();
+                if (id != docID) await open();
             }
         }
     }
@@ -319,11 +320,20 @@ ${text}
             <tr>
                 <td>
                     <button
-                        title="清空文档并插入反链"
+                        title={hotMenuBox.plugin.i18n.uncheckAll}
                         class="b3-button"
                         on:click={async () => {
-                            siyuan.pushMsg("开发中");
-                        }}>插入反链</button
+                            await uncheckAll(docID);
+                        }}>🚫✅</button
+                    >
+                </td>
+                <td>
+                    <button
+                        title={hotMenuBox.plugin.i18n.delAllchecked}
+                        class="b3-button"
+                        on:click={async () => {
+                            await delAllchecked(docID);
+                        }}>🧹✅</button
                     >
                 </td>
             </tr>

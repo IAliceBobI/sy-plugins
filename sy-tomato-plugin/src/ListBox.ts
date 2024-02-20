@@ -1,8 +1,9 @@
 import { IProtyle, Plugin } from "siyuan";
 import "./index.scss";
-import { getContenteditableElement as getContentEditableElement, siyuan } from "./libs/utils";
+import { getContenteditableElement as getContentEditableElement } from "./libs/utils";
 import { EventType, events } from "./libs/Events";
 import { BlockNodeEnum, DATA_TYPE, WEB_ZERO_SPACE } from "./libs/gconst";
+import { delAllchecked, uncheckAll } from "./libs/listUtils";
 
 class ListBox {
     private plugin: Plugin;
@@ -37,19 +38,6 @@ class ListBox {
             },
         });
 
-        this.plugin.eventBus.on("open-menu-content", async ({ detail }) => {
-            const menu = detail.menu;
-            menu.addItem({
-                label: this.plugin.i18n.uncheckAll,
-                icon: "iconUncheck",
-                accelerator: "",
-                click: async () => {
-                    const docID = detail?.protyle?.block?.rootID;
-                    await uncheckAll(docID);
-                },
-            });
-        });
-
         this.plugin.addCommand({
             langKey: "delAllchecked",
             hotkey: "",
@@ -57,19 +45,6 @@ class ListBox {
                 const docID = protyle?.block?.rootID;
                 await delAllchecked(docID);
             },
-        });
-
-        this.plugin.eventBus.on("open-menu-content", async ({ detail }) => {
-            const menu = detail.menu;
-            menu.addItem({
-                label: this.plugin.i18n.delAllchecked,
-                icon: "iconTrashcan",
-                accelerator: "",
-                click: async () => {
-                    const docID = detail?.protyle?.block?.rootID;
-                    await delAllchecked(docID);
-                },
-            });
         });
 
         if (this.settingCfg["dont-break-list"]) {
@@ -101,51 +76,6 @@ class ListBox {
             });
         }
     }
-
-    blockIconEvent(detail: any) {
-        if (!this.plugin) return;
-        detail.menu.addItem({
-            iconHTML: "🚫✅",
-            label: this.plugin.i18n.uncheckAll,
-            click: async () => {
-                const docID = detail?.protyle?.block?.rootID;
-                await uncheckAll(docID);
-            }
-        });
-        detail.menu.addItem({
-            iconHTML: "🧹✅",
-            label: this.plugin.i18n.delAllchecked,
-            click: async () => {
-                const docID = detail?.protyle?.block?.rootID;
-                await delAllchecked(docID);
-            }
-        });
-    }
-}
-
-async function delAllchecked(docID: string) {
-    const kramdowns = await Promise.all((await siyuan.sql(`select id from blocks 
-        where type='i' and subType='t' and root_id="${docID}"
-        and markdown like "* [X] %"
-        limit 30000
-    `)).map(b => siyuan.getBlockKramdown(b.id)));
-    await siyuan.safeDeleteBlocks(kramdowns.map(b => b.id));
-    await siyuan.pushMsg(`删除了${kramdowns.length}个任务`);
-}
-
-async function uncheckAll(docID: string) {
-    const kramdowns = await Promise.all((await siyuan.sql(`select id from blocks 
-        where type='i' and subType='t' and root_id="${docID}"
-        and markdown like "* [X] %"
-        limit 30000
-    `)).map(b => siyuan.getBlockKramdown(b.id)));
-
-    await Promise.all(kramdowns.map(({ id, kramdown }) => {
-        const newKramdown = kramdown.replace("}[X] ", "}[ ] ");
-        return siyuan.updateBlock(id, newKramdown);
-    }));
-
-    await siyuan.pushMsg(`取消了${kramdowns.length}个任务`);
 }
 
 function insertZSpace(e: HTMLElement) {
@@ -158,3 +88,46 @@ function insertZSpace(e: HTMLElement) {
 
 export const listBox = new ListBox();
 
+// this.plugin.eventBus.on("open-menu-content", async ({ detail }) => {
+//     const menu = detail.menu;
+//     menu.addItem({
+//         label: this.plugin.i18n.uncheckAll,
+//         icon: "iconUncheck",
+//         accelerator: "",
+//         click: async () => {
+//             const docID = detail?.protyle?.block?.rootID;
+//             await uncheckAll(docID);
+//         },
+//     });
+// });
+// this.plugin.eventBus.on("open-menu-content", async ({ detail }) => {
+//     const menu = detail.menu;
+//     menu.addItem({
+//         label: this.plugin.i18n.delAllchecked,
+//         icon: "iconTrashcan",
+//         accelerator: "",
+//         click: async () => {
+//             const docID = detail?.protyle?.block?.rootID;
+//             await delAllchecked(docID);
+//         },
+//     });
+// });
+// blockIconEvent(detail: any) {
+//     if (!this.plugin) return;
+//     detail.menu.addItem({
+//         iconHTML: "🚫✅",
+//         label: this.plugin.i18n.uncheckAll,
+//         click: async () => {
+//             const docID = detail?.protyle?.block?.rootID;
+//             await uncheckAll(docID);
+//         }
+//     });
+//     detail.menu.addItem({
+//         iconHTML: "🧹✅",
+//         label: this.plugin.i18n.delAllchecked,
+//         click: async () => {
+//             const docID = detail?.protyle?.block?.rootID;
+//             await delAllchecked(docID);
+//         }
+//     });
+// }
