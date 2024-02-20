@@ -1,7 +1,8 @@
 import { Dialog, IEventBusMap, IProtyle, Plugin } from "siyuan";
-import { newID } from "./libs/utils";
+import { getCursorElement, newID } from "./libs/utils";
 import HotMenu from "./HotMenu.svelte";
 import { ChatContext } from "./libs/baiduAI";
+import { addFlashCard } from "./libs/listUtils";
 
 class HotMenuBox {
     public plugin: Plugin;
@@ -19,6 +20,13 @@ class HotMenuBox {
             hotkey: "⌥A",
             editorCallback: async (protyle: IProtyle) => {
                 this.openDialog(protyle);
+            },
+        });
+        this.plugin.addCommand({
+            langKey: "addFlashCard",
+            hotkey: "⌘1",
+            editorCallback: async () => {
+                await addFlashCard(getCursorElement() as any);
             },
         });
         this.plugin.eventBus.on("open-menu-content", async ({ detail }) => {

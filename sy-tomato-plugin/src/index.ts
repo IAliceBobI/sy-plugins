@@ -7,7 +7,6 @@ import { readingPointBox } from "./ReadingPointBox";
 import { cpBox } from "./CpBox";
 import { backLinkBottomBox } from "./BackLinkBottomBox";
 import { cardBox } from "./CardBox";
-import { cardAddListBox } from "./CardAddListBox";
 import { EventType, events } from "@/libs/Events";
 import { STORAGE_SETTINGS } from "./constants";
 import { siyuan } from "@/libs/utils";
@@ -60,9 +59,6 @@ export default class ThePlugin extends Plugin {
 
         this.addSettingItem("cardRemoveBoxCheckbox", "* 取消当前文档内所有闪卡", false);
         if (this.settingCfg.cardRemoveBoxCheckbox ?? false) await cardRemoveBox.onload(this);
-
-        this.addSettingItem("cardAddListBoxCheckbox", "* 快速列表制卡", false);
-        if (this.settingCfg.cardAddListBoxCheckbox ?? false) await cardAddListBox.onload(this);
 
         this.addSettingItem("cardPriorityBoxCheckbox", "* 闪卡优先级", false);
         if (this.settingCfg.cardPriorityBoxCheckbox ?? false) await cardPriorityBox.onload(this);
@@ -117,12 +113,10 @@ export default class ThePlugin extends Plugin {
         readingPointBox.blockIconEvent(detail);
         schedule.blockIconEvent(detail);
         linkBox.blockIconEvent(detail);
-        cardAddListBox.blockIconEvent(detail);
         cardPriorityBox.blockIconEvent(detail);
         imgOverlayBox.blockIconEvent(detail);
         dailyNoteBox.blockIconEvent(detail);
         cmdBlockBox.blockIconEvent(detail);
-        // listBox.blockIconEvent(detail);
         hotMenuBox.blockIconEvent(detail);
     }
 

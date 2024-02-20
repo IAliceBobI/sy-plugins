@@ -7,12 +7,18 @@
         PROTYLE_WYSIWYG_SELECT,
         TOMATO_BK_IGNORE,
     } from "./libs/gconst";
-    import { NewNodeID, cleanText, siyuan, siyuanCache } from "./libs/utils";
+    import {
+        NewNodeID,
+        cleanText,
+        getCursorElement,
+        siyuan,
+        siyuanCache,
+    } from "./libs/utils";
     import { BaiduAI, ChatContext } from "./libs/baiduAI";
     import { EnumUtils } from "./libs/EnumUtils";
     import { STORAGE_SETTINGS } from "./constants";
     import { hotMenuBox } from "./HotMenuBox";
-    import { delAllchecked, uncheckAll } from "./libs/listUtils";
+    import { addFlashCard, delAllchecked, uncheckAll } from "./libs/listUtils";
 
     enum InsertPlace {
         here = "1#当前位置",
@@ -324,6 +330,7 @@ ${text}
                         class="b3-button"
                         on:click={async () => {
                             await uncheckAll(docID);
+                            destroy();
                         }}>🚫✅</button
                     >
                 </td>
@@ -333,7 +340,18 @@ ${text}
                         class="b3-button"
                         on:click={async () => {
                             await delAllchecked(docID);
+                            destroy();
                         }}>🧹✅</button
+                    >
+                </td>
+                <td>
+                    <button
+                        title={hotMenuBox.plugin.i18n.addFlashCard}
+                        class="b3-button"
+                        on:click={async () => {
+                            await addFlashCard(getCursorElement());
+                            destroy();
+                        }}>📌🗃️</button
                     >
                 </td>
             </tr>
