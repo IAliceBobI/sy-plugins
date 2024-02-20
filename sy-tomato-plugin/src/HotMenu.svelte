@@ -128,18 +128,6 @@
         }
     }
 
-    async function compare() {
-        const text = getAllText();
-        const prompt = `
-资料1：\n
-${text.replace("===", "\n资料2：\n")}
-\n-----\n
-请从人物、对话、情节等方面，对资料1与资料2两段文字，进行全面对比，并分析各自的优缺点，给出建议，帮助我何改进资料2。
-`.trim();
-        await navigator.clipboard.writeText(prompt.trim());
-        destroy();
-    }
-
     async function cleanWX() {
         const tasks = selected
             .map((e) => {
@@ -169,6 +157,24 @@ ${text.replace("===", "\n资料2：\n")}
         destroy();
     }
 
+    function saveCfg() {
+        hotMenuBox.plugin.saveData(STORAGE_SETTINGS, hotMenuBox.settingCfg);
+    }
+
+    compare;
+    async function compare() {
+        const text = getAllText();
+        const prompt = `
+资料1：\n
+${text.replace("===", "\n资料2：\n")}
+\n-----\n
+请从人物、对话、情节等方面，对资料1与资料2两段文字，进行全面对比，并分析各自的优缺点，给出建议，帮助我何改进资料2。
+`.trim();
+        await navigator.clipboard.writeText(prompt.trim());
+        destroy();
+    }
+
+    copyExpandPrompt;
     async function copyExpandPrompt() {
         const text = getAllText();
         if (text) {
@@ -182,6 +188,7 @@ ${text}
         }
     }
 
+    copyCompressPrompt;
     async function copyCompressPrompt(copy?: boolean) {
         const text = getAllText();
         let prompt = "";
@@ -196,16 +203,13 @@ ${text}
         destroy();
         return prompt;
     }
-
-    function saveCfg() {
-        hotMenuBox.plugin.saveData(STORAGE_SETTINGS, hotMenuBox.settingCfg);
-    }
 </script>
 
 <!-- https://learn.svelte.dev/tutorial/if-blocks -->
 <div class="protyle-wysiwyg">
     <table>
         <tbody>
+            <!-- 注册 -->
             <tr>
                 <td title="注册后，创建应用，复制API Key与Secret Key即可">
                     <a
@@ -216,7 +220,7 @@ ${text}
                 <td>
                     <input
                         bind:value={apiKey}
-                        class="ai-key"
+                        class="ai-key cfg"
                         title="API Key"
                         placeholder="API Key"
                         on:input={() => {
@@ -229,7 +233,7 @@ ${text}
                 <td>
                     <input
                         bind:value={secretKey}
-                        class="ai-key"
+                        class="ai-key cfg"
                         title="Secret Key"
                         placeholder="Secret Key"
                         on:input={() => {
@@ -239,10 +243,9 @@ ${text}
                         }}
                     />
                 </td>
-            </tr>
-            <tr>
                 <td>
                     <select
+                        class="cfg"
                         title="AI回复位置"
                         bind:value={insertPlace}
                         on:change={() => {
@@ -258,6 +261,8 @@ ${text}
                         {/each}
                     </select>
                 </td>
+            </tr>
+            <tr>
                 <td>
                     <button
                         title="清空与AI对话历史"
@@ -269,12 +274,16 @@ ${text}
                         }}>🤖💬🧹</button
                     >
                 </td>
-            </tr>
-
-            <tr>
                 <td>
                     <button
-                        title="复制选择文本、光标所在文本"
+                        title="复制微信多个对话后，清理对话开头的人名"
+                        class="b3-button"
+                        on:click={cleanWX}>💬🧹微信对话</button
+                    >
+                </td>
+                <td>
+                    <button
+                        title="复制选中的文本、光标所在文本"
                         class="b3-button"
                         on:click={copyText}>📋文本复制</button
                     >
@@ -286,9 +295,31 @@ ${text}
                         on:click={copyDoc}>📜📋全文复制</button
                     >
                 </td>
+            </tr>
+            <tr>
                 <td>
                     <button
-                        title="总结内容"
+                        title="文心一言4"
+                        class="b3-button"
+                        on:click={async () => {
+                            await ai(hotMenuBox.ctx4k, "");
+                        }}>文心🤖</button
+                    >
+                </td>
+                <td>
+                    <button
+                        title="文心一言4(8K)"
+                        class="b3-button"
+                        on:click={async () => {
+                            await ai(hotMenuBox.ctx8k, "");
+                        }}>文心🤖8K</button
+                    >
+                </td>
+            </tr>
+            <!-- <tr>
+                <td>
+                    <button
+                        title="AI总结内容"
                         class="b3-button"
                         on:click={async () => {
                             await ai(
@@ -311,15 +342,7 @@ ${text}
                         on:click={copyExpandPrompt}>🌲扩写内容</button
                     >
                 </td>
-            </tr>
-            <tr>
-                <td>
-                    <button
-                        title="复制微信多个对话后，清理对话开头的人名"
-                        class="b3-button"
-                        on:click={cleanWX}>💬🧹微信对话</button
-                    >
-                </td>
+           
                 <td>
                     <button
                         title="对比内容"
@@ -327,25 +350,7 @@ ${text}
                         on:click={compare}>🆚</button
                     >
                 </td>
-                <td>
-                    <button
-                        title="文心一言4"
-                        class="b3-button"
-                        on:click={async () => {
-                            await ai(hotMenuBox.ctx4k, "");
-                        }}>🤖</button
-                    >
-                </td>
-                <td>
-                    <button
-                        title="文心一言4(8K)"
-                        class="b3-button"
-                        on:click={async () => {
-                            await ai(hotMenuBox.ctx8k, "");
-                        }}>🤖8K</button
-                    >
-                </td>
-            </tr>
+            </tr> -->
         </tbody>
     </table>
 </div>
@@ -353,5 +358,9 @@ ${text}
 <style>
     .ai-key {
         width: 130px;
+    }
+    .cfg {
+        color: var(--b3-theme-primary);
+        background-color: var(--b3-theme-background);
     }
 </style>
