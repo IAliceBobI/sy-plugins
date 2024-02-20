@@ -20,6 +20,7 @@
     import { hotMenuBox } from "./HotMenuBox";
     import { addFlashCard, delAllchecked, uncheckAll } from "./libs/listUtils";
     import { removeDocCards } from "./libs/cardUtils";
+    import { insertBackLinks } from "./libs/bkUtils";
 
     enum InsertPlace {
         here = "1#当前位置",
@@ -286,41 +287,41 @@ ${text}
                     <button
                         title="复制微信多个对话后，清理对话开头的人名"
                         class="b3-button"
-                        on:click={cleanWX}>💬🧹微信对话</button
+                        on:click={cleanWX}>💬🧹微信</button
                     >
                 </td>
                 <td>
                     <button
                         title="复制选中的文本、光标所在文本"
                         class="b3-button"
-                        on:click={copyText}>📋文本复制</button
+                        on:click={copyText}>📋选中</button
                     >
                 </td>
                 <td>
                     <button
                         title="复制当前文档"
                         class="b3-button"
-                        on:click={copyDoc}>📜📋全文复制</button
+                        on:click={copyDoc}>📜📋全文</button
                     >
                 </td>
             </tr>
             <tr>
                 <td>
                     <button
-                        title="选中内容发给AI，请把问题也一起选中。"
+                        title="文心4:选中内容发给AI，请把问题也一起选中。"
                         class="b3-button"
                         on:click={async () => {
                             await ai(hotMenuBox.ctx4k, getAllText());
-                        }}>文心4🤖</button
+                        }}>🤖文心4</button
                     >
                 </td>
                 <td>
                     <button
-                        title="选中内容发给AI，请把问题也一起选中。"
+                        title="文心4(8K):选中内容发给AI，请把问题也一起选中。"
                         class="b3-button"
                         on:click={async () => {
                             await ai(hotMenuBox.ctx8k, getAllText());
-                        }}>文心4🤖8K</button
+                        }}>🤖文心8K</button
                     >
                 </td>
             </tr>
@@ -363,6 +364,18 @@ ${text}
                             await removeDocCards(protyle.block.rootID);
                             destroy();
                         }}>🚫🗃️</button
+                    >
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <button
+                        title="静态反链"
+                        class="b3-button"
+                        on:click={async () => {
+                            await insertBackLinks(protyle.block.rootID);
+                            destroy();
+                        }}>➕🔙🔗</button
                     >
                 </td>
             </tr>

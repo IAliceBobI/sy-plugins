@@ -1,6 +1,7 @@
+import { Lute } from "siyuan";
 import { isIterable } from "./functional";
-import { DATA_NODE_ID } from "./gconst";
-import { siyuanCache } from "./utils";
+import { BLOCK_REF, DATA_ID, DATA_NODE_ID, DATA_TYPE } from "./gconst";
+import { NewLute, cleanDiv, siyuan, siyuanCache } from "./utils";
 import { BKMaker } from "@/BackLinkBottomBox";
 
 // export function setReadonly(e: HTMLElement, all = false) {
@@ -50,4 +51,42 @@ export const MENTION_COUTING_SPAN = "MENTION_COUTING_SPAN";
 
 export function integrateCounting(self: BKMaker) {
     self.container?.querySelector(`[${MENTION_COUTING_SPAN}]`)?.appendChild(self.mentionCounting);
+}
+
+export async function insertBackLinks(docID: string) {
+    const lute: Lute = NewLute();
+    const backlink2 = await siyuan.getBacklink2(docID);
+    let md = ["* # 静态反链"];
+    md = (await Promise.all(backlink2.backlinks.map(backlink => {
+        return siyuan.getBacklinkDoc(docID, backlink.id);
+    })))
+        .map((i) => i.backlinks)
+        .flat()
+        .filter((bk) => !!bk)
+        .reduce((list, bk) => {
+            pushPath(bk, list);
+            pushDom(bk, lute, list);
+            return list;
+        }, md);
+    const content = md.join("\n");
+    await siyuan.appendBlock(content, docID);
+}
+
+function pushDom(bk: Backlink, lute: Lute, list: string[]) {
+    const div = document.createElement("div") as HTMLElement;
+    div.innerHTML = bk.dom;
+    cleanDiv(div.firstElementChild as any, false, false);
+    div.querySelectorAll(`[${DATA_TYPE}~="${BLOCK_REF}"]`).forEach((e: HTMLElement) => {
+        const id = e.getAttribute(DATA_ID);
+        e.setAttribute(DATA_TYPE, "a");
+        e.setAttribute("data-href", `siyuan://blocks/${id}?focus=1`);
+    });
+    const md = lute.BlockDOM2Md(div.innerHTML);
+    list.push("* " + md);
+}
+
+function pushPath(bk: Backlink, list: string[]) {
+    const file = bk.blockPaths[0];
+    const target = bk.blockPaths[bk.blockPaths.length - 1];
+    list.push(`* [${file.name}](siyuan://blocks/${target.id}?focus=1)`);
 }
