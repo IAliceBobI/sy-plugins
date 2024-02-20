@@ -81,7 +81,12 @@ function pushDom(bk: Backlink, lute: Lute, list: string[]) {
         e.setAttribute(DATA_TYPE, "a");
         e.setAttribute("data-href", `siyuan://blocks/${id}?focus=1`);
     });
-    const md = lute.BlockDOM2Md(div.innerHTML);
+    let md = lute.BlockDOM2Md(div.innerHTML);
+    if (!md.startsWith("*")) {
+        const p = md.trim().split("\n");
+        p.pop();
+        md = "* " + p.join("\n");
+    }
     list.push("* " + md);
 }
 
