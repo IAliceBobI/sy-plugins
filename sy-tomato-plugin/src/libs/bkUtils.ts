@@ -56,7 +56,7 @@ export function integrateCounting(self: BKMaker) {
 export async function insertBackLinks(docID: string) {
     const lute: Lute = NewLute();
     const backlink2 = await siyuan.getBacklink2(docID);
-    let md = ["* # 静态反链"];
+    let md = ["# 静态反链"];
     md = (await Promise.all(backlink2.backlinks.map(backlink => {
         return siyuan.getBacklinkDoc(docID, backlink.id);
     })))
