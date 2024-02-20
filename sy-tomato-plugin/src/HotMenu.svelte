@@ -302,7 +302,7 @@ ${text}
                         title="选中内容发给AI，请把问题也一起选中。"
                         class="b3-button"
                         on:click={async () => {
-                            await ai(hotMenuBox.ctx4k, "");
+                            await ai(hotMenuBox.ctx4k, getAllText());
                         }}>文心4🤖</button
                     >
                 </td>
@@ -311,7 +311,7 @@ ${text}
                         title="选中内容发给AI，请把问题也一起选中。"
                         class="b3-button"
                         on:click={async () => {
-                            await ai(hotMenuBox.ctx8k, "");
+                            await ai(hotMenuBox.ctx8k, getAllText());
                         }}>文心4🤖8K</button
                     >
                 </td>
