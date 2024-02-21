@@ -16,7 +16,7 @@
     import { hotMenuBox } from "./HotMenuBox";
     import { addFlashCard, delAllchecked, uncheckAll } from "./libs/listUtils";
     import { removeDocCards } from "./libs/cardUtils";
-    import { insertBackLinks } from "./libs/bkUtils";
+    import { cleanBackLinks, insertBackLinks } from "./libs/bkUtils";
 
     enum InsertPlace {
         here = "1#当前位置",
@@ -349,7 +349,7 @@ ${text}
                         title={hotMenuBox.plugin.i18n.removeDocCards}
                         class="b3-button"
                         on:click={async () => {
-                            await removeDocCards(protyle.block.rootID);
+                            await removeDocCards(docID);
                             destroy();
                         }}>🚫🗃️</button
                     >
@@ -358,12 +358,13 @@ ${text}
             <tr>
                 <td>
                     <button
-                        title="静态反链"
+                        title="刷新静态反链"
                         class="b3-button"
                         on:click={async () => {
-                            await insertBackLinks(protyle.block.rootID);
+                            await cleanBackLinks(docID);
+                            await insertBackLinks(docID);
                             destroy();
-                        }}>➕🔙🔗</button
+                        }}>♻️🔙🔗</button
                     >
                 </td>
             </tr>

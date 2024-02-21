@@ -135,3 +135,14 @@ type BreadcrumbPath = {
     subType: string;
     children: any;
 };
+
+type Attributes = {
+    block_id: string;
+    box: string;
+    id: string;
+    name: string;
+    path: string;
+    root_id: string;
+    type: string;
+    value: string;
+}

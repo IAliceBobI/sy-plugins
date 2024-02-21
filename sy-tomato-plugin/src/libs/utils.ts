@@ -385,6 +385,9 @@ export const siyuan = {
         }
         return l;
     },
+    async sqlAttr(stmt: string): Promise<Attributes[]> {
+        return (await siyuan.call("/api/query/sql", { stmt })) ?? [];
+    },
     async sql(stmt: string): Promise<Block[]> {
         return (await siyuan.call("/api/query/sql", { stmt })) ?? [];
     },
@@ -394,6 +397,9 @@ export const siyuan = {
             return ret[0];
         }
         return {} as Block;
+    },
+    async getDocAttrs(docID: string, name: string): Promise<Attributes[]> {
+        return siyuan.sqlAttr(`select * from attributes where root_id="${docID}" and name="${name}"`);
     },
     async getBlockIndex(id: string): Promise<number> {
         return await siyuan.call("/api/block/getBlockIndex", { id });

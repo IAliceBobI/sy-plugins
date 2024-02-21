@@ -1,6 +1,6 @@
 import { Lute } from "siyuan";
 import { isIterable } from "./functional";
-import { BLOCK_REF, DATA_ID, DATA_NODE_ID, DATA_TYPE } from "./gconst";
+import { BLOCK_REF, DATA_ID, DATA_NODE_ID, DATA_TYPE, TOMATO_BK_STATIC } from "./gconst";
 import { NewLute, cleanDiv, siyuan, siyuanCache } from "./utils";
 import { BKMaker } from "@/BackLinkBottomBox";
 
@@ -53,10 +53,15 @@ export function integrateCounting(self: BKMaker) {
     self.container?.querySelector(`[${MENTION_COUTING_SPAN}]`)?.appendChild(self.mentionCounting);
 }
 
+export async function cleanBackLinks(docID: string) {
+    const rows = await siyuan.getDocAttrs(docID, TOMATO_BK_STATIC);
+    await siyuan.safeDeleteBlocks(rows.map(r => r.block_id));
+}
+
 export async function insertBackLinks(docID: string) {
     const lute: Lute = NewLute();
     const backlink2 = await siyuan.getBacklink2(docID);
-    let md = ["# 静态反链"];
+    let md = [`# 静态反链\n{: ${TOMATO_BK_STATIC}="1" }`];
     md = (await Promise.all(backlink2.backlinks.map(backlink => {
         return siyuan.getBacklinkDoc(docID, backlink.id);
     })))
@@ -69,7 +74,7 @@ export async function insertBackLinks(docID: string) {
             return list;
         }, md);
     const content = md.join("\n");
-    await siyuan.appendBlock(content, docID);
+    await siyuan.appendBlock(`${content}\n{: ${TOMATO_BK_STATIC}="1" }`, docID);
 }
 
 function pushDom(bk: Backlink, lute: Lute, list: string[]) {
