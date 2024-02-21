@@ -84,7 +84,7 @@ export async function insertBackLinks(docID: string) {
     backLinks.forEach((backLink) => scanAllRef(backLink.bkDiv, docID, allRefs));
 
     const lnkLine = [...allRefs.values()].reduce((md, i) => {
-        md.push(`[[[${i.text}]]${i.count}](siyuan://blocks/${i.id}?focus=1)`);
+        md.push(`[[[${i.text}]]](siyuan://blocks/${i.id}?focus=1)^${i.count}^`);
         return md;
     }, []).join(SPACE.repeat(2));
     if (lnkLine) md.push(lnkLine);

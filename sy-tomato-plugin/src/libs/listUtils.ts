@@ -1,5 +1,6 @@
+import { events } from "./Events";
 import { BlockNodeEnum, CUSTOM_RIFF_DECKS, DATA_NODE_ID, DATA_NODE_INDEX, DATA_TYPE } from "./gconst";
-import { siyuan } from "./utils";
+import { dom2div, siyuan } from "./utils";
 
 export async function delAllchecked(docID: string) {
     const kramdowns = await Promise.all((await siyuan.sql(`select id from blocks 
@@ -7,23 +8,25 @@ export async function delAllchecked(docID: string) {
         and markdown like "* [X] %"
         limit 30000
     `)).map(b => siyuan.getBlockKramdown(b.id)));
-    await siyuan.safeDeleteBlocks(kramdowns.map(b => b.id));
+    await siyuan.deleteBlocks(kramdowns.map(b => b.id));
     await siyuan.pushMsg(`删除了${kramdowns.length}个任务`);
 }
 
 export async function uncheckAll(docID: string) {
-    const kramdowns = await Promise.all((await siyuan.sql(`select id from blocks 
+    const doms = await Promise.all((await siyuan.sql(`select id from blocks 
         where type='i' and subType='t' and root_id="${docID}"
         and markdown like "* [X] %"
         limit 30000
-    `)).map(b => siyuan.getBlockKramdown(b.id)));
-
-    await Promise.all(kramdowns.map(({ id, kramdown }) => {
-        const newKramdown = kramdown.replace("}[X] ", "}[ ] ");
-        return siyuan.updateBlock(id, newKramdown);
+    `)).map(b => siyuan.getBlockDOM(b.id)));
+    await siyuan.updateBlocks(doms.map(({ id, dom }) => {
+        const div = dom2div(dom);
+        div.classList.remove("protyle-task--done");
+        return { id, data: div.outerHTML };
     }));
-
-    await siyuan.pushMsg(`取消了${kramdowns.length}个任务`);
+    setTimeout(() => {
+        events.protyleReload();
+    }, 1000);
+    await siyuan.pushMsg(`取消了${doms.length}个任务`);
 }
 
 export async function addFlashCard(element: HTMLElement) {

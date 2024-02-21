@@ -509,31 +509,27 @@ export const siyuan = {
     // don't append to doc after clearAll
     async clearAll(docID: string) {
         const blocks = await siyuan.getChildBlocks(docID);
-        return siyuan.safeDeleteBlocks(blocks.map((b: any) => b["id"]));
-    },
-    async safeDeleteBlocks(ids: string[]) {
-        for (const idlist of chunks(ids, 50)) {
-            const tasks = [];
-            for (const id of idlist) {
-                tasks.push(siyuan.safeDeleteBlock(id));
-            }
-            await Promise.all(tasks);
-        }
-    },
-    async safeDeleteBlock(id: string) {
-        if (await siyuan.checkBlockExist(id))
-            return siyuan.call("/api/block/deleteBlock", { id });
+        return siyuan.deleteBlocks(blocks.map((b: any) => b["id"]));
     },
     async deleteBlock(id: string) {
         return siyuan.call("/api/block/deleteBlock", { id });
     },
-    async safeMoveBlockToParent(id: string, parentID: string) {
-        if (await siyuan.checkBlockExist(id))
-            return siyuan.call("/api/block/moveBlock", { id, parentID });
+    async deleteBlocks(ids: string[]) {
+        return siyuan.transactions(ids.map(id => {
+            const op = {} as IOperation;
+            op.action = "delete";
+            op.id = id;
+            return op;
+        }));
     },
-    async safeMoveBlockAfter(id: string, previousID: string) {
-        if (await siyuan.checkBlockExist(id))
-            return siyuan.call("/api/block/moveBlock", { id, previousID });
+    async moveBlocksAfter(ids: string[], previousID: string) {
+        return siyuan.transactions(ids.reverse().map(id => {
+            const op = {} as IOperation;
+            op.action = "move";
+            op.id = id;
+            op.previousID = previousID;
+            return op;
+        }));
     },
     async getTailChildBlocks(id: string, n: number): Promise<[{ id: string, type: string }]> {
         return siyuan.call("/api/block/getTailChildBlocks", { id, n });
@@ -548,8 +544,16 @@ export const siyuan = {
         if (await siyuan.checkBlockExist(id))
             return siyuan.call("/api/block/updateBlock", { id, data, dataType });
     },
-    async updateBlock(id: string, data: string, dataType = "markdown") {
-        return siyuan.call("/api/block/updateBlock", { id, data, dataType });
+    async updateBlocks(ops: { id: string, data: string }[]) {
+        ops = ops.filter(op => !!op.id);
+        if (!ops.length) return;
+        return siyuan.transactions(ops.map(({ id, data }) => {
+            const op = {} as IOperation;
+            op.action = "update"; // dom
+            op.id = id;
+            op.data = data;
+            return op;
+        }));
     },
     async getBlockMarkdownAndContent(id: string): Promise<GetBlockMarkdownAndContent> {
         const row = await siyuan.sqlOne(`select markdown, content from blocks where id="${id}"`);
@@ -694,20 +698,20 @@ export const siyuan = {
         }
         return [theUpperestListID, theMD];
     },
-    async checkAllBlocks(ids: string[]) {
-        for (const idChunk of chunks(ids, 50)) {
-            const tasks = [];
-            for (const id of idChunk) {
-                tasks.push(siyuan.checkBlockExist(id));
-            }
-            const rets = await Promise.all(tasks);
-            for (const ret of rets) {
-                if (!ret) return false;
-            }
-        }
-        return true;
-    },
-    async deleteBlocks() {
+    // async checkAllBlocks(ids: string[]) {
+    //     for (const idChunk of chunks(ids, 50)) {
+    //         const tasks = [];
+    //         for (const id of idChunk) {
+    //             tasks.push(siyuan.checkBlockExist(id));
+    //         }
+    //         const rets = await Promise.all(tasks);
+    //         for (const ret of rets) {
+    //             if (!ret) return false;
+    //         }
+    //     }
+    //     return true;
+    // },
+    async deleteBlocksUtil() {
         const startPoint = await siyuan.sqlOne("select id,root_id from blocks where content='aacc1'");
         const endPoint = await siyuan.sqlOne("select id,root_id from blocks where content='aacc2'");
         const [doc1, doc2] = [startPoint["root_id"], endPoint["root_id"]];
@@ -726,11 +730,11 @@ export const siyuan = {
             }
             if (child["id"] === endPoint["id"]) break;
         }
-        if (!await siyuan.checkAllBlocks(toDel)) return "";
-        await siyuan.safeDeleteBlocks(toDel);
+        // if (!await siyuan.checkAllBlocks(toDel)) return "";
+        await siyuan.deleteBlocks(toDel);
         return doc1;
     },
-    async moveBlocks(copy = false) {
+    async moveBlocksUtil(copy = false) {
         const startPoint = await siyuan.sqlOne("select id,root_id from blocks where content='aacc1'");
         const endPoint = await siyuan.sqlOne("select id,root_id from blocks where content='aacc2'");
         const insertPoint = await siyuan.sqlOne("select id,root_id from blocks where content='aacc3'");
@@ -751,7 +755,7 @@ export const siyuan = {
                 ids.push(child["id"]);
             }
         }
-        if (!await siyuan.checkAllBlocks(ids)) return ["", ""];
+        // if (!await siyuan.checkAllBlocks(ids)) return ["", ""];
         const lute = NewLute();
         const mds = [];
         if (copy) {
@@ -765,13 +769,9 @@ export const siyuan = {
             }
             if (mds.length > 0) await siyuan.insertBlockAfter(mds.join("\n\n"), insertPoint["id"]);
         } else {
-            for (const id of ids.reverse()) {
-                await siyuan.safeMoveBlockAfter(id, insertPoint["id"]);
-            }
+            await siyuan.moveBlocksAfter(ids, insertPoint["id"]);
         }
-        await siyuan.safeDeleteBlock(startPoint["id"]);
-        await siyuan.safeDeleteBlock(endPoint["id"]);
-        await siyuan.safeDeleteBlock(insertPoint["id"]);
+        await siyuan.deleteBlocks([startPoint["id"], endPoint["id"], insertPoint["id"]]);
         return [startDocID, insertPoint["root_id"]];
     },
     async getBlockKramdownWithoutID(id: string, newAttrs: string[] = [], prefix?: string, suffix?: string,) {
