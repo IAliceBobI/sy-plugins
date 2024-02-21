@@ -10,7 +10,6 @@ $scriptDir = Split-Path -Parent $scriptPath
 Set-Location -Path $scriptDir
 
 pnpm lint
-.\deploy.ps1 $projShortName
 
 $projDir = Join-Path $scriptDir "sy-${projShortName}-plugin"
 $projName = Split-Path -Leaf $projDir
@@ -25,6 +24,8 @@ $newVersion = "$major.$minor.$patch"
 $pluginsNewVersion = "${newVersion}-${projName}"
 $pluginJson.version = $newVersion
 $pluginJson | ConvertTo-Json -Depth 100 | Set-Content -Path $projDir\plugin.json
+
+.\deploy.ps1 $projShortName
 
 git add -A
 git commit -m "auto"
