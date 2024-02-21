@@ -4,7 +4,6 @@
         NewLute,
         cleanDiv,
         dom2div,
-        getID,
         newID,
         siyuan,
         siyuanCache,
@@ -13,14 +12,14 @@
         MENTION_CACHE_TIME,
         MENTION_COUTING_SPAN,
         icon,
+        path2div,
+        scanAllRef,
     } from "./libs/bkUtils";
     import { Dialog, Protyle, openTab } from "siyuan";
     import { SEARCH_HELP } from "./constants";
     import {
-        BLOCK_REF,
+        BACKLINK_CACHE_TIME,
         BlockNodeEnum,
-        DATA_ID,
-        DATA_TYPE,
         TOMATO_BK_IGNORE,
     } from "./libs/gconst";
     import { BKMaker } from "./BackLinkBottomBox";
@@ -28,18 +27,9 @@
 
     const QUERYABLE_ELEMENT = "QUERYABLE_ELEMENT";
     const ICONS_SIZE = 13;
-    const BACKLINK_CACHE_TIME = 6 * 1000;
     const mentionCountingSpanAttr = {};
     const queryableElementAttr = {};
     const lute = NewLute();
-
-    type BacklinkSv = {
-        bk: Backlink;
-        bkDiv: HTMLElement;
-        id: string;
-        attrs: LinkElementAttr;
-        isMention: boolean;
-    };
 
     export let maker: BKMaker;
     let autoRefreshChecked: boolean;
@@ -83,8 +73,14 @@
                 return { bk, id: newID(), attrs: {}, bkDiv } as BacklinkSv;
             });
 
-        await Promise.all(backLinks.map((backLink) => path2div(backLink)));
-        backLinks.forEach((backLink) => scanAllRef(backLink.bkDiv));
+        await Promise.all(
+            backLinks.map((backLink) =>
+                path2div(backLink, maker.docID, allRefs),
+            ),
+        );
+        backLinks.forEach((backLink) =>
+            scanAllRef(backLink.bkDiv, maker.docID, allRefs),
+        );
 
         const sortDiv = (a: BacklinkSv, b: BacklinkSv) => {
             const dateA = a.bkDiv.getAttribute("updated");
@@ -118,8 +114,12 @@
             }
             maker.mentionCounting.innerText = "";
 
-            await Promise.all(mentions.map((m) => path2div(m)));
-            mentions.forEach((m) => scanAllRef(dom2div(m.bk.dom)));
+            await Promise.all(
+                mentions.map((m) => path2div(m, maker.docID, allRefs)),
+            );
+            mentions.forEach((m) =>
+                scanAllRef(dom2div(m.bk.dom), maker.docID, allRefs),
+            );
             backLinks = [...backLinks, ...mentions];
             linkItems = [...allRefs.values()];
         }
@@ -149,61 +149,6 @@
         }
     }
 
-    async function path2div(backlinkSv: BacklinkSv) {
-        for (const blockPath of backlinkSv.bk.blockPaths.slice(0, -1)) {
-            if (blockPath.type == BlockNodeEnum.NODE_DOCUMENT) {
-                const fileName = blockPath.name.split("/").pop();
-                await addRef(fileName, blockPath.id);
-                backlinkSv.attrs.isThisDoc = blockPath.id == maker.docID;
-            } else if (blockPath.type == BlockNodeEnum.NODE_HEADING) {
-                await addRef(blockPath.name, blockPath.id);
-            } else {
-                const { dom } = await siyuanCache.getBlockDOM(
-                    2 * BACKLINK_CACHE_TIME,
-                    blockPath.id,
-                );
-                await scanAllRef(dom2div(dom));
-            }
-        }
-    }
-
-    async function scanAllRef(div: HTMLElement) {
-        for (const element of div.querySelectorAll(
-            `[${DATA_TYPE}~="${BLOCK_REF}"]`,
-        )) {
-            const id = element.getAttribute(DATA_ID);
-            const txt = element.textContent;
-            await addRef(txt, id, getID(element));
-        }
-    }
-
-    async function addRef(txt: string, id: string, dataNodeID?: string) {
-        if (txt == "*" || txt == "@" || txt == "@*") return;
-        if (
-            Array.from(
-                txt.matchAll(/^c?\d{4}-\d{2}-\d{2}(@第\d+周-星期.{1})?$/g),
-            ).length > 0
-        )
-            return;
-        if (!dataNodeID) dataNodeID = id;
-        const key = id + txt;
-        const value: LinkItem =
-            allRefs.get(key) ??
-            ({ count: 0, dataNodeIDSet: new Set(), attrs: {} } as LinkItem);
-        if (!value.dataNodeIDSet.has(dataNodeID)) {
-            value.count += 1;
-            value.dataNodeIDSet.add(dataNodeID);
-            value.id = id;
-            value.text = txt;
-            value.attrs = {
-                isThisDoc:
-                    id == maker.docID ||
-                    (await getRootID(dataNodeID)) == maker.docID,
-            };
-            allRefs.set(key, value);
-        }
-    }
-
     async function search(event: Event) {
         let query: string = (event.target as any).value;
         query = query.trim();
@@ -224,14 +169,6 @@
                     e.style.display = "";
                 }
             });
-    }
-
-    async function getRootID(dataNodeID: string) {
-        const row = await siyuanCache.sqlOne(
-            MENTION_CACHE_TIME,
-            `select root_id from blocks where id="${dataNodeID}"`,
-        );
-        return row?.root_id ?? "";
     }
 
     function refClick(id: string) {

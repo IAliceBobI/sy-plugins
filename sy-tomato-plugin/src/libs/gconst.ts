@@ -15,6 +15,7 @@ export const IDLen = 20;
 export const TOMATO_CONTROL_ELEMENT = "tomato-control-card-priority";
 export const TOMATO_BK_IGNORE = "tomato-bk-ignore";
 export const TOMATO_BK_STATIC = "custom-tomato-bk-static";
+export const BACKLINK_CACHE_TIME = 6 * 1000;
 
 export enum BlockNodeEnum {
     BLOCK_REF = "block-ref",

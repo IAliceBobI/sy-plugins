@@ -71,3 +71,11 @@ type AttrType = {
 };
 
 type RiffCard = { due: string, reps: number };
+
+type BacklinkSv = {
+    bk: Backlink;
+    bkDiv: HTMLElement;
+    id: string;
+    attrs: LinkElementAttr;
+    isMention: boolean;
+};
