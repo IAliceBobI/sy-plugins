@@ -1,6 +1,6 @@
 import { Lute } from "siyuan";
 import { isIterable } from "./functional";
-import { BACKLINK_CACHE_TIME, BLOCK_REF, BlockNodeEnum, DATA_ID, DATA_NODE_ID, DATA_TYPE, SPACE, TOMATO_BK_STATIC } from "./gconst";
+import { BACKLINK_CACHE_TIME, BLOCK_REF, BlockNodeEnum, DATA_ID, DATA_NODE_ID, DATA_SUBTYPE, DATA_TYPE, SPACE, TOMATO_BK_STATIC } from "./gconst";
 import { NewLute, cleanDiv, dom2div, getID, siyuan, siyuanCache } from "./utils";
 import { BKMaker } from "@/BackLinkBottomBox";
 
@@ -82,7 +82,7 @@ export async function insertBackLinks(docID: string) {
         md.push(`[[[${i.text}]]${i.count}](siyuan://blocks/${i.id}?focus=1)`);
         return md;
     }, []).join(SPACE.repeat(2));
-    if (lnkLine) md.push("* " + lnkLine);
+    if (lnkLine) md.push(lnkLine);
 
     md = links.reduce((list, bk) => {
         if (pushPath(bk, list, docID)) {
@@ -92,34 +92,30 @@ export async function insertBackLinks(docID: string) {
     }, md);
 
     const content = md.join("\n");
-    await siyuan.appendBlock(`${content}\n{: ${TOMATO_BK_STATIC}="1" }`, docID);
+    await siyuan.appendBlock(content, docID);
 }
 
 function pushDom(bk: Backlink, lute: Lute, list: string[]) {
     const div = document.createElement("div") as HTMLElement;
     div.innerHTML = bk.dom;
     cleanDiv(div.firstElementChild as any, false, false);
+    div.querySelectorAll(`[${DATA_SUBTYPE}="h1"]`).forEach((e: HTMLElement) => {
+        e.setAttribute(DATA_SUBTYPE, "h2");
+    });
     div.querySelectorAll(`[${DATA_TYPE}~="${BLOCK_REF}"]`).forEach((e: HTMLElement) => {
         const id = e.getAttribute(DATA_ID);
         e.setAttribute(DATA_TYPE, "a");
         e.setAttribute("data-href", `siyuan://blocks/${id}?focus=1`);
     });
-    let md = lute.BlockDOM2Md(div.innerHTML);
-    if (!md.startsWith("*")) {
-        const p = md.trim().split("\n");
-        if (p[p.length - 1].trim().startsWith("{: ")) {
-            p.pop();
-        }
-        md = "* " + p.join("\n");
-    }
-    list.push("* " + md);
+    const md = lute.BlockDOM2Md(div.innerHTML);
+    list.push(md);
 }
 
 function pushPath(bk: Backlink, list: string[], docID: string) {
     const file = bk.blockPaths[0];
     const target = bk.blockPaths[bk.blockPaths.length - 1];
     if (docID == file?.id) return false;
-    list.push(`* 📃[${file.name}](siyuan://blocks/${target.id}?focus=1)`);
+    list.push(`📃[${file.name}](siyuan://blocks/${target.id}?focus=1)`);
     return true;
 }
 
