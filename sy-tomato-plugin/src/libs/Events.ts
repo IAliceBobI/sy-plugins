@@ -1,5 +1,6 @@
-import { Plugin, getFrontend, Protyle } from "siyuan";
+import { Plugin, getFrontend, Protyle, IProtyle } from "siyuan";
 import { getCursorElement, getID } from "./utils";
+import { DATA_NODE_ID, PROTYLE_WYSIWYG_SELECT } from "./gconst";
 
 export enum EventType {
     click_editorcontent = "click-editorcontent",
@@ -40,7 +41,7 @@ class Events {
     }
 
     public get lastBlockID(): string {
-        return getCursorBlock();
+        return getID(getCursorElement());
     }
 
     private _boxID: string;
@@ -123,10 +124,21 @@ class Events {
             ((this.protyle?.protyle as any)?.getInstance() as Protyle)?.reload(true);
         }
     }
-}
 
-function getCursorBlock() {
-    return getID(getCursorElement());
+    selectedDivs(protyle: IProtyle) {
+        const element = protyle?.wysiwyg?.element;
+        const docID = protyle?.block?.rootID;
+        if (!element || !docID) return {};
+        const selected: HTMLElement[] = [...element.querySelectorAll(`.${PROTYLE_WYSIWYG_SELECT}`)];
+        if (selected.length == 0) {
+            const e = getCursorElement();
+            if (e) selected.push(e);
+        }
+        const range = document.getSelection()?.getRangeAt(0);
+        const rangeText = range?.cloneContents()?.textContent ?? "";
+        const ids = selected.slice(-1).map(i => i.getAttribute(DATA_NODE_ID));
+        return { selected, ids, docID, element, rangeText };
+    }
 }
 
 export const events = new Events();

@@ -2,11 +2,7 @@
     import { onMount, onDestroy } from "svelte";
     import { Dialog, IProtyle, openTab } from "siyuan";
     import { events } from "./libs/Events";
-    import {
-        DATA_NODE_ID,
-        PROTYLE_WYSIWYG_SELECT,
-        TOMATO_BK_IGNORE,
-    } from "./libs/gconst";
+    import { DATA_NODE_ID, TOMATO_BK_IGNORE } from "./libs/gconst";
     import {
         NewNodeID,
         cleanText,
@@ -44,23 +40,15 @@
     let aiAPI: BaiduAI;
 
     onMount(async () => {
-        element = protyle?.wysiwyg?.element;
-        docID = protyle?.block?.rootID;
+        attrs[TOMATO_BK_IGNORE] = "1";
+
+        const s = events.selectedDivs(protyle);
+        element = s.element;
+        docID = s.docID;
+        anchorID = s.ids[s.ids.length - 1];
+        selected = s.selected;
         if (!element || !docID) return;
 
-        attrs[TOMATO_BK_IGNORE] = "1";
-        selected = [
-            ...element.querySelectorAll(`.${PROTYLE_WYSIWYG_SELECT}`),
-        ] as any;
-        if (selected.length == 0) {
-            const e = element.querySelector(
-                `[${DATA_NODE_ID}="${events.lastBlockID}"]`,
-            ) as HTMLElement;
-            if (e) selected.push(e);
-        }
-        selected.slice(-1).forEach((i) => {
-            anchorID = i.getAttribute(DATA_NODE_ID);
-        });
         insertPlace =
             hotMenuBox.settingCfg["ai-return-insert-place"] ??
             getIdx(InsertPlace.here);
