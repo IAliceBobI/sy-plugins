@@ -85,8 +85,9 @@ export async function insertBackLinks(docID: string) {
     if (lnkLine) md.push("* " + lnkLine);
 
     md = links.reduce((list, bk) => {
-        pushPath(bk, list);
-        pushDom(bk, lute, list);
+        if (pushPath(bk, list, docID)) {
+            pushDom(bk, lute, list);
+        }
         return list;
     }, md);
 
@@ -114,10 +115,12 @@ function pushDom(bk: Backlink, lute: Lute, list: string[]) {
     list.push("* " + md);
 }
 
-function pushPath(bk: Backlink, list: string[]) {
+function pushPath(bk: Backlink, list: string[], docID: string) {
     const file = bk.blockPaths[0];
     const target = bk.blockPaths[bk.blockPaths.length - 1];
-    list.push(`* [${file.name}](siyuan://blocks/${target.id}?focus=1)`);
+    if (docID == file?.id) return false;
+    list.push(`* 📃[${file.name}](siyuan://blocks/${target.id}?focus=1)`);
+    return true;
 }
 
 export async function path2div(backlinkSv: BacklinkSv, docID: string, allRefs: RefCollector) {
