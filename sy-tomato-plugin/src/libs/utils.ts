@@ -481,15 +481,6 @@ export const siyuan = {
     async getBlockAttrs(id: string): Promise<AttrType> {
         return siyuan.call("/api/attr/getBlockAttrs", { id });
     },
-    async transactions(doOperations: IOperation[]) {
-        return siyuan.call("/api/transactions", {
-            session: Constants.SIYUAN_APPID,
-            app: Constants.SIYUAN_APPID,
-            transactions: [{
-                doOperations
-            }]
-        });
-    },
     async getNotebookConf(notebookID: string): Promise<GetNotebookConf> {
         return siyuan.call("/api/notebook/getNotebookConf", { "notebook": notebookID });
     },
@@ -499,7 +490,7 @@ export const siyuan = {
     },
     async getRowByID(id: string) {
         const row = await siyuan.sqlOne(`select * from blocks where id='${id}'`);
-        return row ?? {};
+        return row;
     },
     async getChildBlocks(id: string): Promise<GetChildBlocks[]> {
         return siyuan.call("/api/block/getChildBlocks", { id });
@@ -564,7 +555,20 @@ export const siyuan = {
         const row = await siyuan.sqlOne(`select markdown, content from blocks where id="${id}"`);
         return { markdown: row?.markdown ?? "", content: row?.content ?? "" };
     },
-    async getHeadingChildrenIDs(id: string) {
+    async transactions(doOperations: IOperation[], undoOperations: IOperation[] = []) {
+        return siyuan.call("/api/transactions", {
+            session: Constants.SIYUAN_APPID,
+            app: Constants.SIYUAN_APPID,
+            transactions: [{
+                doOperations, undoOperations
+            }],
+            reqId: new Date().getTime(),
+        });
+    },
+    async getHeadingDeleteTransaction(id: string): Promise<{ timestamp: number, doOperations: IOperation[], undoOperations: IOperation[] }> {
+        return siyuan.call("/api/block/getHeadingDeleteTransaction", { id });
+    },
+    async getHeadingChildrenIDs(id: string): Promise<string[]> {
         return siyuan.call("/api/block/getHeadingChildrenIDs", { id });
     },
     async getHeadingChildrenDOM(id: string) {

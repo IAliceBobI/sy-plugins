@@ -55,7 +55,12 @@ export function integrateCounting(self: BKMaker) {
 
 export async function cleanBackLinks(docID: string) {
     const rows = await siyuan.getDocAttrs(docID, TOMATO_BK_STATIC);
-    await siyuan.safeDeleteBlocks(rows.map(r => r.block_id));
+    const bk = (await Promise.all(rows.map(r => siyuan.getRowByID(r.block_id))))
+        .filter(b => b.subtype == "h1");
+    for (const i of bk) {
+        const { doOperations } = await siyuan.getHeadingDeleteTransaction(i.id);
+        await siyuan.transactions(doOperations);
+    }
 }
 
 export async function insertBackLinks(docID: string) {
