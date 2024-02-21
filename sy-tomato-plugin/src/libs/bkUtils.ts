@@ -78,10 +78,11 @@ export async function insertBackLinks(docID: string) {
     await Promise.all(backLinks.map((backLink) => path2div(backLink, docID, allRefs)));
     backLinks.forEach((backLink) => scanAllRef(backLink.bkDiv, docID, allRefs));
 
-    md.push("* " + [...allRefs.values()].reduce((md, i) => {
+    const lnkLine = [...allRefs.values()].reduce((md, i) => {
         md.push(`[[[${i.text}]]${i.count}](siyuan://blocks/${i.id}?focus=1)`);
         return md;
-    }, []).join(SPACE.repeat(2)));
+    }, []).join(SPACE.repeat(2));
+    if (lnkLine) md.push("* " + lnkLine);
 
     md = links.reduce((list, bk) => {
         pushPath(bk, list);
