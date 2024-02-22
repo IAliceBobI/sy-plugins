@@ -1,11 +1,9 @@
-import { IProtyle, ITab, Lute, Plugin, openTab } from "siyuan";
+import { IProtyle, ITab, Plugin, openTab } from "siyuan";
 import { events } from "./libs/Events";
-import { NewLute, cleanDiv, siyuan } from "./libs/utils";
-import { DATA_NODE_ID, PROTYLE_WYSIWYG_SELECT } from "./libs/gconst";
+import { siyuan } from "./libs/utils";
 
 class DailyNoteBox {
     private plugin: Plugin;
-    private lute: Lute;
     private move2BoxID: string;
     private lastOpen: ITab;
     private settingCfg: TomatoSettings;
@@ -25,7 +23,6 @@ class DailyNoteBox {
     async onload(plugin: Plugin) {
         this.plugin = plugin;
         this.settingCfg = (plugin as any).settingCfg;
-        this.lute = NewLute();
         if (!events.isMobile) {
             this.plugin.addTopBar({
                 icon: "iconLeft",
@@ -72,7 +69,7 @@ class DailyNoteBox {
                 icon: "iconMove",
                 accelerator: "",
                 click: () => {
-                    this.moveBlock2today(events.lastBlockID);
+                    this.findDivs();
                 },
             });
         });
@@ -153,35 +150,15 @@ class DailyNoteBox {
         if (targetDocID) this.lastOpen = await openTab({ app: this.plugin.app, doc: { id: targetDocID } });
     }
 
-    async moveBlock2today(blockID: string) {
-        if (!blockID) return;
+    async findDivs(protyle?: IProtyle) {
         let boxID = this.move2BoxID;
         if (!boxID) boxID = events.boxID;
         try {
             const { id: docID } = await siyuan.createDailyNote(boxID);
-            const { dom } = await siyuan.getBlockDOM(blockID);
-            const div = document.createElement("div");
-            div.innerHTML = dom;
-            await cleanDiv(div.firstElementChild as HTMLDivElement, false, false);
-            const md = this.lute.BlockDOM2Md(div.innerHTML);
-            await siyuan.appendBlock(md, docID);
-            await siyuan.safeUpdateBlock(blockID, "");
+            const { ids } = events.selectedDivs(protyle);
+            await siyuan.moveBlocksAsChild(ids, docID);
         } catch (_e) {
             await siyuan.pushMsg(`您配置的笔记本'${boxID}'是否打开？`);
-        }
-    }
-
-    async findDivs(protyle: IProtyle) {
-        const multiLine = protyle.element.querySelectorAll(`.${PROTYLE_WYSIWYG_SELECT}`);
-        let flag = false;
-        for (const div of multiLine) {
-            div.classList.remove(PROTYLE_WYSIWYG_SELECT);
-            const id = div.getAttribute(DATA_NODE_ID);
-            await this.moveBlock2today(id);
-            flag = true;
-        }
-        if (!flag) {
-            await this.moveBlock2today(events.lastBlockID);
         }
     }
 }

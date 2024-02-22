@@ -157,7 +157,7 @@ export async function cleanNote(noteID: string, force: boolean) {
             }
         }
     }
-    await Promise.all(id2del.map(id => siyuan.deleteBlock(id)));
+    await siyuan.deleteBlocks(id2del);
 }
 
 export async function findPieceDoc(bookID: string, point: number) {

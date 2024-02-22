@@ -511,9 +511,6 @@ export const siyuan = {
         const blocks = await siyuan.getChildBlocks(docID);
         return siyuan.deleteBlocks(blocks.map((b: any) => b["id"]));
     },
-    async deleteBlock(id: string) {
-        return siyuan.call("/api/block/deleteBlock", { id });
-    },
     async deleteBlocks(ids: string[]) {
         return siyuan.transactions(ids.map(id => {
             const op = {} as IOperation;
@@ -528,6 +525,15 @@ export const siyuan = {
             op.action = "move";
             op.id = id;
             op.previousID = previousID;
+            return op;
+        }));
+    },
+    async moveBlocksAsChild(ids: string[], parentID: string) {
+        return siyuan.transactions(ids.reverse().map(id => {
+            const op = {} as IOperation;
+            op.action = "move";
+            op.id = id;
+            op.parentID = parentID;
             return op;
         }));
     },
