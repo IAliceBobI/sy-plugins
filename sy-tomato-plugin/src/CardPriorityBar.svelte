@@ -73,13 +73,7 @@
     }
     async function updateCardByInput(event: MouseEvent) {
         event.stopPropagation();
-        await cardPriorityBox.updatePrioritySelected(
-            [cardElement],
-            priority,
-            async () => {
-                await cardPriorityBox.addBtns(wysiwygElement);
-            },
-        );
+        await cardPriorityBox.updatePrioritySelected([cardElement], priority);
     }
 </script>
 

@@ -206,30 +206,35 @@ class CardPriorityBox {
         );
     }
 
-    async updatePrioritySelected(elements: HTMLElement[], priority?: number, cb?: Func) {
+    async updatePrioritySelected(elements: HTMLElement[], priority?: number) {
         const blocks = (await Promise.all(elements.map(div => {
             return getID(div, [CUSTOM_RIFF_DECKS]);
         }).filter(i => !!i).map(id => siyuan.getBlockAttrs(id)))).map(ial => {
             return { ial };
         }).filter(b => !!b.ial[CUSTOM_RIFF_DECKS]);
-        return this.updateDocPriorityBatchDialog(blocks as any, priority, cb);
+        return this.updateDocPriorityBatchDialog(blocks as any, priority);
     }
 
-    private async updateDocPriorityBatchDialog(blocks: Block[], priority?: number, cb?: Func) {
+    private async updateDocPriorityBatchDialog(blocks: Block[], priority?: number) {
         const vp = isValidNumber(priority);
-        if (!vp || cb) {
-            if (!vp) priority = 50;
+        if (!vp) {
+            priority = 50;
             new DialogText(`为${blocks.length}张卡输入新的优先级`, String(priority), async (priorityTxt: string) => {
                 const priority = Number(priorityTxt);
                 if (isValidNumber(priority)) {
                     await this.updateDocPriorityLock(priority, blocks);
-                    if (cb) await cb();
+                    setTimeout(() => {
+                        events.protyleReload();
+                    }, 1000);
                 } else {
                     await siyuan.pushMsg(`您的输入有误：${priorityTxt}`);
                 }
             });
         } else {
             await this.updateDocPriorityLock(priority, blocks);
+            setTimeout(() => {
+                events.protyleReload();
+            }, 500);
         }
     }
 
