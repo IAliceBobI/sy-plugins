@@ -2,6 +2,14 @@ import { App, Constants, IOperation, Lute, Protyle, fetchSyncPost, openTab } fro
 import { v4 as uuid } from "uuid";
 import * as gconst from "./gconst";
 
+export function getRandFloat0tox(x: number) {
+    return Math.random() * x;
+}
+
+export function getRandInt0tox(x: number) {
+    return Math.floor(Math.random() * x);
+}
+
 export function dom2div(dom: string) {
     const div = document.createElement("div") as HTMLElement;
     if (!dom) return div;

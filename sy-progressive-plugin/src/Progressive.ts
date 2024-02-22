@@ -60,6 +60,13 @@ class Progressive {
             },
         });
         this.plugin.addCommand({
+            langKey: "startToLearnRand",
+            hotkey: "⌥⇧-",
+            callback: async () => {
+                await this.startToLearnWithLock("", true);
+            },
+        });
+        this.plugin.addCommand({
             langKey: "viewAllProgressiveBooks",
             hotkey: "⌥=",
             callback: async () => {
@@ -286,11 +293,11 @@ class Progressive {
         }
     }
 
-    async startToLearnWithLock(bookID?: string) {
+    async startToLearnWithLock(bookID = "", isRand = false) {
         return navigator.locks.request(constants.StartToLearnLock, { ifAvailable: true }, async (lock) => {
             if (lock) {
                 await siyuan.pushMsg(this.plugin.i18n.openingDocPieceForYou);
-                await this.startToLearn(bookID);
+                await this.startToLearn(bookID, isRand);
                 await utils.sleep(constants.IndexTime2Wait);
             } else {
                 await siyuan.pushMsg(this.plugin.i18n.slowDownALittleBit + " [2]");
@@ -343,7 +350,7 @@ class Progressive {
         if (contentID) await openTab({ app: this.plugin.app, doc: { id: contentID } });
     }
 
-    private async startToLearn(bookID?: string) {
+    private async startToLearn(bookID = "", isRand = false) {
         let noteID = "";
         const bookInfo = await this.getBook2Learn(bookID);
         if (!bookInfo.bookID) {
@@ -352,7 +359,8 @@ class Progressive {
         }
         bookID = bookInfo.bookID;
         const bookIndex = await this.storage.loadBookIndexIfNeeded(bookInfo.bookID);
-        const point = (await this.storage.booksInfo(bookInfo.bookID)).point;
+        let point = (await this.storage.booksInfo(bookInfo.bookID)).point;
+        if (isRand) point = utils.getRandInt0tox(bookIndex.length);
         await this.storage.updateBookInfoTime(bookID);
         if (point >= bookIndex.length) {
             await siyuan.pushMsg(this.plugin.i18n.thisIsLastPage);
