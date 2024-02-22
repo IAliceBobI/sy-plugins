@@ -223,18 +223,12 @@ class CardPriorityBox {
                 const priority = Number(priorityTxt);
                 if (isValidNumber(priority)) {
                     await this.updateDocPriorityLock(priority, blocks);
-                    setTimeout(() => {
-                        events.protyleReload();
-                    }, 1000);
                 } else {
                     await siyuan.pushMsg(`您的输入有误：${priorityTxt}`);
                 }
             });
         } else {
             await this.updateDocPriorityLock(priority, blocks);
-            setTimeout(() => {
-                events.protyleReload();
-            }, 500);
         }
     }
 
@@ -263,6 +257,9 @@ class CardPriorityBox {
             }
         }).filter(i => !!i);
         await siyuan.batchSetBlockAttrs(params);
+        setTimeout(() => {
+            events.protyleReload();
+        }, 500);
         return params.length;
     }
 
