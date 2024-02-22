@@ -11,7 +11,6 @@
     import { isValidNumber, siyuan } from "./libs/utils";
     import { events } from "./libs/Events";
 
-    export let wysiwygElement: HTMLElement;
     export let cardElement: HTMLElement;
     export let textContent: string;
 
@@ -42,7 +41,6 @@
             [cardElement],
             priority - 1,
         );
-        await cardPriorityBox.addBtns(wysiwygElement);
     }
     async function addOne(event: MouseEvent) {
         event.stopPropagation();
@@ -50,10 +48,9 @@
             [cardElement],
             priority + 1,
         );
-        await cardPriorityBox.addBtns(wysiwygElement);
     }
     async function stopCard(event: MouseEvent) {
-        cardPriorityBox.stopCard(event, cardElement, wysiwygElement);
+        cardPriorityBox.stopCard(event, cardElement);
     }
     async function removeCard(event: MouseEvent) {
         event.stopPropagation();
@@ -69,7 +66,6 @@
     async function updateCard(event: MouseEvent) {
         event.stopPropagation();
         await cardPriorityBox.updatePrioritySelected([cardElement], priority);
-        await cardPriorityBox.addBtns(wysiwygElement);
     }
     async function updateCardByInput(event: MouseEvent) {
         event.stopPropagation();

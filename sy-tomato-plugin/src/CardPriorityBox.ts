@@ -1,4 +1,4 @@
-import { ICardData, IEventBusMap, IProtyle, Plugin, Protyle } from "siyuan";
+import { ICardData, IEventBusMap, IProtyle, Plugin } from "siyuan";
 import "./index.scss";
 import { getID, isCardUI, isValidNumber, shuffleArray, siyuan, siyuanCache, timeUtil } from "./libs/utils";
 import { CARD_PRIORITY_STOP, CUSTOM_RIFF_DECKS, DATA_NODE_ID, TOMATO_CONTROL_ELEMENT } from "./libs/gconst";
@@ -65,7 +65,7 @@ class CardPriorityBox {
                     iconHTML: "🚗🛑",
                     label: "暂停当前所有未复习完成的闪卡",
                     click: async () => {
-                        await this.autoStopRestCards(detail as any);
+                        await this.autoStopRestCards();
                     },
                 });
             }
@@ -122,7 +122,7 @@ class CardPriorityBox {
         }
     }
 
-    async autoStopRestCards(protyle: Protyle) {
+    async autoStopRestCards() {
         const blocks = (await siyuan.getRiffDueCards()).cards.filter(due => {
             const oldDue = this.beforeReview.get(due.blockID);
             if (oldDue) {
@@ -134,7 +134,7 @@ class CardPriorityBox {
         }).map(due => {
             return { ial: { id: due.blockID } } as unknown as Block;
         });
-        await this.stopCards(blocks, protyle?.protyle?.wysiwyg?.element);
+        await this.stopCards(blocks);
     }
 
     blockIconEvent(detail: IEventBusMap["click-blockicon"]) {
@@ -151,7 +151,7 @@ class CardPriorityBox {
             label: "闪卡暂停/恢复",
             click: (_e, event) => {
                 for (const e of detail.blockElements) {
-                    this.stopCard(event, e, detail.protyle?.wysiwyg?.element);
+                    this.stopCard(event, e);
                 }
             }
         });
@@ -160,13 +160,13 @@ class CardPriorityBox {
                 iconHTML: "🚗🛑",
                 label: "暂停当前所有未复习完成的闪卡",
                 click: async () => {
-                    await this.autoStopRestCards(detail as any);
+                    await this.autoStopRestCards();
                 },
             });
         }
     }
 
-    async stopCard(event: MouseEvent, cardElement: HTMLElement, wysiwygElement?: HTMLElement) {
+    async stopCard(event: MouseEvent, cardElement: HTMLElement) {
         event.stopPropagation();
         const id = getID(cardElement, [CUSTOM_RIFF_DECKS]);
         if (!id) return;
@@ -174,16 +174,14 @@ class CardPriorityBox {
         if (attrs[CARD_PRIORITY_STOP]) {
             await resumeCard(id);
             await siyuan.pushMsg("继续闪卡");
-            await cardPriorityBox.addBtns(wysiwygElement);
         } else {
             await cardPriorityBox.stopCards(
                 [{ ial: { id } }] as any,
-                wysiwygElement,
             );
         }
     }
 
-    async stopCards(blocks: Block[], wysiwygElement?: HTMLElement) {
+    async stopCards(blocks: Block[]) {
         new DialogText(
             `准备暂停${blocks.length}个闪卡，请先设置暂停天数`,
             "2",
@@ -198,10 +196,12 @@ class CardPriorityBox {
                         await siyuan.batchSetBlockAttrs([...blocks.map((b: any) => {
                             return { id: b.ial.id, attrs: newAttrs };
                         })]);
+                        setTimeout(() => {
+                            events.protyleReload();
+                        }, 500);
                         await siyuan.pushMsg(`暂停${blocks.length}个闪卡${days}天`);
                     }
                 }
-                if (wysiwygElement) await cardPriorityBox.addBtns(wysiwygElement);
             },
         );
     }
@@ -328,7 +328,6 @@ class CardPriorityBox {
                         target: protyleAttrElement,
                         props: {
                             cardElement,
-                            wysiwygElement,
                             textContent,
                         }
                     });
@@ -341,7 +340,10 @@ export async function resumeCard(blockID: string) {
     const newAttrs = {} as AttrType;
     newAttrs["custom-card-priority-stop"] = "";
     newAttrs.bookmark = "";
-    return siyuan.setBlockAttrs(blockID, newAttrs);
+    await siyuan.setBlockAttrs(blockID, newAttrs);
+    setTimeout(() => {
+        events.protyleReload();
+    }, 500);
 }
 
 async function resumeCardsDeleteAttr(attrList: AttrType[]) {
