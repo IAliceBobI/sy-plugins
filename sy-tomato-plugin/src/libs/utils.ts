@@ -485,15 +485,13 @@ export const siyuan = {
     },
     async batchSetBlockAttrs(blockAttrs: { id: string, attrs: AttrType }[]) {
         // return siyuan.call("/api/attr/batchSetBlockAttrs", { blockAttrs });
-        if (blockAttrs.length > 1) {
-            return siyuan.transactions(blockAttrs.map(b => {
-                const op = {} as IOperation;
-                op.action = "setAttrs";
-                op.id = b.id;
-                op.data = JSON.stringify(b.attrs);
-                return op;
-            }));
-        }
+        return siyuan.transactions(blockAttrs.map(b => {
+            const op = {} as IOperation;
+            op.action = "setAttrs";
+            op.id = b.id;
+            op.data = JSON.stringify(b.attrs);
+            return op;
+        }));
     },
     async getBlockAttrs(id: string): Promise<AttrType> {
         return siyuan.call("/api/attr/getBlockAttrs", { id });
