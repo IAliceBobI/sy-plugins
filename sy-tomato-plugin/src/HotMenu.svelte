@@ -367,6 +367,16 @@ ${text}
                         }}>♻️🔙🔗</button
                     >
                 </td>
+                <td>
+                    <button
+                        title="删除静态反链"
+                        class="b3-button"
+                        on:click={async () => {
+                            await cleanBackLinks(docID);
+                            destroy();
+                        }}>🧹🔙🔗</button
+                    >
+                </td>
             </tr>
             <!-- <tr>
                 <td>
