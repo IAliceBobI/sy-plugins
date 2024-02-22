@@ -216,8 +216,7 @@ class CardPriorityBox {
     }
 
     private async updateDocPriorityBatchDialog(blocks: Block[], priority?: number) {
-        const vp = isValidNumber(priority);
-        if (!vp) {
+        if (!isValidNumber(priority)) {
             priority = 50;
             new DialogText(`为${blocks.length}张卡输入新的优先级`, String(priority), async (priorityTxt: string) => {
                 const priority = Number(priorityTxt);
