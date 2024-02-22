@@ -82,7 +82,6 @@
     }
 
     async function ai(ctx: ChatContext, text: string) {
-        destroy();
         await siyuan.pushMsg(text.slice(0, 100), 2000);
         const ai = await aiAPI.chatCompletionsPro(ctx, text);
         if (!ai?.usage?.completion_tokens) {
@@ -185,7 +184,6 @@ ${text}
         }
     }
 
-    copyCompressPrompt;
     async function copyCompressPrompt(copy?: boolean) {
         const text = getAllText();
         let prompt = "";
@@ -193,11 +191,10 @@ ${text}
             prompt = `
 ${text}
 -------------------
-请将以上文字压缩到最简，保留核心信息。
+请压缩并提取中心意思
 `.trim();
             if (copy) await navigator.clipboard.writeText(prompt);
         }
-        destroy();
         return prompt;
     }
 </script>
@@ -300,6 +297,7 @@ ${text}
                         class="b3-button"
                         on:click={async () => {
                             await ai(hotMenuBox.ctx4k, getAllText());
+                            destroy();
                         }}>🤖文心4</button
                     >
                 </td>
@@ -309,7 +307,29 @@ ${text}
                         class="b3-button"
                         on:click={async () => {
                             await ai(hotMenuBox.ctx8k, getAllText());
+                            destroy();
                         }}>🤖文心8K</button
+                    >
+                </td>
+                <td>
+                    <button
+                        title="AI总结内容"
+                        class="b3-button"
+                        on:click={async () => {
+                            await ai(
+                                hotMenuBox.ctx4k,
+                                await copyCompressPrompt(false),
+                            );
+                            destroy();
+                        }}>🗜️压缩</button
+                    >
+                    <button
+                        title="复制提示词"
+                        class="b3-button"
+                        on:click={async () => {
+                            await copyCompressPrompt(true);
+                            await siyuan.pushMsg("已经复制", 1000);
+                        }}>📜</button
                     >
                 </td>
             </tr>
@@ -380,22 +400,7 @@ ${text}
             </tr>
             <!-- <tr>
                 <td>
-                    <button
-                        title="AI总结内容"
-                        class="b3-button"
-                        on:click={async () => {
-                            await ai(
-                                hotMenuBox.ctx4k,
-                                await copyCompressPrompt(false),
-                            );
-                        }}>🗜️压缩内容</button
-                    >
-                    <button
-                        title="复制提示词"
-                        class="b3-button"
-                        on:click={async () => await copyCompressPrompt(true)}
-                        >📜</button
-                    >
+                    
                 </td>
                 <td>
                     <button
