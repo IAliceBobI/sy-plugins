@@ -204,37 +204,38 @@ class CardPriorityBox {
         );
     }
 
-    async updatePrioritySelected(elements: HTMLElement[], priority?: number) {
+    async updatePrioritySelected(elements: HTMLElement[], priority?: number, dialog?: boolean, cb?: Func) {
         const blocks = (await Promise.all(elements.map(div => {
             return getID(div, [CUSTOM_RIFF_DECKS]);
         }).filter(i => !!i).map(id => siyuan.getBlockAttrs(id)))).map(ial => {
             return { ial };
         }).filter(b => !!b.ial[CUSTOM_RIFF_DECKS]);
-        return this.updateDocPriorityBatchDialog(blocks as any, priority);
+        return this.updateDocPriorityBatchDialog(blocks as any, priority, dialog, cb);
     }
 
-    private async updateDocPriorityBatchDialog(blocks: Block[], priority?: number) {
-        if (!isValidNumber(priority)) {
-            priority = 50;
+    private async updateDocPriorityBatchDialog(blocks: Block[], priority?: number, dialog?: boolean, cb?: Func) {
+        const validNum = isValidNumber(priority);
+        if (dialog || !validNum) {
+            if (!validNum) priority = 50;
             new DialogText(`为${blocks.length}张卡输入新的优先级`, String(priority), async (priorityTxt: string) => {
                 const priority = Number(priorityTxt);
                 if (isValidNumber(priority)) {
-                    await this.updateDocPriorityLock(priority, blocks);
+                    await this.updateDocPriorityLock(priority, blocks, cb);
                 } else {
                     await siyuan.pushMsg(`您的输入有误：${priorityTxt}`);
                 }
             });
         } else {
-            await this.updateDocPriorityLock(priority, blocks);
+            await this.updateDocPriorityLock(priority, blocks, cb);
         }
     }
 
     // update the entire doc cards
-    private updateDocPriorityLock(newPriority: number, blocks: Block[]): any {
+    private updateDocPriorityLock(newPriority: number, blocks: Block[], cb?: Func) {
         return navigator.locks.request("CardPriorityBox.updateDocPriorityLock", { ifAvailable: true }, async (lock) => {
             if (lock) {
                 await siyuan.pushMsg(`设置闪卡优先级为：${newPriority}`, 2000);
-                const count = await this.updateDocPriority(newPriority, blocks);
+                const count = await this.updateDocPriority(newPriority, blocks, cb);
                 await siyuan.pushMsg(`已经调整了${count}个闪卡的优先级`, 2000);
             } else {
                 await siyuan.pushMsg("正在修改优先级，请耐心等候……", 2000);
@@ -242,7 +243,7 @@ class CardPriorityBox {
         });
     }
 
-    private async updateDocPriority(newPriority: number, blocks: Block[]) {
+    private async updateDocPriority(newPriority: number, blocks: Block[], cb?: Func) {
         newPriority = ensureValidPriority(newPriority);
         const params = blocks.map(block => {
             const ial = block.ial as unknown as AttrType;
@@ -254,9 +255,13 @@ class CardPriorityBox {
             }
         }).filter(i => !!i);
         await siyuan.batchSetBlockAttrs(params);
-        setTimeout(() => {
-            events.protyleReload();
-        }, 500);
+        if (cb) {
+            cb(newPriority);
+        } else {
+            setTimeout(() => {
+                events.protyleReload();
+            }, 500);
+        }
         return params.length;
     }
 

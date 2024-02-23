@@ -22,7 +22,13 @@
 
     onMount(async () => {
         cardID = cardElement.getAttribute(DATA_NODE_ID);
-        priority = Number(cardElement.getAttribute(CARD_PRIORITY) ?? "50");
+        if (cardElement.classList.contains("protyle-title")) {
+            const attrs = await siyuan.getBlockAttrs(cardID);
+            priority = Number(attrs["custom-card-priority"] ?? "50");
+        } else {
+            priority = Number(cardElement.getAttribute(CARD_PRIORITY) ?? "50");
+        }
+
         if (!isValidNumber(priority)) priority = 50;
         controlAttr = {} as AttrType;
         controlAttr[TOMATO_CONTROL_ELEMENT] = "1";
@@ -40,6 +46,10 @@
         await cardPriorityBox.updatePrioritySelected(
             [cardElement],
             priority - 1,
+            false,
+            (p) => {
+                priority = p;
+            },
         );
     }
     async function addOne(event: MouseEvent) {
@@ -47,6 +57,10 @@
         await cardPriorityBox.updatePrioritySelected(
             [cardElement],
             priority + 1,
+            false,
+            (p) => {
+                priority = p;
+            },
         );
     }
     async function stopCard(event: MouseEvent) {
@@ -65,11 +79,23 @@
     }
     async function updateCard(event: MouseEvent) {
         event.stopPropagation();
-        await cardPriorityBox.updatePrioritySelected([cardElement], priority);
+        await cardPriorityBox.updatePrioritySelected(
+            [cardElement],
+            priority,
+            false,
+            () => {},
+        );
     }
     async function updateCardByInput(event: MouseEvent) {
         event.stopPropagation();
-        await cardPriorityBox.updatePrioritySelected([cardElement], priority);
+        await cardPriorityBox.updatePrioritySelected(
+            [cardElement],
+            priority,
+            true,
+            (p) => {
+                priority = p;
+            },
+        );
     }
 </script>
 
