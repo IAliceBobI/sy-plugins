@@ -76,7 +76,7 @@ class CardPriorityBox {
                 navigator.locks.request("Tomato-CardPriorityBox-onload", { ifAvailable: true }, async (lock) => {
                     const protyle: IProtyle = detail.protyle;
                     if (!protyle) return;
-                    const element = protyle?.wysiwyg?.element as HTMLElement;
+                    const element = protyle?.element as HTMLElement;
                     const docID = protyle?.block?.rootID;
                     if (lock && element && docID) {
                         siyuanCache.getTreeRiffCardsMap(CacheMinutes * 60 * 1000, docID).then(map => {
@@ -333,7 +333,7 @@ class CardPriorityBox {
 
     async addBtns(wysiwygElement: HTMLElement) {
         if (!wysiwygElement) return;
-        [...wysiwygElement.querySelectorAll(`[${CUSTOM_RIFF_DECKS}]`)]
+        [...wysiwygElement.querySelectorAll(`[${CUSTOM_RIFF_DECKS}][${DATA_NODE_ID}]`)]
             .map((cardElement: HTMLElement) => {
                 cardElement.querySelectorAll(`[${TOMATO_CONTROL_ELEMENT}]`).forEach(e => e.parentElement.removeChild(e));
                 const textContent = cardElement.textContent;
