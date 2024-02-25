@@ -81,7 +81,7 @@ export async function insertBackLinks(docID: string) {
         return { bk, bkDiv } as BacklinkSv;
     });
     await Promise.all(backLinks.map((backLink) => path2div(backLink, docID, allRefs)));
-    backLinks.forEach((backLink) => scanAllRef(backLink.bkDiv, docID, allRefs));
+    await Promise.all(backLinks.map((backLink) => scanAllRef(backLink.bkDiv, docID, allRefs)));
 
     const lnkLine = [...allRefs.values()].reduce((md, i) => {
         md.push(`[[[${i.text}]]](siyuan://blocks/${i.id}?focus=1)^${i.count}^`);
