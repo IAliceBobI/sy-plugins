@@ -1,6 +1,6 @@
 import { Lute } from "siyuan";
 import { isIterable } from "./functional";
-import { BACKLINK_CACHE_TIME, BLOCK_REF, BlockNodeEnum, DATA_ID, DATA_NODE_ID, DATA_SUBTYPE, DATA_TYPE, SPACE, TOMATO_BK_STATIC } from "./gconst";
+import { BACKLINK_CACHE_TIME, BLOCK_REF, BlockNodeEnum, DATA_ID, DATA_NODE_ID, DATA_SUBTYPE, DATA_TYPE, SPACE, STATICLINK, TOMATO_BK_STATIC } from "./gconst";
 import { NewLute, cleanDiv, dom2div, getID, siyuan, siyuanCache } from "./utils";
 import { BKMaker } from "@/BackLinkBottomBox";
 
@@ -87,7 +87,7 @@ export async function insertBackLinks(docID: string) {
         md.push(`[[[${i.text}]]](siyuan://blocks/${i.id}?focus=1)^${i.count}^`);
         return md;
     }, []).join(SPACE.repeat(2));
-    if (lnkLine) md.push(lnkLine);
+    if (lnkLine) md.push(lnkLine + `\n{: ${STATICLINK}="1" }`);
 
     md = links.reduce((list, bk) => {
         if (pushPath(bk, list, docID)) {
@@ -120,7 +120,7 @@ function pushPath(bk: Backlink, list: string[], docID: string) {
     const file = bk.blockPaths[0];
     const target = bk.blockPaths[bk.blockPaths.length - 1];
     if (docID == file?.id) return false;
-    list.push(`📃[${file.name}](siyuan://blocks/${target.id}?focus=1)`);
+    list.push(`📃[${file.name}](siyuan://blocks/${target.id}?focus=1)\n{: ${STATICLINK}="1" }`);
     return true;
 }
 
