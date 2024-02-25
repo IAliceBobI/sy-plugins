@@ -234,10 +234,7 @@ class FlashBox {
             ids.push(id);
             divs.push(elem);
         }
-        setTimeout(async () => {
-            const attrs = { "style": "background-color: var(--b3-font-background7);" } as AttrType;
-            for (const id of ids) await siyuan.setBlockAttrs(id, attrs);
-        }, 1000);
+        changeBGofseletedElement(ids);
         return { divs, ids };
     }
 
@@ -267,8 +264,9 @@ class FlashBox {
             });
             tmpDiv = div;
         } else {
-            const [_id, div] = await this.cloneDiv(dom as HTMLDivElement, !noRef);
+            const [id, div] = await this.cloneDiv(dom as HTMLDivElement, !noRef);
             tmpDiv = div;
+            changeBGofseletedElement([id]);
         }
         await this.insertCard(protyle, [tmpDiv], cardType, blockID, path);
     }
@@ -276,4 +274,11 @@ class FlashBox {
 
 export const flashBox = new FlashBox();
 
+
+function changeBGofseletedElement(ids: any[]) {
+    setTimeout(async () => {
+        const attrs = { "style": "background-color: var(--b3-font-background7);" } as AttrType;
+        for (const id of ids) await siyuan.setBlockAttrs(id, attrs);
+    }, 1000);
+}
 
