@@ -49,6 +49,7 @@
             false,
             (p) => {
                 priority = p;
+                cardElement.setAttribute(CARD_PRIORITY, p);
             },
         );
     }
@@ -60,6 +61,7 @@
             false,
             (p) => {
                 priority = p;
+                cardElement.setAttribute(CARD_PRIORITY, p);
             },
         );
     }
@@ -83,7 +85,10 @@
             [cardElement],
             priority,
             false,
-            () => {},
+            (p) => {
+                priority = p;
+                cardElement.setAttribute(CARD_PRIORITY, p);
+            },
         );
     }
     async function updateCardByInput(event: MouseEvent) {
@@ -94,6 +99,7 @@
             true,
             (p) => {
                 priority = p;
+                cardElement.setAttribute(CARD_PRIORITY, p);
             },
         );
     }
