@@ -234,6 +234,10 @@ class FlashBox {
             ids.push(id);
             divs.push(elem);
         }
+        setTimeout(async () => {
+            const attrs = { "style": "background-color: var(--b3-font-background7);" } as AttrType;
+            for (const id of ids) await siyuan.setBlockAttrs(id, attrs);
+        }, 1000);
         return { divs, ids };
     }
 

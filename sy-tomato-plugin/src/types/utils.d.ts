@@ -51,6 +51,7 @@ type AttrType = {
     name: string,
     bookmark: string,
     scroll: string,
+    style: string,
     "custom-progmark": string,
     "custom-progref": string,
     "custom-in-piece-ref": string,
