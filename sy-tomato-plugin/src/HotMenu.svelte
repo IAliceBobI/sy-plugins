@@ -87,9 +87,14 @@
         if (!ai?.usage?.completion_tokens) {
             return siyuan.pushMsg(JSON.stringify(ai));
         }
+        siyuan.pushMsg(`token用量：${JSON.stringify(ai.usage)}`);
         const boxID = events.boxID;
         const newID = NewNodeID();
-        const result = `${ai.result}\n${JSON.stringify(ai.usage)}\n{: id="${newID}" }`;
+        let result = ai.result
+            .split("\n")
+            .map((i) => "> " + i)
+            .join("\n");
+        result = `${result}\n{: id="${newID}" }`;
         const open = async () => {
             await openTab({
                 app: hotMenuBox.plugin.app,
@@ -296,8 +301,8 @@ ${text}
                         title="文心4:选中内容发给AI，请把问题也一起选中。"
                         class="b3-button"
                         on:click={async () => {
-                            await ai(hotMenuBox.ctx4k, getAllText());
                             destroy();
+                            await ai(hotMenuBox.ctx4k, getAllText());
                         }}>🤖文心4</button
                     >
                 </td>
@@ -306,8 +311,8 @@ ${text}
                         title="文心4(8K):选中内容发给AI，请把问题也一起选中。"
                         class="b3-button"
                         on:click={async () => {
-                            await ai(hotMenuBox.ctx8k, getAllText());
                             destroy();
+                            await ai(hotMenuBox.ctx8k, getAllText());
                         }}>🤖文心8K</button
                     >
                 </td>
@@ -316,11 +321,11 @@ ${text}
                         title="AI总结内容"
                         class="b3-button"
                         on:click={async () => {
+                            destroy();
                             await ai(
                                 hotMenuBox.ctx4k,
                                 await copyCompressPrompt(false),
                             );
-                            destroy();
                         }}>🗜️压缩</button
                     >
                     <button
