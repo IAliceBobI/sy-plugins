@@ -21,7 +21,7 @@ export async function uncheckAll(docID: string) {
     await siyuan.updateBlocks(doms.map(({ id, dom }) => {
         const div = dom2div(dom);
         div.classList.remove("protyle-task--done");
-        return { id, data: div.outerHTML };
+        return { id, domStr: div.outerHTML };
     }));
     setTimeout(() => {
         events.protyleReload();

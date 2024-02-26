@@ -146,3 +146,18 @@ type Attributes = {
     type: string;
     value: string;
 }
+
+type Ref = {
+    block_id: string;
+    box: string;
+    content: string;
+    def_block_id: string;
+    def_block_parent_id: string;
+    def_block_path: string;
+    def_block_root_id: string;
+    id: string;
+    markdown: string;
+    path: string;
+    root_id: string;
+    type: string;
+}

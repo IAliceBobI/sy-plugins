@@ -88,7 +88,7 @@
             return siyuan.pushMsg(JSON.stringify(ai));
         }
         siyuan.pushMsg(`token用量：${JSON.stringify(ai.usage)}`);
-        const boxID = events.boxID;
+        const boxID = protyle.notebookId;
         const newID = NewNodeID();
         let result = ai.result
             .split("\n")

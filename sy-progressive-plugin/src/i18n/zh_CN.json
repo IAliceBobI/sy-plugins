@@ -67,5 +67,6 @@
   "msgIgnoreBook": "已经忽略本书",
   "msgPushBook": "重新推送本书",
   "msgAutoCard": "自动文档制卡",
-  "msgNotAutoCard": "取消自动文档制卡"
+  "msgNotAutoCard": "取消自动文档制卡",
+  "lnk2href": "*,@引用替换为超链接"
 }

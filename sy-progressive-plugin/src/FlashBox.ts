@@ -1,5 +1,5 @@
-import { IProtyle, Lute, Plugin, openTab } from "siyuan";
-import { siyuan } from "../../sy-tomato-plugin/src/libs/utils";
+import { IProtyle, Lute, Plugin, confirm, openTab } from "siyuan";
+import { set_href, siyuan } from "../../sy-tomato-plugin/src/libs/utils";
 import * as utils from "../../sy-tomato-plugin/src/libs/utils";
 import { events } from "../../sy-tomato-plugin/src/libs/Events";
 import * as gconst from "../../sy-tomato-plugin/src/libs/gconst";
@@ -96,6 +96,21 @@ class FlashBox {
                 this.makeCard(protyle, cardType, getDailyPath(), true);
             },
         });
+        this.plugin.addCommand({
+            langKey: "lnk2href",
+            hotkey: "F9",
+            editorCallback: (protyle: IProtyle) => {
+                confirm("'*'与'@'替换为超链接", "我已经备份了，并知道如何恢复！", () => {
+                    navigator.locks.request("", { ifAvailable: true }, async (lock) => {
+                        if (lock) {
+                            await lnk2href(protyle.notebookId);
+                        } else {
+                            await siyuan.pushMsg("正在替换'*'与'@'替换为超链接……");
+                        }
+                    });
+                });
+            },
+        });
         this.plugin.eventBus.on("open-menu-content", async ({ detail }) => {
             const menu = detail.menu;
             menu.addItem({
@@ -158,7 +173,7 @@ class FlashBox {
     }
 
     private async doInsertCard(protyle: IProtyle, divs: HTMLElement[], t: CardType, _lastSelectedID: string, path?: string) {
-        const boxID = events.boxID;
+        const boxID = protyle.notebookId;
         const docID = protyle.block?.rootID;
         if (!docID) return;
         let { bookID } = await getBookID(docID);
@@ -282,3 +297,55 @@ function changeBGofseletedElement(ids: any[]) {
     }, 1000);
 }
 
+async function lnk2href(box: string) {
+    const FROM_WHERE = `from refs where box="${box}" and (content='*' or content='@')`;
+    let total = 0;
+    {
+        const c1 = await siyuan.sqlRef(`select distinct count(block_id) as id ${FROM_WHERE}`);
+        total = Number(c1[0].id);
+        await siyuan.pushMsg(`一共有${total}处'*'或者'@'等待转换……`);
+    }
+
+    let count = 0;
+    let refs = await siyuan.sqlRef(`select distinct block_id ${FROM_WHERE} limit 200`);
+    const idSet = new Set<string>();
+    while (refs.length > 0) {
+        const doms = (await Promise.all(refs.map(r => siyuan.getBlockDOM(r.block_id))))
+            .map(d => { return { id: d.id, div: utils.dom2div(d.dom) }; })
+            .filter(d => !idSet.has(d.id));
+        if (doms.length > 0) {
+            const ops: Parameters<typeof siyuan.updateBlocks>[0] = [];
+            for (const { id, div } of doms) {
+                let changed = false;
+                for (const e of [...div.querySelectorAll(`[${gconst.DATA_ID}]`)]) {
+                    const txt = e.textContent;
+                    const lnkId = e.getAttribute(gconst.DATA_ID);
+                    const t = e.getAttribute(gconst.DATA_TYPE);
+                    const st = e.getAttribute(gconst.DATA_SUBTYPE);
+                    if (txt == "*" || txt == "@") {
+                        if (lnkId && t && st) {
+                            e.removeAttribute(gconst.DATA_ID);
+                            e.removeAttribute(gconst.DATA_SUBTYPE);
+                            set_href(e as HTMLElement, lnkId, txt);
+                            changed = true;
+                        }
+                    }
+                }
+                if (changed) {
+                    ops.push({ id, domStr: div.outerHTML });
+                }
+            }
+            count += ops.length;
+            await siyuan.pushMsg(`准备修改：${count}/${total}……`);
+            await siyuan.updateBlocks(ops);
+            ops.forEach(o => idSet.add(o.id));
+            await siyuan.pushMsg(`修改：${count}/${total}完成！`);
+        } else {
+            await utils.sleep(2000);
+            await siyuan.pushMsg("扫描索引中，请耐心等待……");
+        }
+        refs = await siyuan.sqlRef(`select distinct block_id ${FROM_WHERE} limit 200`);
+    }
+    await siyuan.pushMsg(`${total}处修改完成！`);
+    events.protyleReload();
+}

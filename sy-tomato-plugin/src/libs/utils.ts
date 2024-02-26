@@ -40,6 +40,7 @@ export function sortedMap<K, V>(map: Map<K, V>, compareFn?: (a: [K, V], b: [K, V
 
 export function set_href(e: HTMLElement, id: string, txt?: string) {
     e.setAttribute(gconst.DATA_TYPE, "a");
+    id = id.split("?")[0];
     e.setAttribute(gconst.BlockNodeEnum.DATA_HREF, `siyuan://blocks/${id}?focus=1`);
     if (txt) e.textContent = txt;
 }
@@ -393,10 +394,16 @@ export const siyuan = {
         }
         return l;
     },
+    async sqlRef(stmt: string): Promise<Ref[]> {
+        // from refs
+        return (await siyuan.call("/api/query/sql", { stmt })) ?? [];
+    },
     async sqlAttr(stmt: string): Promise<Attributes[]> {
+        // from attributes
         return (await siyuan.call("/api/query/sql", { stmt })) ?? [];
     },
     async sql(stmt: string): Promise<Block[]> {
+        // from blocks
         return (await siyuan.call("/api/query/sql", { stmt })) ?? [];
     },
     async sqlOne(stmt: string): Promise<Block> {
@@ -423,7 +430,7 @@ export const siyuan = {
     },
     async createDocWithMdIfNotExists(notebookID: string, path_readable: string, markdown: string, attr?: any): Promise<string> {
         return navigator.locks.request("tomato.siyuan.createDocWithMdIfNotExists", { mode: "exclusive" }, async (_lock) => {
-            const row = await siyuan.sqlOne(`select id from blocks where hpath="${path_readable}" and type='d' limit 1`);
+            const row = await siyuan.sqlOne(`select id from blocks where box="${notebookID}" and hpath="${path_readable}" and type='d' limit 1`);
             const docID = row?.id ?? "";
             if (!docID) {
                 return siyuan.createDocWithMd(notebookID, path_readable, markdown, "", attr);
@@ -565,14 +572,14 @@ export const siyuan = {
         if (await siyuan.checkBlockExist(id))
             return siyuan.call("/api/block/updateBlock", { id, data, dataType });
     },
-    async updateBlocks(ops: { id: string, data: string }[]) {
+    async updateBlocks(ops: { id: string, domStr: string }[]) {
         ops = ops.filter(op => !!op.id);
         if (!ops.length) return;
-        return siyuan.transactions(ops.map(({ id, data }) => {
+        return siyuan.transactions(ops.map(({ id, domStr }) => {
             const op = {} as IOperation;
             op.action = "update"; // dom
             op.id = id;
-            op.data = data;
+            op.data = domStr;
             return op;
         }));
     },
