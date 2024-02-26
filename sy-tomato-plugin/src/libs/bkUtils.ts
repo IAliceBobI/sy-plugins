@@ -1,7 +1,7 @@
 import { Lute } from "siyuan";
 import { isIterable } from "./functional";
 import { BACKLINK_CACHE_TIME, BLOCK_REF, BlockNodeEnum, DATA_ID, DATA_NODE_ID, DATA_SUBTYPE, DATA_TYPE, SPACE, STATICLINK, TOMATO_BK_STATIC } from "./gconst";
-import { NewLute, cleanDiv, dom2div, getID, siyuan, siyuanCache } from "./utils";
+import { NewLute, cleanDiv, dom2div, getID, set_href, siyuan, siyuanCache } from "./utils";
 import { BKMaker } from "@/BackLinkBottomBox";
 
 // export function setReadonly(e: HTMLElement, all = false) {
@@ -109,8 +109,7 @@ function pushDom(bk: Backlink, lute: Lute, list: string[]) {
     });
     div.querySelectorAll(`[${DATA_TYPE}~="${BLOCK_REF}"]`).forEach((e: HTMLElement) => {
         const id = e.getAttribute(DATA_ID);
-        e.setAttribute(DATA_TYPE, "a");
-        e.setAttribute("data-href", `siyuan://blocks/${id}?focus=1`);
+        set_href(e, id);
     });
     const md = lute.BlockDOM2Md(div.innerHTML);
     list.push(md);

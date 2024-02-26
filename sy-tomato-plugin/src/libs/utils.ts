@@ -38,6 +38,12 @@ export function sortedMap<K, V>(map: Map<K, V>, compareFn?: (a: [K, V], b: [K, V
     return new Map([...map.entries()].sort(compareFn));
 }
 
+export function set_href(e: HTMLElement, id: string, txt: string) {
+    e.setAttribute(gconst.DATA_TYPE, "a");
+    e.setAttribute(gconst.BlockNodeEnum.DATA_HREF, `siyuan://blocks/${id}?focus=1`);
+    e.textContent = txt;
+}
+
 export async function cleanDiv(div: HTMLDivElement, setRef: boolean, setOrigin: boolean): Promise<[string, HTMLElement, boolean]> {
     const id = div.getAttribute(gconst.DATA_NODE_ID);
 
@@ -70,10 +76,7 @@ export async function cleanDiv(div: HTMLDivElement, setRef: boolean, setOrigin: 
             if (all.length == 0) {
                 const spanOri = div.querySelector("[contenteditable=\"true\"]")?.appendChild(document.createElement("span"));
                 if (spanOri) {
-                    spanOri.setAttribute(gconst.DATA_TYPE, gconst.BlockNodeEnum.BLOCK_REF);
-                    spanOri.setAttribute(gconst.DATA_SUBTYPE, "s");
-                    spanOri.setAttribute(gconst.DATA_ID, originID);
-                    spanOri.innerText = "@";
+                    set_href(spanOri, originID, "@");
                     setTheRef = true;
                 }
             } else {
@@ -93,10 +96,7 @@ export async function cleanDiv(div: HTMLDivElement, setRef: boolean, setOrigin: 
         if (all.length == 0) {
             const span = div.querySelector("[contenteditable=\"true\"]")?.appendChild(document.createElement("span"));
             if (span) {
-                span.setAttribute(gconst.DATA_TYPE, gconst.BlockNodeEnum.BLOCK_REF);
-                span.setAttribute(gconst.DATA_SUBTYPE, "s");
-                span.setAttribute(gconst.DATA_ID, id);
-                span.innerText = "*";
+                set_href(span, id, "*");
                 setTheRef = true;
             }
         } else {
@@ -108,24 +108,6 @@ export async function cleanDiv(div: HTMLDivElement, setRef: boolean, setOrigin: 
         }
     }
     return [id, div, setTheRef];
-}
-
-export function tryAddRef2Div(div: HTMLDivElement, id: string): HTMLDivElement {
-    if (id) {
-        for (const e of div.querySelectorAll(`[${gconst.DATA_TYPE}~="${gconst.BLOCK_REF}"]`)) {
-            if (e.textContent.trim() == "*") {
-                return div;
-            }
-        }
-        const span = div.querySelector("[contenteditable=\"true\"]")?.appendChild(document.createElement("span"));
-        if (span) {
-            span.setAttribute(gconst.DATA_TYPE, gconst.BlockNodeEnum.BLOCK_REF);
-            span.setAttribute(gconst.DATA_SUBTYPE, "s");
-            span.setAttribute(gconst.DATA_ID, id);
-            span.innerText = "*";
-        }
-    }
-    return div;
 }
 
 export async function getBlockDiv(id: string) {
@@ -975,3 +957,20 @@ export function keepContext(text: string, keyword: string, count: number): strin
 //     "NodeLinkDest": "link_dest",
 //     "NodeTextMark": "textmark",
 // };
+// export function tryAddRef2Div(div: HTMLDivElement, id: string): HTMLDivElement {
+//     if (id) {
+//         for (const e of div.querySelectorAll(`[${gconst.DATA_TYPE}~="${gconst.BLOCK_REF}"]`)) {
+//             if (e.textContent.trim() == "*") {
+//                 return div;
+//             }
+//         }
+//         const span = div.querySelector("[contenteditable=\"true\"]")?.appendChild(document.createElement("span"));
+//         if (span) {
+//             span.setAttribute(gconst.DATA_TYPE, gconst.BlockNodeEnum.BLOCK_REF);
+//             span.setAttribute(gconst.DATA_SUBTYPE, "s");
+//             span.setAttribute(gconst.DATA_ID, id);
+//             span.innerText = "*";
+//         }
+//     }
+//     return div;
+// }

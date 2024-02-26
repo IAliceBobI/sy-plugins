@@ -19,6 +19,7 @@ export const STATICLINK = "custom-staticlink";
 export const BACKLINK_CACHE_TIME = 6 * 1000;
 
 export enum BlockNodeEnum {
+    DATA_HREF = "data-href",
     BLOCK_REF = "block-ref",
     NODE_PARAGRAPH = "NodeParagraph",
     NODE_HEADING = "NodeHeading",
