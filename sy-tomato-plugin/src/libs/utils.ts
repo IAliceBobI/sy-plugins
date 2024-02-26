@@ -54,7 +54,8 @@ export async function cleanDiv(div: HTMLDivElement, setRef: boolean, setOrigin: 
     });
     let setTheRef = false;
     const getContext = async (id: string) => {
-        const parts = (await siyuan.getBlockBreadcrumb(id)).slice(0, -1).map(i => i.name);
+        const parts = (await siyuan.getBlockBreadcrumb(id)).slice(0, -1)
+            .filter(i => i.type != gconst.BlockNodeEnum.NODE_LIST_ITEM).map(i => i.name);
         if (parts.length > 0) {
             const file = parts[0].split("/").pop();
             parts[0] = file;
