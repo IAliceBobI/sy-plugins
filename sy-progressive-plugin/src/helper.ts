@@ -122,7 +122,7 @@ export function rmBadThings(s: string) {
     return s.replace(/[​]+/g, "").trim();
 }
 
-export async function cleanNote(noteID: string, force: boolean) {
+export async function cleanNote(noteID: string) {
     const id2del = [];
     for (const row of await siyuan.sql(`select ial,markdown,id from blocks 
         where root_id="${noteID}" and (
@@ -137,24 +137,24 @@ export async function cleanNote(noteID: string, force: boolean) {
         } else if (markdown === "") {
             id2del.push(row.id);
         } else if (ial.includes(RefIDKey) && ial.includes(PROG_ORIGIN_TEXT)) {
-            if (force) {
-                id2del.push(row.id);
-            } else {
-                if (!markdown) continue;
-                if (!markdown.includes("*")) continue;
-                for (const attr of ial.split(" ")) {
-                    if (attr.includes(RefIDKey)) {
-                        const originalID = attr.split("\"")[1]; // custom-progref="20231119150726-2xxypwa"
-                        const origin = await siyuan.sqlOne(`select markdown from blocks where id="${originalID}"`);
-                        const oriMarkdown = origin?.markdown ?? "";
-                        const markdownWithoutStar = markdown.replace(`((${originalID} "*"))`, "");
-                        if (rmBadThings(oriMarkdown) == rmBadThings(markdownWithoutStar)) {
-                            id2del.push(row.id); // delete the same content
-                        }
-                        break;
-                    }
-                }
-            }
+            // if (force) {
+            id2del.push(row.id);
+            // } else {
+            //     if (!markdown) continue;
+            //     if (!markdown.includes("*")) continue;
+            //     for (const attr of ial.split(" ")) {
+            //         if (attr.includes(RefIDKey)) {
+            //             const originalID = attr.split("\"")[1]; // custom-progref="20231119150726-2xxypwa"
+            //             const origin = await siyuan.sqlOne(`select markdown from blocks where id="${originalID}"`);
+            //             const oriMarkdown = origin?.markdown ?? "";
+            //             const markdownWithoutStar = markdown.replace(`((${originalID} "*"))`, "");
+            //             if (rmBadThings(oriMarkdown) == rmBadThings(markdownWithoutStar)) {
+            //                 id2del.push(row.id); // delete the same content
+            //             }
+            //             break;
+            //         }
+            //     }
+            // }
         }
     }
     await siyuan.deleteBlocks(id2del);
@@ -316,22 +316,6 @@ export class Helper {
             <script>
                 function ${btnFullfilContentID}() {
                     globalThis.progressive_zZmqus5PtYRi.progressive.htmlBlockReadNextPeice("${bookID}","${noteID}",${HtmlCBType.fullfilContent},${point})
-                }
-            </script>
-        </div>`;
-    }
-
-    btnCleanUnchanged(bookID: string, noteID: string, point: number) {
-        if (!this.setting.btnCleanUnchanged) return "";
-        const btnCleanUnchangedID = utils.newID().slice(0, IDLen);
-        return `<div>
-            ${styleColor("var(--b3-card-info-background)", "var(--b3-card-info-color)")}
-            <div>
-                <button title="${this.plugin.i18n.tipCleanUnchanged}" onclick="${btnCleanUnchangedID}()" id="btn${btnCleanUnchangedID}">${this.plugin.i18n.cleanUnchangedOriginDoc}</button>
-            </div>
-            <script>
-                function ${btnCleanUnchangedID}() {
-                    globalThis.progressive_zZmqus5PtYRi.progressive.htmlBlockReadNextPeice("${bookID}","${noteID}",${HtmlCBType.cleanUnchanged},${point})
                 }
             </script>
         </div>`;
@@ -585,7 +569,7 @@ ${this.btnSplitByPunctuationsListCheck(bookID, noteID, point)}
 
 ${this.btnSplitByPunctuationsList(bookID, noteID, point)}
 
-${this.btnCleanOriginText(bookID, noteID, point)}
+　
 
 　
 
@@ -621,7 +605,7 @@ ${this.btnPrevious(bookID, noteID, point)}
 
 ${this.btnNext(bookID, noteID, point)}
 
-${this.btnCleanUnchanged(bookID, noteID, point)}
+${this.btnCleanOriginText(bookID, noteID, point)}
 
 ${this.btnFullfilContent(bookID, noteID, point)}
 

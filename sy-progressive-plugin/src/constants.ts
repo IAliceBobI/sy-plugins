@@ -15,7 +15,7 @@ export enum HtmlCBType {
     next = 6,
     ignoreBook = 7,
     fullfilContent = 8,
-    cleanUnchanged = 9,
+    // cleanUnchanged = 9,
     DelDocCard = 10,
     deleteAndExit = 11,
     openFlashcardTab = 12,

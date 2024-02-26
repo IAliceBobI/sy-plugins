@@ -10,7 +10,6 @@ type SettingCfgType = {
     btnViewContents: boolean,
     btnSplitByPunctuationsListCheck: boolean;
     btnFullfilContent: boolean;
-    btnCleanUnchanged: boolean;
     btnCleanOriginText: boolean;
     btnPrevious: boolean;
     btnNext: boolean;

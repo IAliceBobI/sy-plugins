@@ -481,11 +481,8 @@ class Progressive {
                 await this.fullfilContent(bookID, piecePre, piece, noteID);
                 break;
             }
-            case HtmlCBType.cleanUnchanged:
-                await help.cleanNote(noteID, false);
-                break;
             case HtmlCBType.cleanOriginText:
-                await help.cleanNote(noteID, true);
+                await help.cleanNote(noteID);
                 break;
             case HtmlCBType.openFlashcardTab:
                 if (bookID) openTab({ app: this.plugin.app, card: { type: "doc", id: bookID } });
@@ -517,7 +514,7 @@ class Progressive {
             await s.splitByIDs(ids);
         } else {
             await s.split();
-            await help.cleanNote(noteID, true);
+            await help.cleanNote(noteID);
         }
         await s.insert(false);
     }
