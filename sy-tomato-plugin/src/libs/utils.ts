@@ -38,10 +38,14 @@ export function sortedMap<K, V>(map: Map<K, V>, compareFn?: (a: [K, V], b: [K, V
     return new Map([...map.entries()].sort(compareFn));
 }
 
-export function set_href(e: HTMLElement, id: string, txt: string) {
+export function set_href(e: HTMLElement, id: string, txt?: string) {
     e.setAttribute(gconst.DATA_TYPE, "a");
     e.setAttribute(gconst.BlockNodeEnum.DATA_HREF, `siyuan://blocks/${id}?focus=1`);
-    e.textContent = txt;
+    if (txt) e.textContent = txt;
+}
+
+export function get_siyuan_lnk_md(id: string, text: string) {
+    return `[${text}](siyuan://blocks/${id}?focus=1)`;
 }
 
 export async function cleanDiv(div: HTMLDivElement, setRef: boolean, setOrigin: boolean): Promise<[string, HTMLElement, boolean]> {
@@ -72,7 +76,10 @@ export async function cleanDiv(div: HTMLDivElement, setRef: boolean, setOrigin: 
     if (setOrigin) {
         const originID = div.getAttribute(gconst.RefIDKey) ?? "";
         if (originID) {
-            const all = div.querySelectorAll(`[${gconst.DATA_ID}="${originID}"]`) ?? [];
+            const all = [
+                ...div.querySelectorAll(`[${gconst.DATA_ID}="${originID}"]`),
+                ...div.querySelectorAll(`[${gconst.BlockNodeEnum.DATA_HREF}="siyuan://blocks/${originID}?focus=1"]`),
+            ];
             if (all.length == 0) {
                 const spanOri = div.querySelector("[contenteditable=\"true\"]")?.appendChild(document.createElement("span"));
                 if (spanOri) {
@@ -81,7 +88,14 @@ export async function cleanDiv(div: HTMLDivElement, setRef: boolean, setOrigin: 
                 }
             } else {
                 all.forEach((e: HTMLElement) => {
-                    if (e.innerText == "*") e.innerText = "@";
+                    if (e.innerText == "*") {
+                        const id = e.getAttribute(gconst.DATA_ID);
+                        if (id) {
+                            set_href(e, id, "@");
+                        } else {
+                            e.textContent = "@";
+                        }
+                    }
                 });
                 setTheRef = true;
             }
@@ -92,7 +106,10 @@ export async function cleanDiv(div: HTMLDivElement, setRef: boolean, setOrigin: 
         }
     }
     if (setRef) {
-        const all = div.querySelectorAll(`[${gconst.DATA_ID}="${id}"]`) ?? [];
+        const all = [
+            ...div.querySelectorAll(`[${gconst.DATA_ID}="${id}"]`),
+            ...div.querySelectorAll(`[${gconst.BlockNodeEnum.DATA_HREF}="siyuan://blocks/${id}?focus=1"]`),
+        ];
         if (all.length == 0) {
             const span = div.querySelector("[contenteditable=\"true\"]")?.appendChild(document.createElement("span"));
             if (span) {

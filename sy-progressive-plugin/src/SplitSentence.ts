@@ -1,5 +1,5 @@
 import { PARAGRAPH_INDEX, PROG_ORIGIN_TEXT, RefIDKey, SPACE } from "../../sy-tomato-plugin/src/libs/gconst";
-import { NewNodeID, siyuan } from "../../sy-tomato-plugin/src/libs/utils";
+import { NewNodeID, get_siyuan_lnk_md, siyuan } from "../../sy-tomato-plugin/src/libs/utils";
 import { Plugin, openTab } from "siyuan";
 import { prog } from "./Progressive";
 
@@ -86,21 +86,21 @@ export class SplitSentence {
                         .filter(i => i.length > 0)
                         .map(i => {
                             const { newID, attrLine } = getAttrLineWithID(ref, idx);
-                            return { text: SPACE.repeat(2) + i + ` ((${ref} "*"))\n${attrLine}\n`, id: newID };
+                            return { text: SPACE.repeat(2) + i + ` ${get_siyuan_lnk_md(ref, "*")}\n${attrLine}\n`, id: newID };
                         });
                     const { newID } = getAttrLineWithID(ref, idx);
                     blocks.push({ text: `{: id="${newID}"}\n`, id: newID });
                 } else if (this.asList == "t") {
                     blocks = ps.map(i => {
                         const { newID, attrLine } = getAttrLineWithID(ref, idx);
-                        return { text: `* ${getAttrLine(ref, idx)}[ ] ` + i + ` ((${ref} "*"))\n\t${attrLine}\n`, id: newID };
+                        return { text: `* ${getAttrLine(ref, idx)}[ ] ` + i + ` ${get_siyuan_lnk_md(ref, "*")}\n\t${attrLine}\n`, id: newID };
                     });
                     const { newID, attrLine } = getAttrLineWithID(ref, idx);
                     blocks.push({ text: `${attrLine}\n`, id: newID });
                 } else {
                     blocks = ps.map(i => {
                         const { newID, attrLine } = getAttrLineWithID(ref, idx);
-                        return { text: `* ${getAttrLine(ref, idx)} ` + i + ` ((${ref} "*"))\n\t${attrLine}\n`, id: newID };
+                        return { text: `* ${getAttrLine(ref, idx)} ` + i + ` ${get_siyuan_lnk_md(ref, "*")}\n\t${attrLine}\n`, id: newID };
                     });
                     const { newID, attrLine } = getAttrLineWithID(ref, idx);
                     blocks.push({ text: `${attrLine}\n`, id: newID });
