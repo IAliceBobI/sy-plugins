@@ -120,7 +120,12 @@ function pushPath(bk: Backlink, list: string[], docID: string) {
     const file = bk.blockPaths[0];
     const target = bk.blockPaths[bk.blockPaths.length - 1];
     if (docID == file?.id) return false;
-    list.push(`📃[${file.name}](siyuan://blocks/${target.id}?focus=1)\n{: ${STATICLINK}="1" }`);
+    file.name = file.name?.split("/")?.pop() ?? "";
+    bk.blockPaths[0] = file;
+    target.name = "[@]";
+    bk.blockPaths[bk.blockPaths.length - 1] = target;
+    const path = bk.blockPaths.map(p => `[${p.name}](siyuan://blocks/${p.id})`);
+    list.push(`📃${path.join("---")}\n{: ${STATICLINK}="1" }`);
     return true;
 }
 
