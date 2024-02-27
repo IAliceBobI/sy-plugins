@@ -80,3 +80,5 @@ type BacklinkSv = {
     attrs: LinkElementAttr;
     isMention: boolean;
 };
+
+type EventsReadingPoint = { docID: string, blockID: string, title: string, time: Date };

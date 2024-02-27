@@ -2,7 +2,7 @@ import { Plugin, openTab } from "siyuan";
 import { NewNodeID, getID, get_siyuan_lnk_md, siyuan, siyuanCache, sleep } from "@/libs/utils";
 import "./index.scss";
 import { events } from "@/libs/Events";
-import { READINGPOINT } from "./libs/gconst";
+import { DATA_NODE_ID, READINGPOINT } from "./libs/gconst";
 
 const CreateDocLock = "CreateDocLock";
 const AddReadingPointLock = "AddReadingPointLock";
@@ -184,10 +184,24 @@ async function deleteAllReadingPoints(docID: string) {
 }
 
 async function addCardReadingPoint(blockID: string, docInfo: Block, title: string, docID: string) {
+    const docIDs = [...document.body.querySelectorAll("div.protyle-title.protyle-wysiwyg--attr")].map(e => e.getAttribute(DATA_NODE_ID));
     const id = NewNodeID();
     const md = [];
     md.push(`* 阅读点：${get_siyuan_lnk_md(blockID, docInfo.content)}`);
-    // md.push("* " + WEB_ZERO_SPACE);
+    for (const docIDInPage of docIDs) {
+        if (docInfo.id == docIDInPage) continue;
+        const doc = events.readingPointMap.get(docIDInPage);
+        let bID = doc.blockID;
+        if (bID) {
+            const docIDQuery = await siyuan.getDocIDByBlockID(bID);
+            if (docIDQuery != docIDInPage) bID = docIDInPage;
+        } else {
+            bID = docIDInPage;
+        }
+        if (doc && bID) {
+            md.push(`* ${get_siyuan_lnk_md(bID, doc.title ?? "*")}`);
+        }
+    }
     md.push(`{: id="${id}" bookmark="${title}" ${READINGPOINT}="${docID}"}`);
     await siyuan.insertBlockAfter(md.join("\n"), blockID);
     setTimeout(() => {

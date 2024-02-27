@@ -59,13 +59,17 @@ class Events {
         return this._isMobile;
     }
 
-    private plugin: Plugin;
+    private _readingPointMap: Map<string, EventsReadingPoint> = new Map();
+    public get readingPointMap(): Map<string, EventsReadingPoint> {
+        return this._readingPointMap;
+    }
 
     private _protyleListeners: Map<string, eventCB> = new Map();
-
     public addListener(name: string, cb: eventCB) {
         this._protyleListeners.set(name, cb);
     }
+
+    private plugin: Plugin;
 
     private invokeCB(eventType: string, detail: Protyle) {
         if (eventType != EventType.destroy_protyle) {
@@ -73,6 +77,12 @@ class Events {
             this._boxID = this.protyle?.protyle?.notebookId ?? "";
             this._title = this.protyle?.protyle?.title?.editElement?.textContent?.trim() ?? "";
             this._docID = this.protyle?.protyle?.block.rootID ?? "";
+            this._readingPointMap.set(this.docID, {
+                docID: this.docID,
+                blockID: this.lastBlockID,
+                title: this.protyle?.protyle?.title?.editElement?.textContent ?? "",
+                time: new Date(),
+            });
         }
         for (const cb of this._protyleListeners.values()) {
             cb(eventType, detail);
