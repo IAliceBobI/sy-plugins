@@ -1,6 +1,6 @@
 import { ICardData, IEventBusMap, IProtyle, Plugin } from "siyuan";
 import "./index.scss";
-import { getID, isCardUI, isValidNumber, shuffleArray, siyuan, siyuanCache, timeUtil } from "./libs/utils";
+import { getID, isCardUI, isValidNumber, siyuan, siyuanCache, timeUtil } from "./libs/utils";
 import { CARD_PRIORITY_STOP, CUSTOM_RIFF_DECKS, DATA_NODE_ID, TEMP_CONTENT, TOMATO_CONTROL_ELEMENT } from "./libs/gconst";
 import { DialogText } from "./libs/DialogText";
 import { EventType, events } from "./libs/Events";
@@ -191,9 +191,15 @@ class CardPriorityBox {
                         const newAttrs = {} as AttrType;
                         newAttrs["custom-card-priority-stop"] = datetimeStr;
                         newAttrs.bookmark = "🛑 Suspended Cards";
-                        await siyuan.batchSetBlockAttrs([...blocks.map((b: any) => {
+                        await siyuan.batchSetBlockAttrs(blocks.map((b: any) => {
                             return { id: b.ial.id, attrs: newAttrs };
-                        })]);
+                        }));
+                        await siyuan.batchSetRiffCardsDueTime(blocks.map((b: any) => {
+                            return {
+                                id: b.ial.id,
+                                due: datetimeStr.replace(/[- :]/g, ""),
+                            };
+                        }));
                         setTimeout(() => {
                             events.protyleReload();
                         }, 500);
@@ -270,7 +276,6 @@ class CardPriorityBox {
         if (!this.plugin) return options;
         const OldLen = options.cards.length;
         if (OldLen <= 1) return options;
-        options.cards = shuffleArray(options.cards);
 
         const attrList = await Promise.all(options.cards.map(card => siyuan.getBlockAttrs(card.blockID)));
         await resumeCardsDeleteAttr(attrList);
@@ -284,11 +289,9 @@ class CardPriorityBox {
         const { review, stop } = attrList.reduce(({ hasPiece, review, stop }, attr) => {
             if (attr?.id) {
                 const card = cardsMap.get(attr.id).card;
-                const p = readPriorityForSorting(attr);
+                const p = readPriority(attr);
                 const progmark = attr["custom-progmark"] as string;
-                if (p == -1) {
-                    stop.set(attr.id, { card, p });
-                } else if (progmark?.includes(TEMP_CONTENT)) {
+                if (progmark?.includes(TEMP_CONTENT)) {
                     if (!hasPiece) {
                         hasPiece = true;
                         review.set(attr.id, { card, p });
@@ -363,6 +366,14 @@ export async function resumeCard(blockIDs: string[]) {
     await siyuan.batchSetBlockAttrs(blockIDs.map(b => {
         return { id: b, attrs: newAttrs };
     }));
+    let datetimeStr = await siyuan.currentTime();
+    datetimeStr = timeUtil.makesureDateTimeFormat(datetimeStr);
+    await siyuan.batchSetRiffCardsDueTime(blockIDs.map((b: any) => {
+        return {
+            id: b,
+            due: datetimeStr.replace(/[- :]/g, ""),
+        };
+    }));
     if (blockIDs.length > 0) {
         setTimeout(() => {
             events.protyleReload();
@@ -382,13 +393,6 @@ async function resumeCardsDeleteAttr(attrList: AttrType[]) {
     })
         .map(attrList => attrList.id);
     return resumeCard(ids);
-}
-
-function readPriorityForSorting(ial: AttrType) {
-    if (ial["custom-card-priority-stop"]) {
-        return -1;
-    }
-    return readPriority(ial);
 }
 
 function readPriority(ial: AttrType) {

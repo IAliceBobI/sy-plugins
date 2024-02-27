@@ -39,6 +39,7 @@
     let secretKey: string;
     let insertPlace: number;
     let aiAPI: BaiduAI;
+    let selectedText: string;
 
     onMount(async () => {
         attrs[TOMATO_BK_IGNORE] = "1";
@@ -46,6 +47,7 @@
         const s = events.selectedDivs(protyle);
         element = s.element;
         docID = s.docID;
+        selectedText = s.rangeText;
         anchorID = s.ids[s.ids.length - 1];
         selected = s.selected;
         if (!element || !docID) return;
@@ -63,6 +65,7 @@
     }
 
     function getAllText() {
+        if (selectedText) return selectedText;
         return selected
             .map((e) => {
                 const txt = e.textContent || e.innerText;
