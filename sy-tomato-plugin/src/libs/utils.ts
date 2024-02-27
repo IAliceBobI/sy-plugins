@@ -675,10 +675,13 @@ export const siyuan = {
     async skipReviewRiffCard(cardID: string, deckID = "20230218211946-2kw8jgx") {
         return siyuan.call("/api/riff/skipReviewRiffCard", { cardID, deckID });
     },
-    async getRiffCards(page = 1, deckID = ""): Promise<GetCardRet> {
-        return siyuan.call("/api/riff/getRiffCards", { "id": deckID, page });
+    async getRiffCards(page = 1, pageSize = 100, deckID = ""): Promise<GetCardRet> {
+        return siyuan.call("/api/riff/getRiffCards", { "id": deckID, page, pageSize });
     },
-    async getRiffCardsAll(slow?: boolean) {
+    async batchSetRiffCardsDueTime(cardDues: { id: string, due: string }[]) {
+        return siyuan.call("/api/riff/batchSetRiffCardsDueTime", { cardDues });
+    },
+    async getRiffCardsAll() {
         const total: Map<string, Block> = new Map();
         for (let i = 1; ; i++) {
             const ret = await siyuan.getRiffCards(i);
@@ -686,7 +689,6 @@ export const siyuan = {
             ret.blocks.forEach(i => total.set(i.id, i));
             if (total.size >= ret.total) break;
             if (i >= ret.pageCount + 10) break;
-            if (slow) await sleep(10);
         }
         return total.values();
     },
