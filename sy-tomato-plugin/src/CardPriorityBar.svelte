@@ -118,7 +118,7 @@
         >
         <button title="闪卡优先级+1" on:click={addOne}>➕</button>
         {@html whiteSpace}
-        <button title="暂停/继续" on:click={stopCard}>🛑</button>
+        <button title="推迟/取消推迟" on:click={stopCard}>🛑</button>
         {@html whiteSpace}
         <input
             title="拖动闪卡优先级"

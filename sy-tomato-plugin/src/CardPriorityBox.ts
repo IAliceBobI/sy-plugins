@@ -51,7 +51,7 @@ class CardPriorityBox {
                 },
             });
             menu.addItem({
-                label: "当前文档与子文档的闪卡全部暂停",
+                label: "当前文档与子文档的闪卡全部推迟",
                 icon: "iconFocus",
                 click: async () => {
                     const docID = detail?.protyle?.block?.rootID;
@@ -63,7 +63,7 @@ class CardPriorityBox {
             if (isCardUI(detail as any)) {
                 menu.addItem({
                     iconHTML: "🚗🛑",
-                    label: "暂停当前所有未复习完成的闪卡",
+                    label: "推迟当前所有未复习完成的闪卡",
                     click: async () => {
                         await this.autoStopRestCards();
                     },
@@ -148,7 +148,7 @@ class CardPriorityBox {
         });
         detail.menu.addItem({
             iconHTML: "🛑",
-            label: "闪卡暂停/恢复",
+            label: "闪卡推迟/取消推迟",
             click: (_e, event) => {
                 for (const e of detail.blockElements) {
                     this.stopCard(event, e);
@@ -158,7 +158,7 @@ class CardPriorityBox {
         if (isCardUI(detail as any)) {
             detail.menu.addItem({
                 iconHTML: "🚗🛑",
-                label: "暂停当前所有未复习完成的闪卡",
+                label: "推迟当前所有未复习完成的闪卡",
                 click: async () => {
                     await this.autoStopRestCards();
                 },
@@ -181,7 +181,7 @@ class CardPriorityBox {
 
     async stopCards(blocks: Block[]) {
         new DialogText(
-            `准备暂停${blocks.length}个闪卡，请先设置暂停天数`,
+            `准备推迟${blocks.length}个闪卡，请先设置推迟天数`,
             "2",
             async (days: string) => {
                 if (isValidNumber(Number(days))) {
@@ -203,7 +203,7 @@ class CardPriorityBox {
                         setTimeout(() => {
                             events.protyleReload();
                         }, 500);
-                        await siyuan.pushMsg(`暂停${blocks.length}个闪卡${days}天`);
+                        await siyuan.pushMsg(`推迟${blocks.length}个闪卡${days}天`);
                     }
                 }
             },
