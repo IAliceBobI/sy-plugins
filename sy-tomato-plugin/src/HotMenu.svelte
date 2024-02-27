@@ -142,14 +142,8 @@
     }
 
     async function copyDoc() {
-        const mds = (
-            await Promise.all(
-                (await siyuan.getChildBlocks(docID)).map((i) =>
-                    siyuan.getBlockMarkdownAndContent(i.id),
-                ),
-            )
-        ).map((b) => b.markdown);
-        await navigator.clipboard.writeText(mds.join("\n"));
+        const md = await siyuan.copyStdMarkdown(docID);
+        await navigator.clipboard.writeText(md);
         destroy();
     }
 

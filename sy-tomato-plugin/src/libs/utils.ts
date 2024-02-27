@@ -524,6 +524,9 @@ export const siyuan = {
     async getTag(sort: number) {
         return siyuan.call("/api/tag/getTag", { sort });
     },
+    async copyStdMarkdown(id: string) {
+        return siyuan.call("/api/lute/copyStdMarkdown", { id });
+    },
     async getBlocksWordCount(ids: string[]): Promise<GetBlocksWordCount> {
         // if ids.length > 1, like wordCount will be the sum of blocks.
         return siyuan.call("api/block/getBlocksWordCount", { ids });
@@ -679,6 +682,7 @@ export const siyuan = {
         return siyuan.call("/api/riff/getRiffCards", { "id": deckID, page, pageSize });
     },
     async batchSetRiffCardsDueTime(cardDues: { id: string, due: string }[]) {
+        // "due": "20240224214412"
         return siyuan.call("/api/riff/batchSetRiffCardsDueTime", { cardDues });
     },
     async getRiffCardsAll() {
