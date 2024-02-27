@@ -190,3 +190,19 @@ async function getRootID(dataNodeID: string) {
     );
     return row?.root_id ?? "";
 }
+
+export async function disableBK(docID: string) {
+    await siyuan.setBlockAttrs(docID, { "custom-off-tomatobacklink": "1" } as AttrType);
+    await siyuan.pushMsg("禁用底部反链");
+}
+
+export async function enableBK(docID: string) {
+    await siyuan.setBlockAttrs(docID, { "custom-off-tomatobacklink": "" } as AttrType);
+    await siyuan.pushMsg("启用底部反链");
+}
+
+export async function isBkOff(nextDocID: string) {
+    const attrs = await siyuan.getBlockAttrs(nextDocID);
+    const v = attrs["custom-off-tomatobacklink"];
+    return v === "1";
+}

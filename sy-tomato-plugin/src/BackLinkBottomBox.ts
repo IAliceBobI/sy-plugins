@@ -2,11 +2,12 @@ import { IProtyle, Plugin, Protyle } from "siyuan";
 import { EventType, events } from "./libs/Events";
 import { MaxCache } from "./libs/cache";
 import {
-    deleteSelf, getLastElementID,
+    deleteSelf, disableBK, enableBK, getLastElementID,
     integrateCounting,
+    isBkOff,
     shouldInsertDiv
 } from "./libs/bkUtils";
-import { isCardUI, isValidNumber, siyuan, siyuanCache } from "./libs/utils";
+import { isCardUI, isValidNumber, siyuanCache } from "./libs/utils";
 import { MarkKey, TEMP_CONTENT, TOMATO_BK_IGNORE } from "./libs/gconst";
 import BackLinkBottom from "./BackLinkBottom.svelte";
 
@@ -43,7 +44,7 @@ export class BKMaker {
     }
 
     async doTheWork(item: HTMLElement, protyle: IProtyle) {
-        this.disabled = await bkOff(this.docID);
+        this.disabled = await isBkOff(this.docID);
         if (this.disabled) {
             this.container?.parentElement?.removeChild(this.container);
             return;
@@ -173,12 +174,10 @@ class BackLinkBottomBox {
                 click: async () => {
                     if (this.docID) {
                         const docID = this.docID;
-                        if (await bkOff(docID)) {
-                            await siyuan.setBlockAttrs(docID, { "custom-off-tomatobacklink": "" } as AttrType);
-                            await siyuan.pushMsg("启用底部反链");
+                        if (await isBkOff(docID)) {
+                            await enableBK(docID);
                         } else {
-                            await siyuan.setBlockAttrs(docID, { "custom-off-tomatobacklink": "1" } as AttrType);
-                            await siyuan.pushMsg("禁用底部反链");
+                            await disableBK(docID);
                         }
                     }
                 },
@@ -213,12 +212,6 @@ class BackLinkBottomBox {
             }
         });
     }
-}
-
-async function bkOff(nextDocID: string) {
-    const attrs = await siyuan.getBlockAttrs(nextDocID);
-    const v = attrs["custom-off-tomatobacklink"];
-    return v === "1";
 }
 
 async function isBookCard(docID: string): Promise<boolean> {

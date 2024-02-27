@@ -16,7 +16,12 @@
     import { hotMenuBox } from "./HotMenuBox";
     import { addFlashCard, delAllchecked, uncheckAll } from "./libs/listUtils";
     import { removeDocCards } from "./libs/cardUtils";
-    import { cleanBackLinks, insertBackLinks } from "./libs/bkUtils";
+    import {
+        cleanBackLinks,
+        disableBK,
+        enableBK,
+        insertBackLinks,
+    } from "./libs/bkUtils";
     import { gotoBookmark } from "./libs/bookmark";
 
     enum InsertPlace {
@@ -386,6 +391,7 @@ ${text}
                         on:click={async () => {
                             await cleanBackLinks(docID);
                             await insertBackLinks(docID);
+                            await disableBK(docID);
                             destroy();
                         }}>♻️🔙🔗</button
                     >
@@ -396,6 +402,7 @@ ${text}
                         class="b3-button"
                         on:click={async () => {
                             await cleanBackLinks(docID);
+                            await enableBK(docID);
                             destroy();
                         }}>🧹🔙🔗</button
                     >
