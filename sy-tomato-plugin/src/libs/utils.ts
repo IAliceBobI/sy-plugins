@@ -675,7 +675,7 @@ export const siyuan = {
     async skipReviewRiffCard(cardID: string, deckID = "20230218211946-2kw8jgx") {
         return siyuan.call("/api/riff/skipReviewRiffCard", { cardID, deckID });
     },
-    async getRiffCards(page = 1, pageSize = 100, deckID = ""): Promise<GetCardRet> {
+    async getRiffCards(page = 1, pageSize = 1000, deckID = ""): Promise<GetCardRet> {
         return siyuan.call("/api/riff/getRiffCards", { "id": deckID, page, pageSize });
     },
     async batchSetRiffCardsDueTime(cardDues: { id: string, due: string }[]) {
@@ -683,12 +683,15 @@ export const siyuan = {
     },
     async getRiffCardsAll() {
         const total: Map<string, Block> = new Map();
+        // let j = 0;
         for (let i = 1; ; i++) {
             const ret = await siyuan.getRiffCards(i);
             if (!ret?.blocks) break;
-            ret.blocks.forEach(i => total.set(i.id, i));
+            ret.blocks.forEach(i => total.set(i.id, i)); // 存在重复的数据。
+            // j+=ret.blocks.length;
+            // xx.log(total.size, j,ret.total)
             if (total.size >= ret.total) break;
-            if (i >= ret.pageCount + 10) break;
+            if (i >= ret.pageCount + 3) break;
         }
         return total.values();
     },

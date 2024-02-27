@@ -17,6 +17,7 @@
     import { addFlashCard, delAllchecked, uncheckAll } from "./libs/listUtils";
     import { removeDocCards } from "./libs/cardUtils";
     import { cleanBackLinks, insertBackLinks } from "./libs/bkUtils";
+    import { gotoBookmark } from "./libs/bookmark";
 
     enum InsertPlace {
         here = "1#当前位置",
@@ -400,6 +401,16 @@ ${text}
                             await cleanBackLinks(docID);
                             destroy();
                         }}>🧹🔙🔗</button
+                    >
+                </td>
+                <td>
+                    <button
+                        title="跳到当前文档的书签位置"
+                        class="b3-button"
+                        on:click={async () => {
+                            await gotoBookmark(docID, hotMenuBox.plugin.app);
+                            destroy();
+                        }}>🕊️🔖</button
                     >
                 </td>
             </tr>
