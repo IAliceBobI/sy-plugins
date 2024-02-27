@@ -13,7 +13,7 @@ import { BKMaker } from "@/BackLinkBottomBox";
 // }
 
 export function deleteSelf(divs: Element[]) {
-    divs.forEach(e => e.parentElement?.removeChild(e));
+    divs?.forEach(e => e.parentElement?.removeChild(e));
 }
 
 export function icon(name: string, size?: number) {

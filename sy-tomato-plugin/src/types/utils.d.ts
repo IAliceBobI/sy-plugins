@@ -61,7 +61,7 @@ type AttrType = {
     "custom-linkboxdoclinkial": string,
     "custom-attr-pic-overlay": string,
     "custom-tomatomention": string,
-    "custom-tomatobacklink": string,
+    "custom-off-tomatobacklink": string,
     "custom-card-priority": string,
     "custom-card-priority-stop": string,
     "custom-ref-hierarchy": string,

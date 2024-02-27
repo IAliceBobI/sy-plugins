@@ -150,6 +150,8 @@
 
 <img src="assets/bottomBK.png" alt="drawing" width="1000"/>
 
+> 在文档的右键菜单中，可以针对此文档，启用与禁用底部反链。
+
 > [打不开图片请看这里](https://gitee.com/TokenzQdBN/sy-plugins/blob/main/sy-tomato-plugin/README_zh_CN.md)
 
 ### 搜索语法
@@ -429,6 +431,7 @@ aacc3
 * 清理失效闪卡提速。
 * 闪卡优先级：推迟闪卡，也同时修改闪卡的到期时间。回复闪卡这到期时间改为现在。
 * 快捷菜单：AI功能，支持划选块中部分文字，支持选择一个或者多个块。
+* 底部反链：在文档的右键菜单中，可以针对此文档，启用与禁用底部反链。
 
 ## 2024-02-26
 

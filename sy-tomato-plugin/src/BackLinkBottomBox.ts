@@ -6,7 +6,7 @@ import {
     integrateCounting,
     shouldInsertDiv
 } from "./libs/bkUtils";
-import { isCardUI, isValidNumber, siyuanCache } from "./libs/utils";
+import { isCardUI, isValidNumber, siyuan, siyuanCache } from "./libs/utils";
 import { MarkKey, TEMP_CONTENT, TOMATO_BK_IGNORE } from "./libs/gconst";
 import BackLinkBottom from "./BackLinkBottom.svelte";
 
@@ -14,6 +14,8 @@ const BKMAKER_ADD = "BKMAKER_ADD";
 const CACHE_LIMIT = 100;
 
 export class BKMaker {
+    public disabled: boolean;
+
     public shouldFreeze: boolean;
     public mentionCount: number;
 
@@ -41,6 +43,11 @@ export class BKMaker {
     }
 
     async doTheWork(item: HTMLElement, protyle: IProtyle) {
+        this.disabled = await bkOff(this.docID);
+        if (this.disabled) {
+            this.container?.parentElement?.removeChild(this.container);
+            return;
+        }
         this.item = item;
         this.protyle = protyle;
         const divs = await this.findOrLoadFromCache();
@@ -72,33 +79,37 @@ export class BKMaker {
     }
 
     private async insertBkPanel(div: HTMLElement) {
-        this.protyle.wysiwyg.element.style.paddingBottom = "0px";
-        div.style.paddingLeft = this.protyle.wysiwyg.element.style.paddingLeft;
-        div.style.paddingRight = this.protyle.wysiwyg.element.style.paddingRight;
-        this.protyle.wysiwyg.element.insertAdjacentElement("afterend", div);
+        if (!this.disabled) {
+            this.protyle.wysiwyg.element.style.paddingBottom = "0px";
+            div.style.paddingLeft = this.protyle.wysiwyg.element.style.paddingLeft;
+            div.style.paddingRight = this.protyle.wysiwyg.element.style.paddingRight;
+            this.protyle.wysiwyg.element.insertAdjacentElement("afterend", div);
+        }
     }
 
     async findOrLoadFromCache() {
-        return navigator.locks.request("BackLinkBottomBox-BKMakerLock" + this.docID, { ifAvailable: true }, async (lock) => {
-            const divs = Array.from(this.item.parentElement.querySelectorAll(`[${BKMAKER_ADD}="1"]`)?.values() ?? []);
-            if (lock && await shouldInsertDiv(getLastElementID(this.item), this.docID)) {
-                let oldEle: HTMLElement;
-                if (divs.length == 0) {
-                    oldEle = this.blBox.divCache.get(this.docID);
-                    if (oldEle) {
-                        this.insertBkPanel(oldEle);
+        if (!this.disabled) {
+            return navigator.locks.request("BackLinkBottomBox-BKMakerLock" + this.docID, { ifAvailable: true }, async (lock) => {
+                const divs = Array.from(this.item?.parentElement?.querySelectorAll(`[${BKMAKER_ADD}="1"]`)?.values() ?? []);
+                if (lock && await shouldInsertDiv(getLastElementID(this.item), this.docID)) {
+                    let oldEle: HTMLElement;
+                    if (divs.length == 0) {
+                        oldEle = this.blBox.divCache.get(this.docID);
+                        if (oldEle) {
+                            this.insertBkPanel(oldEle);
+                        }
+                    } else {
+                        oldEle = divs.pop() as HTMLElement;
+                        deleteSelf(divs);
                     }
-                } else {
-                    oldEle = divs.pop() as HTMLElement;
-                    deleteSelf(divs);
+                    if (oldEle) {
+                        integrateCounting(this);
+                        divs.push(oldEle);
+                    }
                 }
-                if (oldEle) {
-                    integrateCounting(this);
-                    divs.push(oldEle);
-                }
-            }
-            return divs;
-        });
+                return divs;
+            });
+        }
     }
 }
 
@@ -154,6 +165,26 @@ class BackLinkBottomBox {
             },
         });
 
+        this.plugin.eventBus.on("open-menu-content", async ({ detail }) => {
+            const menu = detail.menu;
+            menu.addItem({
+                label: "启用/禁用当前文档的底部反链",
+                icon: "iconEyeoff",
+                click: async () => {
+                    if (this.docID) {
+                        const docID = this.docID;
+                        if (await bkOff(docID)) {
+                            await siyuan.setBlockAttrs(docID, { "custom-off-tomatobacklink": "" } as AttrType);
+                            await siyuan.pushMsg("启用底部反链");
+                        } else {
+                            await siyuan.setBlockAttrs(docID, { "custom-off-tomatobacklink": "1" } as AttrType);
+                            await siyuan.pushMsg("禁用底部反链");
+                        }
+                    }
+                },
+            });
+        });
+
         events.addListener("BackLinkBottomBox", (eventType, detail) => {
             if (eventType == EventType.loaded_protyle_static || eventType == EventType.switch_protyle) {
                 navigator.locks.request("BackLinkBottomBoxLock", { ifAvailable: true }, async (lock) => {
@@ -182,6 +213,12 @@ class BackLinkBottomBox {
             }
         });
     }
+}
+
+async function bkOff(nextDocID: string) {
+    const attrs = await siyuan.getBlockAttrs(nextDocID);
+    const v = attrs["custom-off-tomatobacklink"];
+    return v === "1";
 }
 
 async function isBookCard(docID: string): Promise<boolean> {
