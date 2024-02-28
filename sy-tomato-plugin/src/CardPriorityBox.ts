@@ -172,7 +172,7 @@ class CardPriorityBox {
         if (!id) return;
         const attrs = await siyuan.getBlockAttrs(id);
         if (attrs[CARD_PRIORITY_STOP]) {
-            await resumeCard([id]);
+            await resumeCard([id], true);
             await siyuan.pushMsg("继续闪卡");
         } else {
             await this.stopCards([{ ial: { id } }] as any);
@@ -359,21 +359,23 @@ class CardPriorityBox {
     }
 }
 
-export async function resumeCard(blockIDs: string[]) {
+export async function resumeCard(blockIDs: string[], setDue = false) {
     const newAttrs = {} as AttrType;
     newAttrs["custom-card-priority-stop"] = "";
     newAttrs.bookmark = "";
     await siyuan.batchSetBlockAttrs(blockIDs.map(b => {
         return { id: b, attrs: newAttrs };
     }));
-    let datetimeStr = await siyuan.currentTime(-60 * 60 * 24);
-    datetimeStr = timeUtil.makesureDateTimeFormat(datetimeStr);
-    await siyuan.batchSetRiffCardsDueTimeByBlockID(blockIDs.map((b) => {
-        return {
-            id: b,
-            due: datetimeStr.replace(/[- :]/g, ""),
-        };
-    }));
+    if (setDue) {
+        let datetimeStr = await siyuan.currentTime(-60 * 60 * 24);
+        datetimeStr = timeUtil.makesureDateTimeFormat(datetimeStr);
+        await siyuan.batchSetRiffCardsDueTimeByBlockID(blockIDs.map((b) => {
+            return {
+                id: b,
+                due: datetimeStr.replace(/[- :]/g, ""),
+            };
+        }));
+    }
     if (blockIDs.length > 0) {
         setTimeout(() => {
             events.protyleReload();
