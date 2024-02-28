@@ -177,7 +177,9 @@ class FlashBox {
         const docID = protyle.block?.rootID;
         if (!docID) return;
         let { bookID } = await getBookID(docID);
-        const { cardID, markdown } = this.createList(divs, t);
+        const srcDocAttrs = await siyuan.getBlockAttrs(docID);
+        const srcPriority = srcDocAttrs["custom-card-priority"] ?? "";
+        const { cardID, markdown } = this.createList(divs, t, srcPriority);
         if (path) {
             const v = getDailyAttrValue();
             const attr = {};
@@ -202,7 +204,7 @@ class FlashBox {
         await siyuan.pushMsg("⚡🗃" + markdown.split("(")[0], 1234);
     }
 
-    private createList(divs: HTMLElement[], cardType: CardType) {
+    private createList(divs: HTMLElement[], cardType: CardType, srcPriority: string) {
         const tmp = [];
         let idx = 0;
         let star = "* ";
@@ -227,6 +229,7 @@ class FlashBox {
         }
         const attrList = [];
         attrList.push(`id="${cardID}"`);
+        attrList.push(`${gconst.CARD_PRIORITY}="${srcPriority}"`);
         if (originPath) {
             attrList.push(`${gconst.ORIGIN_HPATH}="${originPath}"`);
         }
