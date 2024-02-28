@@ -669,7 +669,7 @@ export const siyuan = {
         return (await siyuan.getTreeRiffCardsAll(docID)).reduce((m, b) => {
             const c = b.riffCard;
             if (c?.due) {
-                c.due = timeUtil.dateFormatDay(new Date(c.due));
+                c.due = timeUtil.dateFormat(new Date(c.due));
                 m.set(b.id, c);
             }
             return m;
