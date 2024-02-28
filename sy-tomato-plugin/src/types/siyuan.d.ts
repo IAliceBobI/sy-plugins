@@ -161,3 +161,12 @@ type Ref = {
     root_id: string;
     type: string;
 }
+
+type DocTabInitData = {
+    action: string;
+    blockId: string;
+    instance: string;
+    mode: string;
+    notebookId: string;
+    rootId: string;
+}

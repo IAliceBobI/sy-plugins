@@ -185,6 +185,17 @@ async function deleteAllReadingPoints(docID: string) {
 
 async function addCardReadingPoint(blockID: string, docInfo: Block, title: string, docID: string) {
     const docIDs = [...document.body.querySelectorAll("div.protyle-title.protyle-wysiwyg--attr")].map(e => e.getAttribute(DATA_NODE_ID));
+    [...document.body.querySelectorAll("li[data-initdata]")].forEach(e => {
+        const d = e.getAttribute("data-initdata");
+        const title = e.querySelector(".item__text")?.textContent;
+        const j: DocTabInitData = JSON.parse(d);
+        if (d && j) {
+            docIDs.push(j.rootId);
+            events.readingPointMap.set(j.rootId, {
+                docID: j.rootId, blockID: j.blockId, title, time: new Date(),
+            });
+        }
+    });
     const id = NewNodeID();
     const md = [];
     md.push(`* 阅读点：${get_siyuan_lnk_md(blockID, docInfo.content)}`);
@@ -194,12 +205,14 @@ async function addCardReadingPoint(blockID: string, docInfo: Block, title: strin
         let bID = doc.blockID;
         if (bID) {
             const docIDQuery = await siyuan.getDocIDByBlockID(bID);
-            if (docIDQuery != docIDInPage) bID = docIDInPage;
-        } else {
-            bID = docIDInPage;
+            if (docIDQuery != docIDInPage) bID = "";
         }
-        if (doc && bID) {
-            md.push(`* ${get_siyuan_lnk_md(bID, doc.title ?? "*")}`);
+        if (doc) {
+            let cursor = "";
+            if (bID) {
+                cursor = `::${get_siyuan_lnk_md(bID, "[[光标]]")}`;
+            }
+            md.push(`* ${get_siyuan_lnk_md(doc.docID, doc.title ?? "[[文档]]")}${cursor}`);
         }
     }
     md.push(`{: id="${id}" bookmark="${title}" ${READINGPOINT}="${docID}"}`);
