@@ -636,6 +636,12 @@ export const siyuan = {
     async appendBlock(data: string, parentID: string, dataType = "markdown") {
         return siyuan.call("/api/block/appendBlock", { data, dataType, parentID });
     },
+    async getBlockInfo(id: string): Promise<GetBlockInfo> {
+        return siyuan.call("/api/block/getBlockInfo", { id });
+    },
+    async getDocInfo(id: string): Promise<GetDocInfo> {
+        return siyuan.call("/api/block/getDocInfo", { id });
+    },
     async removeBookmarks(docID: string, keepBlockID: string) {
         const bookmark = "";
         const rows = await siyuan.sql(`select id from blocks where root_id='${docID}' and ial like '%bookmark=%' limit 1000`);
@@ -648,8 +654,8 @@ export const siyuan = {
     async addBookmark(id: string, bookmark: string) {
         return siyuan.setBlockAttrs(id, { bookmark });
     },
-    async getTreeRiffCardsAll(id: string): Promise<Block[]> {
-        const total: Block[] = [];
+    async getTreeRiffCardsAll(id: string): Promise<GetCardRetBlock[]> {
+        const total: GetCardRetBlock[] = [];
         for (let i = 1; ; i++) {
             const ret = await siyuan.getTreeRiffCards(id, i);
             if (!ret?.blocks) break;
@@ -660,8 +666,8 @@ export const siyuan = {
         return total;
     },
     async getTreeRiffCardsMap(docID: string) {
-        return (await siyuan.getTreeRiffCardsAll(docID)).reduce((m, b: any) => {
-            const c = b.riffCard as RiffCard;
+        return (await siyuan.getTreeRiffCardsAll(docID)).reduce((m, b) => {
+            const c = b.riffCard;
             if (c?.due) {
                 c.due = timeUtil.dateFormatDay(new Date(c.due));
                 m.set(b.id, c);
@@ -681,23 +687,36 @@ export const siyuan = {
     async getRiffCards(page = 1, pageSize = 1000, deckID = ""): Promise<GetCardRet> {
         return siyuan.call("/api/riff/getRiffCards", { "id": deckID, page, pageSize });
     },
-    async batchSetRiffCardsDueTime(cardDues: { id: string, due: string }[]) {
+    async batchSetRiffCardsDueTimeByBlockID(cardDues: { id: string, due: string }[]) {
+        const all = await siyuan.getRiffCardsAll(5000);
+        cardDues = cardDues.map(block => {
+            return all.get(block.id)?.map(card => {
+                return { id: card.riffCardID, due: block.due };
+            });
+        }).filter(c => !!c).flat();
+        return siyuan.batchSetRiffCardsDueTimeByCardID(cardDues);
+    },
+    async batchSetRiffCardsDueTimeByCardID(cardDues: { id: string, due: string }[]) {
         // "due": "20240224214412"
         return siyuan.call("/api/riff/batchSetRiffCardsDueTime", { cardDues });
     },
-    async getRiffCardsAll() {
-        const total: Map<string, Block> = new Map();
+    async getRiffCardsAll(pageSize = 1000) {
+        const total: Map<string, GetCardRetBlock[]> = new Map();
         // let j = 0;
         for (let i = 1; ; i++) {
-            const ret = await siyuan.getRiffCards(i);
+            const ret = await siyuan.getRiffCards(i, pageSize);
             if (!ret?.blocks) break;
-            ret.blocks.forEach(i => total.set(i.id, i)); // 存在重复的数据。
+            ret.blocks.forEach(i => { // 存在一个块多卡。
+                const a = total.get(i.id) ?? [];
+                a.push(i);
+                total.set(i.id, a);
+            });
             // j+=ret.blocks.length;
             // xx.log(total.size, j,ret.total)
             if (total.size >= ret.total) break;
-            if (i >= ret.pageCount + 3) break;
+            if (i >= ret.pageCount + 1) break;
         }
-        return total.values();
+        return total;
     },
     async getRiffDueCards(deckID = ""): Promise<GetDueCardRet> {
         return siyuan.call("/api/riff/getRiffDueCards", { deckID });
@@ -845,7 +864,7 @@ export const siyuan = {
             if (!lock) return;
             siyuan.pushMsg("正在确认无效闪卡，请耐心等待……", 1000);
             const invalidCardIDs = [];
-            for (const card of await siyuan.getRiffCardsAll()) {
+            for (const card of [...(await siyuan.getRiffCardsAll()).values()].flat()) {
                 if (!card.box) {
                     invalidCardIDs.push(card.id);
                 }

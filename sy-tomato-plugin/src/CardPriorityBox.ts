@@ -132,7 +132,7 @@ class CardPriorityBox {
             }
             return false;
         }).map(due => {
-            return { ial: { id: due.blockID } } as unknown as Block;
+            return { ial: { id: due.blockID } } as unknown as GetCardRetBlock;
         });
         await this.stopCards(blocks);
     }
@@ -179,7 +179,7 @@ class CardPriorityBox {
         }
     }
 
-    async stopCards(blocks: Block[]) {
+    async stopCards(blocks: GetCardRetBlock[]) {
         new DialogText(
             `准备推迟${blocks.length}个闪卡，请先设置推迟天数`,
             "2",
@@ -191,10 +191,10 @@ class CardPriorityBox {
                         const newAttrs = {} as AttrType;
                         newAttrs["custom-card-priority-stop"] = datetimeStr;
                         newAttrs.bookmark = "🛑 Suspended Cards";
-                        await siyuan.batchSetBlockAttrs(blocks.map((b: any) => {
+                        await siyuan.batchSetBlockAttrs(blocks.map(b => {
                             return { id: b.ial.id, attrs: newAttrs };
                         }));
-                        await siyuan.batchSetRiffCardsDueTime(blocks.map((b: any) => {
+                        await siyuan.batchSetRiffCardsDueTimeByBlockID(blocks.map(b => {
                             return {
                                 id: b.ial.id,
                                 due: datetimeStr.replace(/[- :]/g, ""),
@@ -219,7 +219,7 @@ class CardPriorityBox {
         return this.updateDocPriorityBatchDialog(blocks as any, priority, dialog, cb);
     }
 
-    private async updateDocPriorityBatchDialog(blocks: Block[], priority?: number, dialog?: boolean, cb?: Func) {
+    private async updateDocPriorityBatchDialog(blocks: GetCardRetBlock[], priority?: number, dialog?: boolean, cb?: Func) {
         const validNum = isValidNumber(priority);
         if (dialog || !validNum) {
             if (!validNum) priority = 50;
@@ -237,7 +237,7 @@ class CardPriorityBox {
     }
 
     // update the entire doc cards
-    private updateDocPriorityLock(newPriority: number, blocks: Block[], cb?: Func) {
+    private updateDocPriorityLock(newPriority: number, blocks: GetCardRetBlock[], cb?: Func) {
         return navigator.locks.request("CardPriorityBox.updateDocPriorityLock", { ifAvailable: true }, async (lock) => {
             if (lock) {
                 await siyuan.pushMsg(`设置闪卡优先级为：${newPriority}`, 2000);
@@ -249,7 +249,7 @@ class CardPriorityBox {
         });
     }
 
-    private async updateDocPriority(newPriority: number, blocks: Block[], cb?: Func) {
+    private async updateDocPriority(newPriority: number, blocks: GetCardRetBlock[], cb?: Func) {
         newPriority = ensureValidPriority(newPriority);
         const params = blocks.map(block => {
             const ial = block.ial as unknown as AttrType;
@@ -309,16 +309,16 @@ class CardPriorityBox {
 
         options.cards = [...review.values()].map((c) => c.card);
         options.cards.sort((a, b) => review.get(b.blockID).p - review.get(a.blockID).p);
-        const len = options.cards.length;
-        const n = Math.floor(len * 5 / 100);
-        if (n > 0 && len > n) {
-            const lastN = options.cards.slice(len - n);
-            options.cards = options.cards.slice(0, len - n);
-            for (const e of lastN) {
-                const randPosition = Math.floor(Math.random() * (len / 3));
-                options.cards.splice(randPosition, 0, e);
-            }
-        }
+        // const len = options.cards.length;
+        // const n = Math.floor(len * 5 / 100);
+        // if (n > 0 && len > n) {
+        //     const lastN = options.cards.slice(len - n);
+        //     options.cards = options.cards.slice(0, len - n);
+        //     for (const e of lastN) {
+        //         const randPosition = Math.floor(Math.random() * (len / 3));
+        //         options.cards.splice(randPosition, 0, e);
+        //     }
+        // }
         this.beforeReview = (await siyuan.getRiffDueCards()).cards
             .filter(c => options.cards.findIndex((v) => v.blockID === c.blockID) >= 0)
             .reduce((m, c) => {
@@ -366,9 +366,9 @@ export async function resumeCard(blockIDs: string[]) {
     await siyuan.batchSetBlockAttrs(blockIDs.map(b => {
         return { id: b, attrs: newAttrs };
     }));
-    let datetimeStr = await siyuan.currentTime();
+    let datetimeStr = await siyuan.currentTime(-60 * 60 * 24);
     datetimeStr = timeUtil.makesureDateTimeFormat(datetimeStr);
-    await siyuan.batchSetRiffCardsDueTime(blockIDs.map((b: any) => {
+    await siyuan.batchSetRiffCardsDueTimeByBlockID(blockIDs.map((b) => {
         return {
             id: b,
             due: datetimeStr.replace(/[- :]/g, ""),

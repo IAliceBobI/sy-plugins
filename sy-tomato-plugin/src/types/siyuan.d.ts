@@ -111,8 +111,6 @@ type GetBlocksWordCount = {
 
 type GetBlockKramdown = { id: string, kramdown: string }
 
-type GetCardRet = { blocks: Block[], total: number, pageCount: number };
-
 type DueCard = {
     deckID: string;
     cardID: string;
@@ -170,3 +168,72 @@ type DocTabInitData = {
     notebookId: string;
     rootId: string;
 }
+
+type GetDocInfo = {
+    id: string;
+    rootID: string;
+    name: string;
+    refCount: number;
+    subFileCount: number;
+    refIDs: any[];
+    ial: Ial;
+    icon: string;
+}
+
+type GetBlockInfo = {
+    box: string;
+    path: string;
+    rootChildID: string;
+    rootID: string;
+    rootIcon: string;
+    rootTitle: string;
+}
+
+type GetCardRet = { blocks: GetCardRetBlock[], total: number, pageCount: number };
+
+type GetCardRetBlock = {
+    alias: string;
+    box: string;
+    content: string;
+    created: string;
+    fcontent: string;
+    // hash: string;
+    hPath: string;
+    ial: Ial;
+    id: string;
+    // length: number;
+    markdown: string;
+    memo: string;
+    name: string;
+    parentID: string;
+    path: string;
+    rootID: string;
+    sort: number;
+    subType: string;
+    tag: string;
+    updated: string;
+
+    folded: boolean;
+    type: string;
+    refText: string;
+    refs: null;
+    defID: string;
+    defPath: string;
+    children: null;
+    depth: number;
+    count: number;
+    riffCardID: string;
+    riffCard: RiffCard;
+}
+
+type Ial = {
+    id: string;
+    title: string;
+    updated: string;
+}
+
+type RiffCard = {
+    due: string; // "2024-02-28"
+    reps: number;
+}
+
