@@ -19,15 +19,34 @@ class ReadingPointBox {
                 this.addReadPointLock();
             },
         });
+        this.plugin.addCommand({
+            langKey: "addBookmarkWithoutENV",
+            hotkey: "⌘7",
+            callback: async () => {
+                this.addReadPointLock("", true);
+            },
+        });
         this.plugin.eventBus.on("open-menu-content", async ({ detail }) => {
             const menu = detail.menu;
             menu.addItem({
                 label: this.plugin.i18n.addBookmark,
                 icon: "iconBookmark",
+                accelerator: "⌘2",
                 click: () => {
                     const blockID = detail?.element?.getAttribute("data-node-id") ?? "";
                     if (blockID) {
                         this.addReadPointLock(blockID);
+                    }
+                },
+            });
+            menu.addItem({
+                label: this.plugin.i18n.addBookmarkWithoutENV,
+                icon: "iconBookmark",
+                accelerator: "⌘7",
+                click: () => {
+                    const blockID = detail?.element?.getAttribute("data-node-id") ?? "";
+                    if (blockID) {
+                        this.addReadPointLock(blockID, true);
                     }
                 },
             });
@@ -66,6 +85,7 @@ class ReadingPointBox {
         detail.menu.addItem({
             iconHTML: "🔖",
             label: this.plugin.i18n.addBookmark,
+            accelerator: "⌘2",
             click: () => {
                 for (const element of detail.blockElements) {
                     const blockID = getID(element);
@@ -76,12 +96,26 @@ class ReadingPointBox {
                 }
             }
         });
+        detail.menu.addItem({
+            iconHTML: "🔖",
+            label: this.plugin.i18n.addBookmarkWithoutENV,
+            accelerator: "⌘7",
+            click: () => {
+                for (const element of detail.blockElements) {
+                    const blockID = getID(element);
+                    if (blockID) {
+                        this.addReadPointLock(blockID, true);
+                        break;
+                    }
+                }
+            }
+        });
     }
 
-    private addReadPointLock(blockID?: string) {
+    private addReadPointLock(blockID?: string, withoutENV = false) {
         navigator.locks.request(AddReadingPointLock, { ifAvailable: true }, async (lock) => {
             if (lock) {
-                await this.addReadPoint(blockID);
+                await this.addReadPoint(blockID, withoutENV);
                 await sleep(2000);
             } else {
                 siyuan.pushMsg(this.plugin.i18n.wait4finish);
@@ -150,7 +184,7 @@ class ReadingPointBox {
         }
     }
 
-    private async addReadPoint(blockID?: string) {
+    private async addReadPoint(blockID?: string, withoutENV = false) {
         if (!blockID) blockID = events.lastBlockID;
         if (!blockID) {
             siyuan.pushMsg(this.plugin.i18n.clickOneBlockFirst);
@@ -170,7 +204,7 @@ class ReadingPointBox {
         // await siyuan.addBookmark(blockID, title);
         // await siyuan.removeBookmarks(docID, blockID);
         await deleteAllReadingPoints(docID);
-        await addCardReadingPoint(blockID, docInfo, title, docID);
+        await addCardReadingPoint(blockID, docInfo, title, docID, withoutENV);
     }
 }
 
@@ -183,36 +217,38 @@ async function deleteAllReadingPoints(docID: string) {
     await siyuan.deleteBlocks(ids);
 }
 
-async function addCardReadingPoint(blockID: string, docInfo: Block, title: string, docID: string) {
-    const docIDs = [...document.body.querySelectorAll("div.protyle-title.protyle-wysiwyg--attr")].map(e => e.getAttribute(DATA_NODE_ID));
-    [...document.body.querySelectorAll("li[data-initdata]")].forEach(e => {
-        const d = e.getAttribute("data-initdata");
-        const title = e.querySelector(".item__text")?.textContent;
-        const j: DocTabInitData = JSON.parse(d);
-        if (d && j) {
-            docIDs.push(j.rootId);
-            events.readingPointMap.set(j.rootId, {
-                docID: j.rootId, blockID: j.blockId, title, time: new Date(),
-            });
-        }
-    });
+async function addCardReadingPoint(blockID: string, docInfo: Block, title: string, docID: string, withoutENV = false) {
     const id = NewNodeID();
     const md = [];
     md.push(`* 阅读点：${get_siyuan_lnk_md(blockID, docInfo.content)}`);
-    for (const docIDInPage of docIDs) {
-        if (docInfo.id == docIDInPage) continue;
-        const doc = events.readingPointMap.get(docIDInPage);
-        let bID = doc.blockID;
-        if (bID) {
-            const docIDQuery = await siyuan.getDocIDByBlockID(bID);
-            if (docIDQuery != docIDInPage) bID = "";
-        }
-        if (doc) {
-            let cursor = "";
-            if (bID) {
-                cursor = `::${get_siyuan_lnk_md(bID, "[[光标]]")}`;
+    if (!withoutENV) {
+        const docIDs = [...document.body.querySelectorAll("div.protyle-title.protyle-wysiwyg--attr")].map(e => e.getAttribute(DATA_NODE_ID));
+        [...document.body.querySelectorAll("li[data-initdata]")].forEach(e => {
+            const d = e.getAttribute("data-initdata");
+            const title = e.querySelector(".item__text")?.textContent;
+            const j: DocTabInitData = JSON.parse(d);
+            if (d && j) {
+                docIDs.push(j.rootId);
+                events.readingPointMap.set(j.rootId, {
+                    docID: j.rootId, blockID: j.blockId, title, time: new Date(),
+                });
             }
-            md.push(`* ${get_siyuan_lnk_md(doc.docID, doc.title ?? "[[文档]]")}${cursor}`);
+        });
+        for (const docIDInPage of docIDs) {
+            if (docInfo.id == docIDInPage) continue;
+            const doc = events.readingPointMap.get(docIDInPage);
+            let bID = doc.blockID;
+            if (bID) {
+                const docIDQuery = await siyuan.getDocIDByBlockID(bID);
+                if (docIDQuery != docIDInPage) bID = "";
+            }
+            if (doc) {
+                let cursor = "";
+                if (bID) {
+                    cursor = `::${get_siyuan_lnk_md(bID, "[[光标]]")}`;
+                }
+                md.push(`* ${get_siyuan_lnk_md(doc.docID, doc.title ?? "[[文档]]")}${cursor}`);
+            }
         }
     }
     md.push(`{: id="${id}" bookmark="${title}" ${READINGPOINT}="${docID}"}`);

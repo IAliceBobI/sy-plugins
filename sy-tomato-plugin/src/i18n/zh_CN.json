@@ -15,6 +15,7 @@
   "schedule": "设置提醒",
   "btnAddADay": "+1日",
   "addBookmark": "设置阅读点",
+  "addBookmarkWithoutENV": "设置阅读点(无环境)",
   "removeBrokenCards": "清理所有失效闪卡cleanCards",
   "addFlashCard": "整个列表制卡",
   "removedBrokenCards": "已经删除的失效闪卡：",
