@@ -26,7 +26,9 @@ class CmdBlockBox {
                     await siyuan.setBlockAttrs(idsInContent[1], newAttrs);
                     await moveAllContentToDoc2(protyle, idsInContent[0], idsInContent[1]);
                     await siyuan.flushTransaction();
-                    await siyuan.transferBlockRef(idsInContent[0], idsInContent[1]);
+                    await siyuan.transferBlockRef(idsInContent[0], idsInContent[1], false);
+                    await siyuan.removeDocByID(idsInContent[0]);
+                    window.location.reload();
                 } else {
                     const txt = `请分别粘贴两个文档的引用于括号中，再对本块用'/'触发一次此功能。
 文档A的引用将转移到文档B，

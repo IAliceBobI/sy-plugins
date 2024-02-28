@@ -475,8 +475,8 @@ export const siyuan = {
         }
         return {};
     },
-    async transferBlockRef(fromID: string, toID: string): Promise<any> {
-        return siyuan.call("/api/block/transferBlockRef", { fromID, toID });
+    async transferBlockRef(fromID: string, toID: string, reloadUI = true): Promise<any> {
+        return siyuan.call("/api/block/transferBlockRef", { fromID, toID, reloadUI });
     },
     async createDailyNote(notebook: string): Promise<{ id: string }> {
         return siyuan.call("/api/filetree/createDailyNote", { notebook });
