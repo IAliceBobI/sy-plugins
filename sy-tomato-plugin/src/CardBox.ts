@@ -1,7 +1,8 @@
-import { IProtyle, Plugin, confirm } from "siyuan";
-import { siyuan } from "@/libs/utils";
+import { Dialog, IProtyle, Plugin, confirm } from "siyuan";
+import { newID, siyuan } from "@/libs/utils";
 import "./index.scss";
 import { EventType, events } from "@/libs/Events";
+import CardBoxDel from "./CardBoxDel.svelte";
 
 class CardBox {
     private plugin: Plugin;
@@ -76,10 +77,18 @@ class CardBox {
                             await siyuan.pushMsg(msg);
                         };
                         btn.addEventListener("click", () => {
-                            confirm(btn.title, msg, () => {
-                                siyuan.removeRiffCards([id]);
-                                const btnSkip = document.body.querySelector('button[data-type="-3"]') as HTMLButtonElement;
-                                btnSkip.click();
+                            const btnId = newID();
+                            const dialog = new Dialog({
+                                title: btn.title,
+                                content: `<div id="${btnId}"></div>`,
+                            });
+                            new CardBoxDel({
+                                target: dialog.element.querySelector("#" + btnId),
+                                props: {
+                                    dialog,
+                                    msg,
+                                    id,
+                                }
                             });
                         });
                     });
