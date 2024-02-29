@@ -51,13 +51,13 @@
     {@html msg}
     <div class="fn__hr"></div>
     <button class="b3--button" on:click={deleteCardDeleteContent}
-        >取消闪卡 ➕ 删除内容</button
+        >取消制卡 ➕ 删除内容块</button
     >
     <div class="fn__hr"></div>
     <div class="fn__hr"></div>
     <div class="fn__hr"></div>
     <div class="fn__hr"></div>
-    <button class="b3--button" on:click={deleteCard}>取消闪卡</button>
+    <button class="b3--button" on:click={deleteCard}>取消制卡/删卡</button>
     <div class="fn__hr"></div>
     <div class="fn__hr"></div>
     <div class="fn__hr"></div>
