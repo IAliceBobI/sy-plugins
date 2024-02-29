@@ -85,6 +85,7 @@
         const sortDiv = (a: BacklinkSv, b: BacklinkSv) => {
             const dateA = a.bkDiv.getAttribute("updated");
             const dateB = b.bkDiv.getAttribute("updated");
+            if (!dateA || !dateB) return 0;
             return -dateA.localeCompare(dateB);
         };
         backLinks.sort(sortDiv);

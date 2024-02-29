@@ -1,11 +1,20 @@
 <script lang="ts">
-    import { Dialog, confirm } from "siyuan";
+    import { Dialog, confirm, openTab, Plugin } from "siyuan";
     import { siyuan } from "./libs/utils";
     import { onDestroy } from "svelte";
+    import { escOnElement } from "./libs/keyboard";
 
     export let dialog: Dialog;
+    export let dialogDiv: HTMLElement;
+    export let plugin: Plugin;
     export let msg: string;
     export let id: string;
+
+    onDestroy(destroy);
+
+    function destroy() {
+        dialog.destroy();
+    }
 
     async function deleteCard() {
         await siyuan.removeRiffCards([id]);
@@ -16,10 +25,17 @@
         destroy();
     }
 
-    onDestroy(destroy);
-
-    function destroy() {
-        dialog.destroy();
+    async function gotoCard() {
+        destroy();
+        escOnElement(dialogDiv);
+        openTab({
+            app: plugin.app,
+            doc: {
+                id,
+                action: ["cb-get-hl", "cb-get-context", "cb-get-focus"],
+                zoomIn: false,
+            },
+        });
     }
 
     async function deleteCardDeleteContent() {
@@ -42,6 +58,11 @@
     <div class="fn__hr"></div>
     <div class="fn__hr"></div>
     <button class="b3--button" on:click={deleteCard}>取消闪卡</button>
+    <div class="fn__hr"></div>
+    <div class="fn__hr"></div>
+    <div class="fn__hr"></div>
+    <div class="fn__hr"></div>
+    <button class="b3--button" on:click={gotoCard}>定位闪卡</button>
 </div>
 
 <style>

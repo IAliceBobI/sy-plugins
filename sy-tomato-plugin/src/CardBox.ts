@@ -69,7 +69,7 @@ class CardBox {
                         btn.classList.add("b3-button--error");
                         btn.classList.add("b3-tooltips__n");
                         btn.classList.add("b3-tooltips");
-                        const msg = `原文ID：${id}<br>请确认原文内容：<br>` + protyle.contentElement.textContent.slice(0, 100);
+                        const msg = `原文ID：${id}<br>请确认原文内容：<br>` + protyle.contentElement.textContent.slice(0, 50);
                         this.delCardFunc = async () => {
                             await siyuan.removeRiffCards([id]);
                             const btnSkip = document.body.querySelector('button[data-type="-3"]') as HTMLButtonElement;
@@ -86,6 +86,8 @@ class CardBox {
                                 target: dialog.element.querySelector("#" + btnId),
                                 props: {
                                     dialog,
+                                    plugin: this.plugin,
+                                    dialogDiv: document.querySelector(".b3-dialog__container"),
                                     msg,
                                     id,
                                 }
