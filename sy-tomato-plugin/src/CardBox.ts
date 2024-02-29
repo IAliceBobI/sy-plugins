@@ -71,11 +71,15 @@ class CardBox {
                         const msg = `原文ID：${id}<br>请确认原文内容：<br>` + protyle.contentElement.textContent.slice(0, 100);
                         this.delCardFunc = async () => {
                             await siyuan.removeRiffCards([id]);
+                            const btnSkip = document.body.querySelector('button[data-type="-3"]') as HTMLButtonElement;
+                            btnSkip.click();
                             await siyuan.pushMsg(msg);
                         };
                         btn.addEventListener("click", () => {
                             confirm(btn.title, msg, () => {
                                 siyuan.removeRiffCards([id]);
+                                const btnSkip = document.body.querySelector('button[data-type="-3"]') as HTMLButtonElement;
+                                btnSkip.click();
                             });
                         });
                     });
