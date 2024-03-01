@@ -24,7 +24,7 @@
     } from "./libs/bkUtils";
     import { gotoBookmark } from "./libs/bookmark";
     import { DialogText } from "./libs/DialogText";
-    import { moveAllContentHere } from "./libs/docUtils";
+    import { mergeDocs, moveAllContentHere } from "./libs/docUtils";
 
     enum InsertPlace {
         here = "1#当前位置",
@@ -203,6 +203,7 @@ ${text}
                 if (input) {
                     const docID = await siyuan.getDocIDByBlockID(input);
                     if (docID) {
+                        await mergeDocs(docID, anchorID);
                     }
                 }
                 destroy();
@@ -467,7 +468,7 @@ ${text}
                 </td>
                 <td>
                     <button
-                        title="合并文档"
+                        title="合并文档到这里，把其他文档的属性、内容、引用转移到此文档，并把其他文档删除。"
                         class="b3-button"
                         on:click={mergeDoc}>📃🈴</button
                     >

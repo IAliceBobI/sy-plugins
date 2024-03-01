@@ -12,7 +12,6 @@ import { STORAGE_SETTINGS } from "./constants";
 import { siyuan } from "@/libs/utils";
 import { imgOverlayBox } from "./ImgOverlayBox";
 import { dailyNoteBox } from "./DailyNoteBox";
-import { cmdBlockBox } from "./CmdBlockBox";
 import { cardPriorityBox } from "./CardPriorityBox";
 import { tag2RefBox } from "./Tag2RefBox";
 import { toolbarBox } from "./ToolbarBox";
@@ -80,9 +79,6 @@ export default class ThePlugin extends Plugin {
         this.addSettingItem("tag2RefBoxCheckbox", "* 自动将标签转为引用（引用也继承标签的层级关系）", false, "开启会将当前编辑区内的标签转为引用！tag开头、@开头的标签不会被转。");
         if (this.settingCfg.tag2RefBoxCheckbox ?? false) await tag2RefBox.onload(this);
 
-        this.addSettingItem("cmdBlockBoxCheckbox", "* 命令块", false);
-        if (this.settingCfg.cmdBlockBoxCheckbox ?? false) await cmdBlockBox.onload(this);
-
         this.addSettingItem("listBoxCheckbox", "* 列表工具", false, "取消文档中所有任务的勾选");
         if (this.settingCfg.listBoxCheckbox ?? false) await listBox.onload(this);
     }
@@ -112,7 +108,6 @@ export default class ThePlugin extends Plugin {
         cardPriorityBox.blockIconEvent(detail);
         imgOverlayBox.blockIconEvent(detail);
         dailyNoteBox.blockIconEvent(detail);
-        cmdBlockBox.blockIconEvent(detail);
         hotMenuBox.blockIconEvent(detail);
     }
 
