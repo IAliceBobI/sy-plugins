@@ -217,7 +217,7 @@ class FlashBox {
             if (!originPath) originPath = div.getAttribute(gconst.ORIGIN_HPATH);
             if (!refPath) refPath = div.getAttribute(gconst.REF_HPATH);
             div.removeAttribute(gconst.DATA_NODE_ID);
-            const md = this.lute.BlockDOM2Md(div.outerHTML);
+            const md = this.lute.BlockDOM2Md(div.outerHTML).replace("　　", "");
             if (idx++ == 0) tmp.push("* " + md);
             else tmp.push(star + md);
         }
