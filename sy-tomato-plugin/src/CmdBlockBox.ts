@@ -19,16 +19,7 @@ class CmdBlockBox {
             async callback(protyle: Protyle) {
                 const { blockDiv, idsInContent } = getBlockAndInnerIDs(protyle);
                 if (idsInContent.length == 2) {
-                    const newAttrs = await mergeIntoDoc2(idsInContent[0], idsInContent[1]);
-                    const oldAttrs = setDefaultAttr({} as any);
-                    oldAttrs.title = "moved";
-                    await siyuan.setBlockAttrs(idsInContent[0], oldAttrs);
-                    await siyuan.setBlockAttrs(idsInContent[1], newAttrs);
-                    await moveAllContentToDoc2(idsInContent[0], idsInContent[1]);
-                    await siyuan.flushTransaction();
-                    await siyuan.transferBlockRef(idsInContent[0], idsInContent[1], false);
-                    await siyuan.removeDocByID(idsInContent[0]);
-                    window.location.reload();
+                    await mergeDocs(idsInContent);
                 } else {
                     const txt = `请分别粘贴两个文档的引用于括号中，再对本块用'/'触发一次此功能。
 文档A的引用将转移到文档B，
@@ -47,51 +38,6 @@ class CmdBlockBox {
 }
 
 export const cmdBlockBox = new CmdBlockBox();
-
-async function moveAllContentToDoc2(doc1: string, doc2: string) {
-    const ids = (await siyuan.getChildBlocks(doc1)).map(b => b.id);
-    await siyuan.moveBlocksAsChild(ids, doc2);
-}
-
-async function mergeIntoDoc2(doc1: string, doc2: string) {
-    const newAttrs = setDefaultAttr(await siyuan.getBlockAttrs(doc2));
-    const attrs = setDefaultAttr(await siyuan.getBlockAttrs(doc1));
-    delete newAttrs.updated;
-    delete newAttrs.id;
-    delete newAttrs.scroll;
-
-    const alias = [...newAttrs.alias.split(","), ...attrs.alias.split(","), attrs.name, attrs.title];
-    newAttrs.alias = alias.filter(i => i.length > 0).join(",");
-    if (!newAttrs.bookmark) {
-        newAttrs.bookmark = attrs.bookmark;
-    }
-    if (!newAttrs.memo) {
-        newAttrs.memo = attrs.memo;
-    } else {
-        if (attrs.memo) {
-            newAttrs.memo += "；" + attrs.memo;
-        }
-    }
-
-    for (const key in attrs) {
-        if (key.startsWith("custom-")) {
-            if (key == CUSTOM_RIFF_DECKS) continue;
-            if (!newAttrs[key]) {
-                newAttrs[key] = attrs[key];
-            }
-        }
-    }
-    return newAttrs;
-}
-
-function setDefaultAttr(attrs: AttrType) {
-    if (!attrs.alias) attrs.alias = "";
-    if (!attrs.name) attrs.name = "";
-    if (!attrs.title) attrs.title = "";
-    if (!attrs.memo) attrs.memo = "";
-    if (!attrs.bookmark) attrs.bookmark = "";
-    return attrs;
-}
 
 function getBlockAndInnerIDs(protyle: Protyle) {
     const range = protyle.getRange(protyle.protyle.element);

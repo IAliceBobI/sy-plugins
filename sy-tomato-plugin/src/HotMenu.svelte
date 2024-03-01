@@ -194,6 +194,22 @@ ${text}
         }
     }
 
+    async function mergeDoc() {
+        new DialogText(
+            "填入要被删除的文档的ID，文档里面的块ID也行，会最终得到文档ID",
+            "",
+            async (input: string) => {
+                input = input.trim();
+                if (input) {
+                    const docID = await siyuan.getDocIDByBlockID(input);
+                    if (docID) {
+                    }
+                }
+                destroy();
+            },
+        );
+    }
+
     async function moveContentHere() {
         new DialogText(
             "填入要被清空的文档的ID，文档里面的块ID也行，会最终得到文档ID",
@@ -203,11 +219,14 @@ ${text}
                 if (input) {
                     const docID = await siyuan.getDocIDByBlockID(input);
                     if (docID) {
-                        await moveAllContentHere(docID, anchorID);
+                        const ids = await moveAllContentHere(docID, anchorID);
+                        destroy();
+                        await siyuan.pushMsg(`移动了${ids.length}个块`);
                         events.protyleReload();
+                        return;
                     }
                 }
-                destroy();
+                await siyuan.pushMsg("啥也没有。");
             },
         );
     }
@@ -450,7 +469,7 @@ ${text}
                     <button
                         title="合并文档"
                         class="b3-button"
-                        on:click={copyExpandPrompt}>📃🈴</button
+                        on:click={mergeDoc}>📃🈴</button
                     >
                 </td>
             </tr>
