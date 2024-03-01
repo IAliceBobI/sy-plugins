@@ -23,6 +23,8 @@
         insertBackLinks,
     } from "./libs/bkUtils";
     import { gotoBookmark } from "./libs/bookmark";
+    import { DialogText } from "./libs/DialogText";
+    import { moveAllContentHere } from "./libs/docUtils";
 
     enum InsertPlace {
         here = "1#当前位置",
@@ -190,6 +192,24 @@ ${text}
             await navigator.clipboard.writeText(prompt.trim());
             destroy();
         }
+    }
+
+    async function moveContentHere() {
+        new DialogText(
+            "填入要被清空的文档的ID，文档里面的块ID也行，会最终得到文档ID",
+            "",
+            async (input: string) => {
+                input = input.trim();
+                if (input) {
+                    const docID = await siyuan.getDocIDByBlockID(input);
+                    if (docID) {
+                        await moveAllContentHere(docID, anchorID);
+                        events.protyleReload();
+                    }
+                }
+                destroy();
+            },
+        );
     }
 
     async function copyCompressPrompt(copy?: boolean) {
@@ -418,10 +438,23 @@ ${text}
                     >
                 </td>
             </tr>
-            <!-- <tr>
+            <tr>
                 <td>
-                    
+                    <button
+                        title="把文档内容移动到这里"
+                        class="b3-button"
+                        on:click={moveContentHere}>📃📩</button
+                    >
                 </td>
+                <td>
+                    <button
+                        title="合并文档"
+                        class="b3-button"
+                        on:click={copyExpandPrompt}>📃🈴</button
+                    >
+                </td>
+            </tr>
+            <!-- <tr>
                 <td>
                     <button
                         title="展开内容"
