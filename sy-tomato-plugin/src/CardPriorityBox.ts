@@ -332,9 +332,14 @@ class CardPriorityBox {
         return resumeCardsDeleteAttr(
             [...wysiwygElement.querySelectorAll(`[${CARD_PRIORITY_STOP}]`)]
                 .map((e: HTMLElement) => {
+                    let id = e.getAttribute(DATA_NODE_ID);
+                    if (!id) {
+                        const e1 = e.parentElement.querySelector(`.protyle-title.protyle-wysiwyg--attr[${DATA_NODE_ID}]`);
+                        id = e1.getAttribute(DATA_NODE_ID);
+                    }
                     return {
                         "custom-card-priority-stop": e.getAttribute(CARD_PRIORITY_STOP),
-                        id: e.getAttribute(DATA_NODE_ID)
+                        id,
                     } as AttrType;
                 }));
     }
@@ -360,6 +365,7 @@ class CardPriorityBox {
 }
 
 export async function resumeCard(blockIDs: string[], setDue = false) {
+    if (blockIDs.length == 0) return;
     const newAttrs = {} as AttrType;
     newAttrs["custom-card-priority-stop"] = "";
     newAttrs.bookmark = "";
@@ -393,7 +399,7 @@ async function resumeCardsDeleteAttr(attrList: AttrType[]) {
         }
         return false;
     })
-        .map(attrList => attrList.id);
+        .map(attrList => attrList.id).filter(i => !!i);
     return resumeCard(ids);
 }
 
