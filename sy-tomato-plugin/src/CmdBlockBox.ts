@@ -1,6 +1,6 @@
 import { Plugin, Protyle } from "siyuan";
 import "./index.scss";
-import { cleanDiv, getBlockDiv, getSyElement, siyuan } from "./libs/utils";
+import { getSyElement, siyuan } from "./libs/utils";
 import { BLOCK_REF, CUSTOM_RIFF_DECKS, DATA_ID, DATA_TYPE } from "./libs/gconst";
 
 const MERGEDOC = "合并两个文档";
@@ -24,7 +24,7 @@ class CmdBlockBox {
                     oldAttrs.title = "moved";
                     await siyuan.setBlockAttrs(idsInContent[0], oldAttrs);
                     await siyuan.setBlockAttrs(idsInContent[1], newAttrs);
-                    await moveAllContentToDoc2(protyle, idsInContent[0], idsInContent[1]);
+                    await moveAllContentToDoc2(idsInContent[0], idsInContent[1]);
                     await siyuan.flushTransaction();
                     await siyuan.transferBlockRef(idsInContent[0], idsInContent[1], false);
                     await siyuan.removeDocByID(idsInContent[0]);
@@ -48,13 +48,9 @@ class CmdBlockBox {
 
 export const cmdBlockBox = new CmdBlockBox();
 
-async function moveAllContentToDoc2(protyle: Protyle, doc1: string, doc2: string) {
-    const divs = await Promise.all((await siyuan.getChildBlocks(doc1)).map(b => getBlockDiv(b.id)));
-    for (const { div } of divs) {
-        await cleanDiv(div, false, false);
-        const md = protyle.protyle.lute.BlockDOM2Md(div.outerHTML).trim();
-        await siyuan.appendBlock(md, doc2);
-    }
+async function moveAllContentToDoc2(doc1: string, doc2: string) {
+    const ids = (await siyuan.getChildBlocks(doc1)).map(b => b.id);
+    await siyuan.moveBlocksAsChild(ids, doc2);
 }
 
 async function mergeIntoDoc2(doc1: string, doc2: string) {
