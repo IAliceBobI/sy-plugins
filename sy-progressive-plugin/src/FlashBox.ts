@@ -178,7 +178,7 @@ class FlashBox {
         if (!docID) return;
         let { bookID } = await getBookID(docID);
         const srcDocAttrs = await siyuan.getBlockAttrs(docID);
-        const srcPriority = srcDocAttrs["custom-card-priority"] ?? "";
+        const srcPriority = srcDocAttrs["custom-card-priority"];
         const { cardID, markdown } = this.createList(divs, t, srcPriority);
         if (path) {
             const v = getDailyAttrValue();
@@ -229,7 +229,7 @@ class FlashBox {
         }
         const attrList = [];
         attrList.push(`id="${cardID}"`);
-        attrList.push(`${gconst.CARD_PRIORITY}="${srcPriority}"`);
+        if (srcPriority) attrList.push(`${gconst.CARD_PRIORITY}="${srcPriority}"`);
         if (originPath) {
             attrList.push(`${gconst.ORIGIN_HPATH}="${originPath}"`);
         }

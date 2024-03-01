@@ -633,6 +633,24 @@ export const siyuan = {
     async insertBlockAsChildOf(data: string, parentID: string, dataType = "markdown") {
         return siyuan.call("/api/block/insertBlock", { data, dataType, parentID });
     },
+    async insertBlocksAsChildOf(ids: string[], parentID: string) {
+        return siyuan.transactions(ids.reverse().map(id => {
+            const op = {} as IOperation;
+            op.action = "insert";
+            op.id = id;
+            op.parentID = parentID;
+            return op;
+        }));
+    },
+    async appendBlocks(ids: string[], parentID: string) {
+        return siyuan.transactions(ids.reverse().map(id => {
+            const op = {} as IOperation;
+            op.action = "append";
+            op.id = id;
+            op.parentID = parentID;
+            return op;
+        }));
+    },
     async appendBlock(data: string, parentID: string, dataType = "markdown") {
         return siyuan.call("/api/block/appendBlock", { data, dataType, parentID });
     },
