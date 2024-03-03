@@ -3,6 +3,8 @@
     import { siyuan } from "./libs/utils";
     import { onDestroy, onMount } from "svelte";
     import { escOnElement } from "./libs/keyboard";
+    import { doStopCards } from "./libs/cardUtils";
+    import { cardPriorityBox } from "./CardPriorityBox";
 
     export let dialog: Dialog;
     export let dialogDiv: HTMLElement;
@@ -23,16 +25,33 @@
         dialog.destroy();
     }
 
-    async function deleteCard() {
-        await siyuan.removeRiffCards([id]);
+    function skip() {
         const btnSkip = document.body.querySelector(
             'button[data-type="-3"]',
         ) as HTMLButtonElement;
-        btnSkip.click();
+        if (btnSkip) btnSkip.click();
+    }
+
+    async function deleteCard() {
+        await siyuan.removeRiffCards([id]);
+        skip();
         destroy();
     }
 
-    async function dayCard() {}
+    async function delayRestCards() {
+        const blocks = await cardPriorityBox.getRestCards();
+        await doStopCards(String(delayDays), blocks);
+        destroy();
+        escOnElement(dialogDiv);
+    }
+
+    async function delayCard() {
+        await doStopCards(String(delayDays), [
+            { ial: { id } },
+        ] as GetCardRetBlock[]);
+        skip();
+        destroy();
+    }
 
     async function gotoCard() {
         destroy();
@@ -76,16 +95,23 @@
     <div class="fn__hr"></div>
     <div class="fn__hr"></div>
     <div>
-        <label title="推迟当前闪卡">
-            <input bind:value={delayDays} type="number" class="b3-text-field" />
+        <label title="推迟当前闪卡{hours.toFixed(1)}小时">
+            <input
+                min="0"
+                step="0.2"
+                bind:value={delayDays}
+                type="number"
+                class="b3-text-field"
+            />
             天({hours.toFixed(1)}小时)
-            <button class="b3-button b3-button--outline" on:click={dayCard}
+            <button class="b3-button b3-button--outline" on:click={delayCard}
                 >📅推迟</button
             >
         </label>
-        <label title="推迟没处理过的全部闪卡">
-            <button class="b3-button b3-button--outline" on:click={dayCard}
-                >🌊📅推迟余下闪卡</button
+        <label title="推迟没处理过的全部闪卡{hours.toFixed(1)}小时">
+            <button
+                class="b3-button b3-button--outline"
+                on:click={delayRestCards}>🌊📅推迟余下闪卡</button
             >
         </label>
     </div>

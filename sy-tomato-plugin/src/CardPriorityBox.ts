@@ -5,6 +5,7 @@ import { CARD_PRIORITY_STOP, CUSTOM_RIFF_DECKS, DATA_NODE_ID, TEMP_CONTENT, TOMA
 import { DialogText } from "./libs/DialogText";
 import { EventType, events } from "./libs/Events";
 import CardPriorityBar from "./CardPriorityBar.svelte";
+import { doStopCards } from "./libs/cardUtils";
 
 export const CacheMinutes = 5;
 
@@ -65,7 +66,7 @@ class CardPriorityBox {
                     iconHTML: "🚗🛑",
                     label: "推迟当前所有未复习完成的闪卡",
                     click: async () => {
-                        await this.autoStopRestCards();
+                        await this.stopCards(await this.getRestCards());
                     },
                 });
             }
@@ -122,7 +123,7 @@ class CardPriorityBox {
         }
     }
 
-    async autoStopRestCards() {
+    async getRestCards() {
         const blocks = (await siyuan.getRiffDueCards()).cards.filter(due => {
             const oldDue = this.beforeReview.get(due.blockID);
             if (oldDue) {
@@ -134,7 +135,7 @@ class CardPriorityBox {
         }).map(due => {
             return { ial: { id: due.blockID } } as unknown as GetCardRetBlock;
         });
-        await this.stopCards(blocks);
+        return blocks;
     }
 
     blockIconEvent(detail: IEventBusMap["click-blockicon"]) {
@@ -160,7 +161,7 @@ class CardPriorityBox {
                 iconHTML: "🚗🛑",
                 label: "推迟当前所有未复习完成的闪卡",
                 click: async () => {
-                    await this.autoStopRestCards();
+                    await this.stopCards(await this.getRestCards());
                 },
             });
         }
@@ -184,28 +185,7 @@ class CardPriorityBox {
             `准备推迟${blocks.length}个闪卡，请先设置推迟天数`,
             "2",
             async (days: string) => {
-                if (isValidNumber(Number(days))) {
-                    let datetimeStr = await siyuan.currentTime(Number(days) * 24 * 60 * 60);
-                    datetimeStr = timeUtil.makesureDateTimeFormat(datetimeStr);
-                    if (datetimeStr) {
-                        const newAttrs = {} as AttrType;
-                        newAttrs["custom-card-priority-stop"] = datetimeStr;
-                        newAttrs.bookmark = "🛑 Suspended Cards";
-                        await siyuan.batchSetBlockAttrs(blocks.map(b => {
-                            return { id: b.ial.id, attrs: newAttrs };
-                        }));
-                        await siyuan.batchSetRiffCardsDueTimeByBlockID(blocks.map(b => {
-                            return {
-                                id: b.ial.id,
-                                due: datetimeStr.replace(/[- :]/g, ""),
-                            };
-                        }));
-                        setTimeout(() => {
-                            events.protyleReload();
-                        }, 500);
-                        await siyuan.pushMsg(`推迟${blocks.length}个闪卡${days}天`);
-                    }
-                }
+                await doStopCards(days, blocks);
             },
         );
     }
