@@ -29,7 +29,11 @@
         const btnSkip = document.body.querySelector(
             'button[data-type="-3"]',
         ) as HTMLButtonElement;
-        if (btnSkip) btnSkip.click();
+        if (btnSkip) {
+            btnSkip.click();
+            return true;
+        }
+        return false;
     }
 
     async function deleteCard() {

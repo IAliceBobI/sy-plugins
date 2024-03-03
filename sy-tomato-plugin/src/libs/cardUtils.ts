@@ -15,6 +15,7 @@ export async function removeDocCards(docID: string) {
 export async function doStopCards(days: string, blocks: GetCardRetBlock[]) {
     if (isValidNumber(Number(days))) {
         let datetimeStr = await siyuan.currentTime(Number(days) * 24 * 60 * 60);
+        const datetimeStrDue = await siyuan.currentTime((Number(days) - 1) * 24 * 60 * 60); // TODO: XX
         datetimeStr = timeUtil.makesureDateTimeFormat(datetimeStr);
         if (datetimeStr) {
             const newAttrs = {} as AttrType;
@@ -23,10 +24,12 @@ export async function doStopCards(days: string, blocks: GetCardRetBlock[]) {
             await siyuan.batchSetBlockAttrs(blocks.map(b => {
                 return { id: b.ial.id, attrs: newAttrs };
             }));
+            const due = datetimeStrDue.replace(/[- :]/g, "");
+            console.log(blocks, due);
             await siyuan.batchSetRiffCardsDueTimeByBlockID(blocks.map(b => {
                 return {
                     id: b.ial.id,
-                    due: datetimeStr.replace(/[- :]/g, ""),
+                    due,
                 };
             }));
             setTimeout(() => {

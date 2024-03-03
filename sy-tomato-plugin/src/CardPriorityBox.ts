@@ -353,7 +353,7 @@ export async function resumeCard(blockIDs: string[], setDue = false) {
         return { id: b, attrs: newAttrs };
     }));
     if (setDue) {
-        let datetimeStr = await siyuan.currentTime(-60 * 60 * 24);
+        let datetimeStr = await siyuan.currentTime(-60 * 60 * 24); // TODO: XX
         datetimeStr = timeUtil.makesureDateTimeFormat(datetimeStr);
         await siyuan.batchSetRiffCardsDueTimeByBlockID(blockIDs.map((b) => {
             return {
