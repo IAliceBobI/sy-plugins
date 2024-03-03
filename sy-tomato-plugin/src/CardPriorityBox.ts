@@ -353,12 +353,11 @@ export async function resumeCard(blockIDs: string[], setDue = false) {
         return { id: b, attrs: newAttrs };
     }));
     if (setDue) {
-        let datetimeStr = await siyuan.currentTime(-60 * 60 * 24); // TODO: XX
-        datetimeStr = timeUtil.makesureDateTimeFormat(datetimeStr);
+        const due = timeUtil.getYYYYMMDDHHmmssPlus0(timeUtil.nowts());
         await siyuan.batchSetRiffCardsDueTimeByBlockID(blockIDs.map((b) => {
             return {
                 id: b,
-                due: datetimeStr.replace(/[- :]/g, ""),
+                due,
             };
         }));
     }

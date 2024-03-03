@@ -9,7 +9,7 @@ import { backLinkBottomBox } from "./BackLinkBottomBox";
 import { cardBox } from "./CardBox";
 import { EventType, events } from "@/libs/Events";
 import { STORAGE_SETTINGS } from "./constants";
-import { siyuan } from "@/libs/utils";
+import * as utils from "@/libs/utils";
 import { imgOverlayBox } from "./ImgOverlayBox";
 import { dailyNoteBox } from "./DailyNoteBox";
 import { cardPriorityBox } from "./CardPriorityBox";
@@ -25,7 +25,7 @@ export default class ThePlugin extends Plugin {
     private blockIconEventBindThis = this.blockIconEvent.bind(this);
 
     async onload() {
-        ThePlugin.GLOBAL_THIS["siyuan_zZmqus5PtYRi"] = siyuan;
+        ThePlugin.GLOBAL_THIS["utils_zZmqus5PtYRi"] = utils;
         this.addIcons(ICONS);
         events.onload(this);
         this.eventBus.on(EventType.click_blockicon, this.blockIconEventBindThis);

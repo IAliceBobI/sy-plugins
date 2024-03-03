@@ -14,28 +14,23 @@ export async function removeDocCards(docID: string) {
 
 export async function doStopCards(days: string, blocks: GetCardRetBlock[]) {
     if (isValidNumber(Number(days))) {
-        let datetimeStr = await siyuan.currentTime(Number(days) * 24 * 60 * 60);
-        const datetimeStrDue = await siyuan.currentTime((Number(days) - 1) * 24 * 60 * 60); // TODO: XX
-        datetimeStr = timeUtil.makesureDateTimeFormat(datetimeStr);
-        if (datetimeStr) {
-            const newAttrs = {} as AttrType;
-            newAttrs["custom-card-priority-stop"] = datetimeStr;
-            newAttrs.bookmark = "🛑 Suspended Cards";
-            await siyuan.batchSetBlockAttrs(blocks.map(b => {
-                return { id: b.ial.id, attrs: newAttrs };
-            }));
-            const due = datetimeStrDue.replace(/[- :]/g, "");
-            console.log(blocks, due);
-            await siyuan.batchSetRiffCardsDueTimeByBlockID(blocks.map(b => {
-                return {
-                    id: b.ial.id,
-                    due,
-                };
-            }));
-            setTimeout(() => {
-                events.protyleReload();
-            }, 500);
-            await siyuan.pushMsg(`推迟${blocks.length}个闪卡${days}天`);
-        }
+        const datetimeStr = timeUtil.dateFormat(timeUtil.now(Number(days) * 24 * 60 * 60));
+        const due = timeUtil.getYYYYMMDDHHmmssPlus0(timeUtil.nowts(Number(days) * 24 * 60 * 60));
+        const newAttrs = {} as AttrType;
+        newAttrs["custom-card-priority-stop"] = datetimeStr;
+        newAttrs.bookmark = "🛑 Suspended Cards";
+        await siyuan.batchSetBlockAttrs(blocks.map(b => {
+            return { id: b.ial.id, attrs: newAttrs };
+        }));
+        await siyuan.batchSetRiffCardsDueTimeByBlockID(blocks.map(b => {
+            return {
+                id: b.ial.id,
+                due,
+            };
+        }));
+        setTimeout(() => {
+            events.protyleReload();
+        }, 500);
+        await siyuan.pushMsg(`推迟${blocks.length}个闪卡${days}天`);
     }
 }

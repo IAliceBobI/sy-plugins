@@ -1,6 +1,7 @@
 import { App, Constants, IOperation, Lute, Protyle, fetchSyncPost, openTab } from "siyuan";
 import { v4 as uuid } from "uuid";
 import * as gconst from "./gconst";
+import * as moment from "moment-timezone";
 
 export function getRandFloat0tox(x: number) {
     return Math.random() * x;
@@ -267,26 +268,35 @@ export function isValidNumber(num: number) {
 }
 
 export const timeUtil = {
+    nowts(secs = 0) {
+        return timeUtil.now(secs).getTime() / 1000;
+    },
+    now(secs = 0) {
+        const ts = new Date().getTime() + secs * 1000;
+        return new Date(ts);
+    },
+    getYYYYMMDDHHmmssPlus0(myTimestamp: number) {
+        // let myDate = moment.unix(myTimestamp).tz("America/Los_Angeles"); 
+        const myDate = moment.unix(myTimestamp).utcOffset("+0000");
+        return myDate.format("YYYYMMDDHHmmss");
+    },
+    getYYYYMMDDHHmmssPlus8(myTimestamp: number) {
+        const myDate = moment.unix(myTimestamp).utcOffset("+0800");
+        return myDate.format("YYYYMMDDHHmmss");
+    },
     dateFormat(date: Date) {
-        const year: any = date.getFullYear();
-        let month: any = date.getMonth() + 1;
-        let day: any = date.getDate();
-        let hours: any = date.getHours();
-        let minutes: any = date.getMinutes();
-        let seconds: any = date.getSeconds();
-        month = (month < 10 ? "0" : "") + month;
-        day = (day < 10 ? "0" : "") + day;
-        hours = (hours < 10 ? "0" : "") + hours;
-        minutes = (minutes < 10 ? "0" : "") + minutes;
-        seconds = (seconds < 10 ? "0" : "") + seconds;
+        const year = date.getFullYear().toString();
+        const month = (date.getMonth() + 1).toString().padStart(2, "0"); // Month value needs +1 as it starts from 0.
+        const day = date.getDate().toString().padStart(2, "0");
+        const hours = date.getHours().toString().padStart(2, "0");
+        const minutes = date.getMinutes().toString().padStart(2, "0");
+        const seconds = date.getSeconds().toString().padStart(2, "0");
         return year + "-" + month + "-" + day + " " + hours + ":" + minutes + ":" + seconds;
     },
     dateFormatDay(date: Date) {
-        const year: any = date.getFullYear();
-        let month: any = date.getMonth() + 1;
-        let day: any = date.getDate();
-        month = (month < 10 ? "0" : "") + month;
-        day = (day < 10 ? "0" : "") + day;
+        const year = date.getFullYear().toString();
+        const month = (date.getMonth() + 1).toString().padStart(2, "0");
+        const day = date.getDate().toString().padStart(2, "0");
         return year + "-" + month + "-" + day;
     },
     dateFromYYYYMMDDHHmmss(date: string) {
