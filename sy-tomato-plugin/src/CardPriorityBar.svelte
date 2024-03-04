@@ -13,6 +13,9 @@
 
     export let cardElement: HTMLElement;
     export let textContent: string;
+    export let enableDeleteBtn = true;
+    export let enableDelayBtn = true;
+    export let callback: Func = () => {};
 
     let priText: HTMLElement;
     let controlAttr: AttrType;
@@ -50,6 +53,7 @@
             (p) => {
                 priority = p;
                 cardElement.setAttribute(CARD_PRIORITY, p);
+                callback();
             },
         );
     }
@@ -62,6 +66,7 @@
             (p) => {
                 priority = p;
                 cardElement.setAttribute(CARD_PRIORITY, p);
+                callback();
             },
         );
     }
@@ -88,6 +93,7 @@
             (p) => {
                 priority = p;
                 cardElement.setAttribute(CARD_PRIORITY, p);
+                callback();
             },
         );
     }
@@ -100,6 +106,7 @@
             (p) => {
                 priority = p;
                 cardElement.setAttribute(CARD_PRIORITY, p);
+                callback();
             },
         );
     }
@@ -108,8 +115,10 @@
 <!-- https://learn.svelte.dev/tutorial/if-blocks -->
 <div {...controlAttr} class="container">
     <div>
-        <button title="取消制卡" on:click={removeCard}>🚫</button>
-        {@html whiteSpace}
+        {#if enableDeleteBtn}
+            <button title="取消制卡" on:click={removeCard}>🚫</button>
+            {@html whiteSpace}
+        {/if}
         <button title="闪卡优先级-1" on:click={subOne}>➖</button>
         <button
             title="点击修改优先级"
@@ -118,8 +127,10 @@
         >
         <button title="闪卡优先级+1" on:click={addOne}>➕</button>
         {@html whiteSpace}
-        <button title="推迟/取消推迟" on:click={stopCard}>🛑</button>
-        {@html whiteSpace}
+        {#if enableDelayBtn}
+            <button title="推迟/取消推迟" on:click={stopCard}>🛑</button>
+            {@html whiteSpace}
+        {/if}
         <input
             title="拖动闪卡优先级"
             type="range"

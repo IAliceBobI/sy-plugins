@@ -1,11 +1,15 @@
 <script lang="ts">
-    import { Dialog, confirm, openTab, Plugin } from "siyuan";
+    import { Dialog, confirm, openTab, Plugin, IProtyle } from "siyuan";
     import { siyuan } from "./libs/utils";
     import { onDestroy, onMount } from "svelte";
     import { escOnElement } from "./libs/keyboard";
     import { doStopCards, pressSkip } from "./libs/cardUtils";
     import { cardPriorityBox } from "./CardPriorityBox";
+    import CardPriorityBar from "./CardPriorityBar.svelte";
+    import { CUSTOM_RIFF_DECKS, DATA_NODE_ID } from "./libs/gconst";
+    import { events } from "./libs/Events";
 
+    export let protyle: IProtyle;
     export let dialog: Dialog;
     export let dialogDiv: HTMLElement;
     export let plugin: Plugin;
@@ -14,9 +18,13 @@
 
     let delayDays: number;
     $: hours = delayDays * 24;
+    let cardElement: HTMLElement;
 
     onMount(() => {
         delayDays = 0.1;
+        cardElement = protyle.element.querySelector(
+            `[${DATA_NODE_ID}="${id}"][${CUSTOM_RIFF_DECKS}]`,
+        );
     });
 
     onDestroy(destroy);
@@ -89,12 +97,29 @@
     <div class="fn__hr"></div>
     <div class="fn__hr"></div>
     <div class="fn__hr"></div>
+    {#if cardElement}
+        <div title="数值大的优先复习">
+            <CardPriorityBar
+                {cardElement}
+                textContent={cardElement.textContent}
+                enableDelayBtn={false}
+                enableDeleteBtn={false}
+                callback={() => {
+                    events.protyleReload();
+                }}
+            ></CardPriorityBar>
+        </div>
+    {/if}
+    <div class="fn__hr"></div>
+    <div class="fn__hr"></div>
+    <div class="fn__hr"></div>
+    <div class="fn__hr"></div>
     <div>
         <label>
             <input
                 title="使用鼠标滚轮来调整"
                 min="0"
-                step="0.2"
+                step="0.1"
                 bind:value={delayDays}
                 type="number"
                 class="b3-text-field"

@@ -77,7 +77,7 @@ class CardBox {
                         pressSkip();
                     };
                     this.initSkipBtn();
-                    this.initSettingsBtn(msg, id);
+                    this.initSettingsBtn(msg, id, protyle);
                 } else {
                     this.delCardFunc = null;
                     this.fastSkipFunc = null;
@@ -111,7 +111,7 @@ class CardBox {
         }
     }
 
-    private initSettingsBtn(msg: string, id: string) {
+    private initSettingsBtn(msg: string, id: string, protyle: IProtyle) {
         const btnPrevious = document.body.querySelector(
             'button[data-type="-3"]'
         ) as HTMLButtonElement;
@@ -136,6 +136,7 @@ class CardBox {
                 new CardBoxDel({
                     target: dialog.element.querySelector("#" + btnId),
                     props: {
+                        protyle,
                         dialog,
                         plugin: this.plugin,
                         dialogDiv: document.querySelector(".b3-dialog__container"),
