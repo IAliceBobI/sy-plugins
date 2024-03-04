@@ -457,6 +457,20 @@ ${text}
                         }}>🕊️🔖</button
                     >
                 </td>
+                <td>
+                    <button
+                        title="删除本文档的阅读点"
+                        class="b3-button"
+                        on:click={async () => {
+                            await gotoBookmark(
+                                docID,
+                                hotMenuBox.plugin.app,
+                                true,
+                            );
+                            destroy();
+                        }}>🗑️🔖</button
+                    >
+                </td>
             </tr>
             <tr>
                 <td>
