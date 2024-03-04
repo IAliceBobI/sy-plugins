@@ -37,19 +37,6 @@ export class SplitSentence {
         });
     }
 
-    async split() {
-        const msg = "【尝试分片】请等待索引建立……";
-        {
-            const rows = await siyuan.sql(`select id from blocks where ial like '%${PROG_ORIGIN_TEXT}="1"%' and root_id="${this.noteID}" limit 1`);
-            if (rows.length == 0) {
-                await siyuan.pushMsg(msg);
-                return false;
-            }
-        }
-        const chilrenIDs = (await siyuan.getChildBlocks(this.noteID)).map(c => c.id);
-        return this.splitByIDs(chilrenIDs, ` and ial like '%${PROG_ORIGIN_TEXT}="1"%'`);
-    }
-
     async splitByIDs(chilrenIDs: string[], like = "") {
         const bookInfo = await prog.storage.booksInfo(this.bookID);
         const rows = (await Promise.all(chilrenIDs

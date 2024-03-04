@@ -492,15 +492,24 @@ class Progressive {
                 await this.openContentsLock(bookID);
                 break;
             case HtmlCBType.splitByPunctuations: {
-                await this.splitAndClean(bookID, noteID, "p");
+                await help.cleanNote(noteID);
+                const index = await this.storage.loadBookIndexIfNeeded(bookID);
+                const piece = index[point] ?? [];
+                await this.splitAndInsert(bookID, noteID, "p", piece);
                 break;
             }
             case HtmlCBType.splitByPunctuationsList: {
-                await this.splitAndClean(bookID, noteID, "i");
+                await help.cleanNote(noteID);
+                const index = await this.storage.loadBookIndexIfNeeded(bookID);
+                const piece = index[point] ?? [];
+                await this.splitAndInsert(bookID, noteID, "i", piece);
                 break;
             }
             case HtmlCBType.splitByPunctuationsListCheck: {
-                await this.splitAndClean(bookID, noteID, "t");
+                await help.cleanNote(noteID);
+                const index = await this.storage.loadBookIndexIfNeeded(bookID);
+                const piece = index[point] ?? [];
+                await this.splitAndInsert(bookID, noteID, "t", piece);
                 break;
             }
             default:
@@ -508,15 +517,12 @@ class Progressive {
         }
     }
 
-    private async splitAndClean(bookID: string, noteID: string, t: AsList, ids?: string[]) {
+    private async splitAndInsert(bookID: string, noteID: string, t: AsList, ids: string[]) {
         const s = new SplitSentence(bookID, this.plugin, noteID, t);
         if (ids?.length > 0) {
             await s.splitByIDs(ids);
-        } else {
-            await s.split();
-            await help.cleanNote(noteID);
+            await s.insert(false);
         }
-        await s.insert(false);
     }
 
     private async addAndClose(tab?: ITab) {
@@ -553,11 +559,11 @@ class Progressive {
         }
 
         if (info.autoSplitSentenceP) {
-            await this.splitAndClean(bookID, noteID, "p", piece);
+            await this.splitAndInsert(bookID, noteID, "p", piece);
         } else if (info.autoSplitSentenceI) {
-            await this.splitAndClean(bookID, noteID, "i", piece);
+            await this.splitAndInsert(bookID, noteID, "i", piece);
         } else if (info.autoSplitSentenceT) {
-            await this.splitAndClean(bookID, noteID, "t", piece);
+            await this.splitAndInsert(bookID, noteID, "t", piece);
         } else {
             const idx: { i: number } = { i: 1 };
             const divs = await Promise.all(piece.map(id => utils.getBlockDiv(id)));
