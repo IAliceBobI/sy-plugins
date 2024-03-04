@@ -4,6 +4,7 @@ import "./index.scss";
 import { EventType, events } from "@/libs/Events";
 import CardBoxDel from "./CardBoxDel.svelte";
 import { pressSkip, pressSpace } from "./libs/cardUtils";
+import { SPACE, WEB_SPACE } from "./libs/gconst";
 
 class CardBox {
     private plugin: Plugin;
@@ -104,7 +105,7 @@ class CardBox {
             nextBtn.style.width = btnPrevious.style.width;
             nextBtn.style.minWidth = btnPrevious.style.minWidth;
             nextBtn.style.display = btnPrevious.style.display;
-            nextBtn.innerHTML = 'Skip<svg><use xlink:href="#iconRight"></use></svg>';
+            nextBtn.innerHTML = `Skip${WEB_SPACE}<svg><use xlink:href="#iconRight"></use></svg>`;
             nextBtn.addEventListener("click", () => {
                 if (this.fastSkipFunc) this.fastSkipFunc();
             });
