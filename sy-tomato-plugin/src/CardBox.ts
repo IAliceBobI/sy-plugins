@@ -60,73 +60,94 @@ class CardBox {
                 if (!protyle) return;
                 if (protyle?.element?.classList?.contains("card__block")) {
                     const id = protyle.block.id;
+                    const msg = `原文ID：${id}<br>请确认原文内容：<br>` + protyle.contentElement.textContent.slice(0, 50);
                     if (!id) {
                         this.delCardFunc = null;
                         this.fastSkipFunc = null;
                         return;
                     }
-                    {
-                        const btnSpace = document.body.querySelector(
-                            'button[data-type="-1"]',
-                        ) as HTMLButtonElement;
-                        if (btnSpace) {
-                            btnSpace.title = "不看答案前\n取消制卡ctrl+9\n跳过卡ctrl+8";
-                        }
-                    }
-                    Array.from(document.querySelectorAll(".fn__flex.card__action")).forEach(bottomBtns => {
-                        if (!bottomBtns?.parentElement) {
-                            this.delCardFunc = null;
-                            this.fastSkipFunc = null;
-                            return;
-                        }
-                        bottomBtns.parentElement.querySelectorAll("[TomatoCardDelBtn]").forEach(e => e?.parentElement?.removeChild(e));
-                        const div = bottomBtns.appendChild(document.createElement("div")) as HTMLDivElement;
-                        div.setAttribute("TomatoCardDelBtn", "1");
-                        div.appendChild(document.createElement("span")) as HTMLSpanElement;
-                        const btn = div.appendChild(document.createElement("button")) as HTMLButtonElement;
-                        btn.innerHTML = "<div>⚙️</div> 更多";
-                        btn.title = "删卡、定位、推迟";
-                        btn.setAttribute("data-type", "-100");
-                        btn.setAttribute("aria-label", "不看答案前\n取消制卡ctrl+9\n跳过卡ctrl+8");
-                        btn.classList.add("b3-button");
-                        btn.classList.add("b3-button--error");
-                        btn.classList.add("b3-tooltips__n");
-                        btn.classList.add("b3-tooltips");
-                        const msg = `原文ID：${id}<br>请确认原文内容：<br>` + protyle.contentElement.textContent.slice(0, 50);
-                        this.delCardFunc = async () => {
-                            await siyuan.removeRiffCards([id]);
-                            if (pressSpace()) await sleep(300);
-                            pressSkip();
-                            await siyuan.pushMsg(msg);
-                        };
-                        this.fastSkipFunc = async () => {
-                            if (pressSpace()) await sleep(300);
-                            pressSkip();
-                        };
-                        btn.addEventListener("click", () => {
-                            const btnId = newID();
-                            const dialog = new Dialog({
-                                title: btn.title,
-                                content: `<div id="${btnId}"></div>`,
-                            });
-                            new CardBoxDel({
-                                target: dialog.element.querySelector("#" + btnId),
-                                props: {
-                                    dialog,
-                                    plugin: this.plugin,
-                                    dialogDiv: document.querySelector(".b3-dialog__container"),
-                                    msg,
-                                    id,
-                                }
-                            });
-                        });
-                    });
+                    this.delCardFunc = async () => {
+                        await siyuan.removeRiffCards([id]);
+                        if (pressSpace()) await sleep(300);
+                        pressSkip();
+                        await siyuan.pushMsg(msg);
+                    };
+                    this.fastSkipFunc = async () => {
+                        if (pressSpace()) await sleep(300);
+                        pressSkip();
+                    };
+                    this.initSkipBtn();
+                    this.initSettingsBtn(msg, id);
                 } else {
                     this.delCardFunc = null;
                     this.fastSkipFunc = null;
                 }
             }
         });
+    }
+
+    private initSkipBtn() {
+        const btnPrevious = document.body.querySelector(
+            'button[data-type="-2"]'
+        ) as HTMLButtonElement;
+        if (btnPrevious) {
+            btnPrevious.parentElement.querySelectorAll("[TomatoCardSkipBtn]").forEach(e => e?.parentElement?.removeChild(e));
+            const nextBtn = btnPrevious.insertAdjacentElement("afterend", document.createElement("button")) as HTMLButtonElement;
+
+            const span = btnPrevious.insertAdjacentElement("afterend", document.createElement("span"));
+            span.classList.add("fn__space");
+            span.setAttribute("TomatoCardSkipBtn", "1");
+
+            nextBtn.title = "不看答案前\n取消制卡ctrl+9\n跳过卡ctrl+8";
+            nextBtn.setAttribute("TomatoCardSkipBtn", "1");
+            nextBtn.classList.add(...btnPrevious.classList);
+            nextBtn.style.width = btnPrevious.style.width;
+            nextBtn.style.minWidth = btnPrevious.style.minWidth;
+            nextBtn.style.display = btnPrevious.style.display;
+            nextBtn.innerHTML = 'Skip<svg><use xlink:href="#iconRight"></use></svg>';
+            nextBtn.addEventListener("click", () => {
+                if (this.fastSkipFunc) this.fastSkipFunc();
+            });
+        }
+    }
+
+    private initSettingsBtn(msg: string, id: string) {
+        const btnPrevious = document.body.querySelector(
+            'button[data-type="-3"]'
+        ) as HTMLButtonElement;
+        const container = btnPrevious?.parentElement?.parentElement;
+        if (container) {
+            container.querySelectorAll("[TomatoCardDelBtn]").forEach(e => e?.parentElement?.removeChild(e));
+            const div = container.appendChild(document.createElement("div")) as HTMLDivElement;
+            div.setAttribute("TomatoCardDelBtn", "1");
+            div.appendChild(document.createElement("span")) as HTMLSpanElement;
+            const btn = div.appendChild(document.createElement("button")) as HTMLButtonElement;
+            btn.innerHTML = "<div>⚙️</div> 设置";
+            btn.title = "删卡、定位、推迟";
+            btn.setAttribute("data-type", "-100");
+            btn.setAttribute("aria-label", "不看答案前\n取消制卡ctrl+9\n跳过卡ctrl+8");
+            btn.classList.add("b3-button");
+            btn.classList.add("b3-button--error");
+            btn.classList.add("b3-tooltips__n");
+            btn.classList.add("b3-tooltips");
+            btn.addEventListener("click", () => {
+                const btnId = newID();
+                const dialog = new Dialog({
+                    title: btn.title,
+                    content: `<div id="${btnId}"></div>`,
+                });
+                new CardBoxDel({
+                    target: dialog.element.querySelector("#" + btnId),
+                    props: {
+                        dialog,
+                        plugin: this.plugin,
+                        dialogDiv: document.querySelector(".b3-dialog__container"),
+                        msg,
+                        id,
+                    }
+                });
+            });
+        }
     }
 }
 
