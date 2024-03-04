@@ -126,10 +126,7 @@ class CardBox {
             btn.title = "删卡、定位、推迟";
             btn.setAttribute("data-type", "-100");
             btn.setAttribute("aria-label", "不看答案前\n取消制卡ctrl+9\n跳过卡ctrl+8");
-            btn.classList.add("b3-button");
-            btn.classList.add("b3-button--error");
-            btn.classList.add("b3-tooltips__n");
-            btn.classList.add("b3-tooltips");
+            btn.classList.add(...btnPrevious.classList);
             btn.addEventListener("click", () => {
                 const btnId = newID();
                 const dialog = new Dialog({
