@@ -693,16 +693,6 @@ export const siyuan = {
         }
         return total;
     },
-    async getTreeRiffCardsMap(docID: string) {
-        return (await siyuan.getTreeRiffCardsAll(docID)).reduce((m, b) => {
-            const c = b.riffCard;
-            if (c?.due) {
-                c.due = timeUtil.dateFormat(new Date(c.due));
-                m.set(b.id, c);
-            }
-            return m;
-        }, new Map<string, RiffCard>());
-    },
     async getTreeRiffCards(id: string, page: number): Promise<GetCardRet> {
         return siyuan.call("/api/riff/getTreeRiffCards", { id, page });
     },
@@ -716,7 +706,13 @@ export const siyuan = {
         return siyuan.call("/api/riff/getRiffCards", { "id": deckID, page, pageSize });
     },
     async batchSetRiffCardsDueTimeByBlockID(cardDues: { id: string, due: string }[]) {
-        const all = await siyuan.getRiffCardsAll(5000);
+        let all = await siyuanCache.getRiffCardsAll(365 * 24 * 60 * 60 * 1000, 5000);
+        for (const { id } of cardDues) {
+            if (!all.has(id)) {
+                all = await siyuanCache.getRiffCardsAll(-1, 5000);
+                break;
+            }
+        }
         cardDues = cardDues.map(block => {
             return all.get(block.id)?.map(card => {
                 return { id: card.riffCardID, due: block.due };
@@ -932,9 +928,10 @@ export const siyuanCache = {
     sqlOne: createCache(siyuan.sqlOne),
     sql: createCache(siyuan.sql),
     getBlockAttrs: createCache(siyuan.getBlockAttrs),
-    getTreeRiffCardsMap: createCache(siyuan.getTreeRiffCardsMap),
     getBlockDOM: createCache(siyuan.getBlockDOM),
     getBlockDiv: createCache(getBlockDiv),
+    getRiffCardsAll: createCache(siyuan.getRiffCardsAll),
+    getTreeRiffCardsAll: createCache(siyuan.getTreeRiffCardsAll),
 };
 
 export function createCache

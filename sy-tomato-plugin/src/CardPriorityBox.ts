@@ -1,17 +1,14 @@
 import { ICardData, IEventBusMap, IProtyle, Plugin } from "siyuan";
 import "./index.scss";
-import { getID, isCardUI, isValidNumber, siyuan, siyuanCache, timeUtil } from "./libs/utils";
+import { getID, isCardUI, isValidNumber, siyuan, timeUtil } from "./libs/utils";
 import { CARD_PRIORITY_STOP, CUSTOM_RIFF_DECKS, DATA_NODE_ID, TEMP_CONTENT, TOMATO_CONTROL_ELEMENT } from "./libs/gconst";
 import { DialogText } from "./libs/DialogText";
 import { EventType, events } from "./libs/Events";
 import CardPriorityBar from "./CardPriorityBar.svelte";
 import { doStopCards } from "./libs/cardUtils";
 
-export const CacheMinutes = 5;
-
 class CardPriorityBox {
     plugin: Plugin;
-    cards: Map<string, RiffCard>;
     beforeReview: Map<string, DueCard>;
     private settingCfg: TomatoSettings;
 
@@ -19,7 +16,6 @@ class CardPriorityBox {
         this.plugin = plugin;
         this.settingCfg = (plugin as any).settingCfg;
         this.beforeReview = new Map();
-        this.cards = new Map();
         this.plugin.addCommand({
             langKey: "cardPrioritySet",
             hotkey: "F6",
@@ -80,9 +76,6 @@ class CardPriorityBox {
                     const element = protyle?.element as HTMLElement;
                     const docID = protyle?.block?.rootID;
                     if (lock && element && docID) {
-                        siyuanCache.getTreeRiffCardsMap(CacheMinutes * 60 * 1000, docID).then(map => {
-                            this.cards = map;
-                        });
                         await this.addBtns(element);
                         await this.resumeCards(element);
                     }
