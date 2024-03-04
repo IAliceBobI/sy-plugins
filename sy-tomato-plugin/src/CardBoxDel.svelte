@@ -101,7 +101,6 @@
         <div title="数值大的优先复习">
             <CardPriorityBar
                 {cardElement}
-                textContent={cardElement.textContent}
                 enableDelayBtn={false}
                 enableDeleteBtn={false}
                 callback={() => {

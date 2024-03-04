@@ -1,10 +1,10 @@
 import { Dialog, IProtyle, Plugin, confirm } from "siyuan";
-import { newID, siyuan, sleep } from "@/libs/utils";
+import { getContenteditableElement, newID, siyuan, sleep } from "@/libs/utils";
 import "./index.scss";
 import { EventType, events } from "@/libs/Events";
 import CardBoxDel from "./CardBoxDel.svelte";
 import { pressSkip, pressSpace } from "./libs/cardUtils";
-import { SPACE, WEB_SPACE } from "./libs/gconst";
+import { WEB_SPACE } from "./libs/gconst";
 
 class CardBox {
     private plugin: Plugin;
@@ -61,7 +61,11 @@ class CardBox {
                 if (!protyle) return;
                 if (protyle?.element?.classList?.contains("card__block")) {
                     const id = protyle.block.id;
-                    const msg = `原文ID：${id}<br>请确认原文内容：<br>` + protyle.contentElement.textContent.slice(0, 50);
+                    let msg = "";
+                    {
+                        const e = getContenteditableElement(protyle.contentElement);
+                        msg = `原文ID：${id}<br>请确认原文内容：<br>` + e.textContent.slice(0, 50) ?? "";
+                    }
                     if (!id) {
                         this.delCardFunc = null;
                         this.fastSkipFunc = null;

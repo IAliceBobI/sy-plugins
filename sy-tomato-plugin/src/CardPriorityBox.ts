@@ -329,14 +329,12 @@ class CardPriorityBox {
         [...wysiwygElement.querySelectorAll(`[${CUSTOM_RIFF_DECKS}][${DATA_NODE_ID}]`)]
             .map((cardElement: HTMLElement) => {
                 cardElement.querySelectorAll(`[${TOMATO_CONTROL_ELEMENT}]`).forEach(e => e.parentElement.removeChild(e));
-                const textContent = cardElement.textContent;
                 const protyleAttrElement = cardElement.querySelector(".protyle-attr");
                 if (protyleAttrElement) {
                     new CardPriorityBar({
                         target: protyleAttrElement,
                         props: {
                             cardElement,
-                            textContent,
                         }
                     });
                 }

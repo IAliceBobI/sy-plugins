@@ -8,11 +8,14 @@
         TOMATO_CONTROL_ELEMENT,
         WEB_SPACE,
     } from "./libs/gconst";
-    import { isValidNumber, siyuan } from "./libs/utils";
+    import {
+        getContenteditableElement,
+        isValidNumber,
+        siyuan,
+    } from "./libs/utils";
     import { events } from "./libs/Events";
 
     export let cardElement: HTMLElement;
-    export let textContent: string;
     export let enableDeleteBtn = true;
     export let enableDelayBtn = true;
     export let callback: Func = () => {};
@@ -22,8 +25,15 @@
     let cardID: string;
     let priority: number;
     let whiteSpace = WEB_SPACE;
+    let textContent: string;
 
     onMount(async () => {
+        {
+            const e = getContenteditableElement(cardElement) as HTMLElement;
+            textContent =
+                e?.textContent?.slice(0, 50) ??
+                cardElement.textContent?.slice(0, 50);
+        }
         cardID = cardElement.getAttribute(DATA_NODE_ID);
         if (cardElement.classList.contains("protyle-title")) {
             const attrs = await siyuan.getBlockAttrs(cardID);
