@@ -53,7 +53,7 @@ export class SplitSentence {
             let { ref, idx } = getIDFromIAL(row.ial);
             if (!ref) ref = row.id;
             if (!idx) idx = String(i);
-            if (row.type == "h" || isPic(row.markdown)) {
+            if (row.type == "h" || dontSplit(row.markdown)) {
                 const { newID, attrLine } = getAttrLineWithID(ref, idx);
                 this.textAreas.push({
                     blocks: [{ text: row.markdown + `\n${attrLine}`, id: newID }],
@@ -110,9 +110,10 @@ function getAttrLineWithID(ref: string, idx: string) {
     return { attrLine, newID };
 }
 
-function isPic(markdown: string) {
-    const len = [...markdown.matchAll(/!\[.*?\]\(.*?\)/g)].length;
-    return len > 0;
+function dontSplit(markdown: string) {
+    if (markdown.indexOf("://") > 0) return true;
+    if ([...markdown.matchAll(/!\[.*?\]\(.*?\)/g)].length > 0) return true;
+    return false;
 }
 
 function shouldMove(s: string) {
