@@ -548,7 +548,8 @@ class Progressive {
         const allContent = [];
         if (info.showLastBlock && piecePre.length > 0) {
             const lastID = piecePre[piecePre.length - 1];
-            allContent.push(await this.copyBlock(info, lastID, [PROG_PIECE_PREVIOUS]));
+            const { div } = await utils.getBlockDiv(lastID);
+            allContent.push(await this.copyBlock(info, lastID, div, [PROG_PIECE_PREVIOUS]));
         }
 
         if (info.autoSplitSentenceP) {
@@ -559,8 +560,9 @@ class Progressive {
             await this.splitAndClean(bookID, noteID, "t", piece);
         } else {
             const idx: { i: number } = { i: 1 };
-            for (const id of piece) {
-                allContent.push(await this.copyBlock(info, id, [PROG_ORIGIN_TEXT], idx));
+            const divs = await Promise.all(piece.map(id => utils.getBlockDiv(id)));
+            for (const { id, div } of divs) {
+                allContent.push(await this.copyBlock(info, id, div, [PROG_ORIGIN_TEXT], idx));
             }
         }
 
@@ -569,8 +571,7 @@ class Progressive {
         }
     }
 
-    private async copyBlock(info: BookInfo, id: string, mark: string[] = [], idx?: { i: number }) {
-        const { div: tempDiv } = await utils.getBlockDiv(id);
+    private async copyBlock(info: BookInfo, id: string, tempDiv: HTMLDivElement, mark: string[] = [], idx?: { i: number }) {
         if (!tempDiv) return "";
         if (tempDiv.getAttribute(MarkKey)) return "";
         if (idx && tempDiv.getAttribute(DATA_TYPE) != BlockNodeEnum.NODE_HEADING) {
@@ -589,7 +590,7 @@ class Progressive {
                 }
             }
         }
-        const txt = tempDiv.textContent.replace(/\u200B/g, "").trim();
+        const txt = this.lute.BlockDOM2StdMd(tempDiv.outerHTML).replace(/\u200B/g, "").trim();
         if (!txt || txt == "*") return "";
         await utils.cleanDiv(tempDiv, true, true);
         tempDiv.setAttribute(RefIDKey, id);
