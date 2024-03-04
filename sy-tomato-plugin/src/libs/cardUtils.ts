@@ -34,3 +34,25 @@ export async function doStopCards(days: string, blocks: GetCardRetBlock[]) {
         await siyuan.pushMsg(`推迟${blocks.length}个闪卡${days}天`);
     }
 }
+
+export function pressSpace() {
+    const btnSpace = document.body.querySelector(
+        'button[data-type="-1"]',
+    ) as HTMLButtonElement;
+    if (btnSpace) {
+        btnSpace.click();
+        return true;
+    }
+    return false;
+}
+
+export function pressSkip() {
+    const btnSkip = document.body.querySelector(
+        'button[data-type="-3"]',
+    ) as HTMLButtonElement;
+    if (btnSkip) {
+        btnSkip.click();
+        return true;
+    }
+    return false;
+}

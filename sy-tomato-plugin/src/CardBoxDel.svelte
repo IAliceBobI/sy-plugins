@@ -3,7 +3,7 @@
     import { siyuan } from "./libs/utils";
     import { onDestroy, onMount } from "svelte";
     import { escOnElement } from "./libs/keyboard";
-    import { doStopCards } from "./libs/cardUtils";
+    import { doStopCards, pressSkip } from "./libs/cardUtils";
     import { cardPriorityBox } from "./CardPriorityBox";
 
     export let dialog: Dialog;
@@ -25,21 +25,10 @@
         dialog.destroy();
     }
 
-    function skip() {
-        const btnSkip = document.body.querySelector(
-            'button[data-type="-3"]',
-        ) as HTMLButtonElement;
-        if (btnSkip) {
-            btnSkip.click();
-            return true;
-        }
-        return false;
-    }
-
     async function deleteCard() {
         await siyuan.removeRiffCards([id]);
-        skip();
         destroy();
+        pressSkip();
     }
 
     async function delayRestCards() {
@@ -53,8 +42,8 @@
         await doStopCards(String(delayDays), [
             { ial: { id } },
         ] as GetCardRetBlock[]);
-        skip();
         destroy();
+        pressSkip();
     }
 
     async function gotoCard() {
@@ -87,8 +76,10 @@
             class="b3-button b3-button--outline"
             on:click={deleteCardDeleteContent}>🗑️删除内容块</button
         >
-        <button class="b3-button b3-button--outline" on:click={deleteCard}
-            >🔕取消制卡</button
+        <button
+            title="ctrl+9"
+            class="b3-button b3-button--outline"
+            on:click={deleteCard}>🔕取消制卡</button
         >
         <button class="b3-button b3-button--outline" on:click={gotoCard}
             >🔍定位闪卡</button
