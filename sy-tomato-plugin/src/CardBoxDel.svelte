@@ -99,23 +99,24 @@
     <div class="fn__hr"></div>
     <div class="fn__hr"></div>
     <div>
-        <label title="推迟当前闪卡{hours.toFixed(1)}小时">
+        <label>
             <input
+                title="使用鼠标滚轮来调整"
                 min="0"
                 step="0.2"
                 bind:value={delayDays}
                 type="number"
                 class="b3-text-field"
             />
-            天({hours.toFixed(1)}小时)
+            天
             <button class="b3-button b3-button--outline" on:click={delayCard}
-                >📅推迟</button
+                >📅推迟{hours.toFixed(1)}小时</button
             >
-        </label>
-        <label title="推迟没处理过的全部闪卡{hours.toFixed(1)}小时">
             <button
+                title="没处理过的闪卡都被推迟"
                 class="b3-button b3-button--outline"
-                on:click={delayRestCards}>🌊📅推迟余下闪卡</button
+                on:click={delayRestCards}
+                >🌊📅推迟余下闪卡{hours.toFixed(1)}小时</button
             >
         </label>
     </div>
