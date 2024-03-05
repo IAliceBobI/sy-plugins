@@ -127,7 +127,7 @@ class CardBox {
             div.setAttribute("TomatoCardDelBtn", "1");
             div.appendChild(document.createElement("span")) as HTMLSpanElement;
             const btn = div.appendChild(document.createElement("button")) as HTMLButtonElement;
-            btn.innerHTML = "<div>⚙️</div> 设置";
+            btn.innerHTML = "<div class=\"card__icon\">⚙️</div> 设置";
             btn.title = "删卡、定位、推迟";
             btn.setAttribute("data-type", "-100");
             btn.setAttribute("aria-label", "不看答案前\n取消制卡ctrl+9\n跳过卡ctrl+8");
