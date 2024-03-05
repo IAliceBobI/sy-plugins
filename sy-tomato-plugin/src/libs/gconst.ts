@@ -62,6 +62,7 @@ export const PARAGRAPH_INDEX = "custom-paragraph-index";
 export const CARD_PRIORITY = "custom-card-priority";
 export const CARD_PRIORITY_STOP = "custom-card-priority-stop";
 export const PROG_KEY_NOTE = "custom-prog-key-note";
+export const TOMATO_LINE_THROUGH = "custom-tomato-line-through";
 
 export enum WsActionTypes {
     transactions = "transactions",

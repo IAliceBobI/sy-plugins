@@ -7,6 +7,13 @@
   background-color: var(--b3-font-background5);
 }
 
+.protyle-wysiwyg div[custom-tomato-line-through] {
+  text-decoration: line-through;
+  opacity: 0.3;
+  transform: scale(0.85);
+  transform-origin: 0 0;
+}
+
 .protyle-wysiwyg div[custom-card-priority-stop] {
   opacity: 0.3;
 }

@@ -47,11 +47,13 @@
     let insertPlace: number;
     let aiAPI: BaiduAI;
     let selectedText: string;
+    let selectedIds: string[] = [];
 
     onMount(async () => {
         attrs[TOMATO_BK_IGNORE] = "1";
 
         const s = events.selectedDivs(protyle);
+        selectedIds = s.ids;
         element = s.element;
         docID = s.docID;
         selectedText = s.rangeText;
@@ -192,6 +194,18 @@ ${text}
             await navigator.clipboard.writeText(prompt.trim());
             destroy();
         }
+    }
+
+    async function addLineThrough(v = "") {
+        destroy();
+        const attrs: AttrType = {} as any;
+        attrs["custom-tomato-line-through"] = v;
+        await siyuan.batchSetBlockAttrs(
+            selectedIds.map((id) => {
+                return { id, attrs };
+            }),
+        );
+        events.protyleReload();
     }
 
     async function mergeDoc() {
@@ -485,6 +499,20 @@ ${text}
                         title="合并文档到这里，把其他文档的属性、内容、引用转移到此文档，并把其他文档删除。"
                         class="b3-button"
                         on:click={mergeDoc}>📃🈴</button
+                    >
+                </td>
+                <td>
+                    <button
+                        title="选中块添加删除线效果"
+                        class="b3-button"
+                        on:click={() => addLineThrough("1")}>🙈</button
+                    >
+                </td>
+                <td>
+                    <button
+                        title="选中块去掉删除线效果"
+                        class="b3-button"
+                        on:click={() => addLineThrough()}>🙉</button
                     >
                 </td>
             </tr>
