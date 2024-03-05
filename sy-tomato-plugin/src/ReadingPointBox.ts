@@ -1,8 +1,9 @@
-import { Plugin, openTab } from "siyuan";
+import { IProtyle, Plugin, openTab } from "siyuan";
 import { NewNodeID, getID, get_siyuan_lnk_md, siyuan, siyuanCache, sleep } from "@/libs/utils";
 import "./index.scss";
 import { events } from "@/libs/Events";
 import { DATA_NODE_ID, READINGPOINT } from "./libs/gconst";
+import { zip2ways } from "./libs/functional";
 
 const CreateDocLock = "CreateDocLock";
 const AddReadingPointLock = "AddReadingPointLock";
@@ -15,15 +16,23 @@ class ReadingPointBox {
         this.plugin.addCommand({
             langKey: "addBookmark",
             hotkey: "⌘2",
-            callback: async () => {
-                this.addReadPointLock();
+            editorCallback: async (protyle: IProtyle) => {
+                const { selected, ids } = events.selectedDivs(protyle);
+                for (const [div, id] of zip2ways(selected, ids)) {
+                    this.addReadPointLock(id, div);
+                    break;
+                }
             },
         });
         this.plugin.addCommand({
             langKey: "addBookmarkWithoutENV",
             hotkey: "⌘7",
-            callback: async () => {
-                this.addReadPointLock("", true);
+            editorCallback: async (protyle: IProtyle) => {
+                const { selected, ids } = events.selectedDivs(protyle);
+                for (const [div, id] of zip2ways(selected, ids)) {
+                    this.addReadPointLock(id, div, true);
+                    break;
+                }
             },
         });
         this.plugin.eventBus.on("open-menu-content", async ({ detail }) => {
@@ -35,7 +44,7 @@ class ReadingPointBox {
                 click: () => {
                     const blockID = detail?.element?.getAttribute("data-node-id") ?? "";
                     if (blockID) {
-                        this.addReadPointLock(blockID);
+                        this.addReadPointLock(blockID, detail?.element);
                     }
                 },
             });
@@ -46,7 +55,7 @@ class ReadingPointBox {
                 click: () => {
                     const blockID = detail?.element?.getAttribute("data-node-id") ?? "";
                     if (blockID) {
-                        this.addReadPointLock(blockID, true);
+                        this.addReadPointLock(blockID, detail?.element, true);
                     }
                 },
             });
@@ -90,7 +99,7 @@ class ReadingPointBox {
                 for (const element of detail.blockElements) {
                     const blockID = getID(element);
                     if (blockID) {
-                        this.addReadPointLock(blockID);
+                        this.addReadPointLock(blockID, element);
                         break;
                     }
                 }
@@ -104,7 +113,7 @@ class ReadingPointBox {
                 for (const element of detail.blockElements) {
                     const blockID = getID(element);
                     if (blockID) {
-                        this.addReadPointLock(blockID, true);
+                        this.addReadPointLock(blockID, element, true);
                         break;
                     }
                 }
@@ -112,10 +121,10 @@ class ReadingPointBox {
         });
     }
 
-    private addReadPointLock(blockID?: string, withoutENV = false) {
+    private addReadPointLock(blockID: string, div: HTMLElement, withoutENV = false) {
         navigator.locks.request(AddReadingPointLock, { ifAvailable: true }, async (lock) => {
             if (lock) {
-                await this.addReadPoint(blockID, withoutENV);
+                await this.addReadPoint(blockID, div, withoutENV);
                 await sleep(2000);
             } else {
                 siyuan.pushMsg(this.plugin.i18n.wait4finish);
@@ -184,7 +193,7 @@ class ReadingPointBox {
         }
     }
 
-    private async addReadPoint(blockID?: string, withoutENV = false) {
+    private async addReadPoint(blockID: string, div: HTMLElement, withoutENV = false) {
         if (!blockID) blockID = events.lastBlockID;
         if (!blockID) {
             siyuan.pushMsg(this.plugin.i18n.clickOneBlockFirst);
@@ -201,10 +210,8 @@ class ReadingPointBox {
             const boxConf = await siyuan.getNotebookConf(docInfo["box"]);
             title = boxConf["name"];
         }
-        // await siyuan.addBookmark(blockID, title);
-        // await siyuan.removeBookmarks(docID, blockID);
         await deleteAllReadingPoints(docID);
-        await addCardReadingPoint(blockID, docInfo, title, docID, withoutENV);
+        await addCardReadingPoint(blockID, div, docInfo, title, docID, withoutENV);
     }
 }
 
@@ -217,10 +224,11 @@ async function deleteAllReadingPoints(docID: string) {
     await siyuan.deleteBlocks(ids);
 }
 
-async function addCardReadingPoint(blockID: string, docInfo: Block, title: string, docID: string, withoutENV = false) {
+async function addCardReadingPoint(blockID: string, div: HTMLElement, docInfo: Block, title: string, docID: string, withoutENV = false) {
     const id = NewNodeID();
     const md = [];
     md.push(`* 阅读点：${get_siyuan_lnk_md(blockID, docInfo.content)}`);
+    md.push(`* ${div.textContent}`);
     if (!withoutENV) {
         const docIDs = [...document.body.querySelectorAll("div.protyle-title.protyle-wysiwyg--attr")].map(e => e.getAttribute(DATA_NODE_ID));
         [...document.body.querySelectorAll("li[data-initdata]")].forEach(e => {
