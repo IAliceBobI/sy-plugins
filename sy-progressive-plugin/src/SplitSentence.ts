@@ -37,13 +37,16 @@ export class SplitSentence {
         });
     }
 
-    async splitByIDs(chilrenIDs: string[], like = "") {
+    async splitByIDs(chilrenIDs: string[]) {
         const bookInfo = await prog.storage.booksInfo(this.bookID);
-        const rows = (await Promise.all(chilrenIDs
-            .map(id => siyuan.sqlOne(`select id,content,ial,type,markdown from blocks 
-            where id="${id}"
-            and type != "html" and type != "t" and type != "s"
-            and content != "" and content is not null`+ like)))).filter(b => !!b.markdown);
+
+        const placeholders = chilrenIDs.map(id => `"${id}"`).join(",");
+        const sql = `SELECT id, content, ial, type, markdown FROM blocks 
+            WHERE id IN (${placeholders}) 
+            AND type NOT IN ('html', 't', 's') 
+            AND content != "" AND content IS NOT NULL limit 100000000`;
+        const rows = (await siyuan.sql(sql)).filter(b => !!b.markdown);
+
         this.textAreas = [];
         if (rows.length == 0) {
             await siyuan.pushMsg("目前找不到分片内容");

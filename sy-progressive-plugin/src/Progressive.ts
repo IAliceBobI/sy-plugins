@@ -598,7 +598,7 @@ class Progressive {
         }
         const txt = this.lute.BlockDOM2StdMd(tempDiv.outerHTML).replace(/\u200B/g, "").trim();
         if (!txt || txt == "*") return "";
-        await utils.cleanDiv(tempDiv, true, true);
+        await utils.cleanDiv(tempDiv, false, false);
         tempDiv.setAttribute(RefIDKey, id);
         mark.forEach(m => tempDiv.setAttribute(m, "1"));
         const md = this.lute.BlockDOM2Md(tempDiv.outerHTML);
