@@ -25,7 +25,11 @@ export async function mergeDocs(doc1: string, hereID: string) {
     await siyuan.setBlockAttrs(doc2, newAttrs); // fulfill doc2
     await moveAllContentHere(doc1, hereID);
     await siyuan.flushTransaction();
+    await siyuan.pushMsg("正在转移引用……");
     await siyuan.transferBlockRef(doc1, doc2, false);
+    await siyuan.pushMsg("正在尝试删除闪卡……");
+    await siyuan.removeRiffCards([doc1]);
+    await siyuan.pushMsg("正在删除老文件……");
     await siyuan.removeDocByID(doc1);
     window.location.reload();
 }
