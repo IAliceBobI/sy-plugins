@@ -714,6 +714,18 @@ export const siyuan = {
     async reviewRiffCard(cardID: string, rating: number, deckID = "20230218211946-2kw8jgx") {
         return siyuan.call("/api/riff/reviewRiffCard", { cardID, rating, deckID });
     },
+    async reviewRiffCardByBlockID(blockID: string, rating: number, deckID = "20230218211946-2kw8jgx") {
+        let all = await siyuanCache.getRiffCardsAll(365 * 24 * 60 * 60 * 1000, 5000);
+        if (!all.has(blockID)) {
+            all = await siyuanCache.getRiffCardsAll(-1, 5000);
+        }
+        if (all.has(blockID)) {
+            const card = all.get(blockID).slice().pop();
+            if (card) {
+                return siyuan.reviewRiffCard(card.riffCardID, rating, deckID);
+            }
+        }
+    },
     async getRiffCards(page = 1, pageSize = 1000, deckID = ""): Promise<GetCardRet> {
         return siyuan.call("/api/riff/getRiffCards", { "id": deckID, page, pageSize });
     },

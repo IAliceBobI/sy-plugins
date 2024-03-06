@@ -1,5 +1,5 @@
 import { IProtyle, Lute, Plugin, openTab } from "siyuan";
-import { NewLute, NewNodeID, dom2div, getBlockDiv, getID, get_siyuan_lnk_md, siyuan, siyuanCache, sleep } from "@/libs/utils";
+import { NewLute, NewNodeID, dom2div, getBlockDiv, getID, get_siyuan_lnk_md, siyuan, siyuanCache, sleep, timeUtil } from "@/libs/utils";
 import "./index.scss";
 import { events } from "@/libs/Events";
 import { DATA_NODE_ID, READINGPOINT } from "./libs/gconst";
@@ -281,8 +281,10 @@ async function addCardReadingPoint(lute: Lute, blockID: string, div: HTMLElement
         //     Good                    // 一般
         //     Easy                    // 很容易
         // )
-        await siyuan.reviewRiffCard(id, 2);
+        await siyuan.reviewRiffCardByBlockID(id, 2);
         events.protyleReload();
+        const due = timeUtil.getYYYYMMDDHHmmssPlus0(timeUtil.nowts());
+        await siyuan.batchSetRiffCardsDueTimeByBlockID([{ id, due }]);
     } else {
         const id = NewNodeID();
         md.push(new AttrBuilder(id)
