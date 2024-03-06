@@ -5,6 +5,7 @@ import { events } from "../../sy-tomato-plugin/src/libs/Events";
 import * as gconst from "../../sy-tomato-plugin/src/libs/gconst";
 import { getCardsDoc, getHPathByDocID } from "./helper";
 import { getBookID } from "../../sy-tomato-plugin/src/libs/progressive";
+import { AttrBuilder } from "../../sy-tomato-plugin/src/libs/listUtils";
 
 enum CardType {
     B = "B", C = "C", None = "None"
@@ -228,16 +229,11 @@ class FlashBox {
         } else if (cardType === CardType.B) {
             tmp.push(star + ">");
         }
-        const attrList = [];
-        attrList.push(`id="${cardID}"`);
-        if (srcPriority) attrList.push(`${gconst.CARD_PRIORITY}="${srcPriority}"`);
-        if (originPath) {
-            attrList.push(`${gconst.ORIGIN_HPATH}="${originPath}"`);
-        }
-        if (refPath) {
-            attrList.push(`${gconst.REF_HPATH}="${refPath}"`);
-        }
-        tmp.push(`{: ${attrList.join(" ")} }`);
+        const attrBuilder = new AttrBuilder(cardID);
+        attrBuilder.add(gconst.CARD_PRIORITY, srcPriority);
+        attrBuilder.add(gconst.ORIGIN_HPATH, originPath);
+        attrBuilder.add(gconst.REF_HPATH, refPath);
+        tmp.push(attrBuilder.build());
         return { cardID, "markdown": tmp.join("\n") };
     }
 

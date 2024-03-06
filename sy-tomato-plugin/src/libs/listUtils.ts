@@ -1,6 +1,6 @@
 import { events } from "./Events";
 import { BlockNodeEnum, CUSTOM_RIFF_DECKS, DATA_NODE_ID, DATA_NODE_INDEX, DATA_TYPE } from "./gconst";
-import { dom2div, siyuan } from "./utils";
+import { NewNodeID, dom2div, siyuan } from "./utils";
 
 export async function delAllchecked(docID: string) {
     const kramdowns = await Promise.all((await siyuan.sql(`select id from blocks 
@@ -53,4 +53,33 @@ function findListTypeByElement(e: HTMLElement) {
         }
     }
     return { id, isCard };
+}
+
+export class AttrBuilder {
+    private list = [];
+    private _id: string;
+    public get id(): string {
+        return this._id;
+    }
+    private set id(value: string) {
+        this._id = value;
+    }
+    constructor(id = "", initID = false) {
+        if (initID) {
+            this.id = NewNodeID();
+            this.list.push(`id="${this.id}"`);
+        } else if (id) {
+            this.id = id;
+            this.list.push(`id="${this.id}"`);
+        }
+    }
+    add(name: string, value: any) {
+        if (name != null && value != null) {
+            this.list.push(`${name}="${value}"`);
+        }
+        return this;
+    }
+    build() {
+        return `{: ${this.list.join(" ")} }`;
+    }
 }
