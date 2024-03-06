@@ -711,6 +711,9 @@ export const siyuan = {
     async skipReviewRiffCard(cardID: string, deckID = "20230218211946-2kw8jgx") {
         return siyuan.call("/api/riff/skipReviewRiffCard", { cardID, deckID });
     },
+    async reviewRiffCard(cardID: string, rating: number, deckID = "20230218211946-2kw8jgx") {
+        return siyuan.call("/api/riff/reviewRiffCard", { cardID, rating, deckID });
+    },
     async getRiffCards(page = 1, pageSize = 1000, deckID = ""): Promise<GetCardRet> {
         return siyuan.call("/api/riff/getRiffCards", { "id": deckID, page, pageSize });
     },
