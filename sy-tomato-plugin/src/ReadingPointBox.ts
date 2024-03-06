@@ -4,6 +4,8 @@ import "./index.scss";
 import { events } from "@/libs/Events";
 import { DATA_NODE_ID, READINGPOINT } from "./libs/gconst";
 import { zip2ways } from "./libs/functional";
+import { AttrBuilder } from "./libs/listUtils";
+import { getBookID } from "./libs/progressive";
 
 const CreateDocLock = "CreateDocLock";
 const AddReadingPointLock = "AddReadingPointLock";
@@ -210,21 +212,32 @@ class ReadingPointBox {
             const boxConf = await siyuan.getNotebookConf(docInfo["box"]);
             title = boxConf["name"];
         }
-        await deleteAllReadingPoints(docID);
-        await addCardReadingPoint(blockID, div, docInfo, title, docID, withoutENV);
+
+        let { bookID } = await getBookID(docID);
+        if (!bookID) bookID = docID;
+        const oldID = await keepOneReadingPoints(await findAllReadingPoints(bookID));
+        await addCardReadingPoint(blockID, div, docInfo, title, bookID, oldID, withoutENV);
     }
 }
 
 export const readingPointBox = new ReadingPointBox();
 
-async function deleteAllReadingPoints(docID: string) {
-    const rows = await siyuan.sqlAttr(`select block_id from attributes where name="${READINGPOINT}" and value="${docID}"`);
-    const ids = rows.map(r => r.block_id);
-    await siyuan.removeRiffCards(ids);
-    await siyuan.deleteBlocks(ids);
+async function keepOneReadingPoints(ids: string[]) {
+    const olds = ids.slice(1);
+    if (olds.length > 0) {
+        await siyuan.removeRiffCards(olds);
+        await siyuan.deleteBlocks(olds);
+    }
+    return ids.pop();
 }
 
-async function addCardReadingPoint(blockID: string, div: HTMLElement, docInfo: Block, title: string, docID: string, withoutENV = false) {
+async function findAllReadingPoints(bookID: string) {
+    const rows = await siyuan.sqlAttr(`select block_id from attributes where name="${READINGPOINT}" and value="${bookID}"`);
+    const ids = rows.map(r => r.block_id);
+    return ids;
+}
+
+async function addCardReadingPoint(blockID: string, div: HTMLElement, docInfo: Block, title: string, bookID: string, oldID: string, withoutENV = false) {
     const id = NewNodeID();
     const md = [];
     md.push(`* 阅读点：${get_siyuan_lnk_md(blockID, docInfo.content)}`);
@@ -259,8 +272,16 @@ async function addCardReadingPoint(blockID: string, div: HTMLElement, docInfo: B
             }
         }
     }
-    md.push(`{: id="${id}" bookmark="${title}" ${READINGPOINT}="${docID}"}`);
-    await siyuan.insertBlockAfter(md.join("\n"), blockID);
+    md.push(new AttrBuilder(id)
+        .add("bookmark", title)
+        .add(READINGPOINT, bookID)
+        .build());
+    if (oldID) {
+        await siyuan.updateBlocks([{ id: oldID, md.join("\n"), blockID }]);
+        await siyuan.moveBlocksAfter(md.join("\n"), blockID);
+    } else {
+        await siyuan.insertBlockAfter(md.join("\n"), blockID);
+    }
     setTimeout(() => {
         siyuan.addRiffCards([id]);
     }, 800);
