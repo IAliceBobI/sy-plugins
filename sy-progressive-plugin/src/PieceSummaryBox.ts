@@ -1,8 +1,9 @@
 import { IProtyle, Lute, Plugin, openTab } from "siyuan";
-import { findSummary, getBookIDByBlock, getHPathByDocID, getSummaryDoc } from "./helper";
+import { findSummary, getHPathByDocID, getSummaryDoc } from "./helper";
 import { NewLute, cleanDiv, getCursorElement, getID, siyuan } from "../../sy-tomato-plugin/src/libs/utils";
 import { DATA_NODE_ID, PROTYLE_WYSIWYG_SELECT } from "../../sy-tomato-plugin/src/libs/gconst";
 import { events } from "../../sy-tomato-plugin/src/libs/Events";
+import { getBookIDByBlock } from "../../sy-tomato-plugin/src/libs/progressive";
 
 class PieceSummaryBox {
     private plugin: Plugin;

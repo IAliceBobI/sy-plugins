@@ -33,25 +33,6 @@ export function getDocIalCompareDoc(bookID: string, point: number) {
     return `compareDoc#${TEMP_CONTENT}#${bookID},${point}`;
 }
 
-export async function getBookIDByBlock(blockID: string) {
-    const docRow = await siyuan.getDocRowByBlockID(blockID);
-    return getBookID(docRow?.id);
-}
-
-export async function getBookID(docID: string): Promise<{ bookID: string, pieceNum: number }> {
-    const ret = { bookID: "", pieceNum: NaN } as Awaited<ReturnType<typeof getBookID>>;
-    if (docID) {
-        const attrs = await siyuan.getBlockAttrs(docID);
-        if (attrs["custom-progmark"]) {
-            const last = attrs["custom-progmark"].split("#").pop();
-            const parts = last.split(",");
-            ret.bookID = parts[0];
-            ret.pieceNum = Number(parts[1]);
-        }
-    }
-    return ret;
-}
-
 export async function getHPathByDocID(docID: string, prefix: string) {
     const row = await siyuan.sqlOne(`select hpath from blocks where id = "${docID}"`);
     let path = row?.hpath ?? "";
@@ -235,14 +216,14 @@ export async function createNote(boxID: string, bookID: string, piece: string[],
     return docID;
 }
 
-export function appendChild(parent: HTMLElement, type: string, textContent: string, classList: string[], click?: any) {
-    const elem = document.createElement(type);
-    elem.textContent = textContent;
-    parent.appendChild(elem);
-    for (const cls of classList) if (cls) elem.classList.add(cls);
-    if (click) elem.addEventListener("click", click);
-    return elem;
-}
+// export function appendChild(parent: HTMLElement, type: string, textContent: string, classList: string[], click?: any) {
+//     const elem = document.createElement(type);
+//     elem.textContent = textContent;
+//     parent.appendChild(elem);
+//     for (const cls of classList) if (cls) elem.classList.add(cls);
+//     if (click) elem.addEventListener("click", click);
+//     return elem;
+// }
 
 export function isProtylePiece(protyle: IProtyle) {
     const div = protyle?.element?.querySelector(`[${MarkKey}]`) as HTMLDivElement;

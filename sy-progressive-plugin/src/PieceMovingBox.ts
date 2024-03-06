@@ -1,7 +1,8 @@
 import { IProtyle, Lute, Plugin } from "siyuan";
-import { getBookIDByBlock, getDocIalPieces, isProtylePiece } from "./helper";
+import { getDocIalPieces, isProtylePiece } from "./helper";
 import { NewLute, cleanDiv, getBlockDiv, isValidNumber, siyuan } from "../../sy-tomato-plugin/src/libs/utils";
 import { DATA_NODE_ID, PROTYLE_WYSIWYG_SELECT } from "../../sy-tomato-plugin/src/libs/gconst";
+import { getBookIDByBlock } from "../../sy-tomato-plugin/src/libs/progressive";
 
 class PieceMovingBox {
     private plugin: Plugin;

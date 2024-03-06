@@ -3,7 +3,8 @@ import { set_href, siyuan } from "../../sy-tomato-plugin/src/libs/utils";
 import * as utils from "../../sy-tomato-plugin/src/libs/utils";
 import { events } from "../../sy-tomato-plugin/src/libs/Events";
 import * as gconst from "../../sy-tomato-plugin/src/libs/gconst";
-import { getCardsDoc, getHPathByDocID, getBookID } from "./helper";
+import { getCardsDoc, getHPathByDocID } from "./helper";
+import { getBookID } from "../../sy-tomato-plugin/src/libs/progressive";
 
 enum CardType {
     B = "B", C = "C", None = "None"
