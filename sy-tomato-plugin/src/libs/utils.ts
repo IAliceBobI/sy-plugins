@@ -546,22 +546,28 @@ export const siyuan = {
         const blocks = await siyuan.getChildBlocks(docID);
         return siyuan.deleteBlocks(blocks.map((b: any) => b["id"]));
     },
-    async deleteBlocks(ids: string[]) {
-        return siyuan.transactions(ids.map(id => {
+    transDeleteBlocks(ids: string[]) {
+        return ids.map(id => {
             const op = {} as IOperation;
             op.action = "delete";
             op.id = id;
             return op;
-        }));
+        });
     },
-    async moveBlocksAfter(ids: string[], previousID: string) {
-        return siyuan.transactions(ids.reverse().map(id => {
+    async deleteBlocks(ids: string[]) {
+        return siyuan.transactions(siyuan.transDeleteBlocks(ids));
+    },
+    transMoveBlocksAfter(ids: string[], previousID: string) {
+        return ids.reverse().map(id => {
             const op = {} as IOperation;
             op.action = "move";
             op.id = id;
             op.previousID = previousID;
             return op;
-        }));
+        });
+    },
+    async moveBlocksAfter(ids: string[], previousID: string) {
+        return siyuan.transactions(siyuan.transMoveBlocksAfter(ids, previousID));
     },
     async moveBlocksAsChild(ids: string[], parentID: string) {
         return siyuan.transactions(ids.reverse().map(id => {
@@ -585,16 +591,19 @@ export const siyuan = {
         if (await siyuan.checkBlockExist(id))
             return siyuan.call("/api/block/updateBlock", { id, data, dataType });
     },
-    async updateBlocks(ops: { id: string, domStr: string }[]) {
+    transUpdateBlocks(ops: { id: string, domStr: string }[]) {
         ops = ops.filter(op => !!op.id);
         if (!ops.length) return;
-        return siyuan.transactions(ops.map(({ id, domStr }) => {
+        return ops.map(({ id, domStr }) => {
             const op = {} as IOperation;
             op.action = "update"; // dom
             op.id = id;
             op.data = domStr;
             return op;
-        }));
+        });
+    },
+    async updateBlocks(ops: { id: string, domStr: string }[]) {
+        return siyuan.transactions(siyuan.transUpdateBlocks(ops));
     },
     async getBlockMarkdownAndContent(id: string): Promise<GetBlockMarkdownAndContent> {
         const row = await siyuan.sqlOne(`select markdown, content from blocks where id="${id}"`);
@@ -749,6 +758,7 @@ export const siyuan = {
         return siyuan.call("/api/riff/getRiffDecks", {});
     },
     async removeRiffCards(blockIDs: Array<string>, deckID = "") {
+        if (!blockIDs || blockIDs.length == 0) return null;
         return siyuan.call("/api/riff/removeRiffCards", { deckID, blockIDs });
     },
     async updateEmbedBlock(id: string, content: string) {

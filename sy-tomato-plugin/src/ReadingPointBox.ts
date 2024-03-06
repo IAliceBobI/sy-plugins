@@ -1,5 +1,5 @@
-import { IProtyle, Plugin, openTab } from "siyuan";
-import { NewNodeID, getID, get_siyuan_lnk_md, siyuan, siyuanCache, sleep } from "@/libs/utils";
+import { IProtyle, Lute, Plugin, openTab } from "siyuan";
+import { NewLute, NewNodeID, dom2div, getBlockDiv, getID, get_siyuan_lnk_md, siyuan, siyuanCache, sleep } from "@/libs/utils";
 import "./index.scss";
 import { events } from "@/libs/Events";
 import { DATA_NODE_ID, READINGPOINT } from "./libs/gconst";
@@ -12,6 +12,7 @@ const AddReadingPointLock = "AddReadingPointLock";
 
 class ReadingPointBox {
     private plugin: Plugin;
+    private lute: Lute = NewLute();
 
     async onload(plugin: Plugin) {
         this.plugin = plugin;
@@ -215,21 +216,12 @@ class ReadingPointBox {
 
         let { bookID } = await getBookID(docID);
         if (!bookID) bookID = docID;
-        const oldID = await keepOneReadingPoints(await findAllReadingPoints(bookID));
-        await addCardReadingPoint(blockID, div, docInfo, title, bookID, oldID, withoutENV);
+        const oldIDs = await findAllReadingPoints(bookID) ?? [];
+        await addCardReadingPoint(this.lute, blockID, div, docInfo, title, bookID, oldIDs, withoutENV);
     }
 }
 
 export const readingPointBox = new ReadingPointBox();
-
-async function keepOneReadingPoints(ids: string[]) {
-    const olds = ids.slice(1);
-    if (olds.length > 0) {
-        await siyuan.removeRiffCards(olds);
-        await siyuan.deleteBlocks(olds);
-    }
-    return ids.pop();
-}
 
 async function findAllReadingPoints(bookID: string) {
     const rows = await siyuan.sqlAttr(`select block_id from attributes where name="${READINGPOINT}" and value="${bookID}"`);
@@ -237,8 +229,7 @@ async function findAllReadingPoints(bookID: string) {
     return ids;
 }
 
-async function addCardReadingPoint(blockID: string, div: HTMLElement, docInfo: Block, title: string, bookID: string, oldID: string, withoutENV = false) {
-    const id = NewNodeID();
+async function addCardReadingPoint(lute: Lute, blockID: string, div: HTMLElement, docInfo: Block, title: string, bookID: string, oldIDs: string[], withoutENV = false) {
     const md = [];
     md.push(`* 阅读点：${get_siyuan_lnk_md(blockID, docInfo.content)}`);
     md.push(`* ${div.textContent}`);
@@ -272,18 +263,37 @@ async function addCardReadingPoint(blockID: string, div: HTMLElement, docInfo: B
             }
         }
     }
-    md.push(new AttrBuilder(id)
-        .add("bookmark", title)
-        .add(READINGPOINT, bookID)
-        .build());
-    if (oldID) {
-        await siyuan.updateBlocks([{ id: oldID, md.join("\n"), blockID }]);
-        await siyuan.moveBlocksAfter(md.join("\n"), blockID);
+
+    if (oldIDs && oldIDs.length > 0) {
+        const id = oldIDs.pop();
+        const domStr = await getDomStr(id, lute, md);
+        const ops = siyuan.transDeleteBlocks(oldIDs);
+        ops.push(...siyuan.transMoveBlocksAfter([id], blockID));
+        ops.push(...siyuan.transUpdateBlocks([{ id, domStr }]));
+        await siyuan.transactions(ops);
+        await siyuan.removeRiffCards(oldIDs);
+        await siyuan.addRiffCards([id]);
+        events.protyleReload();
     } else {
+        const id = NewNodeID();
+        md.push(new AttrBuilder(id)
+            .add("bookmark", title)
+            .add(READINGPOINT, bookID)
+            .build());
         await siyuan.insertBlockAfter(md.join("\n"), blockID);
+        setTimeout(() => {
+            siyuan.addRiffCards([id]);
+        }, 800);
     }
-    setTimeout(() => {
-        siyuan.addRiffCards([id]);
-    }, 800);
+}
+
+async function getDomStr(id: string, lute: Lute, md: string[]) {
+    const { div: oldDiv } = await getBlockDiv(id);
+    const domStr = lute.Md2BlockDOM(md.join("\n"));
+    const div = dom2div(domStr);
+    oldDiv.getAttributeNames().forEach(name => {
+        div.setAttribute(name, oldDiv.getAttribute(name));
+    });
+    return div.outerHTML;
 }
 
