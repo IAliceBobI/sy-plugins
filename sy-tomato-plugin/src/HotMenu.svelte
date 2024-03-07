@@ -2,7 +2,11 @@
     import { onMount, onDestroy } from "svelte";
     import { Dialog, IProtyle, openTab } from "siyuan";
     import { events } from "./libs/Events";
-    import { DATA_NODE_ID, TOMATO_BK_IGNORE } from "./libs/gconst";
+    import {
+        DATA_NODE_ID,
+        TOMATO_BK_IGNORE,
+        TOMATO_LINE_THROUGH,
+    } from "./libs/gconst";
     import {
         NewNodeID,
         cleanText,
@@ -196,15 +200,25 @@ ${text}
         }
     }
 
-    async function addLineThrough(v = "") {
+    async function addLineThrough(v: string, all = false) {
         destroy();
         const attrs: AttrType = {} as any;
         attrs["custom-tomato-line-through"] = v;
-        await siyuan.batchSetBlockAttrs(
-            selectedIds.map((id) => {
-                return { id, attrs };
-            }),
-        );
+        if (all) {
+            await siyuan.batchSetBlockAttrs(
+                (await siyuan.getDocAttrs(docID, TOMATO_LINE_THROUGH)).map(
+                    ({ block_id: id }) => {
+                        return { id, attrs };
+                    },
+                ),
+            );
+        } else {
+            await siyuan.batchSetBlockAttrs(
+                selectedIds.map((id) => {
+                    return { id, attrs };
+                }),
+            );
+        }
         events.protyleReload();
     }
 
@@ -507,12 +521,17 @@ ${text}
                         class="b3-button"
                         on:click={() => addLineThrough("1")}>🙈</button
                     >
-                </td>
-                <td>
                     <button
                         title="选中块去掉删除线效果"
                         class="b3-button"
-                        on:click={() => addLineThrough()}>🙉</button
+                        on:click={() => addLineThrough("")}>🙉</button
+                    >
+                </td>
+                <td>
+                    <button
+                        title="整个文档去掉删除线效果"
+                        class="b3-button"
+                        on:click={() => addLineThrough("", true)}>🙉🙉</button
                     >
                 </td>
             </tr>
