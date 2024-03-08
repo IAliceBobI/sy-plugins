@@ -568,7 +568,7 @@ class Progressive {
         } else {
             const idx: { i: number } = { i: 1 };
             if (info.fastInsert !== false) {
-                const rows = (await siyuan.getRows(piece)).filter(row => !!row.markdown);
+                const rows = (await siyuan.getRows(piece, "markdown")).filter(row => !!row.markdown);
                 for (const { id, markdown } of rows) {
                     allContent.push(await this.fastCopyBlock(info, id, markdown, [PROG_ORIGIN_TEXT], idx));
                 }
@@ -600,7 +600,7 @@ class Progressive {
                     markdown = `[${idx.i}]` + markdown;
                 }
             }
-           idx.i++;
+            idx.i++;
         }
         mark.forEach(m => ab.add(m, "1"));
         ab.add(RefIDKey, id);

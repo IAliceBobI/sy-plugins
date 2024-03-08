@@ -524,10 +524,16 @@ export const siyuan = {
         const row = await siyuan.sqlOne(`select * from blocks where id='${id}'`);
         return row;
     },
-    async getRows(chilrenIDs: string[], selectedNeedID = "*", ands: string[] = []) {
+    async getRows(chilrenIDs: string[], selected = "*", ands: string[] = []): Promise<Block[]> {
+        selected = selected.trim();
+        if (selected != "*") {
+            const s = new Set(selected.split(","));
+            s.add("id");
+            selected = [...s.values()].join(",");
+        }
         const placeholders = chilrenIDs.map(id => `"${id}"`).join(",");
         const sqlBuilder = [];
-        sqlBuilder.push(`SELECT ${selectedNeedID} FROM blocks WHERE id IN (${placeholders})`);
+        sqlBuilder.push(`SELECT ${selected} FROM blocks WHERE id IN (${placeholders})`);
         ands.forEach(a => sqlBuilder.push("AND " + a));
         sqlBuilder.push("limit 100000000");
         const rowMap = (await siyuan.sql(sqlBuilder.join(" "))).reduce((m, r) => {

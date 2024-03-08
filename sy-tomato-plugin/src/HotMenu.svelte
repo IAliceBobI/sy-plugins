@@ -162,8 +162,8 @@
         const markdowns = (
             await siyuan.getRows(
                 (await siyuan.getChildBlocks(docID)).map((b) => b.id),
-                "id,markdown",
-                ["type NOT IN ('s')"],
+                "markdown",
+                ["type NOT IN ('s')", "markdown != ''", "markdown IS NOT NULL"],
             )
         )
             .filter((row) => !!row.markdown)
