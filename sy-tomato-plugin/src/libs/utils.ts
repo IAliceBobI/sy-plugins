@@ -747,8 +747,14 @@ export const siyuan = {
     async getRiffCards(page = 1, pageSize = 1000, deckID = ""): Promise<GetCardRet> {
         return siyuan.call("/api/riff/getRiffCards", { "id": deckID, page, pageSize });
     },
-    async getRiffCardsByBlockIDs(blockIDs: string[]): Promise<GetCardRet> {
-        return siyuan.call("/api/riff/getRiffCardsByBlockIDs", { blockIDs });
+    async getRiffCardsByBlockIDs(blockIDs: string[]) {
+        const ret: GetCardRet = await siyuan.call("/api/riff/getRiffCardsByBlockIDs", { blockIDs });
+        return ret?.blocks?.reduce((m, b) => {
+            const cs = m.get(b.id) ?? [];
+            cs.push(b);
+            m.set(b.id, cs);
+            return m;
+        }, new Map<string, GetCardRetBlock[]>());
     },
     async batchSetRiffCardsDueTimeByBlockID(cardDues: { id: string, due: string }[]) {
         let all = await siyuanCache.getRiffCardsAll(365 * 24 * 60 * 60 * 1000, 5000);
