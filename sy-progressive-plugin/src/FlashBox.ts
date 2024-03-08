@@ -208,7 +208,6 @@ class FlashBox {
 
     private createList(divs: HTMLElement[], cardType: CardType, srcPriority: string) {
         const tmp = [];
-        let idx = 0;
         let star = "* ";
         if (this.settings.cardIndent) {
             star = "  * ";
@@ -220,22 +219,26 @@ class FlashBox {
             if (!originPath) originPath = div.getAttribute(gconst.ORIGIN_HPATH);
             if (!refPath) refPath = div.getAttribute(gconst.REF_HPATH);
             if (!inBookIdx) inBookIdx = div.getAttribute(gconst.IN_BOOK_INDEX);
+        }
+        const attrBuilder = new AttrBuilder();
+        attrBuilder.add(gconst.IN_BOOK_INDEX, inBookIdx);
+        let idx = 0;
+        for (const div of divs) {
             div.removeAttribute(gconst.DATA_NODE_ID);
             const md = this.lute.BlockDOM2Md(div.outerHTML).replace("　　", "");
-            if (idx++ == 0) tmp.push("* " + md);
+            if (idx++ == 0) tmp.push(`* ${attrBuilder.build()} ${md}`);
             else tmp.push(star + md);
         }
-        const cardID = utils.NewNodeID();
         if (cardType === CardType.C) {
             tmp.push(star + "```");
         } else if (cardType === CardType.B) {
             tmp.push(star + ">");
         }
-        const attrBuilder = new AttrBuilder(cardID);
+        const cardID = utils.NewNodeID();
+        attrBuilder.add("id", cardID);
         attrBuilder.add(gconst.CARD_PRIORITY, srcPriority);
         attrBuilder.add(gconst.ORIGIN_HPATH, originPath);
         attrBuilder.add(gconst.REF_HPATH, refPath);
-        attrBuilder.add(gconst.IN_BOOK_INDEX, inBookIdx);
         tmp.push(attrBuilder.build());
         return { cardID, "markdown": tmp.join("\n") };
     }

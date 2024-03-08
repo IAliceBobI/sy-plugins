@@ -80,6 +80,6 @@ export class AttrBuilder {
         return this;
     }
     build() {
-        return `{: ${this.list.join(" ")} }`;
+        return `{: ${this.list.join(" ")}}`; // nospace dont touch
     }
 }

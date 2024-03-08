@@ -81,7 +81,6 @@ function getInBookIdx(div: HTMLElement) {
 export const sortDiv = (a: BacklinkSv, b: BacklinkSv) => {
     const abIdx = getInBookIdx(a.bkDiv);
     const bbIdx = getInBookIdx(b.bkDiv);
-    console.log(a.bkDiv, b.bkDiv)
     if (abIdx && bbIdx) {
         const [ai1, ai2] = abIdx;
         const [bi1, bi2] = bbIdx;
@@ -124,9 +123,7 @@ export async function insertBackLinks(docID: string) {
     }, []).join(SPACE.repeat(2));
     if (lnkLine) md.push(lnkLine + `\n{: ${STATICLINK}="1" }`);
 
-    console.log(backLinks.map(b => b.bkDiv.getAttribute(IN_BOOK_INDEX)))
     backLinks.sort(sortDiv);
-    console.log(backLinks.map(b => b.bkDiv.getAttribute(IN_BOOK_INDEX)))
     md = backLinks.reduce((list, { bk }) => {
         if (pushPath(bk, list, docID)) {
             pushDom(bk, lute, list);
