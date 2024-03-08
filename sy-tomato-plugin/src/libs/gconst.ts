@@ -59,6 +59,7 @@ export const REF_HIERARCHY = "custom-ref-hierarchy";
 export const ORIGIN_HPATH = "custom-origin-hpath";
 export const REF_HPATH = "custom-ref-hpath";
 export const PARAGRAPH_INDEX = "custom-paragraph-index";
+export const IN_BOOK_INDEX = "custom-in-book-index";
 export const CARD_PRIORITY = "custom-card-priority";
 export const CARD_PRIORITY_STOP = "custom-card-priority-stop";
 export const PROG_KEY_NOTE = "custom-prog-key-note";

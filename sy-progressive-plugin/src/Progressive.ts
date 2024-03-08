@@ -5,7 +5,7 @@ import { siyuan, timeUtil } from "../../sy-tomato-plugin/src/libs/utils";
 import * as utils from "../../sy-tomato-plugin/src/libs/utils";
 import * as help from "./helper";
 import * as constants from "./constants";
-import { BlockNodeEnum, DATA_NODE_ID, DATA_TYPE, MarkKey, PARAGRAPH_INDEX, PROG_ORIGIN_TEXT, PROG_PIECE_PREVIOUS, RefIDKey } from "../../sy-tomato-plugin/src/libs/gconst";
+import { BlockNodeEnum, DATA_NODE_ID, DATA_TYPE, IN_BOOK_INDEX, MarkKey, PARAGRAPH_INDEX, PROG_ORIGIN_TEXT, PROG_PIECE_PREVIOUS, RefIDKey } from "../../sy-tomato-plugin/src/libs/gconst";
 import { SplitSentence } from "./SplitSentence";
 import AddBook from "./AddBook.svelte";
 import ShowAllBooks from "./ShowAllBooks.svelte";
@@ -381,7 +381,7 @@ class Progressive {
             noteID = await help.createNote(bookInfo.boxID, bookInfo.bookID, piece, point);
             if (noteID) {
                 await this.addReadingBtns(bookID, noteID, point);
-                await this.fullfilContent(bookInfo.bookID, piecePre, piece, noteID);
+                await this.fullfilContent(point, bookInfo.bookID, piecePre, piece, noteID);
                 await this.addAndClose(await openTab({
                     app: this.plugin.app, doc: { id: noteID },
                     afterOpen: () => {
@@ -479,7 +479,7 @@ class Progressive {
                 const index = await this.storage.loadBookIndexIfNeeded(bookID);
                 const piecePre = index[point - 1] ?? [];
                 const piece = index[point] ?? [];
-                await this.fullfilContent(bookID, piecePre, piece, noteID);
+                await this.fullfilContent(point, bookID, piecePre, piece, noteID);
                 break;
             }
             case HtmlCBType.cleanOriginText:
@@ -548,7 +548,7 @@ class Progressive {
         await siyuan.appendBlock(btns.join("\n"), noteID);
     }
 
-    private async fullfilContent(bookID: string, piecePre: string[], piece: string[], noteID: string) {
+    private async fullfilContent(point: number, bookID: string, piecePre: string[], piece: string[], noteID: string) {
         this.storage.updateBookInfoTime(bookID);
         const info = await this.storage.booksInfo(bookID);
 
@@ -556,7 +556,7 @@ class Progressive {
         if (info.showLastBlock && piecePre.length > 0) {
             const lastID = piecePre[piecePre.length - 1];
             const { div } = await utils.getBlockDiv(lastID);
-            allContent.push(await this.copyBlock(info, lastID, div, [PROG_PIECE_PREVIOUS]));
+            allContent.push(await this.copyBlock(point - 1, info, lastID, div, [PROG_PIECE_PREVIOUS]));
         }
 
         if (info.autoSplitSentenceP) {
@@ -570,12 +570,12 @@ class Progressive {
             if (info.fastInsert !== false) {
                 const rows = (await siyuan.getRows(piece, "markdown")).filter(row => !!row.markdown);
                 for (const { id, markdown } of rows) {
-                    allContent.push(await this.fastCopyBlock(info, id, markdown, [PROG_ORIGIN_TEXT], idx));
+                    allContent.push(await this.fastCopyBlock(point, info, id, markdown, [PROG_ORIGIN_TEXT], idx));
                 }
             } else {
                 const divs = await Promise.all(piece.map(id => utils.getBlockDiv(id)));
                 for (const { id, div } of divs) {
-                    allContent.push(await this.copyBlock(info, id, div, [PROG_ORIGIN_TEXT], idx));
+                    allContent.push(await this.copyBlock(point, info, id, div, [PROG_ORIGIN_TEXT], idx));
                 }
             }
         }
@@ -585,9 +585,10 @@ class Progressive {
         }
     }
 
-    private async fastCopyBlock(info: BookInfo, id: string, markdown: string, mark: string[] = [], idx?: { i: number }) {
+    private async fastCopyBlock(point: number, info: BookInfo, id: string, markdown: string, mark: string[] = [], idx?: { i: number }) {
         const ab = new AttrBuilder();
         if (idx) {
+            ab.add(IN_BOOK_INDEX, `${point}#${idx.i}`);
             ab.add(PARAGRAPH_INDEX, String(idx.i));
             if (info.addIndex2paragraph) {
                 if (markdown.startsWith("#")
@@ -607,11 +608,12 @@ class Progressive {
         return markdown + `\n${ab.build()}`;
     }
 
-    private async copyBlock(info: BookInfo, id: string, tempDiv: HTMLDivElement, mark: string[] = [], idx?: { i: number }) {
+    private async copyBlock(point: number, info: BookInfo, id: string, tempDiv: HTMLDivElement, mark: string[] = [], idx?: { i: number }) {
         if (!tempDiv) return "";
         if (tempDiv.getAttribute(MarkKey)) return "";
         if (idx && tempDiv.getAttribute(DATA_TYPE) != BlockNodeEnum.NODE_HEADING) {
             tempDiv.setAttribute(PARAGRAPH_INDEX, String(idx.i));
+            tempDiv.setAttribute(IN_BOOK_INDEX, `${point}#${idx.i}`);
             if (info.addIndex2paragraph) {
                 const editableDiv = utils.getContenteditableElement(tempDiv);
                 if (editableDiv) {
