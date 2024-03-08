@@ -80,7 +80,7 @@
                 <th>序号</th>
                 <th>书名</th>
                 <th>进度</th>
-                <th>速度</th>
+                <th>快速</th>
                 <th>忽略</th>
                 <th>制卡</th>
                 <th>标号</th>
