@@ -597,9 +597,10 @@ class Progressive {
                 ) {
                     //
                 } else {
-                    markdown = `[${idx.i++}]` + markdown;
+                    markdown = `[${idx.i}]` + markdown;
                 }
             }
+           idx.i++;
         }
         mark.forEach(m => ab.add(m, "1"));
         ab.add(RefIDKey, id);
@@ -620,10 +621,10 @@ class Progressive {
                         // idxSpan.style.backgroundColor = "var(--b3-font-background3)";
                         // idxSpan.style.color = "var(--b3-font-color7)";
                         idxSpan.textContent = `[${idx.i}]`;
-                        idx.i++;
                     }
                 }
             }
+            idx.i++;
         }
         const txt = this.lute.BlockDOM2StdMd(tempDiv.outerHTML).replace(/\u200B/g, "").trim();
         if (!txt || txt == "*") return "";
