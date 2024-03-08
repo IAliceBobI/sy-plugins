@@ -80,6 +80,7 @@
                 <th>序号</th>
                 <th>书名</th>
                 <th>进度</th>
+                <th>分片</th>
                 <th>忽略</th>
                 <th>制卡</th>
                 <th>标号</th>
@@ -88,7 +89,7 @@
                 <th>断句t</th>
                 <th>断句i</th>
                 <th>阅读</th>
-                <th>分片</th>
+                <th>重分</th>
                 <th>删除</th>
             </tr>
         </thead>
@@ -110,6 +111,22 @@
                         {Math.ceil(
                             (book.bookInfo.point / book.bookIndex.length) * 100,
                         )}%
+                    </td>
+
+                    <td
+                        class="prog-style__id"
+                        title={"快速生成分片但一些书籍可能与原文样式有出入" +
+                            !!book.bookInfo.ignored}
+                    >
+                        <input
+                            type="checkbox"
+                            bind:checked={book.bookInfo.ignored}
+                            on:click={() =>
+                                prog.storage.setIgnoreBook(
+                                    book.bookID,
+                                    !book.bookInfo.ignored,
+                                )}
+                        />
                     </td>
 
                     <td
