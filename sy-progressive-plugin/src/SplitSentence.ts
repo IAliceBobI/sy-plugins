@@ -39,14 +39,11 @@ export class SplitSentence {
 
     async splitByIDs(chilrenIDs: string[]) {
         const bookInfo = await prog.storage.booksInfo(this.bookID);
-
-        const placeholders = chilrenIDs.map(id => `"${id}"`).join(",");
-        const sql = `SELECT id, content, ial, type, markdown FROM blocks 
-            WHERE id IN (${placeholders}) 
-            AND type NOT IN ('html', 't', 's') 
-            AND content != "" AND content IS NOT NULL limit 100000000`;
-        const rows = (await siyuan.sql(sql)).filter(b => !!b.markdown);
-
+        const rows = (await siyuan.getRows(chilrenIDs, [
+            "type NOT IN ('html', 't', 's')",
+            "content != ''",
+            "content IS NOT NULL",
+        ])).filter(row => !!row.markdown);
         this.textAreas = [];
         if (rows.length == 0) {
             await siyuan.pushMsg("目前找不到分片内容");

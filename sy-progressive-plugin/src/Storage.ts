@@ -53,6 +53,15 @@ export class Storage {
         }
     }
 
+    async setFastInsert(bookID: string, v: boolean) {
+        await this.updateBookInfo(bookID, { fastInsert: v } as BookInfo);
+        if (v) {
+            await siyuan.pushMsg("启用：快速生成分片");
+        } else {
+            await siyuan.pushMsg("禁用：快速生成分片");
+        }
+    }
+
     async setShowLastBlock(bookID: string, v: boolean) {
         await this.updateBookInfo(bookID, { showLastBlock: v } as any);
         if (v) {
@@ -124,6 +133,7 @@ export class Storage {
         if (typeof opt.autoCard === "boolean") info.autoCard = opt.autoCard;
         if (typeof opt.ignored === "boolean") info.ignored = opt.ignored;
         if (typeof opt.showLastBlock === "boolean") info.showLastBlock = opt.showLastBlock;
+        if (typeof opt.fastInsert === "boolean") info.fastInsert = opt.fastInsert;
         if (typeof opt.autoSplitSentenceP === "boolean") info.autoSplitSentenceP = opt.autoSplitSentenceP;
         if (typeof opt.autoSplitSentenceT === "boolean") info.autoSplitSentenceT = opt.autoSplitSentenceT;
         if (typeof opt.autoSplitSentenceI === "boolean") info.autoSplitSentenceI = opt.autoSplitSentenceI;
@@ -141,6 +151,7 @@ export class Storage {
                 point: 0,
                 bookID: docID,
                 time: await siyuan.currentTimeMs(),
+                fastInsert: true,
                 ignored: false,
                 showLastBlock: false,
                 autoCard: false,
@@ -161,6 +172,7 @@ export class Storage {
             }
             this.booksInfos()[docID] = info;
         }
+        if (info.fastInsert == null) info.fastInsert = true;
         return info;
     }
 

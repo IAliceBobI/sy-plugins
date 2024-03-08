@@ -36,6 +36,7 @@ type BookInfo = {
     point: number,
     bookID: string,
     ignored: boolean,
+    fastInsert: boolean,
     autoCard: boolean,
     showLastBlock: boolean,
     autoSplitSentenceP: boolean,

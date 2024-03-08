@@ -73,6 +73,7 @@ type BlockNodeType = "block-ref" | "NodeParagraph" | "NodeHeading" | "NodeDocume
 interface GetBlockMarkdownAndContent {
     markdown: string,
     content: string,
+    id: string,
 }
 
 interface GetChildBlocks {

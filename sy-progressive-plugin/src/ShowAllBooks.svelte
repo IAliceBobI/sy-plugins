@@ -80,7 +80,7 @@
                 <th>序号</th>
                 <th>书名</th>
                 <th>进度</th>
-                <th>分片</th>
+                <th>速度</th>
                 <th>忽略</th>
                 <th>制卡</th>
                 <th>标号</th>
@@ -115,16 +115,16 @@
 
                     <td
                         class="prog-style__id"
-                        title={"快速生成分片但一些书籍可能与原文样式有出入" +
-                            !!book.bookInfo.ignored}
+                        title={"快速生成分片[但一些书籍可能与原文样式有出入]" +
+                            !!book.bookInfo.fastInsert}
                     >
                         <input
                             type="checkbox"
-                            bind:checked={book.bookInfo.ignored}
+                            bind:checked={book.bookInfo.fastInsert}
                             on:click={() =>
-                                prog.storage.setIgnoreBook(
+                                prog.storage.setFastInsert(
                                     book.bookID,
-                                    !book.bookInfo.ignored,
+                                    !book.bookInfo.fastInsert,
                                 )}
                         />
                     </td>

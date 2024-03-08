@@ -524,6 +524,14 @@ export const siyuan = {
         const row = await siyuan.sqlOne(`select * from blocks where id='${id}'`);
         return row;
     },
+    async getRows(chilrenIDs: string[], ands: string[] = []) {
+        const placeholders = chilrenIDs.map(id => `"${id}"`).join(",");
+        const sqlBuilder = [];
+        sqlBuilder.push(`SELECT * FROM blocks WHERE id IN (${placeholders})`);
+        ands.forEach(a => sqlBuilder.push("AND " + a));
+        sqlBuilder.push("limit 100000000");
+        return siyuan.sql(sqlBuilder.join(" "));
+    },
     async getChildBlocks(id: string): Promise<GetChildBlocks[]> {
         return siyuan.call("/api/block/getChildBlocks", { id });
     },
@@ -607,7 +615,7 @@ export const siyuan = {
     },
     async getBlockMarkdownAndContent(id: string): Promise<GetBlockMarkdownAndContent> {
         const row = await siyuan.sqlOne(`select markdown, content from blocks where id="${id}"`);
-        return { markdown: row?.markdown ?? "", content: row?.content ?? "" };
+        return { markdown: row?.markdown ?? "", content: row?.content ?? "", id };
     },
     async transactions(doOperations: IOperation[], undoOperations: IOperation[] = []) {
         return siyuan.call("/api/transactions", {

@@ -11,6 +11,7 @@ import AddBook from "./AddBook.svelte";
 import ShowAllBooks from "./ShowAllBooks.svelte";
 import { Storage } from "./Storage";
 import { HtmlCBType } from "./constants";
+import { AttrBuilder } from "../../sy-tomato-plugin/src/libs/listUtils";
 
 class Progressive {
     private static readonly GLOBAL_THIS: Record<string, any> = globalThis;
@@ -566,15 +567,43 @@ class Progressive {
             await this.splitAndInsert(bookID, noteID, "t", piece);
         } else {
             const idx: { i: number } = { i: 1 };
-            const divs = await Promise.all(piece.map(id => utils.getBlockDiv(id)));
-            for (const { id, div } of divs) {
-                allContent.push(await this.copyBlock(info, id, div, [PROG_ORIGIN_TEXT], idx));
+            if (info.fastInsert !== false) {
+                const rows = (await siyuan.getRows(piece)).filter(row => !!row.markdown);
+                for (const { id, markdown } of rows) {
+                    allContent.push(await this.fastCopyBlock(info, id, markdown, [PROG_ORIGIN_TEXT], idx));
+                }
+            } else {
+                const divs = await Promise.all(piece.map(id => utils.getBlockDiv(id)));
+                for (const { id, div } of divs) {
+                    allContent.push(await this.copyBlock(info, id, div, [PROG_ORIGIN_TEXT], idx));
+                }
             }
         }
 
         if (allContent.length > 0) {
             await siyuan.insertBlockAsChildOf(allContent.filter(i => !!i).join("\n\n"), noteID);
         }
+    }
+
+    private async fastCopyBlock(info: BookInfo, id: string, markdown: string, mark: string[] = [], idx?: { i: number }) {
+        const ab = new AttrBuilder();
+        if (idx) {
+            ab.add(PARAGRAPH_INDEX, String(idx.i));
+            if (info.addIndex2paragraph) {
+                if (markdown.startsWith("#")
+                    || markdown.startsWith("!")
+                    || markdown.startsWith("[")
+                    || markdown.startsWith("*")
+                ) {
+                    //
+                } else {
+                    markdown = `[${idx.i++}]` + markdown;
+                }
+            }
+        }
+        mark.forEach(m => ab.add(m, "1"));
+        ab.add(RefIDKey, id);
+        return markdown + `\n${ab.build()}`;
     }
 
     private async copyBlock(info: BookInfo, id: string, tempDiv: HTMLDivElement, mark: string[] = [], idx?: { i: number }) {
