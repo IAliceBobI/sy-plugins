@@ -65,9 +65,8 @@ export async function cleanBackLinks(docID: string) {
 
 function getInBookIdx(div: HTMLElement) {
     if (!div) return;
-    console.log(div)
-    let abIdx = div.querySelector(`[${IN_BOOK_INDEX}]`)?.getAttribute(IN_BOOK_INDEX);
-    if (!abIdx) abIdx = div.getAttribute(IN_BOOK_INDEX);
+    let abIdx = div.getAttribute(IN_BOOK_INDEX);
+    if (!abIdx) abIdx = div.querySelector(`[${IN_BOOK_INDEX}]`)?.getAttribute(IN_BOOK_INDEX);
     const parts = abIdx?.split("#");
     if (parts?.length == 2) {
         const [a, b] = parts;
@@ -82,6 +81,7 @@ function getInBookIdx(div: HTMLElement) {
 export const sortDiv = (a: BacklinkSv, b: BacklinkSv) => {
     const abIdx = getInBookIdx(a.bkDiv);
     const bbIdx = getInBookIdx(b.bkDiv);
+    console.log(a.bkDiv, b.bkDiv)
     if (abIdx && bbIdx) {
         const [ai1, ai2] = abIdx;
         const [bi1, bi2] = bbIdx;
@@ -117,7 +117,6 @@ export async function insertBackLinks(docID: string) {
     });
     await Promise.all(backLinks.map((backLink) => path2div(backLink, docID, allRefs)));
     await Promise.all(backLinks.map((backLink) => scanAllRef(backLink.bkDiv, docID, allRefs)));
-    backLinks.sort(sortDiv);
 
     const lnkLine = [...allRefs.values()].reduce((md, i) => {
         md.push(`[[[${i.text}]]](siyuan://blocks/${i.id}?focus=1)^${i.count}^`);
@@ -125,7 +124,10 @@ export async function insertBackLinks(docID: string) {
     }, []).join(SPACE.repeat(2));
     if (lnkLine) md.push(lnkLine + `\n{: ${STATICLINK}="1" }`);
 
-    md = links.reduce((list, bk) => {
+    console.log(backLinks.map(b => b.bkDiv.getAttribute(IN_BOOK_INDEX)))
+    backLinks.sort(sortDiv);
+    console.log(backLinks.map(b => b.bkDiv.getAttribute(IN_BOOK_INDEX)))
+    md = backLinks.reduce((list, { bk }) => {
         if (pushPath(bk, list, docID)) {
             pushDom(bk, lute, list);
         }
