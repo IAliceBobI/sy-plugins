@@ -158,8 +158,17 @@
     }
 
     async function copyDoc() {
-        const md = await siyuan.copyStdMarkdown(docID);
-        await navigator.clipboard.writeText(md);
+        // const md = await siyuan.copyStdMarkdown(docID);
+        const markdowns = (
+            await siyuan.getRows(
+                (await siyuan.getChildBlocks(docID)).map((b) => b.id),
+                "id,markdown",
+                ["type NOT IN ('s')"],
+            )
+        )
+            .filter((row) => !!row.markdown)
+            .map((row) => row.markdown);
+        await navigator.clipboard.writeText(markdowns.join("\n"));
         destroy();
     }
 

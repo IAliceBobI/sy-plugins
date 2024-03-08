@@ -39,7 +39,7 @@ export class SplitSentence {
 
     async splitByIDs(chilrenIDs: string[]) {
         const bookInfo = await prog.storage.booksInfo(this.bookID);
-        const rows = (await siyuan.getRows(chilrenIDs, [
+        const rows = (await siyuan.getRows(chilrenIDs, "id, content, ial, type, markdown", [
             "type NOT IN ('html', 't', 's')",
             "content != ''",
             "content IS NOT NULL",
