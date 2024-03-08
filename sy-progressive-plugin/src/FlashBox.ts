@@ -220,7 +220,7 @@ class FlashBox {
             if (!refPath) refPath = div.getAttribute(gconst.REF_HPATH);
             if (!inBookIdx) inBookIdx = div.getAttribute(gconst.IN_BOOK_INDEX);
         }
-        const attrBuilder = new AttrBuilder();
+        let attrBuilder = new AttrBuilder("", true);
         attrBuilder.add(gconst.IN_BOOK_INDEX, inBookIdx);
         let idx = 0;
         for (const div of divs) {
@@ -235,7 +235,7 @@ class FlashBox {
             tmp.push(star + ">");
         }
         const cardID = utils.NewNodeID();
-        attrBuilder.add("id", cardID);
+        attrBuilder = new AttrBuilder(cardID);
         attrBuilder.add(gconst.CARD_PRIORITY, srcPriority);
         attrBuilder.add(gconst.ORIGIN_HPATH, originPath);
         attrBuilder.add(gconst.REF_HPATH, refPath);
