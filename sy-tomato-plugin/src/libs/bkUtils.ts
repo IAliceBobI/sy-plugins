@@ -1,7 +1,7 @@
 import { Lute } from "siyuan";
 import { isIterable } from "./functional";
-import { BACKLINK_CACHE_TIME, BLOCK_REF, BlockNodeEnum, DATA_ID, DATA_NODE_ID, DATA_SUBTYPE, DATA_TYPE, SPACE, STATICLINK, TOMATO_BK_STATIC } from "./gconst";
-import { NewLute, cleanDiv, dom2div, getID, set_href, siyuan, siyuanCache } from "./utils";
+import { BACKLINK_CACHE_TIME, BLOCK_REF, BlockNodeEnum, DATA_ID, DATA_NODE_ID, DATA_SUBTYPE, DATA_TYPE, IN_BOOK_INDEX, SPACE, STATICLINK, TOMATO_BK_STATIC } from "./gconst";
+import { NewLute, cleanDiv, dom2div, getID, isValidNumber, set_href, siyuan, siyuanCache } from "./utils";
 import { BKMaker } from "@/BackLinkBottomBox";
 
 // export function setReadonly(e: HTMLElement, all = false) {
@@ -63,6 +63,38 @@ export async function cleanBackLinks(docID: string) {
     }
 }
 
+function getInBookIdx(div: HTMLElement) {
+    const abIdx = div?.getAttribute(IN_BOOK_INDEX);
+    const parts = abIdx?.split("#");
+    if (parts?.length == 2) {
+        const [a, b] = parts;
+        let na = Number(a);
+        let nb = Number(b);
+        if (!isValidNumber(na)) na = 0;
+        if (!isValidNumber(nb)) nb = 0;
+        return [na, nb];
+    }
+}
+
+export const sortDiv = (a: BacklinkSv, b: BacklinkSv) => {
+    const abIdx = getInBookIdx(a.bkDiv);
+    const bbIdx = getInBookIdx(b.bkDiv);
+    if (abIdx && bbIdx) {
+        const [ai1, ai2] = abIdx;
+        const [bi1, bi2] = bbIdx;
+        if (ai1 == bi1) {
+            return ai2 - bi2;
+        } else {
+            return ai1 - bi1;
+        }
+    } else {
+        const dateA = a.bkDiv.getAttribute("updated");
+        const dateB = b.bkDiv.getAttribute("updated");
+        if (!dateA || !dateB) return 0;
+        return -dateA.localeCompare(dateB);
+    }
+};
+
 export async function insertBackLinks(docID: string) {
     const lute: Lute = NewLute();
     const allRefs: RefCollector = new Map();
@@ -82,6 +114,7 @@ export async function insertBackLinks(docID: string) {
     });
     await Promise.all(backLinks.map((backLink) => path2div(backLink, docID, allRefs)));
     await Promise.all(backLinks.map((backLink) => scanAllRef(backLink.bkDiv, docID, allRefs)));
+    backLinks.sort(sortDiv);
 
     const lnkLine = [...allRefs.values()].reduce((md, i) => {
         md.push(`[[[${i.text}]]](siyuan://blocks/${i.id}?focus=1)^${i.count}^`);

@@ -14,6 +14,7 @@
         icon,
         path2div,
         scanAllRef,
+        sortDiv,
     } from "./libs/bkUtils";
     import { Dialog, Protyle, openTab } from "siyuan";
     import { SEARCH_HELP } from "./constants";
@@ -81,13 +82,6 @@
         backLinks.forEach((backLink) =>
             scanAllRef(backLink.bkDiv, maker.docID, allRefs),
         );
-
-        const sortDiv = (a: BacklinkSv, b: BacklinkSv) => {
-            const dateA = a.bkDiv.getAttribute("updated");
-            const dateB = b.bkDiv.getAttribute("updated");
-            if (!dateA || !dateB) return 0;
-            return -dateA.localeCompare(dateB);
-        };
         backLinks.sort(sortDiv);
         backLinks = [...backLinks];
         linkItems = [...allRefs.values()];
