@@ -155,18 +155,21 @@ class Progressive {
                             || a == BlockNodeEnum.NODE_BLOCKQUOTE
                             || a == BlockNodeEnum.NODE_CODE_BLOCK;
                     }).forEach(e => {
-                        const { ref, idx } = findBack(e) || findForward(e);
+                        const { ref, idx, bIdx } = findBack(e) || findForward(e);
                         if (ref) {
                             const attr = {} as AttrType;
                             attr["custom-progref"] = ref;
                             if (idx) attr["custom-paragraph-index"] = idx;
+                            if (bIdx) attr["custom-in-book-index"] = bIdx;
                             setTimeout(() => {
                                 siyuan.setBlockAttrs(e.getAttribute(DATA_NODE_ID), attr);
                             }, 4000);
                             e.setAttribute(RefIDKey, ref);
+                            if (bIdx) e.setAttribute(IN_BOOK_INDEX, bIdx);
                             if (idx) e.setAttribute(PARAGRAPH_INDEX, idx);
                             e.querySelectorAll(`div[${DATA_NODE_ID}]`).forEach(e => {
                                 e.setAttribute(RefIDKey, ref);
+                                if (bIdx) e.setAttribute(IN_BOOK_INDEX, bIdx);
                                 if (idx) e.setAttribute(PARAGRAPH_INDEX, idx);
                             });
                         }
@@ -686,7 +689,8 @@ function findBack(e: Element) {
     for (let i = 0; i < 1000 && e; i++, e = e.previousElementSibling) {
         const ref = e.getAttribute(RefIDKey);
         const idx = e.getAttribute(PARAGRAPH_INDEX) ?? "";
-        if (ref) return { ref, idx };
+        const bIdx = e.getAttribute(IN_BOOK_INDEX) ?? "";
+        if (ref) return { ref, idx, bIdx };
     }
     return {};
 }
@@ -695,7 +699,8 @@ function findForward(e: Element) {
     for (let i = 0; i < 1000 && e; i++, e = e.nextElementSibling) {
         const ref = e.getAttribute(RefIDKey);
         const idx = e.getAttribute(PARAGRAPH_INDEX) ?? "";
-        if (ref) return { ref, idx };
+        const bIdx = e.getAttribute(IN_BOOK_INDEX) ?? "";
+        if (ref) return { ref, idx, bIdx };
     }
     return {};
 }

@@ -64,7 +64,10 @@ export async function cleanBackLinks(docID: string) {
 }
 
 function getInBookIdx(div: HTMLElement) {
-    const abIdx = div?.getAttribute(IN_BOOK_INDEX);
+    if (!div) return;
+    console.log(div)
+    let abIdx = div.querySelector(`[${IN_BOOK_INDEX}]`)?.getAttribute(IN_BOOK_INDEX);
+    if (!abIdx) abIdx = div.getAttribute(IN_BOOK_INDEX);
     const parts = abIdx?.split("#");
     if (parts?.length == 2) {
         const [a, b] = parts;

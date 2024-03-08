@@ -215,9 +215,11 @@ class FlashBox {
         }
         let originPath: string = "";
         let refPath: string = "";
+        let inBookIdx: string = "";
         for (const div of divs) {
             if (!originPath) originPath = div.getAttribute(gconst.ORIGIN_HPATH);
             if (!refPath) refPath = div.getAttribute(gconst.REF_HPATH);
+            if (!inBookIdx) inBookIdx = div.getAttribute(gconst.IN_BOOK_INDEX);
             div.removeAttribute(gconst.DATA_NODE_ID);
             const md = this.lute.BlockDOM2Md(div.outerHTML).replace("　　", "");
             if (idx++ == 0) tmp.push("* " + md);
@@ -233,6 +235,7 @@ class FlashBox {
         attrBuilder.add(gconst.CARD_PRIORITY, srcPriority);
         attrBuilder.add(gconst.ORIGIN_HPATH, originPath);
         attrBuilder.add(gconst.REF_HPATH, refPath);
+        attrBuilder.add(gconst.IN_BOOK_INDEX, inBookIdx);
         tmp.push(attrBuilder.build());
         return { cardID, "markdown": tmp.join("\n") };
     }

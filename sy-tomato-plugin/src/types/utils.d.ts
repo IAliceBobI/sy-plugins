@@ -68,6 +68,7 @@ type AttrType = {
     "custom-origin-hpath": string,
     "custom-ref-hpath": string,
     "custom-paragraph-index": string,
+    "custom-in-book-index": string,
     "custom-tomato-line-through": string,
     [key: string]: string,
 };
