@@ -56,7 +56,7 @@
     onMount(async () => {
         attrs[TOMATO_BK_IGNORE] = "1";
 
-        const s = events.selectedDivs(protyle);
+        const s = await events.selectedDivs(protyle);
         selectedIds = s.ids;
         element = s.element;
         docID = s.docID;
@@ -163,6 +163,7 @@
             await siyuan.getRows(
                 (await siyuan.getChildBlocks(docID)).map((b) => b.id),
                 "markdown",
+                true,
                 ["type NOT IN ('s')", "markdown != ''", "markdown IS NOT NULL"],
             )
         )
