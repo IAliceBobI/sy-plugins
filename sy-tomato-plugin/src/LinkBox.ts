@@ -1,8 +1,9 @@
 import { IProtyle, Lute, Plugin } from "siyuan";
 import { EventType, events } from "@/libs/Events";
 import * as gconst from "@/libs/gconst";
-import { siyuan } from "@/libs/utils";
+import { extractLinksFromElement, siyuan } from "@/libs/utils";
 import * as utils from "@/libs/utils";
+import { AttrBuilder } from "./libs/listUtils";
 
 class LinkBox {
     private plugin: Plugin;
@@ -49,67 +50,80 @@ class LinkBox {
         });
     }
 
-    private async turn2static(blockID: string, dom: HTMLElement, element: HTMLLIElement) {
-        let changed = false;
-        for (const e of dom.querySelectorAll("[data-type*=\"block-ref\"]")) {
-            const type = e.getAttribute("data-subtype");
+    private async addLink(element: HTMLElement, docName: string) {
+        const srcID = element.getAttribute(gconst.DATA_NODE_ID);
+        const ids = extractLinksFromElement(element);
+        if (ids.length <= 0) return;
+        const rows = await siyuan.getRows(ids, "id,type", false);
+        let insertCount = 0;
+        const newAnchors = new Map<string, string>;
+        const ops = [];
+        for (const { id, type } of rows) {
+            if (!id || !type) continue;
             if (type == "d") {
-                e.setAttribute("data-subtype", "s");
-                changed = true;
+                // const attrRows = await siyuan.sqlAttr(`select block_id from attributes 
+                //     where name="${gconst.LinkBoxDocLinkIAL}" and value = "${srcID}" and root_id="${id}"`);
+                // const row = attrRows.pop();
+                // attrRows.forEach(r => siyuan.addBookmark(r.block_id, "duplicated-bilink"));
+                // if (row?.block_id) {
+                //     //
+                // } else {
+                // }
+                const backLink = `${docName}::((${srcID} '${element.textContent}'))`;
+                const ab = new AttrBuilder("", true);
+                ab.add(gconst.LinkBoxDocLinkIAL, srcID);
+                await siyuan.appendBlock(`${backLink}\n${ab.build()}`, id);
+                newAnchors.set(id, ab.id);
+                insertCount++;
+            } else {
+                const { div } = await utils.getBlockDiv(id);
+                const ids = extractLinksFromElement(div);
+                if (ids.includes(srcID)) continue;
+                div.setAttribute(gconst.LinkBoxDocLinkIAL, srcID);
+                const editable = utils.getContenteditableElement(div);
+                const span = editable.appendChild(document.createElement("span"));
+                span.setAttribute(gconst.DATA_TYPE, gconst.BLOCK_REF);
+                span.setAttribute(gconst.DATA_SUBTYPE, "s");
+                span.setAttribute(gconst.DATA_ID, srcID);
+                span.textContent = `[${docName}]`;
+                ops.push(...siyuan.transUpdateBlocks([{ id, domStr: div.outerHTML }]));
+                insertCount++;
             }
         }
-        if (changed) {
-            const md = this.lute.BlockDOM2Md(dom.innerHTML);
-            await siyuan.safeUpdateBlock(blockID, md);
-            const e = element.querySelector(`[${gconst.DATA_NODE_ID}="${blockID}"]`) as HTMLElement;
+        await siyuan.transactions(ops);
+        await this.turn2static(srcID, element, newAnchors);
+        await siyuan.pushMsg(`插入链接：${insertCount}/${ids.length}`);
+    }
+
+    private async turn2static(srcID: string, element: HTMLElement, anchors: Map<string, string>) {
+        let changed1 = false;
+        let changed2 = false;
+        for (const e of element.querySelectorAll(`[${gconst.DATA_TYPE}~="${gconst.BLOCK_REF}"]`)) {
+            const type = e.getAttribute("data-subtype");
+            if (type == "d") {
+                e.setAttribute(gconst.DATA_SUBTYPE, "s");
+                changed1 = true;
+            }
+            const anchorID = anchors.get(e.getAttribute(gconst.DATA_ID));
+            if (anchorID) {
+                e.setAttribute(gconst.DATA_ID, anchorID);
+                changed2 = true;
+            }
+        }
+        if (changed1 || changed2) {
+            const md = this.lute.BlockDOM2Md(element.outerHTML);
+            await siyuan.safeUpdateBlock(srcID, md);
+            const e = element.querySelector(`[${gconst.DATA_NODE_ID}="${srcID}"]`) as HTMLElement;
             if (e) {
                 document.getSelection().collapse(e, 1);
             }
         }
-    }
-
-    async extractLinksFromDom(div: HTMLElement) {
-        const ids: Set<string> = new Set();
-        for (const e of div.querySelectorAll(`[${gconst.DATA_TYPE}*="${gconst.BLOCK_REF}"]`)) {
-            const id = e.getAttribute(gconst.DATA_ID);
-            ids.add(id);
+        if (changed1) {
+            await siyuan.pushMsg("改为静态引用");
         }
-        return [...ids.values()];
-    }
-
-    private async addLink(element: HTMLElement, docName: string) {
-        const ids = await this.extractLinksFromDom(element);
-        if (ids.length <= 0) return;
-        // events.protyle.updateTransaction();
-        // await this.turn2static(element);
-        const rows = await siyuan.getRows(ids, "id,type", false);
-        let insertCount = 0;
-        for (const { id, type } of rows) {
-            if (!id || !type) continue;
-            if (type == "d") {
-                await siyuan.sqlAttr(`select block_id from attributes where name="${gconst.LinkBoxDocLinkIAL}" and value = "${id}" and root_id="${id}"`)
-                // const row = await siyuan.sqlOne(`select id from blocks where ial like '%${getDocIAL(blockID)}%' and root_id="${id}"`);
-                if (!row?.id) {
-                    let backLink = `((${blockID} "[${docName}]")): ((${blockID} '${dom.innerText}'))`;
-                    backLink += "\n{: " + getDocIAL(blockID) + "}";
-                    await siyuan.insertBlockAsChildOf(backLink, id);
-                    insertCount++;
-                }
-            } else {
-                // const backLink = `((${blockID} "[${docName}]"))`;
-                // const { dom } = await siyuan.getBlockDOM(id);
-                // const md = this.lute.BlockDOM2Md(dom).trim();
-                // if (md.includes(backLink)) continue;
-                // const parts = md.split("\n");
-                // if (parts.length >= 2) {
-                //     const lastLine = parts[parts.length - 2];
-                //     parts[parts.length - 2] = lastLine + backLink;
-                // }
-                // await siyuan.safeUpdateBlock(id, parts.join("\n"));
-                // insertCount++;
-            }
+        if (changed2) {
+            await siyuan.pushMsg("修改引用位置");
         }
-        await siyuan.pushMsg(`插入链接：${insertCount}/${ids.length}`);
     }
 }
 

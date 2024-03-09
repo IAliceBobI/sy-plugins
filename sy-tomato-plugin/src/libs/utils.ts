@@ -3,6 +3,15 @@ import { v4 as uuid } from "uuid";
 import * as gconst from "./gconst";
 import * as moment from "moment-timezone";
 
+export function extractLinksFromElement(div: HTMLElement) {
+    const ids: Set<string> = new Set();
+    for (const e of div.querySelectorAll(`[${gconst.DATA_TYPE}~="${gconst.BLOCK_REF}"]`)) {
+        const id = e.getAttribute(gconst.DATA_ID);
+        ids.add(id);
+    }
+    return [...ids.values()];
+}
+
 export function getRandFloat0tox(x: number) {
     return Math.random() * x;
 }
@@ -542,7 +551,7 @@ export const siyuan = {
                 m.set(r.id, r);
                 return m;
             }, new Map());
-            return chilrenIDs.map(id => rowMap.get(id)).filter(i => !!i);
+            return chilrenIDs.map(id => rowMap.get(id)).filter(i => i != null);
         }
         return rows;
     },
@@ -632,6 +641,7 @@ export const siyuan = {
         return { markdown: row?.markdown ?? "", content: row?.content ?? "", id };
     },
     async transactions(doOperations: IOperation[], undoOperations: IOperation[] = []) {
+        if (doOperations.length == 0 && undoOperations.length == 0) return;
         return siyuan.call("/api/transactions", {
             session: Constants.SIYUAN_APPID,
             app: Constants.SIYUAN_APPID,

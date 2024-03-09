@@ -20,5 +20,5 @@ pnpm build
 
 Remove-Item -Path $targetDir -Recurse -Force -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Path $targetDir | Out-Null
-Copy-Item -Path "$projDir/dist/*" -Destination $targetDir -Recurse -Force
+Copy-Item -Path "$projDir/dist/*" -Destination $targetDir -Recurse -Force -ErrorAction SilentlyContinue
 Set-Location $scriptDir
