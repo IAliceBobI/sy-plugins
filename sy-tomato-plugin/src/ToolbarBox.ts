@@ -51,15 +51,17 @@ async function locateDoc() {
     if (docTreeBtn) {
         if (!docTreeBtn.classList.contains("dock__item--active")) {
             docTreeBtn.click();
+            const collapseBtn = document.querySelector('[data-type="collapse"][aria-label*="折叠"]') as HTMLButtonElement;
+            if (collapseBtn) {
+                collapseBtn.click();
+            }
+            const focusBtn = document.querySelector('[data-type="focus"][aria-label*="定位打开的文档"]') as HTMLButtonElement;
+            if (focusBtn) {
+                focusBtn.click();
+            }
+        } else {
+            docTreeBtn.click();
         }
-    }
-    const collapseBtn = document.querySelector('[data-type="collapse"][aria-label*="折叠"]') as HTMLButtonElement;
-    if (collapseBtn) {
-        collapseBtn.click();
-    }
-    const focusBtn = document.querySelector('[data-type="focus"][aria-label*="定位打开的文档"]') as HTMLButtonElement;
-    if (focusBtn) {
-        focusBtn.click();
     }
 }
 
