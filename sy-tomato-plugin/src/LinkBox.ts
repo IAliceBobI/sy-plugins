@@ -1,21 +1,8 @@
-import { IProtyle, Lute, Plugin } from "siyuan";
+import { Lute, Plugin } from "siyuan";
 import { EventType, events } from "@/libs/Events";
 import * as gconst from "@/libs/gconst";
 import { siyuan } from "@/libs/utils";
 import * as utils from "@/libs/utils";
-import { LinkBoxDocLinkIAL } from "@/libs/gconst";
-
-async function getDocNameFromProtyle(protyle: IProtyle, blockID: string) {
-    let docName = protyle?.title?.editElement?.textContent ?? "";
-    if (!docName) {
-        docName = await siyuan.getDocNameByBlockID(blockID);
-    }
-    return docName;
-}
-
-function getDocIAL(blockID: string) {
-    return `${LinkBoxDocLinkIAL}="${blockID}"`;
-}
 
 class LinkBox {
     private plugin: Plugin;
@@ -130,17 +117,9 @@ class LinkBox {
         }
         await siyuan.pushMsg(`插入链接：${insertCount}/${ids.size}`);
     }
-
-    private getSelectedIDs(protyle: any) {
-        const multiLine = protyle?.element?.querySelectorAll(`.${gconst.PROTYLE_WYSIWYG_SELECT}`);
-        const ids = [];
-        for (const div of multiLine) {
-            const id = div.getAttribute(gconst.DATA_NODE_ID);
-            div.classList.remove(gconst.PROTYLE_WYSIWYG_SELECT);
-            ids.push(id);
-        }
-        return ids;
-    }
+    // function getDocIAL(blockID: string) {
+    //     return `${LinkBoxDocLinkIAL}="${blockID}"`;
+    // }
 }
 
 export const linkBox = new LinkBox();
