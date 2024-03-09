@@ -1,4 +1,4 @@
-import { Lute, Plugin } from "siyuan";
+import { IProtyle, Lute, Plugin } from "siyuan";
 import { EventType, events } from "@/libs/Events";
 import * as gconst from "@/libs/gconst";
 import { siyuan } from "@/libs/utils";
@@ -15,7 +15,7 @@ class LinkBox {
         this.plugin.addCommand({
             langKey: "bilink",
             hotkey: "⌥/",
-            editorCallback: async (protyle) => {
+            editorCallback: async (protyle: IProtyle) => {
                 const { selected, docName } = await events.selectedDivs(protyle);
                 for (const div of selected)
                     await this.addLink(div, docName);
@@ -68,33 +68,27 @@ class LinkBox {
         }
     }
 
-    async extractLinksFromDom(blockID: string) {
-        const { dom } = await siyuan.getBlockDOM(blockID);
-        const div = document.createElement("div") as HTMLElement;
-        div.innerHTML = dom;
+    async extractLinksFromDom(div: HTMLElement) {
         const ids: Set<string> = new Set();
-        for (const e of div.querySelectorAll("[data-type*=\"block-ref\"]")) {
+        for (const e of div.querySelectorAll(`[${gconst.DATA_TYPE}*="${gconst.BLOCK_REF}"]`)) {
             const id = e.getAttribute(gconst.DATA_ID);
             ids.add(id);
         }
-        return { ids, dom: div };
+        return [...ids.values()];
     }
 
     private async addLink(element: HTMLElement, docName: string) {
-        console.log(element, docName)
-        return;
-        const { ids, dom } = await this.extractLinksFromDom(blockID);
-        if (ids.size <= 0) return;
-        await this.turn2static(blockID, dom, element);
-        const idRows = utils.chunks(await Promise.all(Array.from(ids.keys()).map((id) => {
-            return [id, siyuan.sqlOne(`select type from blocks where id="${id}"`)];
-        }).flat()), 2) as [string, Block][];
+        const ids = await this.extractLinksFromDom(element);
+        if (ids.length <= 0) return;
+        // events.protyle.updateTransaction();
+        // await this.turn2static(element);
+        const rows = await siyuan.getRows(ids, "id,type", false);
         let insertCount = 0;
-        for (const [id, row] of idRows) {
-            const idType = row?.type ?? "";
-            if (!idType) continue;
-            if (idType == "d") {
-                const row = await siyuan.sqlOne(`select id from blocks where ial like '%${getDocIAL(blockID)}%' and root_id="${id}"`);
+        for (const { id, type } of rows) {
+            if (!id || !type) continue;
+            if (type == "d") {
+                await siyuan.sqlAttr(`select block_id from attributes where name="${gconst.LinkBoxDocLinkIAL}" and value = "${id}" and root_id="${id}"`)
+                // const row = await siyuan.sqlOne(`select id from blocks where ial like '%${getDocIAL(blockID)}%' and root_id="${id}"`);
                 if (!row?.id) {
                     let backLink = `((${blockID} "[${docName}]")): ((${blockID} '${dom.innerText}'))`;
                     backLink += "\n{: " + getDocIAL(blockID) + "}";
@@ -102,24 +96,21 @@ class LinkBox {
                     insertCount++;
                 }
             } else {
-                const backLink = `((${blockID} "[${docName}]"))`;
-                const { dom } = await siyuan.getBlockDOM(id);
-                const md = this.lute.BlockDOM2Md(dom).trim();
-                if (md.includes(backLink)) continue;
-                const parts = md.split("\n");
-                if (parts.length >= 2) {
-                    const lastLine = parts[parts.length - 2];
-                    parts[parts.length - 2] = lastLine + backLink;
-                }
-                await siyuan.safeUpdateBlock(id, parts.join("\n"));
-                insertCount++;
+                // const backLink = `((${blockID} "[${docName}]"))`;
+                // const { dom } = await siyuan.getBlockDOM(id);
+                // const md = this.lute.BlockDOM2Md(dom).trim();
+                // if (md.includes(backLink)) continue;
+                // const parts = md.split("\n");
+                // if (parts.length >= 2) {
+                //     const lastLine = parts[parts.length - 2];
+                //     parts[parts.length - 2] = lastLine + backLink;
+                // }
+                // await siyuan.safeUpdateBlock(id, parts.join("\n"));
+                // insertCount++;
             }
         }
-        await siyuan.pushMsg(`插入链接：${insertCount}/${ids.size}`);
+        await siyuan.pushMsg(`插入链接：${insertCount}/${ids.length}`);
     }
-    // function getDocIAL(blockID: string) {
-    //     return `${LinkBoxDocLinkIAL}="${blockID}"`;
-    // }
 }
 
 export const linkBox = new LinkBox();
