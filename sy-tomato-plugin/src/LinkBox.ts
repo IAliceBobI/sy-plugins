@@ -3,6 +3,7 @@ import { EventType, events } from "@/libs/Events";
 import * as gconst from "@/libs/gconst";
 import { siyuan } from "@/libs/utils";
 import * as utils from "@/libs/utils";
+import { LinkBoxDocLinkIAL } from "@/libs/gconst";
 
 async function getDocNameFromProtyle(protyle: IProtyle, blockID: string) {
     let docName = protyle?.title?.editElement?.textContent ?? "";
@@ -11,8 +12,6 @@ async function getDocNameFromProtyle(protyle: IProtyle, blockID: string) {
     }
     return docName;
 }
-
-const LinkBoxDocLinkIAL = "custom-linkboxdoclinkial";
 
 function getDocIAL(blockID: string) {
     return `${LinkBoxDocLinkIAL}="${blockID}"`;
@@ -30,12 +29,9 @@ class LinkBox {
             langKey: "bilink",
             hotkey: "⌥/",
             editorCallback: async (protyle) => {
-                const ids = this.getSelectedIDs(protyle);
-                const blockID = events.lastBlockID;
-                if (ids.length == 0) ids.push(events.lastBlockID);
-                const docName = await getDocNameFromProtyle(protyle, blockID);
-                for (const id of ids)
-                    await this.addLink(id, docName, protyle?.wysiwyg?.element);
+                const { selected, docName } = await events.selectedDivs(protyle);
+                for (const div of selected)
+                    await this.addLink(div, docName);
             },
         });
         this.plugin.eventBus.on(EventType.open_menu_content, async ({ detail }) => {
@@ -45,8 +41,9 @@ class LinkBox {
                 icon: "iconLink",
                 accelerator: "⌥/",
                 click: async () => {
-                    const blockID = detail?.element?.getAttribute("data-node-id") ?? "";
-                    if (blockID) this.addLink(blockID, await getDocNameFromProtyle(detail?.protyle, blockID), detail?.protyle?.wysiwyg?.element);
+                    const { selected, docName } = await events.selectedDivs(detail.protyle as any);
+                    for (const div of selected)
+                        await this.addLink(div, docName);
                 },
             });
         });
@@ -58,14 +55,9 @@ class LinkBox {
             iconHTML: "🔗",
             label: this.plugin.i18n.bilink,
             click: async () => {
-                let docName = "";
-                for (const element of detail.blockElements) {
-                    const blockID = utils.getID(element);
-                    if (!docName) docName = await getDocNameFromProtyle(detail?.protyle, blockID);
-                    if (blockID) {
-                        this.addLink(blockID, docName, detail?.protyle?.wysiwyg?.element);
-                    }
-                }
+                const { selected, docName } = await events.selectedDivs(detail.protyle as any);
+                for (const div of selected)
+                    await this.addLink(div, docName);
             }
         });
     }
@@ -101,7 +93,9 @@ class LinkBox {
         return { ids, dom: div };
     }
 
-    private async addLink(blockID: string, docName: string, element: HTMLLIElement) {
+    private async addLink(element: HTMLElement, docName: string) {
+        console.log(element, docName)
+        return;
         const { ids, dom } = await this.extractLinksFromDom(blockID);
         if (ids.size <= 0) return;
         await this.turn2static(blockID, dom, element);

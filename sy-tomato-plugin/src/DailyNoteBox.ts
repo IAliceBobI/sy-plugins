@@ -155,7 +155,7 @@ class DailyNoteBox {
         if (!boxID) boxID = events.boxID;
         try {
             const { id: docID } = await siyuan.createDailyNote(boxID);
-            const { ids } = events.selectedDivs(protyle);
+            const { ids } = await events.selectedDivs(protyle);
             await siyuan.moveBlocksAsChild(ids, docID);
         } catch (_e) {
             await siyuan.pushMsg(`您配置的笔记本'${boxID}'是否打开？`);

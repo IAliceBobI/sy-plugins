@@ -20,7 +20,7 @@ class ReadingPointBox {
             langKey: "addBookmark",
             hotkey: "⌘2",
             editorCallback: async (protyle: IProtyle) => {
-                const { selected, ids } = events.selectedDivs(protyle);
+                const { selected, ids } = await events.selectedDivs(protyle);
                 for (const [div, id] of zip2ways(selected, ids)) {
                     this.addReadPointLock(id, div);
                     break;
@@ -31,7 +31,7 @@ class ReadingPointBox {
             langKey: "addBookmarkWithoutENV",
             hotkey: "⌘7",
             editorCallback: async (protyle: IProtyle) => {
-                const { selected, ids } = events.selectedDivs(protyle);
+                const { selected, ids } = await events.selectedDivs(protyle);
                 for (const [div, id] of zip2ways(selected, ids)) {
                     this.addReadPointLock(id, div, true);
                     break;
