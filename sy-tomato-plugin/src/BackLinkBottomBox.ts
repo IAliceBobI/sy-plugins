@@ -55,12 +55,7 @@ export class BKMaker {
         }
         this.noPadding(this.container);
         if (this.protyle?.id === protyle.id) {
-            await navigator.locks.request(this.lockName, { ifAvailable: true }, async (lock) => {
-                if (this.refreshBK && lock) {
-                    await this.refreshBK();
-                    await sleep(5000);
-                }
-            });
+            await this.refreshBacklinks();
             return;
         }
         this.item = item;
@@ -89,6 +84,15 @@ export class BKMaker {
                     integrateCounting(this);
                     deleteSelf(divs);
                 }
+            }
+        });
+    }
+
+    async refreshBacklinks() {
+        await navigator.locks.request(this.lockName, { ifAvailable: true }, async (lock) => {
+            if (this.refreshBK && lock) {
+                await this.refreshBK();
+                await sleep(5000);
             }
         });
     }
@@ -141,7 +145,7 @@ class BackLinkBottomBox {
     public bkProtyleCache: MaxCache<Protyle> = new MaxCache(CACHE_LIMIT * 2, (t) => { t.destroy(); });
     private makerCache: MaxCache<BKMaker> = new MaxCache(CACHE_LIMIT);
     private docID: string;
-    // private keepAliveID: any;
+    private keepAliveID: any;
     async onload(plugin: Plugin) {
         this.plugin = plugin;
         this.settingCfg = (plugin as any).settingCfg;
@@ -219,14 +223,13 @@ class BackLinkBottomBox {
                         if (await isBookCard(nextDocID)) return;
                         const maker = this.makerCache.getOrElse(nextDocID, () => { return new BKMaker(this, nextDocID); });
                         maker.doTheWork(item, protyle);
-                        // if (this.docID != nextDocID) {
-                        //     this.docID = nextDocID;
-                        //     // keep
-                        //     clearInterval(this.keepAliveID);
-                        //     this.keepAliveID = setInterval(async () => {
-                        //         await maker.findOrLoadFromCache();
-                        //     }, 2000);
-                        // }
+                        if (this.docID != nextDocID) {
+                            this.docID = nextDocID;
+                            clearInterval(this.keepAliveID);
+                            this.keepAliveID = setInterval(async () => {
+                                await maker.refreshBacklinks();
+                            }, 5000);
+                        }
                     }
                 });
             }
