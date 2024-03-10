@@ -26,41 +26,46 @@ class ToolbarBox {
             position: "left",
             callback: refreshVirRef,
         });
-        this.plugin.addTopBar({
-            icon: "iconFocus",
-            title: this.plugin.i18n.locateDoc,
-            position: "left",
-            callback: locateDoc,
-        });
-
         this.plugin.addCommand({
             langKey: "refreshVirRef",
             hotkey: "",
             callback: refreshVirRef,
         });
+
+        this.plugin.addTopBar({
+            icon: "iconFocus",
+            title: this.plugin.i18n.locateDoc,
+            position: "left",
+            callback: () => { locateDoc(); },
+        });
         this.plugin.addCommand({
             langKey: "locateDoc",
             hotkey: "⌥1",
-            callback: locateDoc,
+            callback: () => { locateDoc(true); },
         });
     }
 }
 
-async function locateDoc() {
+function gotoFile() {
+    const collapseBtn = document.querySelector('[data-type="collapse"][aria-label*="折叠"]') as HTMLButtonElement;
+    collapseBtn?.click();
+    const focusBtn = document.querySelector('[data-type="focus"][aria-label*="定位打开的文档"]') as HTMLButtonElement;
+    focusBtn?.click();
+}
+
+function locateDoc(close = false) {
     const docTreeBtn = document.querySelector('[data-title="文档树"][aria-label*="文档树"]') as HTMLButtonElement;
     if (docTreeBtn) {
-        if (!docTreeBtn.classList.contains("dock__item--active")) {
+        const opened = docTreeBtn.classList.contains("dock__item--active");
+        if (!opened) {
             docTreeBtn.click();
-            const collapseBtn = document.querySelector('[data-type="collapse"][aria-label*="折叠"]') as HTMLButtonElement;
-            if (collapseBtn) {
-                collapseBtn.click();
-            }
-            const focusBtn = document.querySelector('[data-type="focus"][aria-label*="定位打开的文档"]') as HTMLButtonElement;
-            if (focusBtn) {
-                focusBtn.click();
-            }
+            gotoFile();
         } else {
-            docTreeBtn.click();
+            if (close) {
+                docTreeBtn.click();
+            } else {
+                gotoFile();
+            }
         }
     }
 }
