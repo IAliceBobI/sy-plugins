@@ -79,6 +79,8 @@ class LinkBox {
                 insertCount++;
             } else {
                 const { div } = await utils.getBlockDiv(id);
+                const idInIAL = div.getAttribute(gconst.LinkBoxDocLinkIAL);
+                if (idInIAL == srcID) continue;
                 const ids = extractLinksFromElement(div);
                 if (ids.includes(srcID)) continue;
                 div.setAttribute(gconst.LinkBoxDocLinkIAL, srcID);
