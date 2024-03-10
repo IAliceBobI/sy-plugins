@@ -92,7 +92,6 @@ export class BKMaker {
         await navigator.locks.request(this.lockName, { ifAvailable: true }, async (lock) => {
             if (this.refreshBK && lock) {
                 await this.refreshBK();
-                await sleep(1200);
             }
         });
     }
