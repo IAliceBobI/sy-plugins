@@ -227,6 +227,7 @@ class BackLinkBottomBox {
                             this.docID = nextDocID;
                             clearInterval(this.keepAliveID);
                             this.keepAliveID = setInterval(async () => {
+                                await maker.findOrLoadFromCache();
                                 await maker.refreshBacklinks();
                             }, 5000);
                         }
