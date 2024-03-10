@@ -7,7 +7,7 @@ import {
     isBkOff,
     shouldInsertDiv
 } from "./libs/bkUtils";
-import { isCardUI, isValidNumber, siyuanCache } from "./libs/utils";
+import { isCardUI, isValidNumber, siyuanCache, sleep } from "./libs/utils";
 import { MarkKey, TEMP_CONTENT, TOMATO_BK_IGNORE } from "./libs/gconst";
 import BackLinkBottom from "./BackLinkBottom.svelte";
 
@@ -23,6 +23,7 @@ export class BKMaker {
     public container: HTMLElement;
     public blBox: BackLinkBottomBox;
     public docID: string;
+    public lockName: string;
     public item: HTMLElement;
     public protyle: IProtyle;
     public mentionCounting: HTMLSpanElement;
@@ -31,6 +32,8 @@ export class BKMaker {
     public label: HTMLLabelElement;
     public settingCfg: TomatoSettings;
     public plugin: Plugin;
+    public sv: BackLinkBottom;
+    public refreshBK: () => Promise<void>;
 
     constructor(blBox: BackLinkBottomBox, docID: string) {
         this.mentionCount = blBox.settingCfg["back-link-mention-count"] ?? 1;
@@ -41,6 +44,7 @@ export class BKMaker {
         this.mentionCounting.classList.add("b3-label__text");
         this.settingCfg = blBox.settingCfg;
         this.plugin = blBox.plugin;
+        this.lockName = "BackLinkBottomBox-BKMakerLock" + this.docID;
     }
 
     async doTheWork(item: HTMLElement, protyle: IProtyle) {
@@ -49,15 +53,23 @@ export class BKMaker {
             this.container?.parentElement?.removeChild(this.container);
             return;
         }
+        this.noPadding(this.container);
+        if (this.protyle?.id === protyle.id) {
+            await navigator.locks.request(this.lockName, { ifAvailable: true }, async (lock) => {
+                if (this.refreshBK && lock) {
+                    await this.refreshBK();
+                }
+            });
+            return;
+        }
         this.item = item;
         this.protyle = protyle;
         const divs = await this.findOrLoadFromCache();
-        await navigator.locks.request("BackLinkBottomBox-BKMakerLock" + this.docID, { ifAvailable: true }, async (lock) => {
-            this.protyle.wysiwyg.element.style.paddingBottom = "0px";
+        await navigator.locks.request(this.lockName, { ifAvailable: true }, async (lock) => {
             if (lock && !this.shouldFreeze && await shouldInsertDiv(getLastElementID(this.item), this.docID)) {
                 // retrieve new data
                 this.container = document.createElement("div");
-                new BackLinkBottom({
+                this.sv = new BackLinkBottom({
                     target: this.container,
                     props: {
                         maker: this,
@@ -69,6 +81,7 @@ export class BKMaker {
                 // put new data into cache
                 this.blBox.divCache.add(this.docID, this.container);
 
+                await sleep(2000);
                 if (!this.shouldFreeze) {
                     // substitute old for new
                     await this.insertBkPanel(this.container);
@@ -81,16 +94,22 @@ export class BKMaker {
 
     private async insertBkPanel(div: HTMLElement) {
         if (!this.disabled) {
+            this.noPadding(div);
+            this.protyle.wysiwyg.element.insertAdjacentElement("afterend", div);
+        }
+    }
+
+    private noPadding(div: HTMLElement) {
+        if (this.protyle) {
             this.protyle.wysiwyg.element.style.paddingBottom = "0px";
             div.style.paddingLeft = this.protyle.wysiwyg.element.style.paddingLeft;
             div.style.paddingRight = this.protyle.wysiwyg.element.style.paddingRight;
-            this.protyle.wysiwyg.element.insertAdjacentElement("afterend", div);
         }
     }
 
     async findOrLoadFromCache() {
         if (!this.disabled) {
-            return navigator.locks.request("BackLinkBottomBox-BKMakerLock" + this.docID, { ifAvailable: true }, async (lock) => {
+            return navigator.locks.request(this.lockName, { ifAvailable: true }, async (lock) => {
                 const divs = Array.from(this.item?.parentElement?.querySelectorAll(`[${BKMAKER_ADD}="1"]`)?.values() ?? []);
                 if (lock && await shouldInsertDiv(getLastElementID(this.item), this.docID)) {
                     let oldEle: HTMLElement;
@@ -121,7 +140,7 @@ class BackLinkBottomBox {
     public bkProtyleCache: MaxCache<Protyle> = new MaxCache(CACHE_LIMIT * 2, (t) => { t.destroy(); });
     private makerCache: MaxCache<BKMaker> = new MaxCache(CACHE_LIMIT);
     private docID: string;
-    private keepAliveID: any;
+    // private keepAliveID: any;
     async onload(plugin: Plugin) {
         this.plugin = plugin;
         this.settingCfg = (plugin as any).settingCfg;
@@ -199,14 +218,14 @@ class BackLinkBottomBox {
                         if (await isBookCard(nextDocID)) return;
                         const maker = this.makerCache.getOrElse(nextDocID, () => { return new BKMaker(this, nextDocID); });
                         maker.doTheWork(item, protyle);
-                        if (this.docID != nextDocID) {
-                            this.docID = nextDocID;
-                            // keep
-                            clearInterval(this.keepAliveID);
-                            this.keepAliveID = setInterval(() => {
-                                maker.findOrLoadFromCache();
-                            }, 2000);
-                        }
+                        // if (this.docID != nextDocID) {
+                        //     this.docID = nextDocID;
+                        //     // keep
+                        //     clearInterval(this.keepAliveID);
+                        //     this.keepAliveID = setInterval(async () => {
+                        //         await maker.findOrLoadFromCache();
+                        //     }, 2000);
+                        // }
                     }
                 });
             }

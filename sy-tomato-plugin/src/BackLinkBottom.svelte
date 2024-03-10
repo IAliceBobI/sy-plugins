@@ -44,6 +44,7 @@
         queryableElementAttr[QUERYABLE_ELEMENT] = "1";
         autoRefreshChecked = !maker.shouldFreeze;
         await getBackLinks();
+        maker.refreshBK = getBackLinks;
     });
 
     onDestroy(() => {});
@@ -213,7 +214,7 @@
 
 <!-- https://learn.svelte.dev/tutorial/if-blocks -->
 <div>
-    {#each linkItems as { text, id, count, attrs }}
+    {#each linkItems as { text, id, count, attrs } (id)}
         <label {...attrs} class="b3-label b3-label__text b3-label--noborder">
             <button
                 {...attrs}
@@ -277,7 +278,7 @@
     <hr />
 </div>
 <div class="bk_protyle">
-    {#each backLinks as backLink}
+    {#each backLinks as backLink (backLink.id)}
         <div id={backLink.id} {...queryableElementAttr} {...backLink.attrs}>
             <div class="bk_one_line">
                 <div class="fn__flex-column">
@@ -309,7 +310,7 @@
                     >
                 </div>
                 <div>
-                    {#each backLink.bk.blockPaths as blockPath, i}
+                    {#each backLink.bk.blockPaths as blockPath, i (blockPath.id)}
                         <span
                             {...backLink.attrs}
                             title={blockPath.name}
