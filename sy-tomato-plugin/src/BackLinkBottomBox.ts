@@ -81,7 +81,7 @@ export class BKMaker {
                 // put new data into cache
                 this.blBox.divCache.add(this.docID, this.container);
 
-                await sleep(2000);
+                await sleep(1000);
                 if (!this.shouldFreeze) {
                     // substitute old for new
                     await this.insertBkPanel(this.container);
