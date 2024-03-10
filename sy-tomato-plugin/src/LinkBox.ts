@@ -17,9 +17,9 @@ class LinkBox {
             langKey: "bilink",
             hotkey: "⌥/",
             editorCallback: async (protyle: IProtyle) => {
-                const { selected, docName } = await events.selectedDivs(protyle);
+                const { selected, docName, docID } = await events.selectedDivs(protyle);
                 for (const div of selected)
-                    await this.addLink(div, docName);
+                    await this.addLink(div, docID, docName);
             },
         });
         this.plugin.eventBus.on(EventType.open_menu_content, async ({ detail }) => {
@@ -29,9 +29,9 @@ class LinkBox {
                 icon: "iconLink",
                 accelerator: "⌥/",
                 click: async () => {
-                    const { selected, docName } = await events.selectedDivs(detail.protyle as any);
+                    const { selected, docName, docID } = await events.selectedDivs(detail.protyle as any);
                     for (const div of selected)
-                        await this.addLink(div, docName);
+                        await this.addLink(div, docID, docName);
                 },
             });
         });
@@ -43,14 +43,14 @@ class LinkBox {
             iconHTML: "🔗",
             label: this.plugin.i18n.bilink,
             click: async () => {
-                const { selected, docName } = await events.selectedDivs(detail.protyle as any);
+                const { selected, docName, docID } = await events.selectedDivs(detail.protyle as any);
                 for (const div of selected)
-                    await this.addLink(div, docName);
+                    await this.addLink(div, docID, docName);
             }
         });
     }
 
-    private async addLink(element: HTMLElement, docName: string) {
+    private async addLink(element: HTMLElement, docID: string, docName: string) {
         const srcID = element.getAttribute(gconst.DATA_NODE_ID);
         const ids = extractLinksFromElement(element);
         if (ids.length <= 0) return;
@@ -70,7 +70,7 @@ class LinkBox {
                 // } else {
                 // }
                 const editable = utils.getContenteditableElement(element);
-                const backLink = `⚓${docName}::((${srcID} '${editable.textContent}'))`;
+                const backLink = `⚓((${docID} '${docName}'))::((${srcID} '${editable.textContent}'))`;
                 const ab = new AttrBuilder("", true);
                 ab.add(gconst.LinkBoxDocLinkIAL, srcID);
                 // TODO: 插入位置，可选一个书签位置。方便写作时，大量插入到中间。
