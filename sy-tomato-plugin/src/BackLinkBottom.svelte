@@ -123,12 +123,14 @@
 
     /** @type {import('svelte/action').Action}  */
     function mountProtyle(node: HTMLElement, backLink: BacklinkSv) {
+        node.style.minHeight = "auto";
         const len = backLink.bk.blockPaths.length;
         if (len > 0) {
             const blockId = backLink.bk.blockPaths[len - 1].id;
             const p = maker.blBox.bkProtyleCache.getOrElse(blockId, () => {
                 const div = document.createElement("div") as HTMLElement;
                 div.setAttribute(TOMATO_BK_IGNORE, "1");
+                div.style.minHeight = "auto";
                 return new Protyle(maker.plugin.app, div, {
                     blockId,
                     render: {
@@ -341,7 +343,9 @@
                                         >{blockPath.name}</button
                                     >
                                 {/if}
-                                <span class="bk_label b3-label__text">__</span>
+                                <svg class="protyle-breadcrumb__arrow"
+                                    ><use xlink:href="#iconRight"></use></svg
+                                >
                             {/if}
                         </span>
                     {/each}

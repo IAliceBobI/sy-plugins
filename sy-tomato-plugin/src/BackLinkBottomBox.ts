@@ -76,7 +76,7 @@ export class BKMaker {
                     }
                 });
                 this.container.setAttribute(BKMAKER_ADD, "1");
-                this.container.classList.add("protyle-wysiwyg");
+                // this.container.classList.add("protyle-wysiwyg");
 
                 // put new data into cache
                 this.blBox.divCache.add(this.docID, this.container);
