@@ -26,7 +26,7 @@ class DailyNoteBox {
         if (!events.isMobile) {
             this.plugin.addTopBar({
                 icon: "iconLeft",
-                title: "上一个日志",
+                title: "上一个日志Alt+Q",
                 position: "left",
                 callback: () => {
                     this.openDailyNote(-1000 * 60 * 60 * 24);
@@ -34,7 +34,7 @@ class DailyNoteBox {
             });
             this.plugin.addTopBar({
                 icon: "iconRight",
-                title: "下一个日志",
+                title: "下一个日志Alt+W",
                 position: "left",
                 callback: () => {
                     this.openDailyNote(1000 * 60 * 60 * 24);
