@@ -90,7 +90,7 @@ export class BKMaker {
 
     async refreshBacklinks() {
         await navigator.locks.request(this.lockName, { ifAvailable: true }, async (lock) => {
-            if (this.refreshBK && lock) {
+            if (this.refreshBK && lock && !this.shouldFreeze) {
                 await this.refreshBK();
             }
         });
