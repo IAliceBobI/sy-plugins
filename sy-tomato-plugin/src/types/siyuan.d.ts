@@ -146,15 +146,27 @@ type Attributes = {
     value: string;
 }
 
+type Span = {
+    id: string;
+    block_id: string;
+    root_id: string;
+    box: string;
+    path: string;
+    content: string;
+    markdown: string;
+    type: string;
+    ial: string;
+}
+
 type Ref = {
     block_id: string;
     box: string;
     content: string;
-    def_block_id: string;
+    def_block_id: string; // defined
     def_block_parent_id: string;
     def_block_path: string;
     def_block_root_id: string;
-    id: string;
+    id: string; // useage
     markdown: string;
     path: string;
     root_id: string;

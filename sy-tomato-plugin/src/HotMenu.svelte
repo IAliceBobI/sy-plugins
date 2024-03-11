@@ -487,26 +487,22 @@ ${text}
                 </td>
                 <td>
                     <button
-                        title="跳到当前文档的书签位置"
+                        title="启用底部反链"
                         class="b3-button"
                         on:click={async () => {
-                            await gotoBookmark(docID, hotMenuBox.plugin.app);
+                            await enableBK(docID);
                             destroy();
-                        }}>🕊️🔖</button
+                        }}>👁️🔙🔗</button
                     >
                 </td>
                 <td>
                     <button
-                        title="删除本文档的阅读点"
+                        title="禁用底部反链"
                         class="b3-button"
                         on:click={async () => {
-                            await gotoBookmark(
-                                docID,
-                                hotMenuBox.plugin.app,
-                                true,
-                            );
+                            await disableBK(docID);
                             destroy();
-                        }}>🗑️🔖</button
+                        }}>🚫🔙🔗</button
                     >
                 </td>
             </tr>
@@ -545,23 +541,50 @@ ${text}
                     >
                 </td>
             </tr>
-            <!-- <tr>
+            <tr>
                 <td>
                     <button
-                        title="展开内容"
+                        title="跳到当前文档的书签位置"
                         class="b3-button"
-                        on:click={copyExpandPrompt}>🌲扩写内容</button
+                        on:click={async () => {
+                            await gotoBookmark(docID, hotMenuBox.plugin.app);
+                            destroy();
+                        }}>🕊️🔖</button
                     >
                 </td>
-           
                 <td>
                     <button
-                        title="对比内容"
+                        title="删除本文档的阅读点"
                         class="b3-button"
-                        on:click={compare}>🆚</button
-                    >
-                </td>
-            </tr> -->
+                        on:click={async () => {
+                            await gotoBookmark(
+                                docID,
+                                hotMenuBox.plugin.app,
+                                true,
+                            );
+                            destroy();
+                        }}>🗑️🔖</button
+                    ></td
+                >
+                <td
+                    ><button
+                        title="打开剪贴板中的块ID"
+                        class="b3-button"
+                        on:click={async () => {
+                            const text = await navigator.clipboard.readText();
+                            await openTab({
+                                app: hotMenuBox.plugin.app,
+                                doc: {
+                                    id: text.trim(),
+                                    zoomIn: false,
+                                    action: ["cb-get-hl", "cb-get-context"],
+                                },
+                            });
+                            destroy();
+                        }}>🦋</button
+                    ></td
+                >
+            </tr>
         </tbody>
     </table>
 </div>

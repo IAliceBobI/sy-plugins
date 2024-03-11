@@ -422,6 +422,10 @@ export const siyuan = {
         }
         return l;
     },
+    async sqlSpan(stmt: string): Promise<Span[]> {
+        // from spans
+        return (await siyuan.call("/api/query/sql", { stmt })) ?? [];
+    },
     async sqlRef(stmt: string): Promise<Ref[]> {
         // from refs
         return (await siyuan.call("/api/query/sql", { stmt })) ?? [];
