@@ -351,6 +351,15 @@ export const siyuan = {
     async readDir(path: string) {
         return siyuan.call("/api/file/readDir", { path });
     },
+    async performSync(upload = true, mobileSwitch = false) {
+        return siyuan.call("/api/sync/performSync", { upload, mobileSwitch });
+    },
+    async performBootSync() {
+        return siyuan.call("/api/sync/performBootSync", {});
+    },
+    async listCloudSyncDir() {
+        return siyuan.call("/api/sync/listCloudSyncDir", {});
+    },
     async getFile(path: string) {
         const method = "POST";
         const headers = { "Content-Type": "application/json" };
