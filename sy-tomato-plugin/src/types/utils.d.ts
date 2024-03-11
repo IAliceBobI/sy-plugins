@@ -70,6 +70,7 @@ type AttrType = {
     "custom-paragraph-index": string,
     "custom-in-book-index": string,
     "custom-tomato-line-through": string,
+    "custom-tomato-readingpoint": string,
     [key: string]: string,
 };
 

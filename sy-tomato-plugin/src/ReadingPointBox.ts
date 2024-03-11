@@ -270,6 +270,7 @@ async function addCardReadingPoint(lute: Lute, blockID: string, div: HTMLElement
         const ops = siyuan.transDeleteBlocks(oldIDs);
         ops.push(...siyuan.transMoveBlocksAfter([id], blockID));
         ops.push(...siyuan.transUpdateBlocks([{ id, domStr }]));
+        ops.push(...siyuan.transbatchSetBlockAttrs([{ id, attrs: { "bookmark": title, "custom-tomato-readingpoint": bookID } as AttrType }]));
         await siyuan.transactions(ops);
         await siyuan.removeRiffCards(oldIDs);
         await siyuan.addRiffCards([id]);
