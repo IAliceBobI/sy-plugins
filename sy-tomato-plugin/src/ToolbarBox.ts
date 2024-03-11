@@ -12,7 +12,7 @@ class ToolbarBox {
         if (!events.isMobile) {
             this.plugin.addTopBar({
                 icon: "iconRiffCard",
-                title: this.plugin.i18n.spaceRepeat,
+                title: this.plugin.i18n.spaceRepeat + "Alt+0",
                 position: "left",
                 callback: () => {
                     openTab({ app: this.plugin.app, card: { type: "all" } });
@@ -29,7 +29,7 @@ class ToolbarBox {
 
         this.plugin.addTopBar({
             icon: "iconRef",
-            title: this.plugin.i18n.refreshVirRef,
+            title: this.plugin.i18n.refreshVirRef + "F5",
             position: "left",
             callback: refreshVirRef,
         });
@@ -41,7 +41,7 @@ class ToolbarBox {
 
         this.plugin.addTopBar({
             icon: "iconFocus",
-            title: this.plugin.i18n.locateDoc,
+            title: this.plugin.i18n.locateDoc + "Alt+1",
             position: "left",
             callback: () => { locateDoc(); },
         });
