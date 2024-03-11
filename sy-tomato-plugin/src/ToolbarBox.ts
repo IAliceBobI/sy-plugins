@@ -12,13 +12,20 @@ class ToolbarBox {
         if (!events.isMobile) {
             this.plugin.addTopBar({
                 icon: "iconRiffCard",
-                title: "间隔重复",
+                title: this.plugin.i18n.spaceRepeat,
                 position: "left",
                 callback: () => {
                     openTab({ app: this.plugin.app, card: { type: "all" } });
                 }
             });
         }
+        this.plugin.addCommand({
+            langKey: "spaceRepeat",
+            hotkey: "⌥0",
+            callback: () => {
+                openTab({ app: this.plugin.app, card: { type: "all" } });
+            }
+        });
 
         this.plugin.addTopBar({
             icon: "iconRef",
@@ -28,7 +35,7 @@ class ToolbarBox {
         });
         this.plugin.addCommand({
             langKey: "refreshVirRef",
-            hotkey: "",
+            hotkey: "F5",
             callback: refreshVirRef,
         });
 
