@@ -492,6 +492,12 @@ ${text}
                         on:click={async () => {
                             await enableBK(docID);
                             destroy();
+                            if (
+                                !hotMenuBox.settingCfg.backLinkBottomBoxCheckbox
+                            ) {
+                                hotMenuBox.settingCfg.backLinkBottomBoxCheckbox = true;
+                                await hotMenuBox.saveCfg();
+                            }
                         }}>👁️🔙🔗</button
                     >
                 </td>

@@ -40,13 +40,13 @@ class CardPriorityBox {
                     this.updateDocPriorityBatchDialog(blocks);
                 },
             });
-            menu.addItem({
-                label: "为闪卡设置优先级",
-                icon: "iconStar",
-                click: () => {
-                    this.updatePrioritySelected([detail.element]);
-                },
-            });
+            // menu.addItem({
+            //     label: "为闪卡设置优先级",
+            //     icon: "iconStar",
+            //     click: () => {
+            //         this.updatePrioritySelected([detail.element]);
+            //     },
+            // });
             menu.addItem({
                 label: "当前文档与子文档的闪卡全部推迟",
                 icon: "iconFocus",

@@ -4,12 +4,18 @@ import HotMenu from "./HotMenu.svelte";
 import { ChatContext } from "./libs/baiduAI";
 import { addFlashCard } from "./libs/listUtils";
 import { removeDocCards } from "./libs/cardUtils";
+import { STORAGE_SETTINGS } from "./constants";
 
 class HotMenuBox {
     public plugin: Plugin;
     public settingCfg: TomatoSettings;
     public ctx4k: ChatContext;
     public ctx8k: ChatContext;
+
+    async saveCfg() {
+        await this.plugin.saveData(STORAGE_SETTINGS, this.settingCfg);
+        window.location.reload();
+    }
 
     async onload(plugin: Plugin) {
         this.plugin = plugin;
