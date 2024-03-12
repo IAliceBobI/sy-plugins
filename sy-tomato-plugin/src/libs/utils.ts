@@ -763,10 +763,7 @@ export const siyuan = {
         return siyuan.call("/api/riff/reviewRiffCard", { cardID, rating, deckID });
     },
     async reviewRiffCardByBlockID(blockID: string, rating: number, deckID = "20230218211946-2kw8jgx") {
-        let all = await siyuanCache.getRiffCardsAll(365 * 24 * 60 * 60 * 1000, 5000);
-        if (!all.has(blockID)) {
-            all = await siyuanCache.getRiffCardsAll(-1, 5000);
-        }
+        const all = await siyuan.getRiffCardsByBlockIDs([blockID]);
         if (all.has(blockID)) {
             const card = all.get(blockID).slice().pop();
             if (card) {
@@ -786,15 +783,9 @@ export const siyuan = {
             return m;
         }, new Map<string, GetCardRetBlock[]>());
     },
-    async batchSetRiffCardsDueTimeByBlockID(cardDues: { id: string, due: string }[]) {
-        let all = await siyuanCache.getRiffCardsAll(365 * 24 * 60 * 60 * 1000, 5000);
-        for (const { id } of cardDues) {
-            if (!all.has(id)) {
-                all = await siyuanCache.getRiffCardsAll(-1, 5000);
-                break;
-            }
-        }
-        cardDues = cardDues.map(block => {
+    async batchSetRiffCardsDueTimeByBlockID(blockDues: { id: string, due: string }[]) {
+        const all = await siyuan.getRiffCardsByBlockIDs(blockDues.map(c => c.id));
+        const cardDues = blockDues.map(block => {
             return all.get(block.id)?.map(card => {
                 return { id: card.riffCardID, due: block.due };
             });
@@ -1014,6 +1005,7 @@ export const siyuanCache = {
     getBlockDiv: createCache(getBlockDiv),
     getRiffCardsAll: createCache(siyuan.getRiffCardsAll),
     getTreeRiffCardsAll: createCache(siyuan.getTreeRiffCardsAll),
+    getRiffCardsByBlockIDs: createCache(siyuan.getRiffCardsByBlockIDs),
 };
 
 export function createCache

@@ -49,25 +49,22 @@
         controlAttr[TOMATO_CONTROL_ELEMENT] = "1";
 
         {
-            const CacheMinutes = 10;
-            siyuanCache
-                .getRiffCardsAll(CacheMinutes * 60 * 1000)
-                .then((all) => {
-                    const cards = all.get(cardID) ?? [];
-                    for (const card of cards) {
-                        if (card.riffCard) {
-                            priText.title = `
+            const all = await siyuanCache.getRiffCardsByBlockIDs(5 * 1000, [
+                cardID,
+            ]);
+            const cards = all.get(cardID) ?? [];
+            for (const card of cards) {
+                if (card.riffCard) {
+                    priText.title = `
 复习时间：${timeUtil.dateFormat(new Date(card.riffCard.due))}
 复习次数：${card.riffCard.reps}
 【点击修改优先级】
 【数值高的优先复习】
-【${CacheMinutes}分钟缓存】
 `.trim();
-                            priText.style.fontWeight = "bold";
-                            break;
-                        }
-                    }
-                });
+                    priText.style.fontWeight = "bold";
+                    break;
+                }
+            }
         }
 
         if (events.isMobile) whiteSpace = "";
