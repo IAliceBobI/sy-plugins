@@ -58,7 +58,7 @@ class ReadingPointBox {
         });
         this.plugin.addCommand({
             langKey: "gotoBookmark",
-            hotkey: "",
+            hotkey: "F7",
             callback: async () => {
                 gotoBookmark(events.docID, this.plugin.app);
             },
@@ -80,7 +80,7 @@ class ReadingPointBox {
             menu.addItem({
                 label: this.plugin.i18n.gotoBookmark,
                 iconHTML: "🕊️🔖",
-                accelerator: "",
+                accelerator: "F7",
                 click: () => {
                     gotoBookmark(events.docID, this.plugin.app);
                 },
@@ -128,7 +128,7 @@ class ReadingPointBox {
         detail.menu.addItem({
             iconHTML: "🕊️🔖",
             label: this.plugin.i18n.gotoBookmark,
-            accelerator: "",
+            accelerator: "F7",
             click: () => {
                 gotoBookmark(events.docID, this.plugin.app);
             },
