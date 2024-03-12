@@ -47,7 +47,7 @@ class HotMenuBox {
             const menu = detail.menu;
             menu.addItem({
                 label: this.plugin.i18n.hotMenu,
-                icon: "iconMenu",
+                iconHTML: "⌨️",
                 accelerator: "⌥A",
                 click: async () => {
                     this.openDialog(detail.protyle);

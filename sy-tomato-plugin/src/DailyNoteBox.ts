@@ -66,7 +66,7 @@ class DailyNoteBox {
             const menu = detail.menu;
             menu.addItem({
                 label: this.plugin.i18n.moveBlock2today,
-                icon: "iconMove",
+                iconHTML: "🏑",
                 accelerator: "",
                 click: () => {
                     this.findDivs();

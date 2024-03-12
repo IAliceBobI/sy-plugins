@@ -31,7 +31,7 @@ class CardPriorityBox {
             const menu = detail.menu;
             menu.addItem({
                 label: this.plugin.i18n.cardPrioritySet,
-                icon: "iconStar",
+                iconHTML: "🌊🏆",
                 accelerator: "F6",
                 click: async () => {
                     const docID = detail?.protyle?.block?.rootID;
@@ -49,7 +49,7 @@ class CardPriorityBox {
             // });
             menu.addItem({
                 label: "当前文档与子文档的闪卡全部推迟",
-                icon: "iconFocus",
+                iconHTML: "🌊🛑",
                 click: async () => {
                     const docID = detail?.protyle?.block?.rootID;
                     if (!docID) return;
@@ -59,7 +59,7 @@ class CardPriorityBox {
             });
             if (isCardUI(detail as any)) {
                 menu.addItem({
-                    iconHTML: "🚗🛑",
+                    iconHTML: "🌊🛑",
                     label: "推迟当前所有未复习完成的闪卡",
                     click: async () => {
                         await this.stopCards(await this.getRestCards());

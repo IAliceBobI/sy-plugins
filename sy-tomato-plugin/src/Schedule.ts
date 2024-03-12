@@ -25,7 +25,7 @@ class Schedule {
             menu.addItem({
                 label: this.plugin.i18n.schedule,
                 accelerator: "⌘3",
-                icon: "iconSchedule",
+                iconHTML: "⏰",
                 click: () => {
                     const blockID = detail?.element?.getAttribute("data-node-id") ?? "";
                     this.showScheduleDialog(blockID);

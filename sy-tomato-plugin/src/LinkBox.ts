@@ -26,7 +26,7 @@ class LinkBox {
             const menu = detail.menu;
             menu.addItem({
                 label: this.plugin.i18n.bilink,
-                icon: "iconLink",
+                iconHTML: "🔗",
                 accelerator: "⌥/",
                 click: async () => {
                     const { selected, docName, docID } = await events.selectedDivs(detail.protyle as any);

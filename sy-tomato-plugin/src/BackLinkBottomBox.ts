@@ -193,7 +193,7 @@ class BackLinkBottomBox {
             const menu = detail.menu;
             menu.addItem({
                 label: "启用/禁用当前文档的底部反链",
-                icon: "iconEyeoff",
+                iconHTML: "📴🔙🔗",
                 click: async () => {
                     if (this.docID) {
                         const docID = this.docID;
