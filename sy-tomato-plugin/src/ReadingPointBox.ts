@@ -6,6 +6,7 @@ import { DATA_NODE_ID, READINGPOINT } from "./libs/gconst";
 import { zip2ways } from "./libs/functional";
 import { AttrBuilder } from "./libs/listUtils";
 import { getBookID } from "./libs/progressive";
+import { gotoBookmark } from "./libs/bookmark";
 
 const CreateDocLock = "CreateDocLock";
 const AddReadingPointLock = "AddReadingPointLock";
@@ -16,6 +17,16 @@ class ReadingPointBox {
 
     async onload(plugin: Plugin) {
         this.plugin = plugin;
+
+        this.plugin.addTopBar({
+            icon: "iconBookmark",
+            title: this.plugin.i18n.topBarTitleShowContents,
+            position: "right",
+            callback: async () => {
+                await this.showContentsWithLock();
+            }
+        });
+
         this.plugin.addCommand({
             langKey: "addBookmark",
             hotkey: "⌘2",
@@ -38,11 +49,26 @@ class ReadingPointBox {
                 }
             },
         });
+        this.plugin.addCommand({
+            langKey: "showBookmarks",
+            hotkey: "⌘4",
+            callback: async () => {
+                await this.showContentsWithLock();
+            },
+        });
+        this.plugin.addCommand({
+            langKey: "gotoBookmark",
+            hotkey: "",
+            callback: async () => {
+                gotoBookmark(events.docID, this.plugin.app);
+            },
+        });
+
         this.plugin.eventBus.on("open-menu-content", async ({ detail }) => {
             const menu = detail.menu;
             menu.addItem({
                 label: this.plugin.i18n.addBookmark,
-                icon: "iconBookmark",
+                iconHTML: "➕🔖",
                 accelerator: "⌘2",
                 click: () => {
                     const blockID = detail?.element?.getAttribute("data-node-id") ?? "";
@@ -52,50 +78,41 @@ class ReadingPointBox {
                 },
             });
             menu.addItem({
-                label: this.plugin.i18n.addBookmarkWithoutENV,
-                icon: "iconBookmark",
-                accelerator: "⌘7",
+                label: this.plugin.i18n.gotoBookmark,
+                iconHTML: "🕊️🔖",
+                accelerator: "",
                 click: () => {
-                    const blockID = detail?.element?.getAttribute("data-node-id") ?? "";
-                    if (blockID) {
-                        this.addReadPointLock(blockID, detail?.element, true);
-                    }
+                    gotoBookmark(events.docID, this.plugin.app);
                 },
             });
-            menu.addItem({
-                label: this.plugin.i18n.showBookmarks,
-                icon: "iconBookmark",
-                click: async () => {
-                    await this.showContentsWithLock();
-                    if (events.isMobile) {
-                        await siyuan.pushMsg("请打开文档树查看。");
-                    }
-                },
-            });
+            // menu.addItem({
+            //     label: this.plugin.i18n.addBookmarkWithoutENV,
+            //     icon: "iconBookmark",
+            //     accelerator: "⌘7",
+            //     click: () => {
+            //         const blockID = detail?.element?.getAttribute("data-node-id") ?? "";
+            //         if (blockID) {
+            //             this.addReadPointLock(blockID, detail?.element, true);
+            //         }
+            //     },
+            // });
+            // menu.addItem({
+            //     label: this.plugin.i18n.showBookmarks,
+            //     icon: "iconBookmark",
+            //     click: async () => {
+            //         await this.showContentsWithLock();
+            //         if (events.isMobile) {
+            //             await siyuan.pushMsg("请打开文档树查看。");
+            //         }
+            //     },
+            // });
         });
-        this.plugin.addCommand({
-            langKey: "showBookmarks",
-            hotkey: "⌘4",
-            callback: async () => {
-                await this.showContentsWithLock();
-            },
-        });
-        if (!events.isMobile) {
-            this.plugin.addTopBar({
-                icon: "iconBookmark",
-                title: this.plugin.i18n.topBarTitleShowContents,
-                position: "right",
-                callback: async () => {
-                    await this.showContentsWithLock();
-                }
-            });
-        }
     }
 
     blockIconEvent(detail: any) {
         if (!this.plugin) return;
         detail.menu.addItem({
-            iconHTML: "🔖",
+            iconHTML: "➕🔖",
             label: this.plugin.i18n.addBookmark,
             accelerator: "⌘2",
             click: () => {
@@ -109,19 +126,27 @@ class ReadingPointBox {
             }
         });
         detail.menu.addItem({
-            iconHTML: "🔖",
-            label: this.plugin.i18n.addBookmarkWithoutENV,
-            accelerator: "⌘7",
+            iconHTML: "🕊️🔖",
+            label: this.plugin.i18n.gotoBookmark,
+            accelerator: "",
             click: () => {
-                for (const element of detail.blockElements) {
-                    const blockID = getID(element);
-                    if (blockID) {
-                        this.addReadPointLock(blockID, element, true);
-                        break;
-                    }
-                }
-            }
+                gotoBookmark(events.docID, this.plugin.app);
+            },
         });
+        // detail.menu.addItem({
+        //     iconHTML: "🔖",
+        //     label: this.plugin.i18n.addBookmarkWithoutENV,
+        //     accelerator: "⌘7",
+        //     click: () => {
+        //         for (const element of detail.blockElements) {
+        //             const blockID = getID(element);
+        //             if (blockID) {
+        //                 this.addReadPointLock(blockID, element, true);
+        //                 break;
+        //             }
+        //         }
+        //     }
+        // });
     }
 
     private addReadPointLock(blockID: string, div: HTMLElement, withoutENV = false) {
