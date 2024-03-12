@@ -43,6 +43,21 @@ class HotMenuBox {
                 await removeDocCards(protyle.block.rootID);
             },
         });
+        this.plugin.addCommand({
+            langKey: "baiduAI",
+            hotkey: "F10",
+            editorCallback: async (protyle: IProtyle) => {
+                const target = document.createElement("div");
+                const m = new HotMenu({
+                    target,
+                    props: {
+                        protyle,
+                        callName: "baiduAI",
+                    }
+                });
+                m.$destroy();
+            },
+        });
         this.plugin.eventBus.on("open-menu-content", async ({ detail }) => {
             const menu = detail.menu;
             menu.addItem({

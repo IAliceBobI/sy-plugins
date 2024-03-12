@@ -38,8 +38,9 @@
     const insertPlaceMap = new EnumUtils(InsertPlace);
     const getIdx = (v: InsertPlace) => insertPlaceMap.getItem(v).idx;
 
-    export let dialog: Dialog;
+    export let dialog: Dialog = null;
     export let protyle: IProtyle;
+    export let callName: string = "";
 
     const attrs = {};
     let element: HTMLElement;
@@ -69,6 +70,9 @@
             hotMenuBox.settingCfg["ai-return-insert-place"] ??
             getIdx(InsertPlace.here);
         initAI();
+        if (callName == "baiduAI") {
+            await ai(hotMenuBox.ctx4k, getAllText());
+        }
     });
 
     function initAI() {
@@ -95,7 +99,7 @@
     onDestroy(destroy);
 
     function destroy() {
-        dialog.destroy();
+        dialog?.destroy();
     }
 
     async function ai(ctx: ChatContext, text: string) {

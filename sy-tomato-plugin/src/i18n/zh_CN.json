@@ -49,5 +49,6 @@
   "hotMenu": "快捷菜单",
   "spaceRepeat": "间隔重复",
   "locateDoc": "全局定位文档",
+  "baiduAI": "选中内容发给文心一言4",
   "gotoBookmark": "跳到当前文档的书签位置"
 }
