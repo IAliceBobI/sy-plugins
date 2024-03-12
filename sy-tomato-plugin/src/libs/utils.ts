@@ -348,7 +348,11 @@ export const siyuan = {
         const response = await fetchSyncPost("/api/system/currentTime", {});
         return response.data + secs * 1000;
     },
+    async copyFile(src: string, dest: string) {
+        return siyuan.call("/api/file/copyFile", { src, dest });
+    },
     async readDir(path: string) {
+        // await utils_zZmqus5PtYRi.siyuan.readDir("/data/plugins/sy-tomato-plugin/i18n")
         return siyuan.call("/api/file/readDir", { path });
     },
     async performSync(upload = true, mobileSwitch = false) {
@@ -359,6 +363,61 @@ export const siyuan = {
     },
     async listCloudSyncDir() {
         return siyuan.call("/api/sync/listCloudSyncDir", {});
+    },
+    async removeFile(path: string) {
+        return siyuan.call("/api/file/removeFile", { path });
+    },
+    async copyFile2(src: string, dest: string) {
+        // await utils_zZmqus5PtYRi.siyuan.copyFile("/data/plugins/sy-tomato-plugin/i18n/empty.xmind","/data/assets/abc.xmind")
+        const bs = await siyuan.getFileBinary(src);
+        return siyuan.putFile(dest, bs);
+    },
+    async putFile(path: string, value: any) {
+        let file: File;
+        if (value instanceof ArrayBuffer) {
+            const uint8Array = new Uint8Array(value);
+            file = new File([new Blob([uint8Array])], path.split("/").pop());
+        } else if (typeof value === "object") {
+            file = new File([new Blob([JSON.stringify(value)], {
+                type: "application/json"
+            })], path.split("/").pop());
+        } else {
+            file = new File([new Blob([value])], path.split("/").pop());
+        }
+        const formData = new FormData();
+        formData.append("path", path);
+        formData.append("file", file);
+        formData.append("isDir", "false");
+        const method = "POST";
+        const resp = await fetch("/api/file/putFile", {
+            method,
+            body: formData,
+        });
+        const data = await resp.json();
+        if (data.code && data.code != 0) {
+            console.error("code=%s %s", data.code, data.msg);
+            return null;
+        }
+        return data.data;
+    },
+    async getFileBinary(path: string): Promise<ArrayBuffer> {
+        try {
+            const method = "POST";
+            const headers = { "Content-Type": "application/json" };
+            const response = await fetch("/api/file/getFile", {
+                method,
+                headers,
+                body: JSON.stringify({ path }),
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            const blobData = await response.blob();
+            return blobData.arrayBuffer();
+        } catch (error) {
+            console.error("Error fetching file binary:", error);
+            throw error; // re-throw the error so it can be caught by the caller, if needed  
+        }
     },
     async getFile(path: string) {
         const method = "POST";
@@ -506,6 +565,21 @@ export const siyuan = {
             await sleep(1000);
         }
         return {};
+    },
+    async insertLocalAssets(id: string, assetPaths: string, isUpload = false): Promise<any> {
+        return siyuan.call("/api/asset/insertLocalAssets", { id, assetPaths, isUpload });
+    },
+    async resolveAssetPath(path: string): Promise<string> {
+        // get abs path in the OS.
+        return siyuan.call("/api/asset/resolveAssetPath", { path });
+    },
+    async renameAsset(oldPath: string, newName: string): Promise<any> {
+        // copy file to assets/ and then raname
+        return siyuan.call("/api/asset/renameAsset", { oldPath, newName });
+    },
+    async getDocImageAssets(id: string): Promise<string[]> {
+        // find and list images only
+        return siyuan.call("/api/asset/getDocImageAssets", { id });
     },
     async transferBlockRef(fromID: string, toID: string, reloadUI = true): Promise<any> {
         return siyuan.call("/api/block/transferBlockRef", { fromID, toID, reloadUI });

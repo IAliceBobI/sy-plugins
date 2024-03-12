@@ -594,6 +594,30 @@ ${text}
                         }}>🦋</button
                     ></td
                 >
+                <td
+                    ><button
+                        title="插入空的xmind文件"
+                        class="b3-button"
+                        on:click={async () => {
+                            new DialogText(
+                                "xmind名字(不带后缀)",
+                                "",
+                                async (value) => {
+                                    const newFile = `assets/${value}.xmind`;
+                                    await siyuan.copyFile2(
+                                        "/data/plugins/sy-tomato-plugin/i18n/empty.xmind",
+                                        `/data/${newFile}`,
+                                    );
+                                    await siyuan.insertBlockAfter(
+                                        `[${value}](${newFile})`,
+                                        anchorID,
+                                    );
+                                    destroy();
+                                },
+                            );
+                        }}>➕🧠</button
+                    ></td
+                >
             </tr>
         </tbody>
     </table>
