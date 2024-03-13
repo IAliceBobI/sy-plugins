@@ -125,7 +125,7 @@ class CardBox {
             span.classList.add("fn__space");
             span.setAttribute("TomatoCardSkipBtn", "1");
 
-            nextBtn.title = "不看答案前\n取消制卡ctrl+9\n跳过卡ctrl+8";
+            nextBtn.title = "不看答案前\n取消制卡ctrl+9\n跳过卡ctrl+8\n优先级ctrl+;";
             nextBtn.setAttribute("TomatoCardSkipBtn", "1");
             nextBtn.classList.add(...btnPrevious.classList);
             nextBtn.style.width = btnPrevious.style.width;
@@ -152,7 +152,7 @@ class CardBox {
             btn.innerHTML = "<div class=\"card__icon\">⚙️</div> 设置";
             btn.title = "删卡、定位、推迟";
             btn.setAttribute("data-type", "-100");
-            btn.setAttribute("aria-label", "不看答案前\n取消制卡ctrl+9\n跳过卡ctrl+8");
+            btn.setAttribute("aria-label", "不看答案前\n取消制卡ctrl+9\n跳过卡ctrl+8\n优先级ctrl+;");
             btn.classList.add(...btnPrevious.classList);
             btn.addEventListener("click", () => {
                 const btnId = newID();
