@@ -603,7 +603,7 @@ ${text}
                                 "xmind名字(不带后缀)",
                                 "",
                                 async (value) => {
-                                    const newFile = `assets/${value}.xmind`;
+                                    const newFile = `assets/${value}-${NewNodeID()}.xmind`;
                                     await siyuan.copyFile2(
                                         "/data/plugins/sy-tomato-plugin/i18n/empty.xmind",
                                         `/data/${newFile}`,
