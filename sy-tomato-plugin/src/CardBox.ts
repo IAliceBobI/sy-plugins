@@ -99,7 +99,9 @@ class CardBox {
                         const card = protyle.element.querySelector(`div[${DATA_NODE_ID}="${id}"]`) as HTMLElement;
                         if (card) {
                             const p = card.getAttribute(CARD_PRIORITY) ?? "50";
-                            cardPriorityBox.updatePrioritySelected([card], Number(p), true);
+                            cardPriorityBox.updatePrioritySelected([card], Number(p), true, () => {
+                                document.body.focus();
+                            });
                         }
                     };
                     this.initSkipBtn();
