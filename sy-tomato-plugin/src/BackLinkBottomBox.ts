@@ -215,6 +215,7 @@ class BackLinkBottomBox {
                         if (!protyle || !protyle.element) return;
                         if (protyle.element.getAttribute(TOMATO_BK_IGNORE)) return;
                         if (isCardUI(detail)) return;
+                        if (isDocFlow(detail)) return;
                         const item = protyle.wysiwyg?.element;
                         if (!item) return;
                         const nextDocID = protyle.block.rootID ?? "";
@@ -241,6 +242,10 @@ async function isBookCard(docID: string): Promise<boolean> {
     const attrs = await siyuanCache.getBlockAttrs(60000, docID);
     const v = attrs[MarkKey] ?? "";
     return v.includes(TEMP_CONTENT);
+}
+
+function isDocFlow(detail: Protyle) {
+    return detail.protyle.element.classList.contains("docs-flow__protyle");
 }
 
 export const backLinkBottomBox = new BackLinkBottomBox();
