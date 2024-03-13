@@ -245,7 +245,7 @@ async function isBookCard(docID: string): Promise<boolean> {
 }
 
 function isDocFlow(detail: Protyle) {
-    return detail.protyle.element.classList.contains("docs-flow__protyle");
+    return detail?.protyle?.element?.classList?.contains("docs-flow__protyle");
 }
 
 export const backLinkBottomBox = new BackLinkBottomBox();
