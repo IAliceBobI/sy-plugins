@@ -146,6 +146,18 @@ type Attributes = {
     value: string;
 }
 
+type Asset = {
+    id: string;
+    block_id: string;
+    root_id: string;
+    box: string;
+    docpath: string,
+    path: string,
+    name: string,
+    title: string,
+    hash: string,
+}
+
 type Span = {
     id: string;
     block_id: string;

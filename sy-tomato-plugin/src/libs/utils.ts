@@ -16,6 +16,10 @@ export function getRandFloat0tox(x: number) {
     return Math.random() * x;
 }
 
+export function replaceAll(str: string, find: string, replace: string): string {
+    return str.replace(new RegExp(find, "g"), replace);
+}
+
 export function getRandInt0tox(x: number) {
     return Math.floor(Math.random() * x);
 }
@@ -351,7 +355,7 @@ export const siyuan = {
     async copyFile(src: string, dest: string) {
         return siyuan.call("/api/file/copyFile", { src, dest });
     },
-    async readDir(path: string) {
+    async readDir(path: string): Promise<{ isDir: boolean, isSymlink: boolean, name: string, updated: string }[]> {
         // await utils_zZmqus5PtYRi.siyuan.readDir("/data/plugins/sy-tomato-plugin/i18n")
         return siyuan.call("/api/file/readDir", { path });
     },
@@ -456,6 +460,18 @@ export const siyuan = {
             console.warn(e, url, reqData);
         }
     },
+    async removeUnusedAsset(path: string): Promise<{ path: string }> {
+        return siyuan.call("/api/asset/removeUnusedAsset", { path });
+    },
+    async removeUnusedAssets(): Promise<{ paths: string[] }> {
+        return siyuan.call("/api/asset/removeUnusedAssets", {});
+    },
+    async getMissingAssets(): Promise<{ missingAssets: string[] }> {
+        return siyuan.call("/api/asset/getMissingAssets", {});
+    },
+    async getUnusedAssets(): Promise<{ unusedAssets: string[] }> {
+        return siyuan.call("/api/asset/getUnusedAssets", {});
+    },
     async getDocCreateSavePath(notebookID: string): Promise<{ path: string }> {
         const notebook = notebookID;
         return siyuan.call("/api/filetree/getDocCreateSavePath", { notebook });
@@ -480,6 +496,10 @@ export const siyuan = {
             }
         }
         return l;
+    },
+    async sqlAsset(stmt: string): Promise<Asset[]> {
+        // from assets
+        return (await siyuan.call("/api/query/sql", { stmt })) ?? [];
     },
     async sqlSpan(stmt: string): Promise<Span[]> {
         // from spans
