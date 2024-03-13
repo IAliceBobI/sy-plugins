@@ -4,12 +4,14 @@ import "./index.scss";
 import { EventType, events } from "@/libs/Events";
 import CardBoxDel from "./CardBoxDel.svelte";
 import { pressSkip, pressSpace } from "./libs/cardUtils";
-import { WEB_SPACE } from "./libs/gconst";
+import { CARD_PRIORITY, DATA_NODE_ID, WEB_SPACE } from "./libs/gconst";
+import { cardPriorityBox } from "./CardPriorityBox";
 
 class CardBox {
     private plugin: Plugin;
     private delCardFunc: Func;
     private fastSkipFunc: Func;
+    private changePriFunc: Func;
     async onload(plugin: Plugin) {
         this.plugin = plugin;
         this.plugin.addCommand({
@@ -55,6 +57,17 @@ class CardBox {
                 }
             },
         });
+        this.plugin.addCommand({
+            langKey: "setCardPriority",
+            hotkey: "⌘;",
+            callback: async () => {
+                if (this.changePriFunc) {
+                    this.changePriFunc();
+                } else {
+                    siyuan.pushMsg("复习闪卡时，才能使用此功能 修改卡优先级");
+                }
+            },
+        });
         events.addListener("CardBox", (eventType, detail) => {
             if (eventType == EventType.loaded_protyle_static || eventType == EventType.switch_protyle) {
                 const protyle = detail.protyle as IProtyle;
@@ -69,6 +82,7 @@ class CardBox {
                     if (!id) {
                         this.delCardFunc = null;
                         this.fastSkipFunc = null;
+                        this.changePriFunc = null;
                         return;
                     }
                     this.delCardFunc = async () => {
@@ -81,11 +95,19 @@ class CardBox {
                         if (pressSpace()) await sleep(300);
                         pressSkip();
                     };
+                    this.changePriFunc = async () => {
+                        const card = protyle.element.querySelector(`div[${DATA_NODE_ID}="${id}"]`) as HTMLElement;
+                        if (card) {
+                            const p = card.getAttribute(CARD_PRIORITY) ?? "50";
+                            cardPriorityBox.updatePrioritySelected([card], Number(p), true);
+                        }
+                    };
                     this.initSkipBtn();
                     this.initSettingsBtn(msg, id, protyle);
                 } else {
                     this.delCardFunc = null;
                     this.fastSkipFunc = null;
+                    this.changePriFunc = null;
                 }
             }
         });

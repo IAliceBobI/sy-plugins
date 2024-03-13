@@ -1,15 +1,18 @@
 <script lang="ts">
     import { Dialog } from "siyuan";
-    import { onDestroy, onMount } from "svelte";
+    import { afterUpdate, onDestroy, onMount } from "svelte";
 
     export let dialog: Dialog;
     export let defaultValue: string;
     export let callback: Func;
 
-    let inputText: string;
+    let inputText: string = "";
+    let input: HTMLInputElement;
 
-    onMount(async () => {
-        inputText = defaultValue;
+    onMount(async () => {});
+
+    afterUpdate(() => {
+        input.focus();
     });
 
     onDestroy(() => {});
@@ -23,9 +26,23 @@
 <!-- https://learn.svelte.dev/tutorial/if-blocks -->
 <div class="b3-dialog__content">
     <input
+        bind:this={input}
+        on:focus={() => input.select()}
+        placeholder={defaultValue}
         type="text"
         class="schedule-style__input-field"
         bind:value={inputText}
+        on:keypress={(event) => {
+            if (event instanceof KeyboardEvent) {
+                if (event.key === "Enter") {
+                    btnClick();
+                }
+            }
+        }}
     />
-    <button class="schedule-style__button" on:click={btnClick}>Ok</button>
+    <button
+        title="快捷键：回车/Enter"
+        class="schedule-style__button"
+        on:click={btnClick}>回车/Enter</button
+    >
 </div>
