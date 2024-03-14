@@ -608,18 +608,21 @@ class Progressive {
         }
         mark.forEach(m => ab.add(m, "1"));
         ab.add(RefIDKey, id);
-        return markdown + `\n${ab.build()}`;
+        return `${markdown}${utils.get_siyuan_lnk_md(id, "*")}\n${ab.build()}`;
     }
 
     private async copyBlock(point: number, info: BookInfo, id: string, tempDiv: HTMLDivElement, mark: string[] = [], idx?: { i: number }) {
         if (!tempDiv) return "";
         if (tempDiv.getAttribute(MarkKey)) return "";
-        if (idx && tempDiv.getAttribute(DATA_TYPE) != BlockNodeEnum.NODE_HEADING) {
-            tempDiv.setAttribute(PARAGRAPH_INDEX, String(idx.i));
-            tempDiv.setAttribute(IN_BOOK_INDEX, `${point}#${idx.i}`);
-            if (info.addIndex2paragraph) {
-                const editableDiv = utils.getContenteditableElement(tempDiv);
-                if (editableDiv) {
+        const editableDiv = utils.getContenteditableElement(tempDiv);
+        if (editableDiv) {
+            const spanStar = editableDiv.appendChild(document.createElement("span")) as HTMLSpanElement;
+            utils.set_href(spanStar, id, "*");
+
+            if (idx && tempDiv.getAttribute(DATA_TYPE) != BlockNodeEnum.NODE_HEADING) {
+                tempDiv.setAttribute(PARAGRAPH_INDEX, String(idx.i));
+                tempDiv.setAttribute(IN_BOOK_INDEX, `${point}#${idx.i}`);
+                if (info.addIndex2paragraph) {
                     const idxSpan = editableDiv.insertBefore(document.createElement("span"), editableDiv.firstChild) as HTMLSpanElement;
                     if (idxSpan) {
                         idxSpan.setAttribute(DATA_TYPE, "text");
