@@ -104,7 +104,7 @@ export class BKMaker {
     }
 
     private noPadding(div: HTMLElement) {
-        if (this.protyle) {
+        if (div && this.protyle?.wysiwyg?.element?.style) {
             this.protyle.wysiwyg.element.style.paddingBottom = "0px";
             div.style.paddingLeft = this.protyle.wysiwyg.element.style.paddingLeft;
             div.style.paddingRight = this.protyle.wysiwyg.element.style.paddingRight;
