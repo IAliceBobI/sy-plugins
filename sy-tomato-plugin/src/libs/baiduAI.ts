@@ -84,7 +84,7 @@ export class BaiduAI {
         const data = await response.json() as CalcTokensResponse;
         return data.usage.prompt_tokens;
     }
-    async chatCompletionsPro(ctx: ChatContext, userContent: string) {
+    async chatCompletionsPro(ctx: ChatContext, userContent: string, shouldSaveAIHistory: boolean) {
         const accessToken = await this.getAccessToken();
         if (!accessToken) return {} as AIResponse;
         const url = `https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/completions_pro?access_token=${accessToken}`;
@@ -103,7 +103,7 @@ export class BaiduAI {
             body: JSON.stringify(playload),
         });
         const data = await response.json() as AIResponse;
-        if (data.usage) ctx.add(userContent, data.result, data.usage);
+        if (data.usage && shouldSaveAIHistory) ctx.add(userContent, data.result, data.usage);
         return data;
     }
 }

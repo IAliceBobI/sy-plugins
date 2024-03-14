@@ -6,6 +6,7 @@
         DATA_NODE_ID,
         TOMATO_BK_IGNORE,
         TOMATO_LINE_THROUGH,
+        WEB_SPACE,
     } from "./libs/gconst";
     import {
         NewNodeID,
@@ -104,7 +105,11 @@
 
     async function ai(ctx: ChatContext, text: string) {
         await siyuan.pushMsg(text.slice(0, 100), 2000);
-        const ai = await aiAPI.chatCompletionsPro(ctx, text);
+        const ai = await aiAPI.chatCompletionsPro(
+            ctx,
+            text,
+            hotMenuBox.shouldSaveAIHistory,
+        );
         if (!ai?.usage?.completion_tokens) {
             return siyuan.pushMsg(JSON.stringify(ai));
         }
@@ -348,14 +353,19 @@ ${text}
             </tr>
             <tr>
                 <td>
-                    <button
-                        title="清空与AI对话历史"
-                        class="b3-button"
-                        on:click={() => {
-                            let a = hotMenuBox.ctx4k.clear();
-                            a += hotMenuBox.ctx8k.clear();
-                            siyuan.pushMsg(`清理了${a}个tokens`, 3000);
-                        }}>🤖💬🧹</button
+                    <label title="是否保留与AI对话历史"
+                        >🤖💬{@html WEB_SPACE}<input
+                            class="b3-switch"
+                            type="checkbox"
+                            bind:checked={hotMenuBox.shouldSaveAIHistory}
+                            on:change={() => {
+                                if (!hotMenuBox.shouldSaveAIHistory) {
+                                    let a = hotMenuBox.ctx4k.clear();
+                                    a += hotMenuBox.ctx8k.clear();
+                                    siyuan.pushMsg(`清理了${a}个tokens`, 3000);
+                                }
+                            }}
+                        /></label
                     >
                 </td>
                 <td>

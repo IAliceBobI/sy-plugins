@@ -11,6 +11,7 @@ class HotMenuBox {
     public settingCfg: TomatoSettings;
     public ctx4k: ChatContext;
     public ctx8k: ChatContext;
+    public shouldSaveAIHistory = false;
 
     async saveCfg() {
         await this.plugin.saveData(STORAGE_SETTINGS, this.settingCfg);
