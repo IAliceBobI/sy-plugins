@@ -246,6 +246,8 @@ async function skipByAttrs(docID: string): Promise<boolean> {
     for (const [k] of Object.entries(attrs)) {
         if (k.startsWith("custom-dailynote-")) {
             return true;
+        } else if (k.startsWith("custom-dailycard-")) {
+            return true;
         }
     }
 
