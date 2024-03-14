@@ -220,7 +220,7 @@ class BackLinkBottomBox {
                         if (!item) return;
                         const nextDocID = protyle.block.rootID ?? "";
                         if (!nextDocID) return;
-                        if (await isBookCard(nextDocID)) return;
+                        if (await skipByAttrs(nextDocID)) return;
                         const maker = this.makerCache.getOrElse(nextDocID, () => { return new BKMaker(this, nextDocID); });
                         maker.doTheWork(item, protyle);
                         if (this.docID != nextDocID) {
@@ -238,10 +238,18 @@ class BackLinkBottomBox {
     }
 }
 
-async function isBookCard(docID: string): Promise<boolean> {
+async function skipByAttrs(docID: string): Promise<boolean> {
     const attrs = await siyuanCache.getBlockAttrs(60000, docID);
-    const v = attrs[MarkKey] ?? "";
-    return v.includes(TEMP_CONTENT);
+    const markKey = attrs[MarkKey] ?? "";
+    if (markKey.includes(TEMP_CONTENT)) return;
+
+    for (const [k] of Object.entries(attrs)) {
+        if (k.startsWith("custom-dailynote-")) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 function isDocFlow(detail: Protyle) {
