@@ -415,6 +415,10 @@ aacc3
 
 # 更新日志
 
+## 2024-03-14
+
+* 解决AI错误码：the length of messages must be an odd number.
+
 ## 2024-03-13
 
 * 复习时修改优先级：`ctrl+;`

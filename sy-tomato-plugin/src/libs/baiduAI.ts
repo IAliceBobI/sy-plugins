@@ -126,7 +126,7 @@ export class ChatContext {
     addContent(role: ChatRole, content: string, tokens: number) {
         const chats = [...this.chats, { role, content, tokens }];
         while (getTokens(chats) > this.maxTokens && chats.length > 0) {
-            chats.splice(0, 1);
+            chats.splice(0, 2); // must be delete as a pair
         }
         return chats;
     }
