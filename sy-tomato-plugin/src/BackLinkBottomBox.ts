@@ -54,7 +54,7 @@ export class BKMaker {
             return;
         }
         this.noPadding(this.container);
-        if (this.protyle?.id === protyle.id) {
+        if (this.protyle?.id === protyle.id && this.sv) {
             await this.refreshBacklinks();
             return;
         }
