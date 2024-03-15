@@ -241,7 +241,7 @@ class BackLinkBottomBox {
 async function skipByAttrs(docID: string): Promise<boolean> {
     const attrs = await siyuanCache.getBlockAttrs(60000, docID);
     const markKey = attrs[MarkKey] ?? "";
-    if (markKey.includes(TEMP_CONTENT)) return;
+    if (markKey.includes(TEMP_CONTENT)) return true;
 
     for (const [k] of Object.entries(attrs)) {
         if (k.startsWith("custom-dailynote-")) {
