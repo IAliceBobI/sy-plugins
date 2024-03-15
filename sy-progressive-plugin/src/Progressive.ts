@@ -632,7 +632,7 @@ class Progressive {
                     }
                 }
             }
-            idx.i++;
+            if (idx) idx.i++;
         }
         const txt = this.lute.BlockDOM2StdMd(tempDiv.outerHTML).replace(/\u200B/g, "").trim();
         if (!txt || txt == "*") return "";
