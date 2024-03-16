@@ -169,17 +169,21 @@
 
     async function copyDoc() {
         // const md = await siyuan.copyStdMarkdown(docID);
-        const markdowns = (
+        const contents = (
             await siyuan.getRows(
                 (await siyuan.getChildBlocks(docID)).map((b) => b.id),
-                "markdown",
+                "markdown,content,ial",
                 true,
-                ["type NOT IN ('s')", "markdown != ''", "markdown IS NOT NULL"],
             )
         )
-            .filter((row) => !!row.markdown)
-            .map((row) => row.markdown);
-        await navigator.clipboard.writeText(markdowns.join("\n"));
+            .filter((row) => !row.ial.includes(TOMATO_LINE_THROUGH))
+            .map((row) => {
+                if (row.markdown.includes("((")) {
+                    return row.content;
+                }
+                return row.markdown;
+            });
+        await navigator.clipboard.writeText(contents.join("\n"));
         destroy();
     }
 
@@ -566,21 +570,39 @@ ${text}
                 </td>
                 <td>
                     <button
-                        title="选中块添加删除线效果"
+                        title="选中块转为注释"
                         class="b3-button"
                         on:click={() => addLineThrough("1")}>🙈</button
                     >
+                    {@html WEB_SPACE.repeat(2)}
                     <button
-                        title="选中块去掉删除线效果"
+                        title="选中块去掉注释"
                         class="b3-button"
                         on:click={() => addLineThrough("")}>🙉</button
                     >
                 </td>
                 <td>
                     <button
-                        title="整个文档去掉删除线效果"
+                        title="插入空的xmind文件"
                         class="b3-button"
-                        on:click={() => addLineThrough("", true)}>🙉🙉</button
+                        on:click={async () => {
+                            new DialogText(
+                                "xmind名字(不带后缀)",
+                                "",
+                                async (value) => {
+                                    const newFile = `assets/${value}-${NewNodeID()}.xmind`;
+                                    await siyuan.copyFile2(
+                                        "/data/plugins/sy-tomato-plugin/i18n/empty.xmind",
+                                        `/data/${newFile}`,
+                                    );
+                                    await siyuan.insertBlockAfter(
+                                        `[${value}](${newFile})`,
+                                        anchorID,
+                                    );
+                                    destroy();
+                                },
+                            );
+                        }}>➕🧠</button
                     >
                 </td>
             </tr>
@@ -628,30 +650,7 @@ ${text}
                         }}>🦋</button
                     ></td
                 >
-                <td
-                    ><button
-                        title="插入空的xmind文件"
-                        class="b3-button"
-                        on:click={async () => {
-                            new DialogText(
-                                "xmind名字(不带后缀)",
-                                "",
-                                async (value) => {
-                                    const newFile = `assets/${value}-${NewNodeID()}.xmind`;
-                                    await siyuan.copyFile2(
-                                        "/data/plugins/sy-tomato-plugin/i18n/empty.xmind",
-                                        `/data/${newFile}`,
-                                    );
-                                    await siyuan.insertBlockAfter(
-                                        `[${value}](${newFile})`,
-                                        anchorID,
-                                    );
-                                    destroy();
-                                },
-                            );
-                        }}>➕🧠</button
-                    ></td
-                >
+                <td></td>
             </tr>
         </tbody>
     </table>

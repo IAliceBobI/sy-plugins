@@ -7,11 +7,20 @@
   background-color: var(--b3-font-background5);
 }
 
+.protyle-wysiwyg div[custom-tomato-line-through]::before {
+  content: "# ";
+  display: inline-block;
+  margin-right: 5px;
+  color: #999;
+}
+
 .protyle-wysiwyg div[custom-tomato-line-through] {
-  text-decoration: line-through;
-  opacity: 0.3;
-  transform: scale(0.7);
-  transform-origin: 0 0;
+  color: var(--b3-font-color11);
+  // text-decoration: underline wavy #888;
+  // box-shadow: 0 2px 4px rgba(0,0,0,0.1);  
+  font-style: italic;
+  display: flex;
+  align-items: center;
 }
 
 .protyle-wysiwyg div[custom-card-priority-stop] {

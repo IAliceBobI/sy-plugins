@@ -1,7 +1,7 @@
 import { IProtyle, Lute, Plugin } from "siyuan";
 import { EventType, events } from "./libs/Events";
-import { BLOCK_REF, DATA_ID, DATA_SUBTYPE, DATA_TYPE, REF_HIERARCHY } from "./libs/gconst";
-import { NewLute, getID, getSyElement, siyuan, siyuanCache } from "./libs/utils";
+import { BLOCK_REF, DATA_ID, DATA_NODE_ID, DATA_SUBTYPE, DATA_TYPE, REF_HIERARCHY, TOMATO_LINE_THROUGH } from "./libs/gconst";
+import { NewLute, getContenteditableElement, getID, getSyElement, siyuan, siyuanCache } from "./libs/utils";
 
 type IDName = {
     id: string;
@@ -64,8 +64,23 @@ class Tag2RefBox {
         return navigator.locks.request("Tomato-Tag2RefBox-findAllTagLock", { ifAvailable: true }, async (lock) => {
             if (lock && element) {
                 await this.findAllTag(notebookId, element);
+                await this.findAllComment(element);
             }
         });
+    }
+
+    private async findAllComment(element: HTMLElement) {
+        const id = element.getAttribute(DATA_NODE_ID);
+        if (!id) return;
+        const e = getContenteditableElement(element);
+        if (e?.textContent?.startsWith(";;")) {
+            element.setAttribute(TOMATO_LINE_THROUGH, "1");
+            setTimeout(() => {
+                const attr = {} as AttrType;
+                attr["custom-tomato-line-through"] = "1";
+                siyuan.setBlockAttrs(id, attr);
+            }, 3000);
+        }
     }
 
     private async findAllTag(notebookId: string, element: HTMLElement) {
