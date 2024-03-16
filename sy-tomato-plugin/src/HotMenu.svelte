@@ -192,31 +192,31 @@
         hotMenuBox.plugin.saveData(STORAGE_SETTINGS, hotMenuBox.settingCfg);
     }
 
-    compare;
-    async function compare() {
-        const text = getAllText();
-        const prompt = `
-资料1：\n
-${text.replace("===", "\n资料2：\n")}
-\n-----\n
-请从人物、对话、情节等方面，对资料1与资料2两段文字，进行全面对比，并分析各自的优缺点，给出建议，帮助我何改进资料2。
-`.trim();
-        await navigator.clipboard.writeText(prompt.trim());
-        destroy();
-    }
+    //     async function compare() {
+    //         const text = getAllText();
+    //         const prompt = `
+    // 资料1：\n
+    // ${text.replace("===", "\n资料2：\n")}
+    // \n-----\n
+    // 请从人物、对话、情节等方面，对资料1与资料2两段文字，进行全面对比，并分析各自的优缺点，给出建议，帮助我何改进资料2。
+    // `.trim();
+    //         await navigator.clipboard.writeText(prompt.trim());
+    //         destroy();
+    //     }
 
-    copyExpandPrompt;
-    async function copyExpandPrompt() {
+    async function copyExpandPrompt(copy?: boolean) {
         const text = getAllText();
+        let prompt = "";
         if (text) {
-            const prompt = `
+            prompt = `
+Context:        
 ${text}
 -------------------
-请将以上文字扩写，以对话为主。
-`;
-            await navigator.clipboard.writeText(prompt.trim());
-            destroy();
+请根据 Context 续写内容。
+`.trim();
+            if (copy) await navigator.clipboard.writeText(prompt);
         }
+        return prompt;
     }
 
     async function addLineThrough(v: string, all = false) {
@@ -284,9 +284,10 @@ ${text}
         let prompt = "";
         if (text) {
             prompt = `
+Context:        
 ${text}
 -------------------
-请压缩并提取中心意思
+请对 Context 压缩并提取中心意思
 `.trim();
             if (copy) await navigator.clipboard.writeText(prompt);
         }
@@ -428,6 +429,27 @@ ${text}
                         class="b3-button"
                         on:click={async () => {
                             await copyCompressPrompt(true);
+                            await siyuan.pushMsg("已经复制", 1000);
+                        }}>📜</button
+                    >
+                </td>
+                <td>
+                    <button
+                        title="AI续写内容"
+                        class="b3-button"
+                        on:click={async () => {
+                            destroy();
+                            await ai(
+                                hotMenuBox.ctx4k,
+                                await copyExpandPrompt(false),
+                            );
+                        }}>✨续写</button
+                    >
+                    <button
+                        title="复制提示词"
+                        class="b3-button"
+                        on:click={async () => {
+                            await copyExpandPrompt(true);
                             await siyuan.pushMsg("已经复制", 1000);
                         }}>📜</button
                     >
