@@ -51,6 +51,7 @@ class LinkBox {
     }
 
     private async addLink(element: HTMLElement, docID: string, docName: string) {
+        element = findPara(element);
         const srcID = element.getAttribute(gconst.DATA_NODE_ID);
         const ids = extractLinksFromElement(element);
         if (ids.length <= 0) return;
@@ -132,3 +133,11 @@ class LinkBox {
 }
 
 export const linkBox = new LinkBox();
+
+function findPara(element: HTMLElement) {
+    if (element.getAttribute(gconst.DATA_TYPE) == gconst.BlockNodeEnum.NODE_LIST_ITEM) {
+        const e = element.querySelector(`[${gconst.DATA_TYPE}="${gconst.BlockNodeEnum.NODE_PARAGRAPH}"]`) as HTMLElement;
+        if (e) element = e;
+    }
+    return element;
+}
