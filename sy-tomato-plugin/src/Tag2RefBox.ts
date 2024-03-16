@@ -72,8 +72,8 @@ class Tag2RefBox {
     private async findAllComment(element: HTMLElement) {
         const id = element.getAttribute(DATA_NODE_ID);
         if (!id) return;
-        const e = getContenteditableElement(element);
-        if (e?.textContent?.startsWith(";;")) {
+        const txt = getContenteditableElement(element)?.textContent ?? "";
+        if (txt.startsWith(";;") || txt.startsWith("；；")) {
             element.setAttribute(TOMATO_LINE_THROUGH, "1");
             setTimeout(() => {
                 const attr = {} as AttrType;
