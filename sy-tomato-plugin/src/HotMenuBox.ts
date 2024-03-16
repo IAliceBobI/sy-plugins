@@ -1,10 +1,12 @@
 import { Dialog, IEventBusMap, IProtyle, Plugin } from "siyuan";
-import { getCursorElement, newID } from "./libs/utils";
+import { getContenteditableElement, getCursorElement, newID, siyuan } from "./libs/utils";
 import HotMenu from "./HotMenu.svelte";
 import { ChatContext } from "./libs/baiduAI";
 import { addFlashCard } from "./libs/listUtils";
 import { removeDocCards } from "./libs/cardUtils";
 import { STORAGE_SETTINGS } from "./constants";
+import { EventType, events } from "./libs/Events";
+import { DATA_NODE_ID, TOMATO_LINE_THROUGH } from "./libs/gconst";
 
 class HotMenuBox {
     public plugin: Plugin;
@@ -12,6 +14,8 @@ class HotMenuBox {
     public ctx4k: ChatContext;
     public ctx8k: ChatContext;
     public shouldSaveAIHistory = false;
+    private docID: string;
+    private observer: MutationObserver;
 
     async saveCfg() {
         await this.plugin.saveData(STORAGE_SETTINGS, this.settingCfg);
@@ -70,6 +74,52 @@ class HotMenuBox {
                 },
             });
         });
+
+        events.addListener("Tomato-HotMenuBox", (eventType, detail) => {
+            if (eventType == EventType.loaded_protyle_static) {
+                navigator.locks.request("Tomato-HotMenuBox-onload", { ifAvailable: true }, async (lock) => {
+                    const protyle: IProtyle = detail.protyle;
+                    if (!protyle) return;
+                    const notebookId = protyle.notebookId;
+                    const nextDocID = protyle?.block?.rootID;
+                    const element = protyle?.wysiwyg?.element;
+                    if (lock && element && nextDocID && notebookId) {
+                        if (this.docID != nextDocID) {
+                            this.docID = nextDocID;
+                            this.observer?.disconnect();
+                            this.observer = new MutationObserver((mutationsList) => {
+                                mutationsList
+                                    .map(i => i.previousSibling)
+                                    .forEach((e: HTMLElement) => this.findAllCommentLock(e));
+                            });
+                            this.observer.observe(element, { childList: true });
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    private async findAllCommentLock(element: HTMLElement) {
+        return navigator.locks.request("Tomato-HotMenuBox-findAllCommentLock", { ifAvailable: true }, async (lock) => {
+            if (lock && element) {
+                await this.findAllComment(element);
+            }
+        });
+    }
+
+    private async findAllComment(element: HTMLElement) {
+        const id = element.getAttribute(DATA_NODE_ID);
+        if (!id) return;
+        const txt = getContenteditableElement(element)?.textContent ?? "";
+        if (txt.startsWith(";;") || txt.startsWith("；；")) {
+            element.setAttribute(TOMATO_LINE_THROUGH, "1");
+            setTimeout(() => {
+                const attr = {} as AttrType;
+                attr["custom-tomato-line-through"] = "1";
+                siyuan.setBlockAttrs(id, attr);
+            }, 3000);
+        }
     }
 
     blockIconEvent(detail: IEventBusMap["click-blockicon"]) {
