@@ -12,6 +12,7 @@
         NewNodeID,
         cleanText,
         getCursorElement,
+        replaceAll,
         siyuan,
         siyuanCache,
     } from "./libs/utils";
@@ -613,7 +614,8 @@ ${text}
                         title="打开剪贴板中的块ID"
                         class="b3-button"
                         on:click={async () => {
-                            const text = await navigator.clipboard.readText();
+                            let text = await navigator.clipboard.readText();
+                            text = replaceAll(text, `["'    ]+`, "");
                             await openTab({
                                 app: hotMenuBox.plugin.app,
                                 doc: {
