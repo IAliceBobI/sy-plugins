@@ -390,7 +390,7 @@ ${text}
                 </td>
                 <td>
                     <button
-                        title="复制当前文档"
+                        title="复制当前文档（忽略注释）"
                         class="b3-button"
                         on:click={copyDoc}>📜📋全文</button
                     >
@@ -570,7 +570,7 @@ ${text}
                 </td>
                 <td>
                     <button
-                        title="选中块转为注释"
+                        title="选中块转为注释（复制当前文档功能，会忽略注释）"
                         class="b3-button"
                         on:click={() => addLineThrough("1")}>🙈</button
                     >
