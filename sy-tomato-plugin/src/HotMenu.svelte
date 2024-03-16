@@ -422,7 +422,7 @@ ${text}
                                 hotMenuBox.ctx4k,
                                 await copyCompressPrompt(false),
                             );
-                        }}>🗜️压缩</button
+                        }}>压缩</button
                     >
                     <button
                         title="复制提示词"
@@ -443,7 +443,7 @@ ${text}
                                 hotMenuBox.ctx4k,
                                 await copyExpandPrompt(false),
                             );
-                        }}>✨续写</button
+                        }}>续写</button
                     >
                     <button
                         title="复制提示词"
