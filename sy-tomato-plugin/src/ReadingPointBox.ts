@@ -162,7 +162,7 @@ class ReadingPointBox {
 
     private async insertContents(boxID: string, docID: string) {
         const resp = await siyuan.listDocsByPath(boxID, "/", 256);
-        resp.files.reverse();
+        const md = [];
         for (const file of resp.files) {
             const fromWhere = `from blocks 
                 where path like '${file.path.replace(/\.sy$/, "")}%' 
@@ -173,10 +173,11 @@ class ReadingPointBox {
             const rows = await siyuan.sql(`select id ${fromWhere} limit 1`);
             if (rows.length > 0) {
                 const sqlStr = `select * ${fromWhere} order by updated desc`;
-                await siyuan.insertBlockAsChildOf(`{{${sqlStr}}}`, docID);
-                await siyuan.insertBlockAsChildOf(`###### ${file.name.replace(/\.sy$/, "")}`, docID);
+                md.push(`###### ${file.name.replace(/\.sy$/, "")}`);
+                md.push(`{{${sqlStr}}}`);
             }
         }
+        await siyuan.insertBlockAsChildOf(md.join("\n"), docID);
     }
 
     private async showContentsWithLock() {
@@ -211,13 +212,12 @@ class ReadingPointBox {
             openTab({
                 app: this.plugin.app,
                 doc: { id: docID },
+                afterOpen: () => {
+                    events.protyleReload();
+                },
             });
         } else {
-            try {
-                siyuan.pushMsg(cfg.name + this.plugin.i18n.thereIsNoBookmark);
-            } catch (e) {
-                console.log(e);
-            }
+            await siyuan.pushMsg(cfg.name + this.plugin.i18n.thereIsNoBookmark);
         }
     }
 
