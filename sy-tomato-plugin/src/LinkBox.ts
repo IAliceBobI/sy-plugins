@@ -73,10 +73,8 @@ class LinkBox {
                     const backLink = `⚓((${docID} '${docName}'))::((${srcID} '${editable.textContent}'))`;
                     const ab = new AttrBuilder("", true);
                     ab.add(gconst.LinkBoxDocLinkIAL, srcID);
-                    // TODO: 插入位置，可选一个书签位置。方便写作时，大量插入到中间。
                     await siyuan.appendBlock(`${backLink}\n${ab.build()}`, id);
                     newAnchors.set(id, ab.id);
-                    insertCount++;
                 }
             } else {
                 const { div } = await utils.getBlockDiv(id);

@@ -577,7 +577,7 @@ ${text}
                         class="b3-button"
                         on:click={() => addLineThrough("1")}>🙈</button
                     >
-                    {@html WEB_SPACE.repeat(2)}
+                    {@html WEB_SPACE}
                     <button
                         title="选中块去掉注释"
                         class="b3-button"
@@ -644,7 +644,7 @@ ${text}
                             destroy();
                         }}>✨</button
                     >
-                    {@html WEB_SPACE.repeat(2)}
+                    {@html WEB_SPACE}
                     <button
                         title="转引用后，执行双向互链"
                         class="b3-button"
@@ -659,8 +659,18 @@ ${text}
                         }}>🌌</button
                     >
                 </td>
-                <td
-                    ><button
+                <td>
+                    <button
+                        title="双向互链"
+                        class="b3-button"
+                        on:click={async () => {
+                            for (const div of selected)
+                                await linkBox.addLink(div, docID, docName);
+                            destroy();
+                        }}>🧲</button
+                    >
+                    {@html WEB_SPACE}
+                    <button
                         title="打开剪贴板中的块ID"
                         class="b3-button"
                         on:click={async () => {
@@ -676,8 +686,8 @@ ${text}
                             });
                             destroy();
                         }}>🦋</button
-                    ></td
-                >
+                    >
+                </td>
             </tr>
         </tbody>
     </table>
