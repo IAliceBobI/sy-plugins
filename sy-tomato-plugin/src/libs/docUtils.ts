@@ -1,4 +1,4 @@
-import { CUSTOM_RIFF_DECKS, DATA_NODE_ID } from "./gconst";
+import { BLOCK_REF, CUSTOM_RIFF_DECKS, DATA_ID, DATA_NODE_ID, DATA_SUBTYPE, DATA_TYPE } from "./gconst";
 import { getContenteditableElement, siyuan, siyuanCache } from "./utils";
 
 export async function moveAllContentToDoc(tobeRmDocID: string, destDocID: string) {
@@ -86,20 +86,41 @@ export async function createRefDoc(notebookId: string, name: string, add2card = 
 }
 
 export async function item2ref(boxID: string, elements: HTMLElement[], add2card = false) {
+    const ops = [];
     for (const e of elements) {
         const id = e?.getAttribute(DATA_NODE_ID);
-        const text = getContenteditableElement(e)?.textContent;
-        if (!id || !text) continue;
-        const parts = text.split(/;;|；；/g, 2);
-        const refs = [];
-        for (let item of parts[0].split(/[ 　]/g)) {
-            item = item?.trim();
-            if (!item) continue;
-            const id = await createRefDoc(boxID, item, add2card);
-            refs.push(`((${id} '${item}'))`);
+        const edit = getContenteditableElement(e);
+        if (!id || !edit?.textContent) continue;
+        const nodes = [...edit.childNodes]; // avoiding dead looping
+        let i = 0;
+        for (const t of nodes) {
+            if (t.nodeType != 3) continue;  // text node
+            const parts = t.textContent.split(/;;|；；/g, 2);
+            let inserted = false;
+            for (const item of parts[0].split(/[ 　]/g)) {
+                if (!item) continue;
+                const span = document.createElement("span") as HTMLElement;
+                span.setAttribute(DATA_TYPE, BLOCK_REF);
+                span.setAttribute(DATA_SUBTYPE, "d");
+                const newDocID = await createRefDoc(boxID, item, add2card);
+                span.setAttribute(DATA_ID, newDocID);
+                span.textContent = item;
+                if (i++ > 0) t.parentElement.insertBefore(document.createTextNode(" "), t);
+                t.parentElement.insertBefore(span, t);
+                inserted = true;
+            }
+            if (inserted) {
+                if (parts.length > 1) {
+                    let txt = parts.slice(1).join("").trim();
+                    if (txt) {
+                        txt = ";; " + txt;
+                        t.parentElement.insertBefore(document.createTextNode(txt), t);
+                    }
+                }
+                t.parentNode.removeChild(t);
+            }
         }
-        if (refs.length > 0) {
-            await siyuan.safeUpdateBlock(id, refs.join(" ") + " ;; " + parts.slice(1).join("").trim());
-        }
+        ops.push(...siyuan.transUpdateBlocks([{ id, domStr: e.outerHTML }]));
     }
+    await siyuan.transactions(ops);
 }

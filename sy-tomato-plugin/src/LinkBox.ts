@@ -50,7 +50,7 @@ class LinkBox {
         });
     }
 
-    private async addLink(element: HTMLElement, docID: string, docName: string) {
+    async addLink(element: HTMLElement, docID: string, docName: string) {
         element = findPara(element);
         const srcID = element.getAttribute(gconst.DATA_NODE_ID);
         const ids = extractLinksFromElement(element);
@@ -62,22 +62,22 @@ class LinkBox {
         for (const { id, type } of rows) {
             if (!id || !type) continue;
             if (type == "d") {
-                // const attrRows = await siyuan.sqlAttr(`select block_id from attributes 
-                //     where name="${gconst.LinkBoxDocLinkIAL}" and value = "${srcID}" and root_id="${id}"`);
-                // const row = attrRows.pop();
-                // attrRows.forEach(r => siyuan.addBookmark(r.block_id, "duplicated-bilink"));
-                // if (row?.block_id) {
-                //     //
-                // } else {
-                // }
-                const editable = utils.getContenteditableElement(element);
-                const backLink = `⚓((${docID} '${docName}'))::((${srcID} '${editable.textContent}'))`;
-                const ab = new AttrBuilder("", true);
-                ab.add(gconst.LinkBoxDocLinkIAL, srcID);
-                // TODO: 插入位置，可选一个书签位置。方便写作时，大量插入到中间。
-                await siyuan.appendBlock(`${backLink}\n${ab.build()}`, id);
-                newAnchors.set(id, ab.id);
-                insertCount++;
+                const attrRows = await siyuan.sqlAttr(`select block_id from attributes 
+                    where name="${gconst.LinkBoxDocLinkIAL}" and value = "${srcID}" and root_id="${id}"`);
+                const row = attrRows.pop();
+                if (row) {
+                    newAnchors.set(id, row.block_id);
+                    insertCount++;
+                } else {
+                    const editable = utils.getContenteditableElement(element);
+                    const backLink = `⚓((${docID} '${docName}'))::((${srcID} '${editable.textContent}'))`;
+                    const ab = new AttrBuilder("", true);
+                    ab.add(gconst.LinkBoxDocLinkIAL, srcID);
+                    // TODO: 插入位置，可选一个书签位置。方便写作时，大量插入到中间。
+                    await siyuan.appendBlock(`${backLink}\n${ab.build()}`, id);
+                    newAnchors.set(id, ab.id);
+                    insertCount++;
+                }
             } else {
                 const { div } = await utils.getBlockDiv(id);
                 const idInIAL = div.getAttribute(gconst.LinkBoxDocLinkIAL);

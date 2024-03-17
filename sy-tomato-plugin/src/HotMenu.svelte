@@ -31,6 +31,7 @@
     import { gotoBookmark } from "./libs/bookmark";
     import { DialogText } from "./libs/DialogText";
     import { item2ref, mergeDocs, moveAllContentHere } from "./libs/docUtils";
+    import { linkBox } from "./LinkBox";
 
     enum InsertPlace {
         here = "1#当前位置",
@@ -48,6 +49,7 @@
     let element: HTMLElement;
     let selected: HTMLElement[] = [];
     let docID: string;
+    let docName: string;
     let anchorID: string;
     let apiKey: string;
     let secretKey: string;
@@ -63,6 +65,7 @@
         selectedIds = s.ids;
         element = s.element;
         docID = s.docID;
+        docName = s.docName;
         selectedText = s.rangeText;
         anchorID = s.ids[s.ids.length - 1];
         selected = s.selected;
@@ -639,9 +642,23 @@ ${text}
                             const boxID = protyle.notebookId;
                             await item2ref(boxID, selected, false);
                             destroy();
-                        }}>✨🔗</button
-                    ></td
-                >
+                        }}>✨</button
+                    >
+                    {@html WEB_SPACE.repeat(2)}
+                    <button
+                        title="转引用后，执行双向互链"
+                        class="b3-button"
+                        on:click={async () => {
+                            const boxID = protyle.notebookId;
+                            await item2ref(boxID, selected, false);
+                            setTimeout(async () => {
+                                for (const div of selected)
+                                    await linkBox.addLink(div, docID, docName);
+                            }, 3000);
+                            destroy();
+                        }}>🌌</button
+                    >
+                </td>
                 <td
                     ><button
                         title="打开剪贴板中的块ID"
