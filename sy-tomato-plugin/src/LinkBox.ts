@@ -114,6 +114,7 @@ class LinkBox {
             }
         }
         if (changed1 || changed2) {
+            element.setAttribute(gconst.TOMATO_LINE_THROUGH2, "1");
             const md = this.lute.BlockDOM2Md(element.outerHTML);
             await siyuan.safeUpdateBlock(srcID, md);
             const e = element.querySelector(`[${gconst.DATA_NODE_ID}="${srcID}"]`) as HTMLElement;
