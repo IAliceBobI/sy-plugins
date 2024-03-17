@@ -30,7 +30,7 @@
     } from "./libs/bkUtils";
     import { gotoBookmark } from "./libs/bookmark";
     import { DialogText } from "./libs/DialogText";
-    import { mergeDocs, moveAllContentHere } from "./libs/docUtils";
+    import { item2ref, mergeDocs, moveAllContentHere } from "./libs/docUtils";
 
     enum InsertPlace {
         here = "1#当前位置",
@@ -633,9 +633,11 @@ ${text}
                 >
                 <td
                     ><button
-                        title="空格隔开的所有内容都转为引用"
+                        title="空格隔开的所有内容都转为引用（忽略;;后的内容)"
                         class="b3-button"
                         on:click={async () => {
+                            const boxID = protyle.notebookId;
+                            await item2ref(boxID, selected, false);
                             destroy();
                         }}>✨🔗</button
                     ></td

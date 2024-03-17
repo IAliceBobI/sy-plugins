@@ -1,5 +1,5 @@
-import { CUSTOM_RIFF_DECKS } from "./gconst";
-import { siyuan, siyuanCache } from "./utils";
+import { CUSTOM_RIFF_DECKS, DATA_NODE_ID } from "./gconst";
+import { getContenteditableElement, siyuan, siyuanCache } from "./utils";
 
 export async function moveAllContentToDoc(tobeRmDocID: string, destDocID: string) {
     const ids = (await siyuan.getChildBlocks(tobeRmDocID)).map(b => b.id);
@@ -83,4 +83,23 @@ export async function createRefDoc(notebookId: string, name: string, add2card = 
         await siyuan.addRiffCards([id]);
     }
     return id;
+}
+
+export async function item2ref(boxID: string, elements: HTMLElement[], add2card = false) {
+    for (const e of elements) {
+        const id = e?.getAttribute(DATA_NODE_ID);
+        const text = getContenteditableElement(e)?.textContent;
+        if (!id || !text) continue;
+        const parts = text.split(/;;|；；/g, 2);
+        const refs = [];
+        for (let item of parts[0].split(/[ 　]/g)) {
+            item = item?.trim();
+            if (!item) continue;
+            const id = await createRefDoc(boxID, item, add2card);
+            refs.push(`((${id} '${item}'))`);
+        }
+        if (refs.length > 0) {
+            await siyuan.safeUpdateBlock(id, refs.join(" ") + " ;; " + parts.slice(1).join("").trim());
+        }
+    }
 }
