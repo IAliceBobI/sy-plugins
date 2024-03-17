@@ -770,7 +770,7 @@ export const siyuan = {
     async getHeadingChildrenDOM(id: string) {
         return siyuan.call("/api/block/getHeadingChildrenDOM", { id });
     },
-    async listDocsByPath(notebookID: string, notReadablePath: string, sort = 15) {
+    async listDocsByPath(notebookID: string, notReadablePath: string, sort = 15): Promise<RetListDocsByPath> {
         return siyuan.call("/api/filetree/listDocsByPath", { notebook: notebookID, path: notReadablePath, sort });
     },
     async getRefIDs(id: string) {
@@ -794,11 +794,11 @@ export const siyuan = {
     async insertBlockAsChildOf(data: string, parentID: string, dataType = "markdown") {
         return siyuan.call("/api/block/insertBlock", { data, dataType, parentID });
     },
-    transInsertBlocksAsChildOf(ids: string[], parentID: string) {
-        return ids.reverse().map(id => {
+    transInsertBlocksAsChildOf(datas: string[], parentID: string) {
+        return datas.reverse().map(data => {
             const op = {} as IOperation;
             op.action = "insert";
-            op.id = id;
+            op.data = data;
             op.parentID = parentID;
             return op;
         });
@@ -806,11 +806,11 @@ export const siyuan = {
     async insertBlocksAsChildOf(ids: string[], parentID: string) {
         return siyuan.transactions(siyuan.transInsertBlocksAsChildOf(ids, parentID));
     },
-    async appendBlocks(ids: string[], parentID: string) {
-        return siyuan.transactions(ids.reverse().map(id => {
+    async appendBlocks(datas: string[], parentID: string) {
+        return siyuan.transactions(datas.reverse().map(data => {
             const op = {} as IOperation;
             op.action = "append";
-            op.id = id;
+            op.data = data;
             op.parentID = parentID;
             return op;
         }));

@@ -262,3 +262,32 @@ type RiffCard = {
     reps: number;
 }
 
+type RetListDocsByPath = {
+    box: string;
+    files: RetListDocsByPathFile[];
+    path: string;
+}
+
+type RetListDocsByPathFile = {
+    path: string;
+    name: string;
+    icon: string;
+    name1: string;
+    alias: string;
+    memo: string;
+    bookmark: string;
+    id: string;
+    count: number;
+    size: number;
+    hSize: string;
+    mtime: number;
+    ctime: number;
+    hMtime: string;
+    hCtime: Date;
+    sort: number;
+    subFileCount: number;
+    hidden: boolean;
+    newFlashcardCount: number;
+    dueFlashcardCount: number;
+    flashcardCount: number;
+}

@@ -7,7 +7,8 @@ import { zip2ways } from "./libs/functional";
 import { AttrBuilder } from "./libs/listUtils";
 import { getBookID } from "./libs/progressive";
 import { gotoBookmark } from "./libs/bookmark";
-import { SHA256 } from "crypto-js";
+import { Md5 } from "ts-md5";
+import { domEmbedding, domHdeading } from "./libs/sydom";
 
 const CreateDocLock = "CreateDocLock";
 const AddReadingPointLock = "AddReadingPointLock";
@@ -163,35 +164,46 @@ class ReadingPointBox {
 
     private async insertContents(boxID: string, docID: string) {
         const resp = await siyuan.listDocsByPath(boxID, "/", 256);
-        const md = [];
-        for (const file of resp.files) {
+        const doms = [];
+        const md5 = new Md5();
+        // resp.files.sort((a, b) => {
+        //     return a.path.localeCompare(b.path);
+        // });
+        const tasks = resp.files.map(file => {
             const fromWhere = `from blocks 
-                where path like '${file.path.replace(/\.sy$/, "")}%' 
-                and box='${boxID}' 
-                and ial like '%bookmark=%'
-                and ial not like '%bookmark="🛑 Suspended Cards"%'
-            `.replace(/\n/g, " ");
-            const rows = await siyuan.sql(`select id ${fromWhere} limit 1`);
+            where path like '${file.path.replace(/\.sy$/, "")}%' 
+            and box='${boxID}' 
+            and ial like '%bookmark=%'
+            and ial not like '%bookmark="🛑 Suspended Cards"%'`;
+            return { file, fromWhere, task: siyuan.sql(`select id ${fromWhere} limit 1`) };
+        });
+        for (const [rows, task] of zip2ways(await Promise.all(tasks.map(i => i.task)), tasks)) {
             if (rows.length > 0) {
-                const sqlStr = `select * ${fromWhere} order by updated desc`;
-                md.push(`###### ${file.name.replace(/\.sy$/, "")}`);
-                md.push(`{{${sqlStr}}}`);
+                const title: string = task.file.name.replace(/\.sy$/, "").trim();
+                doms.push(domHdeading("", title, "h6").replace(/[\n\s]+/g, " "));
+                md5.appendStr(title);
+
+                const sqlStr = `select * ${task.fromWhere} order by updated desc`;
+                doms.push(domEmbedding("", sqlStr).replace(/[\n\s]+/g, " "));
+                md5.appendStr(sqlStr);
             }
         }
-        const content = md.join("\n");
-        const hash = SHA256(content).toString();
+
+        const hash = md5.end().toString();
         const attrs = await siyuan.getBlockAttrs(docID);
         if (hash !== attrs["custom-tomato-rp-content-hash"]) {
             const blocks = await siyuan.getChildBlocks(docID);
             const ops = siyuan.transDeleteBlocks(blocks.map(b => b.id));
-
-            ops.push(...siyuan.transInsertBlocksAsChildOf([content], docID));
+            ops.push(...siyuan.transInsertBlocksAsChildOf(doms, docID));
 
             const newAttr = {} as AttrType;
             newAttr["custom-tomato-rp-content-hash"] = hash;
+            newAttr["custom-sy-readonly"] = "true";
             ops.push(...siyuan.transbatchSetBlockAttrs([{ id: docID, attrs: newAttr }]));
-
             await siyuan.transactions(ops);
+            await siyuan.pushMsg("更新：阅读点目录");
+        } else {
+            await siyuan.pushMsg("阅读点目录已是最新");
         }
     }
 
@@ -226,9 +238,6 @@ class ReadingPointBox {
             openTab({
                 app: this.plugin.app,
                 doc: { id: docID },
-                afterOpen: () => {
-                    events.protyleReload();
-                },
             });
         } else {
             await siyuan.pushMsg(cfg.name + this.plugin.i18n.thereIsNoBookmark);
