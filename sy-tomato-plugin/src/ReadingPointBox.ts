@@ -235,11 +235,11 @@ class ReadingPointBox {
         const rows = await siyuan.sql(sqlStr);
         if (rows.length > 0) {
             const docID = await siyuanCache.createDocWithMdIfNotExists(5000, boxID, "/📚" + cfg.name, "");
-            await this.insertContents(boxID, docID);
             openTab({
                 app: this.plugin.app,
                 doc: { id: docID },
             });
+            await this.insertContents(boxID, docID);
         } else {
             await siyuan.pushMsg(cfg.name + this.plugin.i18n.thereIsNoBookmark);
         }
