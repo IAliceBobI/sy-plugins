@@ -633,6 +633,15 @@ ${text}
                 >
                 <td
                     ><button
+                        title="空格隔开的所有内容都转为引用"
+                        class="b3-button"
+                        on:click={async () => {
+                            destroy();
+                        }}>✨🔗</button
+                    ></td
+                >
+                <td
+                    ><button
                         title="打开剪贴板中的块ID"
                         class="b3-button"
                         on:click={async () => {
@@ -650,7 +659,6 @@ ${text}
                         }}>🦋</button
                     ></td
                 >
-                <td></td>
             </tr>
         </tbody>
     </table>
