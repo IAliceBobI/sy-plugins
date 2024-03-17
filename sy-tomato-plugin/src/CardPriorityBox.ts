@@ -196,10 +196,10 @@ class CardPriorityBox {
         const validNum = isValidNumber(priority);
         if (dialog || !validNum) {
             if (!validNum) priority = 50;
-            new DialogText(`为${blocks.length}张卡输入新的优先级`, String(priority), async (priorityTxt: string) => {
+            new DialogText(`为${blocks.length}张卡输入新的优先级，优先级前缀为'-'或者'+'则表示增量`, String(priority), async (priorityTxt: string) => {
                 const priority = Number(priorityTxt);
                 if (isValidNumber(priority)) {
-                    await this.updateDocPriorityLock(priority, blocks, cb);
+                    await this.updateDocPriorityLock(priority, blocks, cb, priorityTxt.startsWith("-") || priorityTxt.startsWith("+"));
                 } else {
                     await siyuan.pushMsg(`您的输入有误：${priorityTxt}`);
                 }
@@ -210,11 +210,11 @@ class CardPriorityBox {
     }
 
     // update the entire doc cards
-    private updateDocPriorityLock(newPriority: number, blocks: GetCardRetBlock[], cb?: Func) {
+    private updateDocPriorityLock(newPriority: number, blocks: GetCardRetBlock[], cb?: Func, isDelta = false) {
         return navigator.locks.request("CardPriorityBox.updateDocPriorityLock", { ifAvailable: true }, async (lock) => {
             if (lock) {
                 await siyuan.pushMsg(`设置闪卡优先级为：${newPriority}`, 2000);
-                const count = await this.updateDocPriority(newPriority, blocks, cb);
+                const count = await this.updateDocPriority(newPriority, blocks, cb, isDelta);
                 await siyuan.pushMsg(`已经调整了${count}个闪卡的优先级`, 2000);
             } else {
                 await siyuan.pushMsg("正在修改优先级，请耐心等候……", 2000);
@@ -222,11 +222,17 @@ class CardPriorityBox {
         });
     }
 
-    private async updateDocPriority(newPriority: number, blocks: GetCardRetBlock[], cb?: Func) {
-        newPriority = ensureValidPriority(newPriority);
+    private async updateDocPriority(newPriority: number, blocks: GetCardRetBlock[], cb?: Func, isDelta = false) {
         const params = blocks.map(block => {
             const ial = block.ial as unknown as AttrType;
             const priority = readPriority(ial);
+            if (isDelta) {
+                const attrs = {} as AttrType;
+                attrs["custom-card-priority"] = String(ensureValidPriority(priority + newPriority));
+                return { id: ial.id, attrs };
+            }
+
+            newPriority = ensureValidPriority(newPriority);
             if (newPriority != priority) {
                 const attrs = {} as AttrType;
                 attrs["custom-card-priority"] = String(newPriority);
