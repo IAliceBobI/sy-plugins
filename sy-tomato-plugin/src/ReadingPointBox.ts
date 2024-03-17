@@ -201,9 +201,9 @@ class ReadingPointBox {
             newAttr["custom-sy-readonly"] = "true";
             ops.push(...siyuan.transbatchSetBlockAttrs([{ id: docID, attrs: newAttr }]));
             await siyuan.transactions(ops);
-            await siyuan.pushMsg("更新：阅读点目录");
+            await siyuan.pushMsg("更新：阅读点目录", 2000);
         } else {
-            await siyuan.pushMsg("阅读点目录已是最新");
+            await siyuan.pushMsg("阅读点目录已是最新", 2000);
         }
     }
 
