@@ -7,6 +7,7 @@ import { zip2ways } from "./libs/functional";
 import { AttrBuilder } from "./libs/listUtils";
 import { getBookID } from "./libs/progressive";
 import { gotoBookmark } from "./libs/bookmark";
+import { SHA256 } from "crypto-js";
 
 const CreateDocLock = "CreateDocLock";
 const AddReadingPointLock = "AddReadingPointLock";
@@ -177,7 +178,21 @@ class ReadingPointBox {
                 md.push(`{{${sqlStr}}}`);
             }
         }
-        await siyuan.insertBlockAsChildOf(md.join("\n"), docID);
+        const content = md.join("\n");
+        const hash = SHA256(content).toString();
+        const attrs = await siyuan.getBlockAttrs(docID);
+        if (hash !== attrs["custom-tomato-rp-content-hash"]) {
+            const blocks = await siyuan.getChildBlocks(docID);
+            const ops = siyuan.transDeleteBlocks(blocks.map(b => b.id));
+
+            ops.push(...siyuan.transInsertBlocksAsChildOf([content], docID));
+
+            const newAttr = {} as AttrType;
+            newAttr["custom-tomato-rp-content-hash"] = hash;
+            ops.push(...siyuan.transbatchSetBlockAttrs([{ id: docID, attrs: newAttr }]));
+
+            await siyuan.transactions(ops);
+        }
     }
 
     private async showContentsWithLock() {
@@ -207,7 +222,6 @@ class ReadingPointBox {
         const rows = await siyuan.sql(sqlStr);
         if (rows.length > 0) {
             const docID = await siyuanCache.createDocWithMdIfNotExists(5000, boxID, "/📚" + cfg.name, "");
-            await siyuan.clearAll(docID);
             await this.insertContents(boxID, docID);
             openTab({
                 app: this.plugin.app,
