@@ -199,6 +199,7 @@ class ReadingPointBox {
             const newAttr = {} as AttrType;
             newAttr["custom-tomato-rp-content-hash"] = hash;
             newAttr["custom-sy-readonly"] = "true";
+            newAttr["custom-off-tomatobacklink"] = "1";
             ops.push(...siyuan.transbatchSetBlockAttrs([{ id: docID, attrs: newAttr }]));
             await siyuan.transactions(ops);
             await siyuan.pushMsg("更新：阅读点目录", 2000);
