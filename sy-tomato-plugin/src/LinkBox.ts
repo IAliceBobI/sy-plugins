@@ -67,7 +67,6 @@ class LinkBox {
                 const row = attrRows.pop();
                 if (row) {
                     newAnchors.set(id, row.block_id);
-                    insertCount++;
                 } else {
                     const editable = utils.getContenteditableElement(element);
                     const backLink = `⚓((${docID} '${docName}'))::((${srcID} '${editable.textContent}'))`;
@@ -75,6 +74,7 @@ class LinkBox {
                     ab.add(gconst.LinkBoxDocLinkIAL, srcID);
                     await siyuan.appendBlock(`${backLink}\n${ab.build()}`, id);
                     newAnchors.set(id, ab.id);
+                    insertCount++;
                 }
             } else {
                 const { div } = await utils.getBlockDiv(id);
