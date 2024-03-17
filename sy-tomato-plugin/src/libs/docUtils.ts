@@ -1,5 +1,5 @@
 import { CUSTOM_RIFF_DECKS } from "./gconst";
-import { siyuan } from "./utils";
+import { siyuan, siyuanCache } from "./utils";
 
 export async function moveAllContentToDoc(tobeRmDocID: string, destDocID: string) {
     const ids = (await siyuan.getChildBlocks(tobeRmDocID)).map(b => b.id);
@@ -72,4 +72,15 @@ function setDefaultAttr(attrs: AttrType) {
     if (!attrs.memo) attrs.memo = "";
     if (!attrs.bookmark) attrs.bookmark = "";
     return attrs;
+}
+
+export async function createRefDoc(notebookId: string, name: string, add2card = false) {
+    const row = await siyuan.sqlOne(`select id from blocks where type='d' and content='${name}' limit 1`);
+    if (row?.id) return row.id;
+    const { path } = await siyuan.getRefCreateSavePath(notebookId);
+    const id = await siyuanCache.createDocWithMdIfNotExists(5000, notebookId, path + name, "");
+    if (add2card) {
+        await siyuan.addRiffCards([id]);
+    }
+    return id;
 }

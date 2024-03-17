@@ -1,7 +1,8 @@
 import { IProtyle, Lute, Plugin } from "siyuan";
 import { EventType, events } from "./libs/Events";
 import { BLOCK_REF, DATA_ID, DATA_SUBTYPE, DATA_TYPE, REF_HIERARCHY } from "./libs/gconst";
-import { NewLute, getID, getSyElement, siyuan, siyuanCache } from "./libs/utils";
+import { NewLute, getID, getSyElement, siyuan } from "./libs/utils";
+import { createRefDoc } from "./libs/docUtils";
 
 type IDName = {
     id: string;
@@ -101,7 +102,7 @@ class Tag2RefBox {
                     }
                     const span = document.createElement("span") as HTMLSpanElement;
                     span.setAttribute(DATA_TYPE, BLOCK_REF);
-                    const id = await this.createRefDoc(notebookId, ref);
+                    const id = await createRefDoc(notebookId, ref, this.settingCfg["tag-to-ref-add-card"]);
                     span.setAttribute(DATA_ID, id);
                     span.setAttribute(DATA_SUBTYPE, "d");
                     span.innerText = ref;
@@ -122,17 +123,6 @@ class Tag2RefBox {
             const md = this.lute.BlockDOM2Md(element.outerHTML);
             await siyuan.safeUpdateBlock(nodeID, md);
         }
-    }
-
-    private async createRefDoc(notebookId: string, name: string) {
-        const row = await siyuan.sqlOne(`select id from blocks where type='d' and content='${name}' limit 1`);
-        if (row?.id) return row.id;
-        const { path } = await siyuan.getRefCreateSavePath(notebookId);
-        const id = await siyuanCache.createDocWithMdIfNotExists(5000, notebookId, path + name, "");
-        if (this.settingCfg["tag-to-ref-add-card"]) {
-            await siyuan.addRiffCards([id]);
-        }
-        return id;
     }
 }
 
