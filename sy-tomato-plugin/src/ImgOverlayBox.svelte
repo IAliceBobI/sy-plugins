@@ -177,5 +177,5 @@
 <div class="b3-dialog__content">
     <canvas id="imgOverlayBoxCanvas"></canvas>
     <button class="b3-button" on:click={remove}>删除最后一个层</button>
-    <button class="b3-button" on:click={exit}>退出</button>
+    <button class="b3-button" on:click={exit}>保存并退出</button>
 </div>

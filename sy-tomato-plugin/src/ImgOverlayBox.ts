@@ -8,10 +8,10 @@ class ImgOverlayBox {
     private plugin: Plugin;
     async onload(plugin: Plugin) {
         this.plugin = plugin;
-        this.plugin.eventBus.on(EventType.open_menu_image, ({ detail }: any) => {
+        this.plugin.eventBus.on(EventType.open_menu_image, ({ detail }) => {
             detail.menu.addItem({
                 label: this.plugin.i18n.addPicOverlay,
-                icon: "iconOverlay",
+                iconHTML: "🛡️🖼️",
                 click: () => { this.overlayEditor(detail.element); }
             });
         });
@@ -32,7 +32,7 @@ class ImgOverlayBox {
     blockIconEvent(detail: any) {
         if (!this.plugin) return;
         detail.menu.addItem({
-            iconHTML: "🛡️",
+            iconHTML: "🛡️🖼️",
             label: this.plugin.i18n.addPicOverlay,
             click: () => {
                 for (const element of detail.blockElements) {
