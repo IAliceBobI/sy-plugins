@@ -15,14 +15,14 @@ class PieceMovingBox {
         const { isPiece } = isProtylePiece(protyle);
         if (isPiece) {
             detail.menu.addItem({
-                iconHTML: "📨⬆️",
+                iconHTML: "🚚⬆️",
                 label: "移动到上一分片内",
                 click: () => {
                     this.move(protyle, -1);
                 }
             });
             detail.menu.addItem({
-                iconHTML: "📨⬇️",
+                iconHTML: "🚚⬇️",
                 label: "移动到下一分片内",
                 click: () => {
                     this.move(protyle, 1);
@@ -42,7 +42,7 @@ class PieceMovingBox {
                 const menu = detail.menu;
                 menu.addItem({
                     label: "移动到上一分片内",
-                    icon: "iconMove",
+                    iconHTML: "🚚⬆️",
                     click: () => {
                         const blockID = detail?.element?.getAttribute("data-node-id") ?? "";
                         if (blockID) {
@@ -52,7 +52,7 @@ class PieceMovingBox {
                 });
                 menu.addItem({
                     label: "移动到下一分片内",
-                    icon: "iconMove",
+                    iconHTML: "🚚⬇️",
                     click: () => {
                         const blockID = detail?.element?.getAttribute("data-node-id") ?? "";
                         if (blockID) {

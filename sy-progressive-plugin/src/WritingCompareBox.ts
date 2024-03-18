@@ -1,6 +1,6 @@
 import { IProtyle, Lute, Plugin, openTab } from "siyuan";
-import { NewLute, NewNodeID, cleanDiv, getBlockDiv, isValidNumber, siyuan } from "../../sy-tomato-plugin/src/libs/utils";
-import { findCompareDoc, findKeysDoc, findPieceDoc, getCompareDoc, getHPathByDocID, getKeysDoc, isProtyleKeyDoc, isProtylePiece } from "./helper";
+import { NewLute, NewNodeID, cleanDiv, getBlockDiv, get_siyuan_lnk_md, isValidNumber, siyuan } from "../../sy-tomato-plugin/src/libs/utils";
+import { findAllInOneKeyDoc, findCompareDoc, findKeysDoc, findPieceDoc, getAllInOneKeyDoc, getCompareDoc, getHPathByDocID, getKeysDoc, isProtyleKeyDoc, isProtylePiece } from "./helper";
 import { DATA_NODE_ID, MarkKey, PARAGRAPH_INDEX, PROG_KEY_NOTE, PROG_ORIGIN_TEXT, RefIDKey, WEB_ZERO_SPACE } from "../../sy-tomato-plugin/src/libs/gconst";
 
 class WritingCompareBox {
@@ -17,6 +17,13 @@ class WritingCompareBox {
             const { isPiece, markKey } = isProtylePiece(protyle);
             if (isPiece) {
                 const menu = detail.menu;
+                menu.addItem({
+                    label: "提取所有分片笔记",
+                    icon: "iconCopy",
+                    click: async () => {
+                        await this.extractAllNotes(protyle.notebookId, markKey);
+                    },
+                });
                 menu.addItem({
                     label: "提取笔记",
                     icon: "iconCopy",
@@ -45,6 +52,39 @@ class WritingCompareBox {
                 }
             }
         });
+    }
+    private async extractAllNotes(boxID: string, markKey: string) {
+        // 插件管理勿改managedByPluginDoNotModify#20240130152919-exlnqci,7
+        const pmPreffix = markKey.split(",")[0];
+        const attrRows = await siyuan.sqlAttr(`select root_id,value from attributes where name="${MarkKey}" and value like "${pmPreffix}%" limit 100000000`);
+        const allDocs = attrRows.map(row => {
+            const idx = row.value.split(",").pop();
+            if (idx)
+                return { docID: row.root_id, idx: Number(idx) };
+        }).filter(row => row != null).sort((a, b) => a.idx - b.idx).map(row => row.docID);
+        const blocks = (await Promise.all(allDocs.map(docID => siyuan.getChildBlocks(docID))))
+            .flat()
+            .filter(row => row.type != "s" && row.type != "tb")
+            .map(b => b.id);
+        const rows = await siyuan.getRows(blocks, "markdown", true, [`ial not like "%${PROG_ORIGIN_TEXT}%"`]);
+        const md = rows.map(row => {
+            if (row.markdown) {
+                return `${row.markdown} ${get_siyuan_lnk_md(row.id, "*")}`;
+            } else {
+                return `{: id="${NewNodeID()}"}`;
+            }
+        });
+        const bookID = pmPreffix.split("#")[1];
+        let keysDocID = await findAllInOneKeyDoc(bookID);
+        if (!keysDocID) {
+            const hpath = await getHPathByDocID(bookID, "digest");
+            if (hpath) {
+                keysDocID = await getAllInOneKeyDoc(bookID, boxID, hpath);
+            }
+        }
+        if (!keysDocID) return;
+        await siyuan.clearAll(keysDocID);
+        await siyuan.insertBlockAsChildOf(md.join("\n"), keysDocID);
     }
 
     private async compareNotes(keyNoteID: string, notebookId: string, keyDocAttr: string) {

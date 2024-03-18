@@ -25,6 +25,10 @@ export function getDocIalSummary(bookID: string) {
     return `summary#${TEMP_CONTENT}#${bookID}`;
 }
 
+export function getDocIalAllInOneKey(bookID: string) {
+    return `allInOneKeysDoc#${TEMP_CONTENT}#${bookID}`;
+}
+
 export function getDocIalKeysDoc(bookID: string, point: number) {
     return `keysDoc#${TEMP_CONTENT}#${bookID},${point}`;
 }
@@ -60,6 +64,15 @@ export async function getSummaryDoc(bookID: string, boxID: string, hpath: string
     if (id) return id;
     const attr = {};
     attr[MarkKey] = getDocIalSummary(bookID);
+    const targetDocID = await utils.siyuanCache.createDocWithMdIfNotExists(5000, boxID, hpath, "", attr);
+    return targetDocID;
+}
+
+export async function getAllInOneKeyDoc(bookID: string, boxID: string, hpath: string) {
+    const id = await findAllInOneKeyDoc(bookID);
+    if (id) return id;
+    const attr = {};
+    attr[MarkKey] = getDocIalAllInOneKey(bookID);
     const targetDocID = await utils.siyuanCache.createDocWithMdIfNotExists(5000, boxID, hpath, "", attr);
     return targetDocID;
 }
@@ -155,6 +168,10 @@ export async function findCards(bookID: string) {
 
 export async function findSummary(bookID: string) {
     return doFindDoc(bookID, getDocIalSummary);
+}
+
+export async function findAllInOneKeyDoc(bookID: string) {
+    return doFindDoc(bookID, getDocIalAllInOneKey);
 }
 
 export async function findKeysDoc(bookID: string, point: number) {
