@@ -43,7 +43,7 @@ class PieceSummaryBox {
             const menu = detail.menu;
             menu.addItem({
                 label: this.plugin.i18n.collect,
-                icon: "iconCopy",
+                iconHTML: "📨",
                 accelerator: "⌥Z",
                 click: () => {
                     if (detail?.element) {
