@@ -45,7 +45,8 @@ class FlashBox {
             cardType = CardType.B;
         }
         detail.menu.addItem({
-            iconHTML: "🗃️",
+            iconHTML: "➕🗃️",
+            accelerator: "⌥E",
             label: this.plugin.i18n.insertBlankSpaceCard,
             click: () => {
                 this.makeCard(detail.protyle, cardType);
@@ -53,6 +54,7 @@ class FlashBox {
         });
         detail.menu.addItem({
             iconHTML: "🗓️🗃️🇷",
+            accelerator: "⌘`",
             label: this.plugin.i18n.send2dailyCard,
             click: () => {
                 this.makeCard(detail.protyle, cardType, getDailyPath());
@@ -60,6 +62,7 @@ class FlashBox {
         });
         detail.menu.addItem({
             iconHTML: "🗓️🗃️",
+            accelerator: "⌥S",
             label: this.plugin.i18n.send2dailyCardNoRef,
             click: () => {
                 this.makeCard(detail.protyle, cardType, getDailyPath(), true);
@@ -117,7 +120,7 @@ class FlashBox {
             const menu = detail.menu;
             menu.addItem({
                 label: this.plugin.i18n.insertBlankSpaceCard,
-                icon: "iconFlashcard",
+                iconHTML: "➕🗃️",
                 accelerator: "⌥E",
                 click: () => {
                     const blockID = detail?.element?.getAttribute("data-node-id") ?? "";
@@ -129,7 +132,7 @@ class FlashBox {
             });
             menu.addItem({
                 label: this.plugin.i18n.send2dailyCard,
-                icon: "iconFlashcard",
+                iconHTML: "🗓️🗃️🇷",
                 accelerator: "⌘`",
                 click: () => {
                     const blockID = detail?.element?.getAttribute("data-node-id") ?? "";
@@ -141,7 +144,7 @@ class FlashBox {
             });
             menu.addItem({
                 label: this.plugin.i18n.send2dailyCardNoRef,
-                icon: "iconFlashcard",
+                iconHTML: "🗓️🗃️",
                 accelerator: "⌥S",
                 click: () => {
                     const blockID = detail?.element?.getAttribute("data-node-id") ?? "";

@@ -17,6 +17,7 @@ class PieceSummaryBox {
         // if (isPiece) {
         detail.menu.addItem({
             iconHTML: "📨",
+            accelerator: "⌥Z",
             label: this.plugin.i18n.collect,
             click: () => {
                 this.copyBlocks(protyle);
