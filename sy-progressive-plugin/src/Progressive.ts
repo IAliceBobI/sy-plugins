@@ -34,7 +34,7 @@ class Progressive {
         await this.storage.onLayoutReady();
         if (!events.isMobile) {
             const topBarElement = this.plugin.addTopBar({
-                icon: "iconABook",
+                icon: "iconFilesRoot",
                 title: this.plugin.i18n.progressiveReadingMenu,
                 position: "right",
                 callback: () => {
@@ -77,7 +77,7 @@ class Progressive {
         this.plugin.eventBus.on("open-menu-content", async ({ detail }) => {
             const menu = detail.menu;
             menu.addItem({
-                icon: "iconAddingBook",
+                iconHTML: "➕📗",
                 label: this.plugin.i18n.addProgressiveReading,
                 accelerator: "",
                 click: async () => {
@@ -85,7 +85,7 @@ class Progressive {
                 }
             });
             menu.addItem({
-                icon: "iconEye",
+                iconHTML: "👁️📚",
                 label: this.plugin.i18n.viewAllProgressiveBooks,
                 accelerator: "⌥=",
                 click: async () => {
@@ -94,7 +94,7 @@ class Progressive {
             });
             menu.addItem({
                 label: this.plugin.i18n.readThisPiece,
-                icon: "iconCursor",
+                iconHTML: "🎯📖",
                 click: () => {
                     const blockID = detail?.element?.getAttribute("data-node-id") ?? "";
                     if (blockID) {
@@ -103,7 +103,7 @@ class Progressive {
                 },
             });
             menu.addItem({
-                icon: "iconLearn",
+                iconHTML: "🔀📖",
                 label: this.plugin.i18n.startToLearn,
                 accelerator: "⌥-",
                 click: () => {
@@ -181,7 +181,7 @@ class Progressive {
     private addMenu(rect?: DOMRect) {
         const menu = new Menu("progressiveMenu");
         menu.addItem({
-            icon: "iconAddingBook",
+            iconHTML: "➕📗",
             label: this.plugin.i18n.addProgressiveReading,
             accelerator: "",
             click: async () => {
@@ -189,7 +189,7 @@ class Progressive {
             }
         });
         menu.addItem({
-            icon: "iconEye",
+            iconHTML: "👁️📚",
             label: this.plugin.i18n.viewAllProgressiveBooks,
             accelerator: "⌥=",
             click: async () => {
@@ -197,7 +197,7 @@ class Progressive {
             }
         });
         menu.addItem({
-            icon: "iconCursor",
+            iconHTML: "🎯📖",
             label: this.plugin.i18n.readThisPiece,
             accelerator: "",
             click: async () => {
@@ -205,7 +205,7 @@ class Progressive {
             }
         });
         menu.addItem({
-            icon: "iconLearn",
+            iconHTML: "🔀📖",
             label: this.plugin.i18n.startToLearn,
             accelerator: "⌥-",
             click: () => {
