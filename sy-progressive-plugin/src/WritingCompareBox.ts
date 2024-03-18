@@ -68,7 +68,7 @@ class WritingCompareBox {
             .map(b => b.id);
         const rows = await siyuan.getRows(blocks, "markdown", true, [`ial not like "%${PROG_ORIGIN_TEXT}%"`]);
         const md = rows.map(row => {
-            if (row.markdown) {
+            if (row.markdown?.trim()) {
                 return `${row.markdown} ${get_siyuan_lnk_md(row.id, "*")}`;
             } else {
                 return `{: id="${NewNodeID()}"}`;
