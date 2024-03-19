@@ -680,7 +680,7 @@ export const siyuan = {
     },
     async getBlocksWordCount(ids: string[]): Promise<GetBlocksWordCount> {
         // if ids.length > 1, like wordCount will be the sum of blocks.
-        return siyuan.call("api/block/getBlocksWordCount", { ids });
+        return siyuan.call("/api/block/getBlocksWordCount", { ids });
     },
     // don't append to doc after clearAll
     async clearAll(docID: string) {
@@ -694,6 +694,9 @@ export const siyuan = {
             op.id = id;
             return op;
         });
+    },
+    async deleteBlock(id: string) {
+        return siyuan.call("/api/block/deleteBlock", { id });
     },
     async deleteBlocks(ids: string[]) {
         return siyuan.transactions(siyuan.transDeleteBlocks(ids));

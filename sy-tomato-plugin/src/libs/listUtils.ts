@@ -85,12 +85,12 @@ export class AttrBuilder {
     }
 }
 
-export function getDocListMd(isComment = false) {
+export function getDocListMd(text = "", isComment = false) {
     let attr = "";
     if (isComment) {
         attr = ` ${TOMATO_LINE_THROUGH2}="1"`;
     }
-    return `* {: id="${NewNodeID()}"}
+    return `* {: id="${NewNodeID()}"}${text}
   {: id="${NewNodeID()}"}
   {: id="${NewNodeID()}"}
   {: id="${NewNodeID()}"}

@@ -18,3 +18,25 @@ export function domEmbedding(id: string, text: string) {
         <div class="protyle-attr" contenteditable="false">​</div>
     </div>`;
 }
+
+export function domSingleItemList(editableDivStr: string, isComment = false) {
+    let comment = "";
+    if (isComment) comment = 'custom-tomato-line-through2="1"';
+    return `<div data-subtype="u" data-node-id="${NewNodeID()}" data-type="NodeList" class="list" ${comment}>
+        <div data-marker="*" data-subtype="u" data-node-id="${NewNodeID()}" data-type="NodeListItem" class="li" >
+            <div class="protyle-action" draggable="true"><svg>
+                    <use xlink:href="#iconDot"></use>
+                </svg></div>
+            <div data-node-id="${NewNodeID()}" data-type="NodeParagraph" class="p" >
+                ${editableDivStr}
+                <div class="protyle-attr" contenteditable="false">​</div>
+            </div>
+            <div data-node-id="${NewNodeID()}" data-type="NodeParagraph" class="p" >
+                <div contenteditable="true" spellcheck="false"></div>
+                <div class="protyle-attr" contenteditable="false">​</div>
+            </div>
+            <div class="protyle-attr" contenteditable="false">​</div>
+        </div>
+        <div class="protyle-attr" contenteditable="false">​</div>
+    </div>`;
+}
