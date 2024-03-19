@@ -182,7 +182,7 @@ class BackLinkBottomBox {
                 input.addEventListener("input", () => {
                     let c = Number(input.value.trim());
                     if (!isValidNumber(c)) c = 1;
-                    if (c <= 0) c = 1;
+                    if (c < 0) c = 0;
                     this.settingCfg["back-link-mention-count"] = c;
                 });
                 return input;
