@@ -57,7 +57,7 @@ class ListBox {
         }, {
             filter: ["comment", "zsdxlb", "list", "zs"],
             html: "插入单项注释列表(\"comment\", \"zsdxlb\", \"list\", \"zs\")(快捷菜单'📜📋全文'功能，会忽略注释)",
-            id: "insertSingleItemList",
+            id: "insertCommentedSingleItemList",
             callback(protyle: Protyle) {
                 protyle.insert(getDocListMd(true));
             }
