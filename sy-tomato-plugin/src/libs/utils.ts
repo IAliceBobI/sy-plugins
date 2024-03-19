@@ -699,7 +699,7 @@ export const siyuan = {
         return siyuan.transactions(siyuan.transDeleteBlocks(ids));
     },
     transMoveBlocksAfter(ids: string[], previousID: string) {
-        return ids.reverse().map(id => {
+        return ids.slice().reverse().map(id => {
             const op = {} as IOperation;
             op.action = "move";
             op.id = id;
@@ -710,14 +710,23 @@ export const siyuan = {
     async moveBlocksAfter(ids: string[], previousID: string) {
         return siyuan.transactions(siyuan.transMoveBlocksAfter(ids, previousID));
     },
-    async moveBlocksAsChild(ids: string[], parentID: string) {
-        return siyuan.transactions(ids.reverse().map(id => {
+    async moveBlockAfter(id: string, previousID: string) {
+        return siyuan.call("/api/block/moveBlock", { id, previousID });
+    },
+    async moveBlockAsChild(id: string, parentID: string) {
+        return siyuan.call("/api/block/moveBlock", { id, parentID });
+    },
+    transMoveBlocksAsChild(ids: string[], parentID: string) {
+        return ids.slice().reverse().map(id => {
             const op = {} as IOperation;
             op.action = "move";
             op.id = id;
             op.parentID = parentID;
             return op;
-        }));
+        });
+    },
+    async moveBlocksAsChild(ids: string[], parentID: string) {
+        return siyuan.transactions(siyuan.transMoveBlocksAsChild(ids, parentID));
     },
     async getTailChildBlocks(id: string, n: number): Promise<[{ id: string, type: string }]> {
         return siyuan.call("/api/block/getTailChildBlocks", { id, n });

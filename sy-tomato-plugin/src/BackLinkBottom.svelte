@@ -26,7 +26,6 @@
     } from "./libs/gconst";
     import { BKMaker } from "./BackLinkBottomBox";
     import { SearchEngine } from "./libs/search";
-    import { events } from "./libs/Events";
 
     const QUERYABLE_ELEMENT = "QUERYABLE_ELEMENT";
     const ICONS_SIZE = 13;
@@ -215,8 +214,7 @@
                 await siyuan.getTailChildBlocks(maker.docID, 1)
             )?.pop()?.id;
             if (lastID) {
-                await siyuan.moveBlocksAfter([id], lastID);
-                events.protyleReload();
+                await siyuan.moveBlockAfter(id, lastID);
                 await siyuan.pushMsg("移动成功", 2000);
             }
         }
