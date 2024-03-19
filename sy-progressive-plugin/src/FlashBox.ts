@@ -233,6 +233,7 @@ class FlashBox {
         } else if (cardType === CardType.B) {
             tmp.push("  >");
         }
+        tmp.push(`  {: id="${utils.NewNodeID()}"}`);
         const cardID = utils.NewNodeID();
         attrBuilder = new AttrBuilder(cardID);
         attrBuilder.add(gconst.CARD_PRIORITY, srcPriority);
