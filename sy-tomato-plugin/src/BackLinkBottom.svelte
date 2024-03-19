@@ -21,6 +21,7 @@
     import {
         BACKLINK_CACHE_TIME,
         BlockNodeEnum,
+        DATA_NODE_ID,
         TOMATO_BK_IGNORE,
     } from "./libs/gconst";
     import { BKMaker } from "./BackLinkBottomBox";
@@ -206,10 +207,16 @@
     }
 
     async function move2doc(domStr: string) {
-        const id = await copy2doc(domStr);
+        const div = dom2div(domStr);
+        const id = div.getAttribute(DATA_NODE_ID);
         if (id) {
-            await siyuan.safeUpdateBlock(id, "");
-            await siyuan.pushMsg("移动成功", 2000);
+            const lastID = (
+                await siyuan.getTailChildBlocks(maker.docID, 1)
+            )?.pop()?.id;
+            if (lastID) {
+                await siyuan.moveBlocksAfter([id], lastID);
+                await siyuan.pushMsg("移动成功", 2000);
+            }
         }
     }
 </script>
