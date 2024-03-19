@@ -13,6 +13,7 @@
     import {
         NewNodeID,
         cleanText,
+        getContenteditableElement,
         getCursorElement,
         replaceAll,
         siyuan,
@@ -708,10 +709,14 @@ ${text}
                         title="插入单项注释列表（'📜📋全文'功能，会忽略注释）"
                         class="b3-button"
                         on:click={async () => {
+                            const txt = getContenteditableElement(
+                                selected[0],
+                            ).textContent;
                             await siyuan.insertBlockAfter(
-                                getDocListMd(true),
+                                getDocListMd(txt, true),
                                 anchorID,
                             );
+                            await siyuan.deleteBlock(anchorID);
                             destroy();
                         }}>#️⃣🎏</button
                     >
@@ -721,10 +726,14 @@ ${text}
                         title="插入单项列表"
                         class="b3-button"
                         on:click={async () => {
+                            const txt = getContenteditableElement(
+                                selected[0],
+                            ).textContent;
                             await siyuan.insertBlockAfter(
-                                getDocListMd(),
+                                getDocListMd(txt),
                                 anchorID,
                             );
+                            await siyuan.deleteBlock(anchorID);
                             destroy();
                         }}>🎏</button
                     >
