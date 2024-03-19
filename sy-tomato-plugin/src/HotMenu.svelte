@@ -4,6 +4,7 @@
     import { events } from "./libs/Events";
     import {
         DATA_NODE_ID,
+        MarkKey,
         TOMATO_BK_IGNORE,
         TOMATO_LINE_THROUGH,
         WEB_SPACE,
@@ -179,7 +180,12 @@
                 true,
             )
         )
-            .filter((row) => !row.ial.includes(TOMATO_LINE_THROUGH))
+            .filter((row) => {
+                return (
+                    !row.ial.includes(TOMATO_LINE_THROUGH) &&
+                    !row.ial.includes(MarkKey)
+                );
+            })
             .map((row) => {
                 if (row.markdown.includes("((")) {
                     return row.content;
