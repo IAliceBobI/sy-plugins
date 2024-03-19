@@ -57,6 +57,19 @@ class CardPriorityBox {
                     await this.stopCards(blocks);
                 },
             });
+            menu.addItem({
+                label: "恢复所有暂停的闪卡",
+                iconHTML: "🌊🗃️",
+                click: async () => {
+                    const docID = detail?.protyle?.block?.rootID;
+                    if (!docID) return;
+                    const blocks = (await siyuan.sqlAttr(`select block_id from attributes where name="${CARD_PRIORITY_STOP}"`))
+                        .map(attr => {
+                            return { ial: { id: attr.block_id } };
+                        });
+                    await doStopCards("0", blocks as any);
+                },
+            });
             if (isCardUI(detail as any)) {
                 menu.addItem({
                     iconHTML: "🌊🛑",
@@ -175,7 +188,7 @@ class CardPriorityBox {
 
     async stopCards(blocks: GetCardRetBlock[]) {
         new DialogText(
-            `准备推迟${blocks.length}个闪卡，请先设置推迟天数`,
+            `准备推迟${blocks.length}个闪卡，请先设置推迟天数（整数、小数、负数）`,
             "2",
             async (days: string) => {
                 await doStopCards(days, blocks);

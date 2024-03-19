@@ -13,12 +13,18 @@ export async function removeDocCards(docID: string) {
 }
 
 export async function doStopCards(days: string, blocks: GetCardRetBlock[]) {
-    if (isValidNumber(Number(days))) {
-        const datetimeStr = timeUtil.dateFormat(timeUtil.now(Number(days) * 24 * 60 * 60));
-        const due = timeUtil.getYYYYMMDDHHmmssPlus0(timeUtil.nowts(Number(days) * 24 * 60 * 60));
+    const numDays = Number(days);
+    if (isValidNumber(numDays)) {
+        const datetimeStr = timeUtil.dateFormat(timeUtil.now(numDays * 24 * 60 * 60));
+        const due = timeUtil.getYYYYMMDDHHmmssPlus0(timeUtil.nowts(numDays * 24 * 60 * 60));
         const newAttrs = {} as AttrType;
-        newAttrs["custom-card-priority-stop"] = datetimeStr;
-        newAttrs.bookmark = "🛑 Suspended Cards";
+        if (numDays <= 0) {
+            newAttrs["custom-card-priority-stop"] = "";
+            newAttrs.bookmark = "";
+        } else {
+            newAttrs["custom-card-priority-stop"] = datetimeStr;
+            newAttrs.bookmark = "🛑 Suspended Cards";
+        }
         await siyuan.batchSetBlockAttrs(blocks.map(b => {
             return { id: b.ial.id, attrs: newAttrs };
         }));
