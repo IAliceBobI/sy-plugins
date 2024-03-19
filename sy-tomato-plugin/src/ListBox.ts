@@ -49,14 +49,14 @@ class ListBox {
 
         this.plugin.protyleSlash.push(...[{
             filter: ["item", "single", "list", "列表", "单项", "dxlb", "lb"],
-            html: "插入单项列表",
+            html: "插入单项列表(\"item\", \"single\", \"list\", \"列表\", \"单项\", \"dxlb\", \"lb\")",
             id: "insertSingleItemList",
             callback(protyle: Protyle) {
                 protyle.insert(getDocListMd());
             }
         }, {
             filter: ["comment", "zsdxlb", "list", "zs"],
-            html: "插入单项注释列表(快捷菜单'📜📋全文'功能，会忽略注释)",
+            html: "插入单项注释列表(\"comment\", \"zsdxlb\", \"list\", \"zs\")(快捷菜单'📜📋全文'功能，会忽略注释)",
             id: "insertSingleItemList",
             callback(protyle: Protyle) {
                 protyle.insert(getDocListMd(true));
