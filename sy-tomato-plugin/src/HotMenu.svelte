@@ -5,6 +5,7 @@
     import {
         DATA_NODE_ID,
         MarkKey,
+        READINGPOINT,
         TOMATO_BK_IGNORE,
         TOMATO_LINE_THROUGH,
         WEB_SPACE,
@@ -183,6 +184,7 @@
             .filter((row) => {
                 return (
                     !row.ial.includes(TOMATO_LINE_THROUGH) &&
+                    !row.ial.includes(READINGPOINT) &&
                     !row.ial.includes(MarkKey)
                 );
             })
