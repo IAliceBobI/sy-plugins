@@ -211,10 +211,6 @@ class FlashBox {
 
     private createList(divs: HTMLElement[], cardType: CardType, srcPriority: string) {
         const tmp = [];
-        let star = "* ";
-        if (this.settings.cardIndent) {
-            star = "  * ";
-        }
         let originPath: string = "";
         let refPath: string = "";
         let inBookIdx: string = "";
@@ -230,12 +226,12 @@ class FlashBox {
             div.removeAttribute(gconst.DATA_NODE_ID);
             const md = this.lute.BlockDOM2Md(div.outerHTML).replace("　　", "");
             if (idx++ == 0) tmp.push(`* ${attrBuilder.build()} ${md}`);
-            else tmp.push(star + md);
+            else tmp.push("  " + md);
         }
         if (cardType === CardType.C) {
-            tmp.push(star + "```");
+            tmp.push("  ```");
         } else if (cardType === CardType.B) {
-            tmp.push(star + ">");
+            tmp.push("  >");
         }
         const cardID = utils.NewNodeID();
         attrBuilder = new AttrBuilder(cardID);

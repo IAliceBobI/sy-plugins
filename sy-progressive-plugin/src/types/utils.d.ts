@@ -6,7 +6,6 @@ type SettingCfgType = {
     addCodeBlock: boolean,
     addQuoteBlock: boolean,
     openCardsOnOpenPiece: boolean,
-    cardIndent: boolean,
     btnViewContents: boolean,
     btnSplitByPunctuationsListCheck: boolean;
     btnFullfilContent: boolean;
