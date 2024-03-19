@@ -1,5 +1,5 @@
 import { events } from "./Events";
-import { BlockNodeEnum, CUSTOM_RIFF_DECKS, DATA_NODE_ID, DATA_NODE_INDEX, DATA_TYPE } from "./gconst";
+import { BlockNodeEnum, CUSTOM_RIFF_DECKS, DATA_NODE_ID, DATA_NODE_INDEX, DATA_TYPE, TOMATO_LINE_THROUGH2 } from "./gconst";
 import { NewNodeID, dom2div, siyuan } from "./utils";
 
 export async function delAllchecked(docID: string) {
@@ -83,4 +83,16 @@ export class AttrBuilder {
         if (this.list.length == 0) return "";
         return `{: ${this.list.join(" ")}}`; // nospace dont touch
     }
+}
+
+export function getDocListMd(isComment = false) {
+    let attr = "";
+    if (isComment) {
+        attr = ` ${TOMATO_LINE_THROUGH2}="1"`;
+    }
+    return `* {: id="${NewNodeID()}"}\u200b
+  {: id="${NewNodeID()}"}
+  {: id="${NewNodeID()}"}
+  {: id="${NewNodeID()}"}
+{: id="${NewNodeID()}"${attr}}`;
 }

@@ -22,7 +22,12 @@
     import { EnumUtils } from "./libs/EnumUtils";
     import { STORAGE_SETTINGS } from "./constants";
     import { hotMenuBox } from "./HotMenuBox";
-    import { addFlashCard, delAllchecked, uncheckAll } from "./libs/listUtils";
+    import {
+        addFlashCard,
+        delAllchecked,
+        getDocListMd,
+        uncheckAll,
+    } from "./libs/listUtils";
     import { removeDocCards } from "./libs/cardUtils";
     import {
         cleanBackLinks,
@@ -694,6 +699,34 @@ ${text}
                             });
                             destroy();
                         }}>🦋</button
+                    >
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <button
+                        title="插入单项注释列表（'📜📋全文'功能，会忽略注释）"
+                        class="b3-button"
+                        on:click={async () => {
+                            await siyuan.insertBlockAfter(
+                                getDocListMd(true),
+                                anchorID,
+                            );
+                            destroy();
+                        }}>#️⃣🎏</button
+                    >
+                </td>
+                <td>
+                    <button
+                        title="插入单项列表"
+                        class="b3-button"
+                        on:click={async () => {
+                            await siyuan.insertBlockAfter(
+                                getDocListMd(),
+                                anchorID,
+                            );
+                            destroy();
+                        }}>🎏</button
                     >
                 </td>
             </tr>
