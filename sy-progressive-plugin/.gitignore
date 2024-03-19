@@ -8,3 +8,4 @@
 /index.js
 /i18n
 /dev
+vite.config.ts.timestamp*.mjs
