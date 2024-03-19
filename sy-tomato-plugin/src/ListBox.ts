@@ -1,9 +1,9 @@
-import { IProtyle, Plugin } from "siyuan";
+import { IProtyle, Plugin, Protyle } from "siyuan";
 import "./index.scss";
 import { getContenteditableElement as getContentEditableElement } from "./libs/utils";
 import { EventType, events } from "./libs/Events";
 import { BlockNodeEnum, DATA_TYPE, WEB_ZERO_SPACE } from "./libs/gconst";
-import { delAllchecked, uncheckAll } from "./libs/listUtils";
+import { delAllchecked, getDocListMd, uncheckAll } from "./libs/listUtils";
 
 class ListBox {
     private plugin: Plugin;
@@ -46,6 +46,22 @@ class ListBox {
                 await delAllchecked(docID);
             },
         });
+
+        this.plugin.protyleSlash.push(...[{
+            filter: ["item", "single", "list", "列表", "单项", "dxlb", "lb"],
+            html: "插入单项列表",
+            id: "insertSingleItemList",
+            callback(protyle: Protyle) {
+                protyle.insert(getDocListMd());
+            }
+        }, {
+            filter: ["comment", "zsdxlb", "list", "zs"],
+            html: "插入单项注释列表(快捷菜单'📜📋全文'功能，会忽略注释)",
+            id: "insertSingleItemList",
+            callback(protyle: Protyle) {
+                protyle.insert(getDocListMd(true));
+            }
+        }]);
 
         if (this.settingCfg["dont-break-list"]) {
             events.addListener("Tomato-ListBox-ListAsFile", (eventType, detail) => {

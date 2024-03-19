@@ -90,7 +90,7 @@ export function getDocListMd(isComment = false) {
     if (isComment) {
         attr = ` ${TOMATO_LINE_THROUGH2}="1"`;
     }
-    return `* {: id="${NewNodeID()}"}\u200b
+    return `* {: id="${NewNodeID()}"}
   {: id="${NewNodeID()}"}
   {: id="${NewNodeID()}"}
   {: id="${NewNodeID()}"}

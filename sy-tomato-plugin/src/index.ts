@@ -79,7 +79,7 @@ export default class ThePlugin extends Plugin {
         this.addSettingItem("tag2RefBoxCheckbox", "* 自动将标签转为引用（引用也继承标签的层级关系）", false, "开启会将当前编辑区内的标签转为引用！tag开头、@开头的标签不会被转。");
         if (this.settingCfg.tag2RefBoxCheckbox ?? false) await tag2RefBox.onload(this);
 
-        this.addSettingItem("listBoxCheckbox", "* 列表工具", false, "取消文档中所有任务的勾选");
+        this.addSettingItem("listBoxCheckbox", "* 列表工具", false, "取消文档中所有任务的勾选, 插入单项列表");
         if (this.settingCfg.listBoxCheckbox ?? false) await listBox.onload(this);
     }
 
