@@ -1,6 +1,6 @@
 import { events } from "./Events";
 import { BlockNodeEnum, CUSTOM_RIFF_DECKS, DATA_NODE_ID, DATA_NODE_INDEX, DATA_TYPE, TOMATO_LINE_THROUGH2 } from "./gconst";
-import { NewNodeID, dom2div, getContenteditableElement, siyuan } from "./utils";
+import { NewNodeID, dom2div, getContenteditableElement, moveCursor2Tail, siyuan } from "./utils";
 
 export async function delAllchecked(docID: string) {
     const kramdowns = await Promise.all((await siyuan.sql(`select id from blocks 
@@ -42,9 +42,10 @@ export async function addFlashCard(element: HTMLElement) {
         const txt = getContenteditableElement(element)?.textContent ?? "";
         const id = element.getAttribute(DATA_NODE_ID);
         if (id) {
-            const { md } = getDocListMd(txt, true);
+            const { md, id: newID } = getDocListMd(txt, true);
             await siyuan.insertBlockAfter(md, id);
             await siyuan.deleteBlock(id);
+            moveCursor2Tail(newID);
         }
     }
 }

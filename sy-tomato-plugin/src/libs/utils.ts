@@ -3,6 +3,11 @@ import { v4 as uuid } from "uuid";
 import * as gconst from "./gconst";
 import * as moment from "moment-timezone";
 
+export function moveCursor2Tail(id: string) {
+    const newDIV = document.querySelector(`div[${gconst.DATA_NODE_ID}="${id}"]`);
+    document.getSelection().collapse(getContenteditableElement(newDIV), 1);
+}
+
 export function extractLinksFromElement(div: HTMLElement) {
     const ids: Set<string> = new Set();
     for (const e of div.querySelectorAll(`[${gconst.DATA_TYPE}~="${gconst.BLOCK_REF}"]`)) {

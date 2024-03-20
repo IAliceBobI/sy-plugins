@@ -15,6 +15,7 @@
         cleanText,
         getContenteditableElement,
         getCursorElement,
+        moveCursor2Tail,
         replaceAll,
         siyuan,
         siyuanCache,
@@ -712,11 +713,10 @@ ${text}
                             const txt = getContenteditableElement(
                                 selected[0],
                             ).textContent;
-                            await siyuan.insertBlockAfter(
-                                getDocListMd(txt, true),
-                                anchorID,
-                            );
+                            const { id, md } = getDocListMd(txt, true);
+                            await siyuan.insertBlockAfter(md, anchorID);
                             await siyuan.deleteBlock(anchorID);
+                            moveCursor2Tail(id);
                             destroy();
                         }}>#️⃣🎏</button
                     >
@@ -729,11 +729,10 @@ ${text}
                             const txt = getContenteditableElement(
                                 selected[0],
                             ).textContent;
-                            await siyuan.insertBlockAfter(
-                                getDocListMd(txt),
-                                anchorID,
-                            );
+                            const { id, md } = getDocListMd(txt);
+                            await siyuan.insertBlockAfter(md, anchorID);
                             await siyuan.deleteBlock(anchorID);
+                            moveCursor2Tail(id);
                             destroy();
                         }}>🎏</button
                     >

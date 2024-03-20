@@ -1,8 +1,8 @@
 import { IProtyle, Plugin } from "siyuan";
 import "./index.scss";
-import { getContenteditableElement as getContentEditableElement, siyuan } from "./libs/utils";
+import { getContenteditableElement as getContentEditableElement, moveCursor2Tail, siyuan } from "./libs/utils";
 import { EventType, events } from "./libs/Events";
-import { BlockNodeEnum, DATA_NODE_ID, DATA_TYPE, WEB_ZERO_SPACE } from "./libs/gconst";
+import { BlockNodeEnum, DATA_TYPE, WEB_ZERO_SPACE } from "./libs/gconst";
 import { delAllchecked, getDocListMd, uncheckAll } from "./libs/listUtils";
 
 class ListBox {
@@ -107,8 +107,7 @@ async function insertItemList(isComment = false) {
             const { md, id: newID } = getDocListMd(txt, isComment);
             await siyuan.insertBlockAfter(md, id);
             await siyuan.deleteBlock(id);
-            const newDIV = document.querySelector(`div[${DATA_NODE_ID}="${newID}"]`);
-            document.getSelection().collapse(getContentEditableElement(newDIV), 1);
+            moveCursor2Tail(newID);
         }
     }
 }
