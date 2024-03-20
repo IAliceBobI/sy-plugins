@@ -706,7 +706,7 @@ ${text}
             <tr>
                 <td>
                     <button
-                        title="插入单项注释列表（'📜📋全文'功能，会忽略注释）"
+                        title="插入单项注释列表ctrl+1（'📜📋全文'功能，会忽略注释）"
                         class="b3-button"
                         on:click={async () => {
                             const txt = getContenteditableElement(
