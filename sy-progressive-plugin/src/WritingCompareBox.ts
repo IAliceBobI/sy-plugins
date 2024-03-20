@@ -66,10 +66,10 @@ class WritingCompareBox {
             .flat()
             .filter(row => row.type != "s" && row.type != "tb")
             .map(b => b.id);
-        const rows = await siyuan.getRows(blocks, "markdown", true, [`ial not like "%${PROG_ORIGIN_TEXT}%"`]);
+        const rows = await siyuan.getRows(blocks, "content", true, [`ial not like "%${PROG_ORIGIN_TEXT}%"`]);
         const md = rows.map(row => {
-            if (row.markdown?.trim()) {
-                return `${row.markdown} ${get_siyuan_lnk_md(row.id, "*")}\n{: id="${NewNodeID()}"}`;
+            if (row.content?.trim()) {
+                return `${row.content} ${get_siyuan_lnk_md(row.id, "*")}\n{: id="${NewNodeID()}"}`;
             }
         }).filter(i => !!i);
         const bookID = pmPreffix.split("#")[1];
