@@ -2,7 +2,7 @@ import { IProtyle, Lute, Plugin, openTab } from "siyuan";
 import { NewLute, NewNodeID, dom2div, getBlockDiv, getID, get_siyuan_lnk_md, siyuan, siyuanCache, sleep, timeUtil } from "@/libs/utils";
 import "./index.scss";
 import { events } from "@/libs/Events";
-import { DATA_NODE_ID, READINGPOINT } from "./libs/gconst";
+import { DATA_NODE_ID, IN_BOOK_INDEX, MarkKey, PARAGRAPH_INDEX, READINGPOINT, RefIDKey } from "./libs/gconst";
 import { zip2ways } from "./libs/functional";
 import { AttrBuilder } from "./libs/listUtils";
 import { getBookID } from "./libs/progressive";
@@ -353,6 +353,10 @@ async function getDomStr(id: string, lute: Lute, md: string[]) {
     const domStr = lute.Md2BlockDOM(md.join("\n"));
     const div = dom2div(domStr);
     oldDiv.getAttributeNames().forEach(name => {
+        if (name == MarkKey) return;
+        if (name == RefIDKey) return;
+        if (name == PARAGRAPH_INDEX) return;
+        if (name == IN_BOOK_INDEX) return;
         div.setAttribute(name, oldDiv.getAttribute(name));
     });
     return div.outerHTML;
