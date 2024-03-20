@@ -1,8 +1,8 @@
-import { IProtyle, Plugin, Protyle } from "siyuan";
+import { IProtyle, Plugin } from "siyuan";
 import "./index.scss";
-import { getContenteditableElement as getContentEditableElement } from "./libs/utils";
+import { getContenteditableElement as getContentEditableElement, siyuan } from "./libs/utils";
 import { EventType, events } from "./libs/Events";
-import { BlockNodeEnum, DATA_TYPE, WEB_ZERO_SPACE } from "./libs/gconst";
+import { BlockNodeEnum, DATA_NODE_ID, DATA_TYPE, WEB_ZERO_SPACE } from "./libs/gconst";
 import { delAllchecked, getDocListMd, uncheckAll } from "./libs/listUtils";
 
 class ListBox {
@@ -51,15 +51,15 @@ class ListBox {
             filter: ["item", "single", "list", "列表", "单项", "dxlb", "lb"],
             html: "插入单项列表(\"item\", \"single\", \"list\", \"列表\", \"单项\", \"dxlb\", \"lb\")",
             id: "insertSingleItemList",
-            callback(protyle: Protyle) {
-                protyle.insert(getDocListMd());
+            async callback() {
+                await insertItemList();
             }
         }, {
             filter: ["comment", "zsdxlb", "list", "zs"],
             html: "插入单项注释列表(\"comment\", \"zsdxlb\", \"list\", \"zs\")(快捷菜单'📜📋全文'功能，会忽略注释)",
             id: "insertCommentedSingleItemList",
-            callback(protyle: Protyle) {
-                protyle.insert(getDocListMd("", true));
+            async callback() {
+                await insertItemList(true);
             }
         }]);
 
@@ -90,6 +90,25 @@ class ListBox {
                     });
                 }
             });
+        }
+    }
+}
+
+async function insertItemList(isComment = false) {
+    const { selected, ids } = await events.selectedDivs();
+    if (selected.length > 0) {
+        const div = selected[0];
+        const id = ids[0];
+        const edit = getContentEditableElement(div);
+        if (id && edit) {
+            const parts = edit.textContent.split("/");
+            parts.pop();
+            const txt = parts.join("/");
+            const { md, id: newID } = getDocListMd(txt, isComment);
+            await siyuan.insertBlockAfter(md, id);
+            await siyuan.deleteBlock(id);
+            const newDIV = document.querySelector(`div[${DATA_NODE_ID}="${newID}"]`);
+            document.getSelection().collapse(getContentEditableElement(newDIV), 1);
         }
     }
 }

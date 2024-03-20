@@ -42,7 +42,8 @@ export async function addFlashCard(element: HTMLElement) {
         const txt = getContenteditableElement(element)?.textContent ?? "";
         const id = element.getAttribute(DATA_NODE_ID);
         if (id) {
-            await siyuan.insertBlockAfter(getDocListMd(txt, true), id);
+            const { md } = getDocListMd(txt, true);
+            await siyuan.insertBlockAfter(md, id);
             await siyuan.deleteBlock(id);
         }
     }
@@ -93,13 +94,17 @@ export class AttrBuilder {
 }
 
 export function getDocListMd(text = "", isComment = false) {
+    const id = NewNodeID();
     let attr = "";
     if (isComment) {
         attr = ` ${TOMATO_LINE_THROUGH2}="1"`;
     }
-    return `* {: id="${NewNodeID()}"}${text}
+    return {
+        md: `* {: id="${NewNodeID()}"}${text}
   {: id="${NewNodeID()}"}
   {: id="${NewNodeID()}"}
   {: id="${NewNodeID()}"}
-{: id="${NewNodeID()}"${attr}}`;
+{: id="${id}"${attr}}`,
+        id
+    };
 }
