@@ -177,7 +177,7 @@ class FlashBox {
         });
     }
 
-    private async doInsertCard(protyle: IProtyle, divs: HTMLElement[], t: CardType, _lastSelectedID: string, path?: string) {
+    private async doInsertCard(protyle: IProtyle, divs: HTMLElement[], t: CardType, lastSelectedID: string, path?: string) {
         const boxID = protyle.notebookId;
         const docID = protyle.block?.rootID;
         if (!docID) return;
@@ -207,6 +207,14 @@ class FlashBox {
         }
         await siyuan.addRiffCards([cardID]);
         await siyuan.pushMsg("⚡🗃" + markdown.split("(")[0], 1234);
+
+        const { div } = await utils.getBlockDiv(lastSelectedID);
+        const edit = utils.getContenteditableElement(div);
+        if (edit) {
+            const span = edit.appendChild(document.createElement("span")) as HTMLElement;
+            set_href(span, cardID, "&");
+            await siyuan.safeUpdateBlock(lastSelectedID, this.lute.BlockDOM2Md(div.outerHTML));
+        }
     }
 
     private createList(divs: HTMLElement[], cardType: CardType, srcPriority: string) {
