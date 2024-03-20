@@ -83,6 +83,7 @@ class WritingCompareBox {
         if (!keysDocID) return;
         await siyuan.clearAll(keysDocID);
         await siyuan.insertBlockAsChildOf(md.join("\n"), keysDocID);
+        openTab({ app: this.plugin.app, doc: { id: keysDocID }, position: "right" });
     }
 
     private async compareNotes(keyNoteID: string, notebookId: string, keyDocAttr: string) {
