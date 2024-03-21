@@ -73,7 +73,8 @@ class Schedule {
 
     async addSchedule(blockID: string, datetime: string) {
         if (!blockID) return;
-        const data = this.plugin.data[STORAGE_SCHEDULE] ?? {};
+        let data = this.plugin.data[STORAGE_SCHEDULE] ?? {};
+        if (typeof data == "string") data = {};
         data[blockID] = datetime;
         await this.plugin.saveData(STORAGE_SCHEDULE, data);
         await this.doSchedule(blockID, data);
