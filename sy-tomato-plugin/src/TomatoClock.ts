@@ -33,7 +33,8 @@ class TomatoClock {
         this.lastDelayMinute = 0;
         this.settingCfg = (plugin as any).settingCfg;
         this.plugin.loadData(STORAGE_TOMATO_TIME).then(() => {
-            const data = (this.plugin.data[STORAGE_TOMATO_TIME] ?? {}) as TomatoTime;
+            let data = (this.plugin.data[STORAGE_TOMATO_TIME] ?? {}) as TomatoTime;
+            if (typeof data == "string") data = {} as any;
             if (data.minute > 0 && data.startTime > 0) {
                 const due = data.minute * 60 * 1000 + data.startTime;
                 const now = Date.now();

@@ -177,8 +177,10 @@ export class Storage {
     }
 
     booksInfos(): BookInfos {
-        if (!this.plugin.data[constants.STORAGE_BOOKS])
+        const data = this.plugin.data[constants.STORAGE_BOOKS];
+        if (!data || typeof data == "string") {
             this.plugin.data[constants.STORAGE_BOOKS] = {};
+        }
         return this.plugin.data[constants.STORAGE_BOOKS];
     }
 

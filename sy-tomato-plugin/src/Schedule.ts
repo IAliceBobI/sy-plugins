@@ -112,7 +112,8 @@ class Schedule {
     }
 
     private loopSchedule() {
-        const data = this.plugin.data[STORAGE_SCHEDULE] ?? {};
+        let data = this.plugin.data[STORAGE_SCHEDULE] ?? {};
+        if (typeof data == "string") data = {};
         for (const keyBlockID in data) {
             this.doSchedule(keyBlockID, data);
         }
