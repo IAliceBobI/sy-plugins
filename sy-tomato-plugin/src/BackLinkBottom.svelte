@@ -52,17 +52,14 @@
     onDestroy(() => {});
 
     async function getBackLinks() {
-        const backlink2 = await siyuanCache.getBacklink2(
-            20 * 1000,
-            maker.docID,
-        );
+        const backlink2 = await siyuanCache.getBacklink2(5 * 1000, maker.docID);
 
         const maxCount = maker.settingCfg["back-link-max-size"] ?? 100;
         backLinks = (
             await Promise.all(
                 backlink2.backlinks.slice(0, maxCount).map((backlink) => {
                     return siyuanCache.getBacklinkDoc(
-                        2 * BACKLINK_CACHE_TIME,
+                        6 * 1000,
                         maker.docID,
                         backlink.id,
                     );
