@@ -39,6 +39,7 @@
     let backLinks: BacklinkSv[] = [];
     let linkItems: LinkItem[] = [];
     const allRefs: RefCollector = new Map();
+    let searchText = "";
 
     onMount(async () => {
         mentionCountingSpanAttr[MENTION_COUTING_SPAN] = "1";
@@ -177,6 +178,11 @@
         });
     }
 
+    function refConceptClick(txt: string) {
+        searchText = txt;
+        search({ target: { value: txt } } as any);
+    }
+
     function hideThis() {
         if (autoRefreshChecked) {
             autoRefreshChecked = false;
@@ -228,7 +234,7 @@
             <button
                 {...attrs}
                 class="bk_label b3-label__text"
-                on:click={() => refClick(id)}>{text}</button
+                on:click={() => refConceptClick(text)}>{text}</button
             >
             <span class="bk_ref_count">{count}</span>
         </label>
@@ -280,6 +286,7 @@
             title="必须包含AA、BB，DD与EE至少包含一个，但不能包含CC"
             placeholder="AA BB !CC DD|EE"
             on:focus={() => (autoRefreshChecked = false)}
+            bind:value={searchText}
             on:input={search}
         />
         <span {...mentionCountingSpanAttr}></span>
