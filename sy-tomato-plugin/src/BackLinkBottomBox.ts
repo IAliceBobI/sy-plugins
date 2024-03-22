@@ -244,9 +244,10 @@ async function skipByAttrs(docID: string): Promise<boolean> {
     if (markKey.includes(TEMP_CONTENT)) return true;
 
     for (const [k] of Object.entries(attrs)) {
-        if (k.startsWith("custom-dailynote-")) {
-            return true;
-        } else if (k.startsWith("custom-dailycard-")) {
+        // if (k.startsWith("custom-dailynote-")) {
+        //     return true;
+        // }
+        if (k.startsWith("custom-dailycard-")) {
             return true;
         }
     }

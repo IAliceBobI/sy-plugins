@@ -192,13 +192,13 @@ export async function scanAllRef(div: HTMLElement, docID: string, allRefs: RefCo
 }
 
 async function addRef(txt: string, id: string, docID: string, allRefs: RefCollector, dataNodeID?: string) {
-    if (txt == "*" || txt == "@" || txt == "@*") return;
-    if (
-        Array.from(
-            txt.matchAll(/^c?\d{4}-\d{2}-\d{2}(@第\d+周-星期.{1})?$/g),
-        ).length > 0
-    )
-        return;
+    if (txt == "*") return;
+    // if (
+    //     Array.from(
+    //         txt.matchAll(/^c?\d{4}-\d{2}-\d{2}(@第\d+周-星期.{1})?$/g),
+    //     ).length > 0
+    // )
+    //     return;
     if (!dataNodeID) dataNodeID = id;
     const key = id + txt;
     const value: LinkItem =
