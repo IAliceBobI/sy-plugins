@@ -168,7 +168,7 @@
 
     function hideGutter(e: HTMLElement) {
         e?.querySelectorAll(".protyle-gutters")?.forEach((e) => {
-            e.classList?.add("fn__none");
+            e.innerHTML = "";
         });
     }
 
