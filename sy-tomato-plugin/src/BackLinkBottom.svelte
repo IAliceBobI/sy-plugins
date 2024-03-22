@@ -143,23 +143,33 @@
                 const div = document.createElement("div") as HTMLElement;
                 div.setAttribute(TOMATO_BK_IGNORE, "1");
                 div.style.minHeight = "auto";
-                return new Protyle(maker.plugin.app, div, {
+                const p = new Protyle(maker.plugin.app, div, {
                     blockId,
                     render: {
                         background: false,
                         title: false,
-                        gutter: false,
+                        gutter: true,
                         scroll: false,
                         breadcrumb: false,
                         breadcrumbDocName: false,
                     },
                 });
+                p.protyle.element.addEventListener("mouseleave", () => {
+                    hideGutter(p.protyle.element);
+                });
+                return p;
             });
             node.appendChild(p.protyle.element);
             node.addEventListener("click", () => {
                 autoRefreshChecked = false;
             });
         }
+    }
+
+    function hideGutter(e: HTMLElement) {
+        e?.querySelectorAll(".protyle-gutters")?.forEach((e) => {
+            e.classList?.add("fn__none");
+        });
     }
 
     async function search() {
