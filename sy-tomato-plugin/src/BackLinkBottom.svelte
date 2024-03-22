@@ -149,26 +149,30 @@
         }
     }
 
-    async function search(event: Event) {
-        let query: string = (event.target as any).value;
-        query = query.trim();
-        if (!query) {
+    async function search() {
+        searchText = searchText.trim();
+        if (!searchText) {
             autoRefreshChecked = true;
-            return;
-        }
-        autoRefreshChecked = false;
-        const se = new SearchEngine(true);
-        se.setQuery(query);
-        maker.container
-            .querySelectorAll(`[${QUERYABLE_ELEMENT}]`)
-            .forEach((e: HTMLElement) => {
-                const m = se.match(e.textContent);
-                if (!m) {
-                    e.style.display = "none";
-                } else {
+            maker.container
+                .querySelectorAll(`[${QUERYABLE_ELEMENT}]`)
+                .forEach((e: HTMLElement) => {
                     e.style.display = "";
-                }
-            });
+                });
+        } else {
+            autoRefreshChecked = false;
+            const se = new SearchEngine(true);
+            se.setQuery(searchText);
+            maker.container
+                .querySelectorAll(`[${QUERYABLE_ELEMENT}]`)
+                .forEach((e: HTMLElement) => {
+                    const m = se.match(e.textContent);
+                    if (!m) {
+                        e.style.display = "none";
+                    } else {
+                        e.style.display = "";
+                    }
+                });
+        }
     }
 
     function refClick(id: string) {
@@ -178,9 +182,37 @@
         });
     }
 
-    function refConceptClick(txt: string) {
-        searchText = txt;
-        search({ target: { value: txt } } as any);
+    function refConceptClick(event: Event, txt: string) {
+        if (event instanceof PointerEvent) {
+            searchText = searchText.trim();
+            if (event.ctrlKey || event.altKey || event.shiftKey) {
+                //
+            } else {
+                searchText = "";
+            }
+            if (event.shiftKey) {
+                if (searchText) {
+                    searchText += "  !" + txt;
+                } else {
+                    searchText = "!" + txt;
+                }
+            } else if (event.altKey) {
+                if (searchText) {
+                    searchText += "|" + txt;
+                } else {
+                    searchText = txt;
+                }
+            } else if (event.ctrlKey) {
+                if (searchText) {
+                    searchText += "  " + txt;
+                } else {
+                    searchText = txt;
+                }
+            } else {
+                searchText = txt;
+            }
+            search();
+        }
     }
 
     function hideThis() {
@@ -232,9 +264,11 @@
     {#each linkItems as { text, id, count, attrs } (id)}
         <label {...attrs} class="b3-label b3-label__text b3-label--noborder">
             <button
+                title="点击(单选), ctrl点击(并且), shift点击(排除), alt点击(或者)"
                 {...attrs}
                 class="bk_label b3-label__text"
-                on:click={() => refConceptClick(text)}>{text}</button
+                on:click={(event) => refConceptClick(event, text)}
+                >{text}</button
             >
             <span class="bk_ref_count">{count}</span>
         </label>
@@ -276,19 +310,27 @@
     <label class="b3-label b3-label__text b3-label--noborder">
         <button
             class="bk_label b3-label__text"
+            title="清空"
+            on:click={() => {
+                searchText = "";
+                search();
+            }}>{@html icon("Trashcan", ICONS_SIZE)}</button
+        >
+        <input
+            class="b3-text-field searchField"
+            title="必须包含AA、BB，DD与EE至少包含一个，但不能包含CC"
+            placeholder="AA BB !CC DD|EE"
+            on:focus={() => (autoRefreshChecked = false)}
+            bind:value={searchText}
+            on:input={() => search()}
+        />
+        <button
+            class="bk_label b3-label__text"
             title="点击查看：搜索语法"
             on:click={() =>
                 new Dialog({ title: "搜索语法", content: SEARCH_HELP })}
             >{@html icon("Help", ICONS_SIZE)}</button
         >
-        <input
-            class="b3-text-field"
-            title="必须包含AA、BB，DD与EE至少包含一个，但不能包含CC"
-            placeholder="AA BB !CC DD|EE"
-            on:focus={() => (autoRefreshChecked = false)}
-            bind:value={searchText}
-            on:input={search}
-        />
         <span {...mentionCountingSpanAttr}></span>
     </label>
     <hr />
@@ -372,6 +414,9 @@
 </div>
 
 <style>
+    .searchField {
+        width: 30%;
+    }
     .bk_protyle {
         /* transform: scale(0.999); */
         transform-origin: top left;
