@@ -19,7 +19,6 @@
     import { Dialog, Protyle, openTab } from "siyuan";
     import { SEARCH_HELP } from "./constants";
     import {
-        BACKLINK_CACHE_TIME,
         BlockNodeEnum,
         DATA_NODE_ID,
         TOMATO_BK_IGNORE,
