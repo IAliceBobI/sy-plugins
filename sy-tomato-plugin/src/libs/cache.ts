@@ -57,4 +57,7 @@ export class MaxCache<T> {
         }
         return v.obj;
     }
+    public delete(key: string) {
+        return this.cache.delete(key);
+    }
 }

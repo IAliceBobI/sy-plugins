@@ -19,6 +19,7 @@
     import { Dialog, Protyle, openTab } from "siyuan";
     import { SEARCH_HELP } from "./constants";
     import {
+        BACKLINK_CACHE_TIME,
         BlockNodeEnum,
         DATA_NODE_ID,
         TOMATO_BK_IGNORE,
@@ -51,14 +52,17 @@
     onDestroy(() => {});
 
     async function getBackLinks() {
-        const backlink2 = await siyuanCache.getBacklink2(5 * 1000, maker.docID);
+        const backlink2 = await siyuanCache.getBacklink2(
+            BACKLINK_CACHE_TIME,
+            maker.docID,
+        );
 
         const maxCount = maker.settingCfg["back-link-max-size"] ?? 100;
         backLinks = (
             await Promise.all(
                 backlink2.backlinks.slice(0, maxCount).map((backlink) => {
                     return siyuanCache.getBacklinkDoc(
-                        6 * 1000,
+                        2 * BACKLINK_CACHE_TIME,
                         maker.docID,
                         backlink.id,
                     );
@@ -119,6 +123,16 @@
         }
     }
 
+    function refreshBKProtyle(backLink: BacklinkSv) {
+        const len = backLink.bk.blockPaths.length;
+        if (len > 0) {
+            const blockId = backLink.bk.blockPaths[len - 1].id;
+            maker.blBox.bkProtyleCache.delete(blockId);
+            document.getElementById(backLink.id).style.display = "none";
+            autoRefreshChecked = true;
+        }
+    }
+
     /** @type {import('svelte/action').Action}  */
     function mountProtyle(node: HTMLElement, backLink: BacklinkSv) {
         node.style.minHeight = "auto";
@@ -142,6 +156,9 @@
                 });
             });
             node.appendChild(p.protyle.element);
+            node.addEventListener("click", () => {
+                autoRefreshChecked = false;
+            });
         }
     }
 
@@ -277,14 +294,16 @@
             on:click={hideThis}>{@html icon("Eyeoff", ICONS_SIZE)}</button
         >
     </label>
-    <label class="b3-label b3-label__text b3-label--noborder">
+    <label
+        class="b3-label b3-label__text b3-label--noborder"
+        title="是否自动刷新"
+    >
         {#if !autoRefreshChecked}
-            {@html icon("Focus", ICONS_SIZE)}停止
+            {@html icon("Focus", ICONS_SIZE)}不刷新
         {:else}
-            {@html icon("Refresh", ICONS_SIZE)}自动
+            {@html icon("Refresh", ICONS_SIZE)}刷新中
         {/if}
         <input
-            title="是否自动刷新"
             type="checkbox"
             class="b3-switch"
             bind:checked={autoRefreshChecked}
@@ -399,6 +418,14 @@
                             {/if}
                         </span>
                     {/each}
+                    <button
+                        title="单独刷新"
+                        {...backLink.attrs}
+                        class="bk_label b3-label__text"
+                        on:click={() => refreshBKProtyle(backLink)}
+                    >
+                        {@html icon("Refresh", ICONS_SIZE)}</button
+                    >
                     <div use:mountProtyle={backLink}></div>
                 </div>
             </div>
