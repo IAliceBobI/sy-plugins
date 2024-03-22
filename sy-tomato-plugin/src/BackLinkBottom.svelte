@@ -52,7 +52,7 @@
 
     async function getBackLinks() {
         const backlink2 = await siyuanCache.getBacklink2(
-            BACKLINK_CACHE_TIME,
+            20 * 1000,
             maker.docID,
         );
 
