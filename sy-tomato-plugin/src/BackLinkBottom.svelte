@@ -146,8 +146,7 @@
     }
 
     async function search() {
-        searchText = searchText.trim();
-        if (!searchText) {
+        if (!searchText.trim()) {
             autoRefreshChecked = true;
             maker.container
                 .querySelectorAll(`[${QUERYABLE_ELEMENT}]`)
@@ -180,7 +179,6 @@
 
     function refConceptClick(event: Event, txt: string) {
         if (event instanceof PointerEvent) {
-            searchText = searchText.trim();
             if (event.ctrlKey || event.altKey || event.shiftKey) {
                 //
             } else {
