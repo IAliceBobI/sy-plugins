@@ -174,14 +174,25 @@
             <button title="推迟/取消推迟" on:click={stopCard}>🛑</button>
             {@html whiteSpace}
         {/if}
-        <input
-            title="拖动闪卡优先级"
-            type="range"
-            on:click={updateCard}
-            bind:value={priority}
-            min="0"
-            max="100"
-        />
+        <label>
+            <input
+                class="slider"
+                title="拖动闪卡优先级"
+                type="range"
+                on:click={updateCard}
+                bind:value={priority}
+                min="0"
+                max="100"
+                list={cardID + "-priority-labels"}
+            />
+            <datalist id={cardID + "-priority-labels"}>
+                <option value="0"> </option>
+                <option value="25"> </option>
+                <option value="50"> </option>
+                <option value="75"> </option>
+                <option value="100"> </option>
+            </datalist>
+        </label>
     </div>
 </div>
 
