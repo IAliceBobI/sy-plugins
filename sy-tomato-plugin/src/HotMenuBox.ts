@@ -125,7 +125,7 @@ class HotMenuBox {
     blockIconEvent(detail: IEventBusMap["click-blockicon"]) {
         if (!this.plugin) return;
         detail.menu.addItem({
-            iconHTML: "📃",
+            iconHTML: "⌨️",
             label: this.plugin.i18n.hotMenu,
             click: () => {
                 this.openDialog(detail.protyle);
