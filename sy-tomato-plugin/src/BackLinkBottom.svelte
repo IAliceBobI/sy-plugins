@@ -40,6 +40,7 @@
     let linkItems: LinkItem[] = [];
     const allRefs: RefCollector = new Map();
     let searchText = "";
+    let searchField: HTMLInputElement;
 
     onMount(async () => {
         mentionCountingSpanAttr[MENTION_COUTING_SPAN] = "1";
@@ -173,6 +174,11 @@
     }
 
     async function search() {
+        if (searchField) {
+            searchField.style.width =
+                (Math.max(searchText.length, 10) + 10) * 8 + "px";
+        }
+
         if (!searchText.trim()) {
             autoRefreshChecked = true;
             maker.container
@@ -340,6 +346,7 @@
             }}>{@html icon("Trashcan", ICONS_SIZE)}</button
         >
         <input
+            bind:this={searchField}
             class="b3-text-field searchField"
             title="必须包含AA、BB，DD与EE至少包含一个，但不能包含CC"
             placeholder="AA BB !CC DD|EE"
@@ -446,7 +453,7 @@
 
 <style>
     .searchField {
-        width: 30%;
+        width: auto;
     }
     .bk_protyle {
         /* transform: scale(0.999); */
