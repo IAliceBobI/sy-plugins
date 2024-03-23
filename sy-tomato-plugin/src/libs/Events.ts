@@ -152,7 +152,7 @@ class Events {
         const range = document.getSelection()?.getRangeAt(0);
         const rangeText = range?.cloneContents()?.textContent ?? "";
         const ids = selected.map(i => i.getAttribute(DATA_NODE_ID));
-        return { selected, ids, docID, element, rangeText, docName };
+        return { selected, ids, docID, element, rangeText, docName, boxID: protyle.notebookId };
     }
 }
 

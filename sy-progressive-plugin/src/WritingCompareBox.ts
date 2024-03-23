@@ -75,7 +75,7 @@ class WritingCompareBox {
         const bookID = pmPreffix.split("#")[1];
         let keysDocID = await findAllInOneKeyDoc(bookID);
         if (!keysDocID) {
-            const hpath = await getHPathByDocID(bookID, "digest");
+            const hpath = await getHPathByDocID(bookID, "collection");
             if (hpath) {
                 keysDocID = await getAllInOneKeyDoc(bookID, boxID, hpath);
             }
