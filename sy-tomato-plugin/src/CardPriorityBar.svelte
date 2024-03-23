@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { confirm } from "siyuan";
+    import { confirm, openTab, Plugin } from "siyuan";
     import { onMount } from "svelte";
     import { cardPriorityBox } from "./CardPriorityBox";
     import {
@@ -18,9 +18,11 @@
     import { events } from "./libs/Events";
 
     export let cardElement: HTMLElement;
+    export let isReviewing = false;
     export let enableDeleteBtn = true;
     export let enableDelayBtn = true;
     export let callback: Func = () => {};
+    export let plugin: Plugin;
 
     let priText: HTMLElement;
     let controlAttr: AttrType;
@@ -99,6 +101,17 @@
     async function stopCard(event: MouseEvent) {
         cardPriorityBox.stopCard(event, cardElement);
     }
+    async function locate(event: MouseEvent) {
+        event.stopPropagation();
+        openTab({
+            app: plugin.app,
+            doc: {
+                id: cardID,
+                action: ["cb-get-hl", "cb-get-context", "cb-get-focus"],
+                zoomIn: false,
+            },
+        });
+    }
     async function removeCard(event: MouseEvent) {
         event.stopPropagation();
         confirm("删除闪卡", textContent, async () => {
@@ -141,6 +154,10 @@
 <!-- https://learn.svelte.dev/tutorial/if-blocks -->
 <div {...controlAttr} class="container">
     <div>
+        {#if isReviewing}
+            <button title="定位" on:click={locate}>🔍</button>
+            {@html whiteSpace}
+        {/if}
         {#if enableDeleteBtn}
             <button title="取消制卡" on:click={removeCard}>🚫</button>
             {@html whiteSpace}

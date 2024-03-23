@@ -101,6 +101,7 @@
         <div title="数值大的优先复习">
             <CardPriorityBar
                 {cardElement}
+                {plugin}
                 enableDelayBtn={false}
                 enableDeleteBtn={false}
                 callback={() => {

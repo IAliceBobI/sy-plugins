@@ -1,4 +1,4 @@
-import { ICardData, IEventBusMap, IProtyle, Plugin } from "siyuan";
+import { ICardData, IEventBusMap, IProtyle, Plugin, Protyle } from "siyuan";
 import "./index.scss";
 import { getID, isCardUI, isValidNumber, siyuan, timeUtil } from "./libs/utils";
 import { CARD_PRIORITY_STOP, CUSTOM_RIFF_DECKS, DATA_NODE_ID, TEMP_CONTENT, TOMATO_CONTROL_ELEMENT } from "./libs/gconst";
@@ -89,7 +89,7 @@ class CardPriorityBox {
                     const element = protyle?.element as HTMLElement;
                     const docID = protyle?.block?.rootID;
                     if (lock && element && docID) {
-                        await this.addBtns(element);
+                        await this.addBtns(element, detail);
                         await this.resumeCards(element);
                     }
                 });
@@ -336,7 +336,7 @@ class CardPriorityBox {
                 }));
     }
 
-    async addBtns(wysiwygElement: HTMLElement) {
+    async addBtns(wysiwygElement: HTMLElement, protyle: Protyle) {
         if (!wysiwygElement) return;
         [...wysiwygElement.querySelectorAll(`[${CUSTOM_RIFF_DECKS}][${DATA_NODE_ID}]`)]
             .map((cardElement: HTMLElement) => {
@@ -347,6 +347,8 @@ class CardPriorityBox {
                         target: protyleAttrElement,
                         props: {
                             cardElement,
+                            isReviewing: isCardUI(protyle),
+                            plugin: this.plugin,
                         }
                     });
                 }
