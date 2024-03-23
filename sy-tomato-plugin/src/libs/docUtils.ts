@@ -124,3 +124,27 @@ export async function item2ref(boxID: string, elements: HTMLElement[], add2card 
     }
     await siyuan.transactions(ops);
 }
+
+export function quotationMark(txt: string) {
+    const buffer: string[] = [];
+    let cOne = 0;
+    let cTwo = 0;
+    const one = () => {
+        if (cOne++ % 2 === 0) return "‘";
+        return "’";
+    };
+    const two = () => {
+        if (cTwo++ % 2 === 0) return "“";
+        return "”";
+    };
+    for (const c of txt) {
+        if (c === "'") {
+            buffer.push(one());
+        } else if (c === '"') {
+            buffer.push(two());
+        } else {
+            buffer.push(c);
+        }
+    }
+    return buffer.join("");
+}

@@ -39,7 +39,12 @@
     } from "./libs/bkUtils";
     import { gotoBookmark } from "./libs/bookmark";
     import { DialogText } from "./libs/DialogText";
-    import { item2ref, mergeDocs, moveAllContentHere } from "./libs/docUtils";
+    import {
+        item2ref,
+        mergeDocs,
+        moveAllContentHere,
+        quotationMark,
+    } from "./libs/docUtils";
     import { linkBox } from "./LinkBox";
 
     enum InsertPlace {
@@ -201,7 +206,7 @@
                 }
                 return row.markdown;
             });
-        await navigator.clipboard.writeText(contents.join("\n"));
+        await navigator.clipboard.writeText(quotationMark(contents.join("\n")));
         destroy();
     }
 
