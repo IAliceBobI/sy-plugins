@@ -10,20 +10,17 @@ class PieceSummaryBox {
     settings: SettingCfgType;
     lute: Lute;
 
-    blockIconEvent(detail: any) {
-        if (!this.plugin) return;
-        const protyle: IProtyle = detail.protyle;
-        // const { isPiece } = isProtylePiece(protyle);
-        // if (isPiece) {
-        detail.menu.addItem({
-            iconHTML: "📨",
-            accelerator: "⌥Z",
-            label: this.plugin.i18n.collect,
-            click: () => {
-                this.copyBlocks(protyle);
-            }
-        });
-        // }
+    blockIconEvent(_detail: any) {
+        // if (!this.plugin) return;
+        // const protyle: IProtyle = detail.protyle;
+        // detail.menu.addItem({
+        //     iconHTML: "📨",
+        //     accelerator: "⌥Z",
+        //     label: this.plugin.i18n.collect,
+        //     click: () => {
+        //         this.copyBlocks(protyle);
+        //     }
+        // });
     }
 
     async onload(plugin: Plugin, settings: SettingCfgType) {
@@ -32,28 +29,24 @@ class PieceSummaryBox {
         this.lute = NewLute();
         this.plugin.addCommand({
             langKey: "collect",
-            hotkey: "⌥Z",
+            hotkey: "",
             editorCallback: (protyle) => {
                 this.copyBlocks(protyle);
             },
         });
-        this.plugin.eventBus.on("open-menu-content", async ({ detail }) => {
-            // const protyle: IProtyle = detail.protyle;
-            // const { isPiece } = isProtylePiece(protyle);
-            // if (isPiece) {
-            const menu = detail.menu;
-            menu.addItem({
-                label: this.plugin.i18n.collect,
-                iconHTML: "📨",
-                accelerator: "⌥Z",
-                click: () => {
-                    if (detail?.element) {
-                        this.copyBlock(detail?.element);
-                    }
-                },
-            });
-            // }
-        });
+        // this.plugin.eventBus.on("open-menu-content", async ({ detail }) => {
+        //     const menu = detail.menu;
+        //     menu.addItem({
+        //         label: this.plugin.i18n.collect,
+        //         iconHTML: "📨",
+        //         accelerator: "⌥Z",
+        //         click: () => {
+        //             if (detail?.element) {
+        //                 this.copyBlock(detail?.element);
+        //             }
+        //         },
+        //     });
+        // });
     }
 
     private async copyBlock(element: HTMLElement) {
