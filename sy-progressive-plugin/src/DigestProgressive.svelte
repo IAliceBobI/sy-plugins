@@ -8,6 +8,9 @@
     import {
         DATA_NODE_ID,
         DATA_NODE_INDEX,
+        IN_BOOK_INDEX,
+        PARAGRAPH_INDEX,
+        PROG_ORIGIN_TEXT,
         RefIDKey,
     } from "../../sy-tomato-plugin/src/libs/gconst";
 
@@ -60,14 +63,20 @@
     async function digest() {
         const md = [];
         let idx: string;
+        let i = 0;
         for (const div of selected) {
+            const inBookIdx = div.getAttribute(DATA_NODE_INDEX);
             if (!idx) {
-                idx = div.getAttribute(DATA_NODE_INDEX);
+                idx = inBookIdx;
             }
             const cloned = div.cloneNode(true) as HTMLDivElement;
             await cleanDiv(cloned, true, true, false);
             cloned.setAttribute(RefIDKey, div.getAttribute(DATA_NODE_ID));
+            cloned.setAttribute(IN_BOOK_INDEX, inBookIdx);
+            cloned.setAttribute(PARAGRAPH_INDEX, String(i));
+            cloned.setAttribute(PROG_ORIGIN_TEXT, "1");
             md.push(digestProgressiveBox.lute.BlockDOM2Md(cloned.outerHTML));
+            i++;
         }
         if (!idx) {
             idx = "0";

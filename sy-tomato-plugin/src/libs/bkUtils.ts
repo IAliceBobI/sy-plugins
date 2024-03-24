@@ -68,7 +68,7 @@ function getInBookIdx(div: HTMLElement) {
     let abIdx = div.getAttribute(IN_BOOK_INDEX);
     if (!abIdx) abIdx = div.querySelector(`[${IN_BOOK_INDEX}]`)?.getAttribute(IN_BOOK_INDEX);
     const parts = abIdx?.split("#");
-    if (parts?.length == 2) {
+    if (parts?.length >= 1) {
         const [a, b] = parts;
         let na = Number(a);
         let nb = Number(b);
