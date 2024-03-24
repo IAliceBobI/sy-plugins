@@ -43,15 +43,13 @@ export async function finishDigest(digestID: string, ctime: string, plugin: Plug
         and value like "${bookID}#%"
         and value<"${ctime}" 
         and block_id!="${digestID}"
-        order by value desc limit 1
-    `);
+        order by value desc limit 1`);
     if (await tryOpen(rows, plugin)) return;
     const latestRows = await siyuan.sqlAttr(`select block_id from attributes where 
         name="${PDIGEST_CTIME}" 
         and value like "${bookID}#%"
         and block_id!="${digestID}"
-        order by value desc limit 1
-    `);
+        order by value desc limit 1`);
     if (await tryOpen(latestRows, plugin)) return;
 }
 
