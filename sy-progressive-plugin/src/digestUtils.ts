@@ -13,7 +13,7 @@ export async function newDigestDoc(bookID: string, boxID: string, idx: string, n
     return siyuan.createDocWithMd(boxID, `${hpath}/[${idx}]${name.slice(0, 10)}`, md, "", attr);
 }
 
-export async function getDigestDir(bookID: string) {
+export async function setDigestCard(bookID: string, digestID: string) {
     const row = await siyuan.sqlOne(`SELECT a.id FROM blocks a
             INNER JOIN (
                 SELECT hpath,content
@@ -24,10 +24,11 @@ export async function getDigestDir(bookID: string) {
         WHERE a.type='d' limit 1`);
     if (row?.id) {
         const cards = await siyuan.getTreeRiffCardsAll(row.id);
-        for(const card of cards){
-            card.ia
+        for (const card of cards) {
+            console.log(card)
         }
     }
+    await siyuan.addRiffCards([digestID]);
 }
 
 

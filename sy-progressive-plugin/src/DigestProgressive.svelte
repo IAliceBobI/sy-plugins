@@ -2,7 +2,7 @@
     import { Dialog, IProtyle, openTab } from "siyuan";
     import { onDestroy, onMount } from "svelte";
     import { events } from "../../sy-tomato-plugin/src/libs/Events";
-    import { getDigestDir, newDigestDoc } from "./digestUtils";
+    import { setDigestCard, newDigestDoc } from "./digestUtils";
     import {
         cleanDiv,
         cleanText,
@@ -100,7 +100,7 @@
                 action: ["cb-get-hl", "cb-get-context"],
             },
         });
-        await getDigestDir(bookID);
+        await setDigestCard(bookID, digestID);
         destroy();
     }
 </script>
