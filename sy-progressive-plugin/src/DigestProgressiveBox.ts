@@ -6,10 +6,12 @@ class DigestProgressiveBox {
     plugin: Plugin;
     settings: SettingCfgType;
     lute: Lute;
-    private digestCount = 0;
-    public get incDigestCount() {
-        return this.digestCount++;
-    }
+    // private digestIDMap = new Map<string, number>();
+    // async incDigestCount(bookID: string) {
+    //     return navigator.locks.request("DigestProgressiveBoxDigestIDLock", { mode: "exclusive" }, async () => {
+    //         this.digestIDMap.get(bookID)
+    //     });
+    // }
 
     blockIconEvent(detail: IEventBusMap["click-blockicon"]) {
         if (!this.plugin) return;

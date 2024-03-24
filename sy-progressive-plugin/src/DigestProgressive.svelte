@@ -5,6 +5,7 @@
     import { newDigestDoc } from "./digestUtils";
     import { cleanDiv, cleanText } from "../../sy-tomato-plugin/src/libs/utils";
     import { digestProgressiveBox } from "./DigestProgressiveBox";
+    import { DATA_NODE_INDEX } from "../../sy-tomato-plugin/src/libs/gconst";
 
     export let dialog: Dialog = null;
     export let protyle: IProtyle;
@@ -54,15 +55,22 @@
 
     async function digest() {
         const md = [];
+        let idx: string;
         for (const div of selected) {
+            if (!idx) {
+                idx = div.getAttribute(DATA_NODE_INDEX);
+            }
             const cloned = div.cloneNode(true) as HTMLDivElement;
             await cleanDiv(cloned, true, true, false);
             md.push(digestProgressiveBox.lute.BlockDOM2Md(cloned.outerHTML));
         }
+        if (!idx) {
+            idx = "0";
+        }
         const digestID = await newDigestDoc(
             docID,
             boxID,
-            digestProgressiveBox.incDigestCount,
+            idx,
             allText,
             md.join("\n"),
         );
