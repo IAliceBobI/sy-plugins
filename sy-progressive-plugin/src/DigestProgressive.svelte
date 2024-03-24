@@ -1,23 +1,10 @@
 <script lang="ts">
-    import { Dialog, IProtyle, openTab } from "siyuan";
+    import { Dialog, IProtyle } from "siyuan";
     import { onDestroy, onMount } from "svelte";
     import { events } from "../../sy-tomato-plugin/src/libs/Events";
-    import { setDigestCard, newDigestDoc } from "./digestUtils";
-    import {
-        cleanDiv,
-        cleanText,
-        siyuan,
-    } from "../../sy-tomato-plugin/src/libs/utils";
+    import { digest, finishDigest } from "./digestUtils";
+    import { cleanText, siyuan } from "../../sy-tomato-plugin/src/libs/utils";
     import { digestProgressiveBox } from "./DigestProgressiveBox";
-    import {
-        DATA_NODE_ID,
-        DATA_NODE_INDEX,
-        IN_BOOK_INDEX,
-        PARAGRAPH_INDEX,
-        PROG_ORIGIN_TEXT,
-        RefIDKey,
-    } from "../../sy-tomato-plugin/src/libs/gconst";
-    import { getBookID } from "../../sy-tomato-plugin/src/libs/progressive";
 
     export let dialog: Dialog = null;
     export let protyle: IProtyle;
@@ -64,45 +51,6 @@
             }, [])
             .join("\n");
     }
-
-    async function digest() {
-        const md = [];
-        let idx: string;
-        let i = 0;
-        for (const div of selected) {
-            let inBookIdx = div.getAttribute(IN_BOOK_INDEX);
-            if (!inBookIdx) inBookIdx = div.getAttribute(DATA_NODE_INDEX);
-            if (!idx) idx = inBookIdx;
-            const cloned = div.cloneNode(true) as HTMLDivElement;
-            await cleanDiv(cloned, true, true, false);
-            cloned.setAttribute(RefIDKey, div.getAttribute(DATA_NODE_ID));
-            cloned.setAttribute(IN_BOOK_INDEX, inBookIdx);
-            cloned.setAttribute(PARAGRAPH_INDEX, String(i));
-            cloned.setAttribute(PROG_ORIGIN_TEXT, "1");
-            md.push(digestProgressiveBox.lute.BlockDOM2Md(cloned.outerHTML));
-            i++;
-        }
-        if (!idx) idx = "0";
-        let { bookID } = await getBookID(docID);
-        if (!bookID) bookID = docID;
-        const digestID = await newDigestDoc(
-            bookID,
-            boxID,
-            idx,
-            allText,
-            md.join("\n"),
-        );
-        await openTab({
-            app: digestProgressiveBox.plugin.app,
-            doc: {
-                id: digestID,
-                zoomIn: false,
-                action: ["cb-get-hl", "cb-get-context"],
-            },
-        });
-        await setDigestCard(bookID, digestID);
-        destroy();
-    }
 </script>
 
 <!-- https://learn.svelte.dev/tutorial/if-blocks -->
@@ -111,8 +59,20 @@
         <tbody>
             <tr>
                 <td>
-                    <button title="摘抄" class="b3-button" on:click={digest}
-                        >➕🍕</button
+                    <button
+                        title="摘抄"
+                        class="b3-button"
+                        on:click={async () => {
+                            await digest(
+                                docID,
+                                boxID,
+                                allText,
+                                selected,
+                                digestProgressiveBox.lute,
+                                digestProgressiveBox.plugin,
+                            );
+                            destroy();
+                        }}>➕🍕</button
                     >
                 </td>
                 <td>
@@ -126,16 +86,16 @@
                 </td>
                 <td>
                     <button
-                        title="🗑️🍕完成并删除"
+                        title="🗑️🍕完成并删除摘要"
                         class="b3-button"
-                        on:click={() => {
-                            siyuan.pushMsg("开发中...");
+                        on:click={async () => {
+                            await finishDigest(docID);
                         }}>🗑️</button
                     >
                 </td>
                 <td>
                     <button
-                        title="删除失效的引用、链接: *@&"
+                        title="删除失效的（*@&）链接、引用"
                         class="b3-button"
                         on:click={() => {
                             siyuan.pushMsg("开发中...");
