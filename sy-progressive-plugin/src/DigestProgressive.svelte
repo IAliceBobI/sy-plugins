@@ -1,11 +1,15 @@
 <script lang="ts">
-    import { Dialog, IProtyle } from "siyuan";
+    import { Dialog, IProtyle, openTab } from "siyuan";
     import { onDestroy, onMount } from "svelte";
     import { events } from "../../sy-tomato-plugin/src/libs/Events";
     import { newDigestDoc } from "./digestUtils";
     import { cleanDiv, cleanText } from "../../sy-tomato-plugin/src/libs/utils";
     import { digestProgressiveBox } from "./DigestProgressiveBox";
-    import { DATA_NODE_INDEX } from "../../sy-tomato-plugin/src/libs/gconst";
+    import {
+        DATA_NODE_ID,
+        DATA_NODE_INDEX,
+        RefIDKey,
+    } from "../../sy-tomato-plugin/src/libs/gconst";
 
     export let dialog: Dialog = null;
     export let protyle: IProtyle;
@@ -62,6 +66,7 @@
             }
             const cloned = div.cloneNode(true) as HTMLDivElement;
             await cleanDiv(cloned, true, true, false);
+            cloned.setAttribute(RefIDKey, div.getAttribute(DATA_NODE_ID));
             md.push(digestProgressiveBox.lute.BlockDOM2Md(cloned.outerHTML));
         }
         if (!idx) {
@@ -74,7 +79,15 @@
             allText,
             md.join("\n"),
         );
-        console.log(digestID);
+        await openTab({
+            app: digestProgressiveBox.plugin.app,
+            doc: {
+                id: digestID,
+                zoomIn: false,
+                action: ["cb-get-hl", "cb-get-context"],
+            },
+            position: "right",
+        });
         destroy();
     }
 </script>
