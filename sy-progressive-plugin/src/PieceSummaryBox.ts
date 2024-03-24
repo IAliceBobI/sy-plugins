@@ -29,7 +29,7 @@ class PieceSummaryBox {
         this.lute = NewLute();
         this.plugin.addCommand({
             langKey: "collect",
-            hotkey: "",
+            hotkey: "⌥⇧Z",
             editorCallback: (protyle) => {
                 this.copyBlocks(protyle);
             },
