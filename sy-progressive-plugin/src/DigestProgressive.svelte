@@ -3,7 +3,11 @@
     import { onDestroy, onMount } from "svelte";
     import { events } from "../../sy-tomato-plugin/src/libs/Events";
     import { newDigestDoc } from "./digestUtils";
-    import { cleanDiv, cleanText } from "../../sy-tomato-plugin/src/libs/utils";
+    import {
+        cleanDiv,
+        cleanText,
+        siyuan,
+    } from "../../sy-tomato-plugin/src/libs/utils";
     import { digestProgressiveBox } from "./DigestProgressiveBox";
     import {
         DATA_NODE_ID,
@@ -13,6 +17,7 @@
         PROG_ORIGIN_TEXT,
         RefIDKey,
     } from "../../sy-tomato-plugin/src/libs/gconst";
+    import { getBookID } from "../../sy-tomato-plugin/src/libs/progressive";
 
     export let dialog: Dialog = null;
     export let protyle: IProtyle;
@@ -67,7 +72,12 @@
         for (const div of selected) {
             const inBookIdx = div.getAttribute(DATA_NODE_INDEX);
             if (!idx) {
-                idx = inBookIdx;
+                const inBookIdxOrigin = div.getAttribute(IN_BOOK_INDEX);
+                if (inBookIdxOrigin) {
+                    idx = inBookIdxOrigin;
+                } else {
+                    idx = inBookIdx;
+                }
             }
             const cloned = div.cloneNode(true) as HTMLDivElement;
             await cleanDiv(cloned, true, true, false);
@@ -81,8 +91,10 @@
         if (!idx) {
             idx = "0";
         }
+        let { bookID } = await getBookID(docID);
+        if (!bookID) bookID = docID;
         const digestID = await newDigestDoc(
-            docID,
+            bookID,
             boxID,
             idx,
             allText,
@@ -95,7 +107,6 @@
                 zoomIn: false,
                 action: ["cb-get-hl", "cb-get-context"],
             },
-            position: "right",
         });
         destroy();
     }
@@ -109,6 +120,15 @@
                 <td>
                     <button title="摘抄" class="b3-button" on:click={digest}
                         >🍕摘抄</button
+                    >
+                </td>
+                <td>
+                    <button
+                        title="删除失效的引用、链接: *@&"
+                        class="b3-button"
+                        on:click={() => {
+                            siyuan.pushMsg("开发中...");
+                        }}>💔删坏链</button
                     >
                 </td>
             </tr>
