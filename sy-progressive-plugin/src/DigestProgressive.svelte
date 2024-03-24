@@ -5,6 +5,7 @@
     import { digest, finishDigest } from "./digestUtils";
     import { cleanText, siyuan } from "../../sy-tomato-plugin/src/libs/utils";
     import { digestProgressiveBox } from "./DigestProgressiveBox";
+    import { PDIGEST_CTIME } from "../../sy-tomato-plugin/src/libs/gconst";
 
     export let dialog: Dialog = null;
     export let protyle: IProtyle;
@@ -18,6 +19,7 @@
     let selectedIds: string[] = [];
     let boxID: string;
     let allText: string;
+    let ctime: string;
 
     onMount(async () => {
         const s = await events.selectedDivs(protyle);
@@ -30,6 +32,7 @@
         selected = s.selected;
         boxID = s.boxID;
         allText = getAllText();
+        ctime = element.getAttribute(PDIGEST_CTIME);
     });
 
     onDestroy(destroy);
@@ -79,9 +82,14 @@
                     <button
                         title="🍕🦈完成：转移闪卡到其他摘抄"
                         class="b3-button"
-                        on:click={() => {
-                            siyuan.pushMsg("开发中...");
-                        }}>完成</button
+                        on:click={async () => {
+                            await finishDigest(
+                                docID,
+                                ctime,
+                                digestProgressiveBox.plugin,
+                            );
+                            destroy();
+                        }}>🔨</button
                     >
                 </td>
                 <td>
@@ -89,7 +97,13 @@
                         title="🗑️🍕完成并删除摘要"
                         class="b3-button"
                         on:click={async () => {
-                            await finishDigest(docID);
+                            await finishDigest(
+                                docID,
+                                ctime,
+                                digestProgressiveBox.plugin,
+                            );
+                            await siyuan.removeDocByID(docID);
+                            destroy();
                         }}>🗑️</button
                     >
                 </td>
