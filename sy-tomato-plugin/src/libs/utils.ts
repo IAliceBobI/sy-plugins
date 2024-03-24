@@ -68,7 +68,7 @@ export function get_siyuan_lnk_md(id: string, text: string) {
     return `[${text}](siyuan://blocks/${id}?focus=1)`;
 }
 
-export async function cleanDiv(div: HTMLDivElement, setRef: boolean, setOrigin: boolean): Promise<[string, HTMLElement, boolean]> {
+export async function cleanDiv(div: HTMLDivElement, setRef: boolean, setOrigin: boolean, context = true): Promise<[string, HTMLElement, boolean]> {
     const id = div.getAttribute(gconst.DATA_NODE_ID);
 
     // new ids
@@ -119,9 +119,11 @@ export async function cleanDiv(div: HTMLDivElement, setRef: boolean, setOrigin: 
                 });
                 setTheRef = true;
             }
-            const path = await getContext(originID);
-            if (path) {
-                div.setAttribute(gconst.ORIGIN_HPATH, path);
+            if (context) {
+                const path = await getContext(originID);
+                if (path) {
+                    div.setAttribute(gconst.ORIGIN_HPATH, path);
+                }
             }
         }
     }
@@ -139,9 +141,11 @@ export async function cleanDiv(div: HTMLDivElement, setRef: boolean, setOrigin: 
         } else {
             setTheRef = true;
         }
-        const path = await getContext(id);
-        if (path) {
-            div.setAttribute(gconst.REF_HPATH, path);
+        if (context) {
+            const path = await getContext(id);
+            if (path) {
+                div.setAttribute(gconst.REF_HPATH, path);
+            }
         }
     }
     return [id, div, setTheRef];
@@ -557,8 +561,12 @@ export const siyuan = {
     async createDocWithMd(notebookID: string, path_readable: string, markdown: string, id = "", attr?: any) {
         const notebook = notebookID;
         const path = path_readable;
-        const params = { notebook, path, markdown, id };
-        if (!id) delete params["id"];
+        let params: any;
+        if (id) {
+            params = { notebook, path, markdown, id };
+        } else {
+            params = { notebook, path, markdown };
+        }
         id = await siyuan.call("/api/filetree/createDocWithMd", params);
         if (attr) await siyuan.setBlockAttrs(id, attr);
         return id;
@@ -1197,48 +1205,3 @@ export function keepContext(text: string, keyword: string, count: number): strin
     }
     return parts.join("");
 }
-
-// export const TypeAbbrMap: Record<BlockNodeType, string> = {
-//     // Block-level elements
-//     "NodeDocument": "d",
-//     "NodeHeading": "h",
-//     "NodeList": "l",
-//     "NodeListItem": "i",
-//     "NodeCodeBlock": "c",
-//     "NodeMathBlock": "m",
-//     "NodeTable": "t",
-//     "NodeBlockquote": "b",
-//     "NodeSuperBlock": "s",
-//     "NodeParagraph": "p",
-//     "NodeHTMLBlock": "html",
-//     "NodeBlockQueryEmbed": "query_embed",
-//     "NodeAttributeView": "av",
-//     "NodeKramdownBlockIAL": "ial",
-//     "NodeIFrame": "iframe",
-//     "NodeWidget": "widget",
-//     "NodeThematicBreak": "tb",
-//     "NodeVideo": "video",
-//     "NodeAudio": "audio",
-//     "NodeText": "text",
-//     "NodeImage": "img",
-//     "NodeLinkText": "link_text",
-//     "NodeLinkDest": "link_dest",
-//     "NodeTextMark": "textmark",
-// };
-// export function tryAddRef2Div(div: HTMLDivElement, id: string): HTMLDivElement {
-//     if (id) {
-//         for (const e of div.querySelectorAll(`[${gconst.DATA_TYPE}~="${gconst.BLOCK_REF}"]`)) {
-//             if (e.textContent.trim() == "*") {
-//                 return div;
-//             }
-//         }
-//         const span = div.querySelector("[contenteditable=\"true\"]")?.appendChild(document.createElement("span"));
-//         if (span) {
-//             span.setAttribute(gconst.DATA_TYPE, gconst.BlockNodeEnum.BLOCK_REF);
-//             span.setAttribute(gconst.DATA_SUBTYPE, "s");
-//             span.setAttribute(gconst.DATA_ID, id);
-//             span.innerText = "*";
-//         }
-//     }
-//     return div;
-// }

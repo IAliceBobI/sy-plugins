@@ -1,10 +1,15 @@
-import { Dialog, IEventBusMap, IProtyle, Plugin } from "siyuan";
-import { newID } from "../../sy-tomato-plugin/src/libs/utils";
+import { Dialog, IEventBusMap, IProtyle, Lute, Plugin } from "siyuan";
+import { newID, NewLute } from "../../sy-tomato-plugin/src/libs/utils";
 import DigestProgressive from "./DigestProgressive.svelte";
 
 class DigestProgressiveBox {
     plugin: Plugin;
     settings: SettingCfgType;
+    lute: Lute;
+    private digestCount = 0;
+    public get incDigestCount() {
+        return this.digestCount++;
+    }
 
     blockIconEvent(detail: IEventBusMap["click-blockicon"]) {
         if (!this.plugin) return;
@@ -21,6 +26,7 @@ class DigestProgressiveBox {
     async onload(plugin: Plugin, settings: SettingCfgType) {
         this.plugin = plugin;
         this.settings = settings;
+        this.lute = NewLute();
         this.plugin.addCommand({
             langKey: "digestProgressive",
             hotkey: "⌥Z",

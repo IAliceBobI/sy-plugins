@@ -3,7 +3,8 @@
     import { onDestroy, onMount } from "svelte";
     import { events } from "../../sy-tomato-plugin/src/libs/Events";
     import { newDigestDoc } from "./digestUtils";
-    import { cleanText } from "../../sy-tomato-plugin/src/libs/utils";
+    import { cleanDiv, cleanText } from "../../sy-tomato-plugin/src/libs/utils";
+    import { digestProgressiveBox } from "./DigestProgressiveBox";
 
     export let dialog: Dialog = null;
     export let protyle: IProtyle;
@@ -52,7 +53,20 @@
     }
 
     async function digest() {
-        const digestID = await newDigestDoc(docID, boxID, allText);
+        const md = [];
+        for (const div of selected) {
+            const cloned = div.cloneNode(true) as HTMLDivElement;
+            await cleanDiv(cloned, true, true, false);
+            md.push(digestProgressiveBox.lute.BlockDOM2Md(cloned.outerHTML));
+        }
+        const digestID = await newDigestDoc(
+            docID,
+            boxID,
+            digestProgressiveBox.incDigestCount,
+            allText,
+            md.join("\n"),
+        );
+        console.log(digestID);
         destroy();
     }
 </script>
