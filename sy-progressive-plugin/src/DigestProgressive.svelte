@@ -2,7 +2,7 @@
     import { Dialog, IProtyle, openTab } from "siyuan";
     import { onDestroy, onMount } from "svelte";
     import { events } from "../../sy-tomato-plugin/src/libs/Events";
-    import { newDigestDoc } from "./digestUtils";
+    import { getDigestDir, newDigestDoc } from "./digestUtils";
     import {
         cleanDiv,
         cleanText,
@@ -70,15 +70,9 @@
         let idx: string;
         let i = 0;
         for (const div of selected) {
-            const inBookIdx = div.getAttribute(DATA_NODE_INDEX);
-            if (!idx) {
-                const inBookIdxOrigin = div.getAttribute(IN_BOOK_INDEX);
-                if (inBookIdxOrigin) {
-                    idx = inBookIdxOrigin;
-                } else {
-                    idx = inBookIdx;
-                }
-            }
+            let inBookIdx = div.getAttribute(IN_BOOK_INDEX);
+            if (!inBookIdx) inBookIdx = div.getAttribute(DATA_NODE_INDEX);
+            if (!idx) idx = inBookIdx;
             const cloned = div.cloneNode(true) as HTMLDivElement;
             await cleanDiv(cloned, true, true, false);
             cloned.setAttribute(RefIDKey, div.getAttribute(DATA_NODE_ID));
@@ -88,9 +82,7 @@
             md.push(digestProgressiveBox.lute.BlockDOM2Md(cloned.outerHTML));
             i++;
         }
-        if (!idx) {
-            idx = "0";
-        }
+        if (!idx) idx = "0";
         let { bookID } = await getBookID(docID);
         if (!bookID) bookID = docID;
         const digestID = await newDigestDoc(
@@ -108,6 +100,7 @@
                 action: ["cb-get-hl", "cb-get-context"],
             },
         });
+        await getDigestDir(bookID);
         destroy();
     }
 </script>
@@ -119,7 +112,25 @@
             <tr>
                 <td>
                     <button title="摘抄" class="b3-button" on:click={digest}
-                        >🍕摘抄</button
+                        >➕🍕</button
+                    >
+                </td>
+                <td>
+                    <button
+                        title="🍕🦈完成：转移闪卡到其他摘抄"
+                        class="b3-button"
+                        on:click={() => {
+                            siyuan.pushMsg("开发中...");
+                        }}>完成</button
+                    >
+                </td>
+                <td>
+                    <button
+                        title="🗑️🍕完成并删除"
+                        class="b3-button"
+                        on:click={() => {
+                            siyuan.pushMsg("开发中...");
+                        }}>🗑️</button
                     >
                 </td>
                 <td>
@@ -128,7 +139,7 @@
                         class="b3-button"
                         on:click={() => {
                             siyuan.pushMsg("开发中...");
-                        }}>💔删坏链</button
+                        }}>💔🔗</button
                     >
                 </td>
             </tr>
