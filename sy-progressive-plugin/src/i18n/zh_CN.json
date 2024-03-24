@@ -58,7 +58,7 @@
   "cannotFindTheBox": "找不到文档对应的笔记本：",
   "openAdocFirst": "请先打开一个文档",
   "progressiveReadingMenu": "渐进学习菜单",
-  "addProgressiveReading": "添加当前文档到渐进阅读(分片版)",
+  "addProgressiveReading": "添加当前文档到渐进阅读(分片模式)",
   "viewAllProgressiveBooks": "查看所有渐进学习文档",
   "startToLearn": "开始学习",
   "startToLearnRand": "开始随机学习",
@@ -68,6 +68,6 @@
   "msgPushBook": "重新推送本书",
   "msgAutoCard": "自动文档制卡",
   "msgNotAutoCard": "取消自动文档制卡",
-  "digestProgressive": "渐进阅读-摘抄版",
+  "digestProgressive": "渐进阅读(摘抄模式)",
   "lnk2href": "*,@引用替换为超链接"
 }

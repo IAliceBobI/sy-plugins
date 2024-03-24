@@ -74,6 +74,8 @@ type AttrType = {
     "custom-tomato-readingpoint": string,
     "custom-tomato-rp-content-hash": string,
     "custom-pdigest-ctime": string,//PDIGEST_CTIME
+    "custom-pdigest-last-id": string,//PDIGEST_LAST_ID
+    "custom-pdigest-parent-id": string,//PDIGEST_PARENT_ID
     [key: string]: string,
 };
 

@@ -5,7 +5,10 @@
     import { digest, finishDigest } from "./digestUtils";
     import { cleanText, siyuan } from "../../sy-tomato-plugin/src/libs/utils";
     import { digestProgressiveBox } from "./DigestProgressiveBox";
-    import { PDIGEST_CTIME } from "../../sy-tomato-plugin/src/libs/gconst";
+    import {
+        PDIGEST_CTIME,
+        PDIGEST_LAST_ID,
+    } from "../../sy-tomato-plugin/src/libs/gconst";
 
     export let dialog: Dialog = null;
     export let protyle: IProtyle;
@@ -33,6 +36,8 @@
         boxID = s.boxID;
         allText = getAllText();
         ctime = element.getAttribute(PDIGEST_CTIME);
+        const fallbackID = element.getAttribute(PDIGEST_LAST_ID);
+        if (fallbackID) anchorID = fallbackID;
     });
 
     onDestroy(destroy);
@@ -67,6 +72,7 @@
                         class="b3-button"
                         on:click={async () => {
                             await digest(
+                                anchorID,
                                 docID,
                                 boxID,
                                 allText,
@@ -83,11 +89,14 @@
                         title="🍕🦈完成：转移闪卡到其他摘抄"
                         class="b3-button"
                         on:click={async () => {
-                            await finishDigest(
-                                docID,
-                                ctime,
-                                digestProgressiveBox.plugin,
-                            );
+                            if (ctime) {
+                                await finishDigest(
+                                    anchorID,
+                                    docID,
+                                    ctime,
+                                    digestProgressiveBox.plugin,
+                                );
+                            }
                             destroy();
                         }}>🔨</button
                     >
@@ -97,12 +106,15 @@
                         title="🗑️🍕完成并删除摘要"
                         class="b3-button"
                         on:click={async () => {
-                            await finishDigest(
-                                docID,
-                                ctime,
-                                digestProgressiveBox.plugin,
-                            );
-                            await siyuan.removeDocByID(docID);
+                            if (ctime) {
+                                await finishDigest(
+                                    anchorID,
+                                    docID,
+                                    ctime,
+                                    digestProgressiveBox.plugin,
+                                );
+                                await siyuan.removeDocByID(docID);
+                            }
                             destroy();
                         }}>🗑️</button
                     >
@@ -114,6 +126,17 @@
                         on:click={() => {
                             siyuan.pushMsg("开发中...");
                         }}>💔🔗</button
+                    >
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <button
+                        title="查看阅读轨迹树"
+                        class="b3-button"
+                        on:click={() => {
+                            siyuan.pushMsg("开发中...");
+                        }}>🌲</button
                     >
                 </td>
             </tr>

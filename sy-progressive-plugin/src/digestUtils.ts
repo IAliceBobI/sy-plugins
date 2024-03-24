@@ -4,11 +4,13 @@ import { cleanDiv, siyuan, timeUtil } from "../../sy-tomato-plugin/src/libs/util
 import { getHPathByDocID } from "./helper";
 import { getBookID } from "../../sy-tomato-plugin/src/libs/progressive";
 
-async function newDigestDoc(bookID: string, boxID: string, idx: string, name: string, md: string) {
+async function newDigestDoc(docID: string, anchorID: string, bookID: string, boxID: string, idx: string, name: string, md: string) {
     const hpath = await getHPathByDocID(bookID, "digest");
     const attr = {} as AttrType;
     const ct = new Date().getTime();
     // attr["custom-pdigest-index"] = `${docID}#${idx.padStart(10, "0")}`;
+    attr["custom-pdigest-parent-id"] = docID;
+    attr["custom-pdigest-last-id"] = anchorID;
     attr["custom-pdigest-ctime"] = `${bookID}#${ct}`;
     attr["custom-off-tomatobacklink"] = "1";
     attr["custom-progmark"] = `${TEMP_CONTENT}#${bookID},${ct}`;
@@ -34,8 +36,9 @@ async function setDigestCard(bookID: string, digestID: string) {
     await siyuan.batchSetRiffCardsDueTimeByBlockID([{ id: digestID, due }]);
 }
 
-export async function finishDigest(digestID: string, ctime: string, plugin: Plugin) {
+export async function finishDigest(lastID: string, digestID: string, ctime: string, plugin: Plugin) {
     await siyuan.removeRiffCards([digestID]);
+    await siyuan.setBlockAttrs(digestID, { "custom-pdigest-ctime": "", "title": "🔨" } as AttrType);
     let { bookID } = await getBookID(digestID);
     if (!bookID) bookID = digestID;
     const rows = await siyuan.sqlAttr(`select block_id from attributes where 
@@ -51,6 +54,14 @@ export async function finishDigest(digestID: string, ctime: string, plugin: Plug
         and block_id!="${digestID}"
         order by value desc limit 1`);
     if (await tryOpen(latestRows, plugin)) return;
+    await openTab({
+        app: plugin.app,
+        doc: {
+            id: lastID,
+            zoomIn: false,
+            action: ["cb-get-hl", "cb-get-context"],
+        },
+    });
 }
 
 async function tryOpen(rows: Attributes[], plugin: Plugin) {
@@ -69,7 +80,7 @@ async function tryOpen(rows: Attributes[], plugin: Plugin) {
     return false;
 }
 
-export async function digest(docID: string, boxID: string, allText: string, selected: HTMLElement[], lute: Lute, plugin: Plugin) {
+export async function digest(anchorID: string, docID: string, boxID: string, allText: string, selected: HTMLElement[], lute: Lute, plugin: Plugin) {
     const md = [];
     let idx: string;
     let i = 0;
@@ -90,6 +101,8 @@ export async function digest(docID: string, boxID: string, allText: string, sele
     let { bookID } = await getBookID(docID);
     if (!bookID) bookID = docID;
     const digestID = await newDigestDoc(
+        docID,
+        anchorID,
         bookID,
         boxID,
         idx,
