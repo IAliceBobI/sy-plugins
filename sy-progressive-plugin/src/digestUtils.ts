@@ -1,5 +1,5 @@
 import { TEMP_CONTENT } from "../../sy-tomato-plugin/src/libs/gconst";
-import { siyuan } from "../../sy-tomato-plugin/src/libs/utils";
+import { siyuan, timeUtil } from "../../sy-tomato-plugin/src/libs/utils";
 import { getHPathByDocID } from "./helper";
 
 export async function newDigestDoc(bookID: string, boxID: string, idx: string, name: string, md: string) {
@@ -24,21 +24,10 @@ export async function setDigestCard(bookID: string, digestID: string) {
         WHERE a.type='d' limit 1`);
     if (row?.id) {
         const cards = await siyuan.getTreeRiffCardsAll(row.id);
-        for (const card of cards) {
-            console.log(card)
-        }
+        await siyuan.removeRiffCards(cards.map(card => card.id));
     }
     await siyuan.addRiffCards([digestID]);
+    await siyuan.reviewRiffCardByBlockID(digestID, 2);
+    const due = timeUtil.getYYYYMMDDHHmmssPlus0(timeUtil.nowts());
+    await siyuan.batchSetRiffCardsDueTimeByBlockID([{ id: digestID, due }]);
 }
-
-
-
-// SELECT a.*
-// FROM blocks a
-// INNER JOIN (
-//   SELECT hpath
-//   FROM blocks
-//   WHERE type='d'
-//   AND id ='20240123151020-gpjyj0l'
-// ) b ON a.hpath LIKE b.hpath || '%'
-// where a.type='d'
