@@ -17,8 +17,6 @@ export const TOMATO_BK_IGNORE = "tomato-bk-ignore";
 export const TOMATO_BK_STATIC = "custom-tomato-bk-static";
 export const STATICLINK = "custom-staticlink";
 export const READINGPOINT = "custom-tomato-readingpoint";
-// export const PDIGEST_INDEX = "custom-pdigest-index";
-// export const PDIGEST_CTIME = "custom-pdigest-ctime";
 export const BACKLINK_CACHE_TIME = 6 * 1000;
 
 export enum BlockNodeEnum {

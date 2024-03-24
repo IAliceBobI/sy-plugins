@@ -73,8 +73,6 @@ type AttrType = {
     "custom-tomato-line-through2": string,
     "custom-tomato-readingpoint": string,
     "custom-tomato-rp-content-hash": string,
-    // "custom-pdigest-index": string,
-    // "custom-pdigest-ctime": string,
     [key: string]: string,
 };
 
