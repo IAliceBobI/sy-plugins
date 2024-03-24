@@ -91,6 +91,7 @@
                         on:click={async () => {
                             if (ctime) {
                                 await finishDigest(
+                                    docName,
                                     anchorID,
                                     docID,
                                     ctime,
@@ -99,24 +100,6 @@
                             }
                             destroy();
                         }}>🔨</button
-                    >
-                </td>
-                <td>
-                    <button
-                        title="🗑️🍕完成并删除摘要"
-                        class="b3-button"
-                        on:click={async () => {
-                            if (ctime) {
-                                await finishDigest(
-                                    anchorID,
-                                    docID,
-                                    ctime,
-                                    digestProgressiveBox.plugin,
-                                );
-                                await siyuan.removeDocByID(docID);
-                            }
-                            destroy();
-                        }}>🗑️</button
                     >
                 </td>
                 <td>
@@ -137,6 +120,15 @@
                         on:click={() => {
                             siyuan.pushMsg("开发中...");
                         }}>🌲</button
+                    >
+                </td>
+                <td>
+                    <button
+                        title="清理已经完成的摘抄"
+                        class="b3-button"
+                        on:click={() => {
+                            siyuan.pushMsg("开发中...");
+                        }}>🗑️</button
                     >
                 </td>
             </tr>
