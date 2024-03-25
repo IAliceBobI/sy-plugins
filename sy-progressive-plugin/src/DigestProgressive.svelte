@@ -108,7 +108,7 @@
                 </td>
                 <td>
                     <button
-                        title="删除失效的（*@&）链接、引用"
+                        title="删除失效的（*@&+）链接、引用"
                         class="b3-button"
                         on:click={() => {
                             siyuan.pushMsg("开发中...");
