@@ -97,6 +97,10 @@
                                     ctime,
                                     digestProgressiveBox.plugin,
                                 );
+                            } else {
+                                await siyuan.pushMsg(
+                                    `《${docName}》这并不是一个摘抄`,
+                                );
                             }
                             destroy();
                         }}>🔨</button
