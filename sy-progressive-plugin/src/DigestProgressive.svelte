@@ -2,7 +2,7 @@
     import { Dialog, IProtyle } from "siyuan";
     import { onDestroy, onMount } from "svelte";
     import { events } from "../../sy-tomato-plugin/src/libs/Events";
-    import { digest, finishDigest } from "./digestUtils";
+    import { cleanDigest, digest, finishDigest } from "./digestUtils";
     import { cleanText, siyuan } from "../../sy-tomato-plugin/src/libs/utils";
     import { digestProgressiveBox } from "./DigestProgressiveBox";
     import {
@@ -130,8 +130,9 @@
                     <button
                         title="清理已经完成的摘抄"
                         class="b3-button"
-                        on:click={() => {
-                            siyuan.pushMsg("开发中...");
+                        on:click={async () => {
+                            await cleanDigest(docID);
+                            destroy();
                         }}>🗑️</button
                     >
                 </td>

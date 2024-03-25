@@ -17,6 +17,15 @@ async function newDigestDoc(docID: string, anchorID: string, bookID: string, box
     return siyuan.createDocWithMd(boxID, `${hpath}/[${idx}]${name.slice(0, 10)}`, md, "", attr);
 }
 
+export async function cleanDigest(digestID: string) {
+    let { bookID } = await getBookID(digestID);
+    if (!bookID) bookID = digestID;
+    const rows = await siyuan.sqlAttr(`select block_id from attributes where name="${PDIGEST_CTIME}" and value like "🔨#${bookID}#%"`);
+    for (const row of rows) {
+        await siyuan.removeDocByID(row.block_id);
+    }
+}
+
 async function setDigestCard(bookID: string, digestID: string) {
     const row = await siyuan.sqlOne(`SELECT a.id FROM blocks a
             INNER JOIN (
