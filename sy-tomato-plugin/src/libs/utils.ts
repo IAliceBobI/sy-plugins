@@ -577,6 +577,12 @@ export const siyuan = {
     async removeDoc(notebookID: string, path_not_readable: string) {
         return siyuan.call("/api/filetree/removeDoc", { notebook: notebookID, path: path_not_readable });
     },
+    async renameDocByID(docID: string, title: string) {
+        const row = await siyuan.sqlOne(`select box,path from blocks where type='d' and id="${docID}"`);
+        if (row?.box && row?.path) {
+            return siyuan.renameDoc(row.box, row.path, title);
+        }
+    },
     async renameDoc(notebookID: string, path_not_readable: string, title: string) {
         return siyuan.call("/api/filetree/renameDoc", { notebook: notebookID, title, path: path_not_readable });
     },

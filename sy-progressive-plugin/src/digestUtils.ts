@@ -38,7 +38,8 @@ async function setDigestCard(bookID: string, digestID: string) {
 
 export async function finishDigest(docName: string, lastID: string, digestID: string, ctime: string, plugin: Plugin) {
     await siyuan.removeRiffCards([digestID]);
-    await siyuan.setBlockAttrs(digestID, { "custom-pdigest-ctime": "🔨#" + ctime, "title": "🔨" + docName } as AttrType);
+    await siyuan.setBlockAttrs(digestID, { "custom-pdigest-ctime": "🔨#" + ctime } as AttrType);
+    await siyuan.renameDocByID(digestID, "🔨" + docName);
     let { bookID } = await getBookID(digestID);
     if (!bookID) bookID = digestID;
     const rows = await siyuan.sqlAttr(`select block_id from attributes where 
