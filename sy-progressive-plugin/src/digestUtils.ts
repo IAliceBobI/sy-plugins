@@ -86,7 +86,6 @@ export async function digest(anchorID: string, docID: string, boxID: string, all
     let idx: string;
     let i = 0;
     for (const div of selected) {
-        div.style.textDecoration = "underline wavy #888";
 
         let inBookIdx = div.getAttribute(IN_BOOK_INDEX);
         if (!inBookIdx) inBookIdx = div.getAttribute(DATA_NODE_INDEX);
@@ -97,6 +96,13 @@ export async function digest(anchorID: string, docID: string, boxID: string, all
         if (!idx) idx = inBookIdx;
 
         const cloned = div.cloneNode(true) as HTMLDivElement;
+
+        {
+            div.style.backgroundColor = "var(--b3-font-background11)";
+            const attrs = { "style": "background-color: var(--b3-font-background11);" } as AttrType;
+            siyuan.setBlockAttrs(div.getAttribute(DATA_NODE_ID), attrs);
+        }
+
         await cleanDiv(cloned, true, true, false);
         cloned.setAttribute(RefIDKey, originID);
         cloned.setAttribute(IN_BOOK_INDEX, inBookIdx);
