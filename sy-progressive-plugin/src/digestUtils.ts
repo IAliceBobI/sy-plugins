@@ -50,6 +50,8 @@ export async function getDigestLnk(digestID: string, boxID: string, plugin: Plug
     if (!bookID) bookID = digestID;
     const rows = await siyuan.sql(`select ial,content,id from blocks where id = "${bookID}" or id in 
         (select block_id from attributes where name="${PDIGEST_CTIME}" and value like "${bookID}#%" limit 1000000)`);
+    if (rows.length <= 1) return;
+
     const [attrMap, parents] = rows.map(r => {
         const a = parseIAL(r.ial);
         a.title = r.content;
@@ -81,7 +83,7 @@ export async function getDigestLnk(digestID: string, boxID: string, plugin: Plug
         const line: string[] = [];
         for (const attr of list) line.push(get_siyuan_lnk_md(attr.id, attr.title));
         line.push(get_siyuan_lnk_md(bookID, bookName));
-        return `${line.join("🐾")}\n{: id="${NewNodeID()}"}\n{: id="${NewNodeID()}"}`;
+        return `${line.join(" -> ")}\n{: id="${NewNodeID()}"}\n{: id="${NewNodeID()}"}`;
     });
 
     const hpath = await getHPathByDocID(bookID, "trace");
