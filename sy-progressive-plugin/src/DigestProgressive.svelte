@@ -123,7 +123,11 @@
                         title="摘抄轨迹链"
                         class="b3-button"
                         on:click={async () => {
-                            await getDigestLnk(docID, boxID);
+                            await getDigestLnk(
+                                docID,
+                                boxID,
+                                digestProgressiveBox.plugin,
+                            );
                             destroy();
                         }}>🌲</button
                     >

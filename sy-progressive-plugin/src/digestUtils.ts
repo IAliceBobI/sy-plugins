@@ -1,7 +1,7 @@
 import { Lute, openTab, Plugin } from "siyuan";
 import { DATA_NODE_ID, DATA_NODE_INDEX, IN_BOOK_INDEX, PARAGRAPH_INDEX, PDIGEST_CTIME, PROG_ORIGIN_TEXT, RefIDKey, TEMP_CONTENT } from "../../sy-tomato-plugin/src/libs/gconst";
 import { cleanDiv, get_siyuan_lnk_md, getContenteditableElement, NewNodeID, set_href, siyuan, timeUtil } from "../../sy-tomato-plugin/src/libs/utils";
-import { getHPathByDocID } from "./helper";
+import { getHPathByDocID, getTraceDoc } from "./helper";
 import { getBookID } from "../../sy-tomato-plugin/src/libs/progressive";
 
 async function newDigestDoc(docID: string, anchorID: string, bookID: string, boxID: string, idx: string, name: string, md: string) {
@@ -45,7 +45,7 @@ async function setDigestCard(bookID: string, digestID: string) {
     await siyuan.batchSetRiffCardsDueTimeByBlockID([{ id: digestID, due }]);
 }
 
-export async function getDigestLnk(digestID: string, boxID: string) {
+export async function getDigestLnk(digestID: string, boxID: string, plugin: Plugin) {
     let { bookID } = await getBookID(digestID);
     if (!bookID) bookID = digestID;
     const rows = await siyuan.sql(`select ial,content,id from blocks where id = "${bookID}" or id in 
@@ -85,7 +85,17 @@ export async function getDigestLnk(digestID: string, boxID: string) {
     });
 
     const hpath = await getHPathByDocID(bookID, "trace");
-    return siyuan.createDocWithMd(boxID, hpath, lines.join("\n"));
+    const trace = await getTraceDoc(bookID, boxID, hpath);
+    await siyuan.clearAll(trace);
+    await siyuan.insertBlockAsChildOf(lines.join("\n"), trace);
+    await openTab({
+        app: plugin.app,
+        doc: {
+            id: trace,
+            zoomIn: false,
+            action: ["cb-get-hl", "cb-get-context"],
+        },
+    });
 }
 
 

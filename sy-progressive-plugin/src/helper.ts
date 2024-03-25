@@ -29,6 +29,10 @@ export function getDocIalAllInOneKey(bookID: string) {
     return `allInOneKeysDoc#${TEMP_CONTENT}#${bookID}`;
 }
 
+export function getDocIaltrace(bookID: string) {
+    return `traceDoc#${TEMP_CONTENT}#${bookID}`;
+}
+
 export function getDocIalKeysDoc(bookID: string, point: number) {
     return `keysDoc#${TEMP_CONTENT}#${bookID},${point}`;
 }
@@ -73,6 +77,15 @@ export async function getAllInOneKeyDoc(bookID: string, boxID: string, hpath: st
     if (id) return id;
     const attr = {};
     attr[MarkKey] = getDocIalAllInOneKey(bookID);
+    const targetDocID = await utils.siyuanCache.createDocWithMdIfNotExists(5000, boxID, hpath, "", attr);
+    return targetDocID;
+}
+
+export async function getTraceDoc(bookID: string, boxID: string, hpath: string) {
+    const id = await findTraceDoc(bookID);
+    if (id) return id;
+    const attr = {};
+    attr[MarkKey] = getDocIaltrace(bookID);
     const targetDocID = await utils.siyuanCache.createDocWithMdIfNotExists(5000, boxID, hpath, "", attr);
     return targetDocID;
 }
@@ -172,6 +185,10 @@ export async function findSummary(bookID: string) {
 
 export async function findAllInOneKeyDoc(bookID: string) {
     return doFindDoc(bookID, getDocIalAllInOneKey);
+}
+
+export async function findTraceDoc(bookID: string) {
+    return doFindDoc(bookID, getDocIaltrace);
 }
 
 export async function findKeysDoc(bookID: string, point: number) {
