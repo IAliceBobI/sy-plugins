@@ -37,7 +37,12 @@
         enableBK,
         insertBackLinks,
     } from "./libs/bkUtils";
-    import { gotoBookmark } from "./libs/bookmark";
+    import {
+        addTodoBookmark,
+        gotoBookmark,
+        removeReadingPoint,
+        rmTodoBookmark,
+    } from "./libs/bookmark";
     import { DialogText } from "./libs/DialogText";
     import {
         item2ref,
@@ -632,7 +637,7 @@ ${text}
             <tr>
                 <td>
                     <button
-                        title="跳到当前文档的书签位置"
+                        title="跳到当前文档的阅读点"
                         class="b3-button"
                         on:click={async () => {
                             await gotoBookmark(docID, hotMenuBox.plugin.app);
@@ -645,15 +650,11 @@ ${text}
                         title="删除本文档的阅读点"
                         class="b3-button"
                         on:click={async () => {
-                            await gotoBookmark(
-                                docID,
-                                hotMenuBox.plugin.app,
-                                true,
-                            );
+                            await removeReadingPoint(docID);
                             destroy();
                         }}>🗑️🔖</button
-                    ></td
-                >
+                    >
+                </td>
                 <td
                     ><button
                         title="空格隔开的所有内容都转为引用（忽略##后的内容)"
@@ -740,6 +741,24 @@ ${text}
                             moveCursor2Tail(id);
                             destroy();
                         }}>🎏</button
+                    >
+                </td>
+                <td>
+                    <button
+                        title={hotMenuBox.plugin.i18n.addTODOBookmark}
+                        class="b3-button"
+                        on:click={async () => {
+                            await addTodoBookmark(selectedIds);
+                            destroy();
+                        }}>🚩</button
+                    >
+                    <button
+                        title={hotMenuBox.plugin.i18n.deleteAllTODOBookmarks}
+                        class="b3-button"
+                        on:click={async () => {
+                            await rmTodoBookmark(docID);
+                            destroy();
+                        }}>🗑️🚩</button
                     >
                 </td>
             </tr>

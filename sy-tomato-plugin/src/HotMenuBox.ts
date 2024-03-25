@@ -7,6 +7,7 @@ import { removeDocCards } from "./libs/cardUtils";
 import { STORAGE_SETTINGS } from "./constants";
 import { EventType, events } from "./libs/Events";
 import { DATA_NODE_ID, TOMATO_LINE_THROUGH } from "./libs/gconst";
+import { addTodoBookmark, rmTodoBookmark } from "./libs/bookmark";
 
 class HotMenuBox {
     public plugin: Plugin;
@@ -61,6 +62,22 @@ class HotMenuBox {
                     }
                 });
                 m.$destroy();
+            },
+        });
+        this.plugin.addCommand({
+            langKey: "addTODOBookmark",
+            hotkey: "⌘F1",
+            editorCallback: async (protyle: IProtyle) => {
+                const { ids } = await events.selectedDivs(protyle);
+                await addTodoBookmark(ids);
+            },
+        });
+        this.plugin.addCommand({
+            langKey: "deleteAllTODOBookmarks",
+            hotkey: "⌘F2",
+            editorCallback: async (protyle: IProtyle) => {
+                const { docID } = await events.selectedDivs(protyle);
+                await rmTodoBookmark(docID);
             },
         });
         this.plugin.eventBus.on("open-menu-content", async ({ detail }) => {
