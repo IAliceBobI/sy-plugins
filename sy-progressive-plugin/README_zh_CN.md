@@ -244,9 +244,9 @@
 
 > **提示** 如果是在分片中制卡，则卡片会放到书籍的子文件里。比如书籍名为ABC，则卡都收集到ABC-cards文件中。
 
-## Daily Card`Alt+S`或者[Ctrl+`]
+### Daily Card`Alt+S`或者``` Ctrl+` ```
 
-右键菜单或者快捷键 [Ctrl+`] 可以制卡，并且把卡片归档到 Daily Card 文件夹下。结果类似 Daily Note。
+右键菜单或者快捷键 ``` Ctrl+` or Alt+S ``` 可以制卡，并且把卡片归档到 Daily Card 文件夹下。结果类似 Daily Note。
 
 <img src="assets/dailyCardMenu.png" alt="drawing" width="300"/>
 
@@ -257,6 +257,14 @@
 文件内容：
 
 <img src="assets/dailyCardContent.png" alt="drawing" width="300"/>
+
+### 写作式闪卡``` Alt+` ```
+
+<img src="assets/writingCardInit.png" alt="drawing" width="300"/>
+
+创建后，原文处也插入闪卡的嵌入块，在闪卡中做的内容，也反应到原文。
+
+<img src="assets/writingCard.png" alt="drawing" width="300"/>
 
 ## 命令面板工具
 
@@ -619,7 +627,7 @@
 
 ## 2023-12-26
 
-* daliy card: [ctrl+`] 不再插入嵌入块。
+* daliy card: ``` Ctrl+` ``` 不再插入嵌入块。
 * 分片底部按钮行：添加打开书本目录按钮。
 * 分片底部按钮行：以tab的方式打开闪卡，只打开，在本书中或者在本书的子文件中的闪卡。
 * 在分片中做闪卡：`alt+e`。不在分片底部插入闪卡，而是将闪卡放入书籍下的一个文件中。

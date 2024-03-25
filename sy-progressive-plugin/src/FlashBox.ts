@@ -47,7 +47,15 @@ class FlashBox {
             }
         });
         detail.menu.addItem({
-            iconHTML: "🗓️🗃️🇷",
+            iconHTML: "➕🗃️🔗",
+            accelerator: "⌥`",
+            label: this.plugin.i18n.insertBlankSpaceCardEmbed,
+            click: () => {
+                this.makeCard(detail.protyle, CardType.E);
+            }
+        });
+        detail.menu.addItem({
+            iconHTML: "🗓️🗃️*️⃣",
             accelerator: "⌘`",
             label: this.plugin.i18n.send2dailyCard,
             click: () => {
@@ -126,8 +134,20 @@ class FlashBox {
                 },
             });
             menu.addItem({
+                label: this.plugin.i18n.insertBlankSpaceCardEmbed,
+                iconHTML: "➕🗃️🔗",
+                accelerator: "⌥`",
+                click: () => {
+                    const blockID = detail?.element?.getAttribute("data-node-id") ?? "";
+                    const blank = detail?.range?.cloneContents()?.textContent ?? "";
+                    if (blockID) {
+                        this.blankSpaceCard(blockID, blank, detail?.range, detail?.protyle, CardType.E);
+                    }
+                },
+            });
+            menu.addItem({
                 label: this.plugin.i18n.send2dailyCard,
-                iconHTML: "🗓️🗃️🇷",
+                iconHTML: "🗓️🗃️*️⃣",
                 accelerator: "⌘`",
                 click: () => {
                     const blockID = detail?.element?.getAttribute("data-node-id") ?? "";
