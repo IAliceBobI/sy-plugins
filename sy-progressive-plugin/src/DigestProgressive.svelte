@@ -123,7 +123,7 @@
                         title="摘抄轨迹链"
                         class="b3-button"
                         on:click={async () => {
-                            await getDigestLnk(docID);
+                            await getDigestLnk(docID, boxID);
                             destroy();
                         }}>🌲</button
                     >

@@ -1,6 +1,6 @@
 import { Lute, openTab, Plugin } from "siyuan";
 import { DATA_NODE_ID, DATA_NODE_INDEX, IN_BOOK_INDEX, PARAGRAPH_INDEX, PDIGEST_CTIME, PROG_ORIGIN_TEXT, RefIDKey, TEMP_CONTENT } from "../../sy-tomato-plugin/src/libs/gconst";
-import { cleanDiv, getContenteditableElement, set_href, siyuan, timeUtil } from "../../sy-tomato-plugin/src/libs/utils";
+import { cleanDiv, get_siyuan_lnk_md, getContenteditableElement, NewNodeID, set_href, siyuan, timeUtil } from "../../sy-tomato-plugin/src/libs/utils";
 import { getHPathByDocID } from "./helper";
 import { getBookID } from "../../sy-tomato-plugin/src/libs/progressive";
 
@@ -45,24 +45,49 @@ async function setDigestCard(bookID: string, digestID: string) {
     await siyuan.batchSetRiffCardsDueTimeByBlockID([{ id: digestID, due }]);
 }
 
-export async function getDigestLnk(digestID: string) {
+export async function getDigestLnk(digestID: string, boxID: string) {
     let { bookID } = await getBookID(digestID);
     if (!bookID) bookID = digestID;
-    const rows = await siyuan.sql(`select ial from blocks where type='d' and id in 
+    const rows = await siyuan.sql(`select ial,content,id from blocks where id = "${bookID}" or id in 
         (select block_id from attributes where name="${PDIGEST_CTIME}" and value like "${bookID}#%" limit 1000000)`);
-    const [attrMap, parents] = rows.map(r => parseIAL(r.ial)).reduce(([a, p], attr) => {
+    const [attrMap, parents] = rows.map(r => {
+        const a = parseIAL(r.ial);
+        a.title = r.content;
+        a.id = r.id;
+        return a;
+    }).reduce(([a, p], attr) => {
         a.set(attr.id, attr);
         p.add(attr["custom-pdigest-parent-id"]);
         return [a, p];
     }, [new Map<string, AttrType>(), new Set<string>()]);
 
+    const bookName = attrMap.get(bookID).title;
+
     const leaves = [...attrMap.keys()].reduce((l, id) => {
-        if (!parents.has(id)) l.push(id);
+        if (!parents.has(id) && id != bookID) l.push(attrMap.get(id));
         return l;
-    }, [] as string[]).sort((a, b) => -attrMap.get(a)["custom-pdigest-ctime"].localeCompare(attrMap.get(b)["custom-pdigest-ctime"]));
+    }, [] as AttrType[]).sort((a, b) => -a["custom-pdigest-ctime"].localeCompare(b["custom-pdigest-ctime"]));
 
+    const lines = leaves.map(leave => {
+        const lnk: AttrType[] = [];
+        lnk.push(leave);
+        do {
+            if (leave["custom-pdigest-parent-id"] == bookID) break;
+            leave = attrMap.get(leave["custom-pdigest-parent-id"]);
+            if (leave) lnk.push(leave);
+        } while (leave);
+        return lnk;
+    }).map(list => {
+        const line: string[] = [];
+        for (const attr of list) line.push(get_siyuan_lnk_md(attr.id, attr.title));
+        line.push(get_siyuan_lnk_md(bookID, bookName));
+        return `${line.join("🐾")}\n{: id="${NewNodeID()}"}\n{: id="${NewNodeID()}"}`;
+    });
 
+    const hpath = await getHPathByDocID(bookID, "trace");
+    return siyuan.createDocWithMd(boxID, hpath, lines.join("\n"));
 }
+
 
 function parseIAL(ial: string) {
     const attrs = ial.matchAll(/([^\s]+)="([^\s]+)"/g);
