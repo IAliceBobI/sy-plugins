@@ -260,6 +260,7 @@ class FlashBox {
         const ids = [];
         for (const div of multiLine) {
             div.classList.remove(gconst.PROTYLE_WYSIWYG_SELECT);
+            (div as HTMLElement).style.backgroundColor = "var(--b3-font-background7)";
             const [id, elem, hasRef] = await this.cloneDiv(div as any, setRef);
             if (hasRef) setRef = false;
             ids.push(id);
@@ -306,11 +307,11 @@ class FlashBox {
 export const flashBox = new FlashBox();
 
 
-function changeBGofseletedElement(ids: any[]) {
-    setTimeout(async () => {
-        const attrs = { "style": "background-color: var(--b3-font-background7);" } as AttrType;
-        for (const id of ids) await siyuan.setBlockAttrs(id, attrs);
-    }, 1000);
+async function changeBGofseletedElement(ids: any[]) {
+    const attrs = { "style": "background-color: var(--b3-font-background7);" } as AttrType;
+    return siyuan.batchSetBlockAttrs(ids.map(id => {
+        return { id, attrs };
+    }));
 }
 
 async function lnk2href(box: string) {

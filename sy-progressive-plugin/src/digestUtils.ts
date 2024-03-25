@@ -87,10 +87,15 @@ export async function digest(anchorID: string, docID: string, boxID: string, all
     for (const div of selected) {
         let inBookIdx = div.getAttribute(IN_BOOK_INDEX);
         if (!inBookIdx) inBookIdx = div.getAttribute(DATA_NODE_INDEX);
+
+        let originID = div.getAttribute(RefIDKey);
+        if (!originID) originID = div.getAttribute(DATA_NODE_ID);
+
         if (!idx) idx = inBookIdx;
+
         const cloned = div.cloneNode(true) as HTMLDivElement;
         await cleanDiv(cloned, true, true, false);
-        cloned.setAttribute(RefIDKey, div.getAttribute(DATA_NODE_ID));
+        cloned.setAttribute(RefIDKey, originID);
         cloned.setAttribute(IN_BOOK_INDEX, inBookIdx);
         cloned.setAttribute(PARAGRAPH_INDEX, String(i));
         cloned.setAttribute(PROG_ORIGIN_TEXT, "1");
