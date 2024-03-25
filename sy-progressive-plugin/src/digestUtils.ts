@@ -86,6 +86,8 @@ export async function digest(anchorID: string, docID: string, boxID: string, all
     let idx: string;
     let i = 0;
     for (const div of selected) {
+        div.style.textDecoration = "underline wavy #888";
+
         let inBookIdx = div.getAttribute(IN_BOOK_INDEX);
         if (!inBookIdx) inBookIdx = div.getAttribute(DATA_NODE_INDEX);
 
