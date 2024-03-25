@@ -119,7 +119,7 @@
             <tr>
                 <td>
                     <button
-                        title="查看阅读轨迹树"
+                        title="摘抄轨迹链"
                         class="b3-button"
                         on:click={() => {
                             siyuan.pushMsg("开发中...");
