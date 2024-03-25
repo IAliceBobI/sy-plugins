@@ -3,8 +3,6 @@
 type SettingCfgType = {
     hideBtnsInFlashCard: boolean;
     cardUnderPiece: boolean;
-    addCodeBlock: boolean,
-    addQuoteBlock: boolean,
     openCardsOnOpenPiece: boolean,
     btnViewContents: boolean,
     btnSplitByPunctuationsListCheck: boolean;

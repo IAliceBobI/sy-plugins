@@ -16,7 +16,7 @@
                     },
     "description":  {
                         "default":  "Document chunking for progressive reading, flashcard-style progressive writing.",
-                        "zh_CN":  "摘抄式渐进学习、分片式渐进学习、写作式闪卡、单项列表卡、Daily Card"
+                        "zh_CN":  "摘抄式渐进学习、分片式渐进学习、写作式闪卡、列表卡、Daily Card"
                     },
     "readme":  {
                    "default":  "README.md",

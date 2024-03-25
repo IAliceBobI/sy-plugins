@@ -8,7 +8,7 @@ import { getBookID } from "../../sy-tomato-plugin/src/libs/progressive";
 import { AttrBuilder } from "../../sy-tomato-plugin/src/libs/listUtils";
 
 enum CardType {
-    B = "B", C = "C", None = "None"
+    E = "E", None = "None"
 }
 
 function getDailyPath() {
@@ -38,18 +38,12 @@ class FlashBox {
 
     blockIconEvent(detail: any) {
         if (!this.plugin) return;
-        let cardType = CardType.None;
-        if (this.settings.addCodeBlock) {
-            cardType = CardType.C;
-        } else if (this.settings.addQuoteBlock) {
-            cardType = CardType.B;
-        }
         detail.menu.addItem({
             iconHTML: "➕🗃️",
             accelerator: "⌥E",
             label: this.plugin.i18n.insertBlankSpaceCard,
             click: () => {
-                this.makeCard(detail.protyle, cardType);
+                this.makeCard(detail.protyle, CardType.None);
             }
         });
         detail.menu.addItem({
@@ -57,7 +51,7 @@ class FlashBox {
             accelerator: "⌘`",
             label: this.plugin.i18n.send2dailyCard,
             click: () => {
-                this.makeCard(detail.protyle, cardType, getDailyPath());
+                this.makeCard(detail.protyle, CardType.None, getDailyPath());
             }
         });
         detail.menu.addItem({
@@ -65,7 +59,7 @@ class FlashBox {
             accelerator: "⌥S",
             label: this.plugin.i18n.send2dailyCardNoRef,
             click: () => {
-                this.makeCard(detail.protyle, cardType, getDailyPath(), true);
+                this.makeCard(detail.protyle, CardType.None, getDailyPath(), true);
             }
         });
     }
@@ -74,31 +68,32 @@ class FlashBox {
         this.plugin = plugin;
         this.settings = settings;
         this.lute = utils.NewLute();
-        let cardType = CardType.None;
-        if (this.settings.addCodeBlock) {
-            cardType = CardType.C;
-        } else if (this.settings.addQuoteBlock) {
-            cardType = CardType.B;
-        }
         this.plugin.addCommand({
             langKey: "insertBlankSpaceCard",
             hotkey: "⌥E",
             editorCallback: (protyle) => {
-                this.makeCard(protyle, cardType);
+                this.makeCard(protyle, CardType.None);
+            },
+        });
+        this.plugin.addCommand({
+            langKey: "insertBlankSpaceCardEmbed",
+            hotkey: "⌥`",
+            editorCallback: (protyle) => {
+                this.makeCard(protyle, CardType.E);
             },
         });
         this.plugin.addCommand({
             langKey: "send2dailyCard",
             hotkey: "⌘`",
             editorCallback: (protyle) => {
-                this.makeCard(protyle, cardType, getDailyPath());
+                this.makeCard(protyle, CardType.None, getDailyPath());
             },
         });
         this.plugin.addCommand({
             langKey: "send2dailyCardNoRef",
             hotkey: "⌥S",
             editorCallback: (protyle) => {
-                this.makeCard(protyle, cardType, getDailyPath(), true);
+                this.makeCard(protyle, CardType.None, getDailyPath(), true);
             },
         });
         this.plugin.addCommand({
@@ -126,7 +121,7 @@ class FlashBox {
                     const blockID = detail?.element?.getAttribute("data-node-id") ?? "";
                     const blank = detail?.range?.cloneContents()?.textContent ?? "";
                     if (blockID) {
-                        this.blankSpaceCard(blockID, blank, detail?.range, detail?.protyle, cardType);
+                        this.blankSpaceCard(blockID, blank, detail?.range, detail?.protyle, CardType.None);
                     }
                 },
             });
@@ -138,7 +133,7 @@ class FlashBox {
                     const blockID = detail?.element?.getAttribute("data-node-id") ?? "";
                     const blank = detail?.range?.cloneContents()?.textContent ?? "";
                     if (blockID) {
-                        this.blankSpaceCard(blockID, blank, detail?.range, detail?.protyle, cardType, getDailyPath());
+                        this.blankSpaceCard(blockID, blank, detail?.range, detail?.protyle, CardType.None, getDailyPath());
                     }
                 },
             });
@@ -150,7 +145,7 @@ class FlashBox {
                     const blockID = detail?.element?.getAttribute("data-node-id") ?? "";
                     const blank = detail?.range?.cloneContents()?.textContent ?? "";
                     if (blockID) {
-                        this.blankSpaceCard(blockID, blank, detail?.range, detail?.protyle, cardType, getDailyPath(), true);
+                        this.blankSpaceCard(blockID, blank, detail?.range, detail?.protyle, CardType.None, getDailyPath(), true);
                     }
                 },
             });
@@ -184,7 +179,7 @@ class FlashBox {
         let { bookID } = await getBookID(docID);
         const srcDocAttrs = await siyuan.getBlockAttrs(docID);
         const srcPriority = srcDocAttrs["custom-card-priority"];
-        const { cardID, markdown } = this.createList(divs, t, srcPriority);
+        const { cardID, markdown } = this.createList(divs, srcPriority);
         if (path) {
             const v = getDailyAttrValue();
             const attr = {};
@@ -215,9 +210,12 @@ class FlashBox {
             set_href(span, cardID, "&");
             await siyuan.safeUpdateBlock(lastSelectedID, this.lute.BlockDOM2Md(div.outerHTML));
         }
+        if (t == CardType.E) {
+            await siyuan.insertBlockAfter(`{{ select * from blocks where id="${cardID}" }}`, lastSelectedID);
+        }
     }
 
-    private createList(divs: HTMLElement[], cardType: CardType, srcPriority: string) {
+    private createList(divs: HTMLElement[], srcPriority: string) {
         const tmp = [];
         let originPath: string = "";
         let refPath: string = "";
@@ -235,11 +233,6 @@ class FlashBox {
             const md = this.lute.BlockDOM2Md(div.outerHTML).replace("　　", "");
             if (idx++ == 0) tmp.push(`* ${attrBuilder.build()} ${md}`);
             else tmp.push("  " + md);
-        }
-        if (cardType === CardType.C) {
-            tmp.push("  ```");
-        } else if (cardType === CardType.B) {
-            tmp.push("  >");
         }
         tmp.push(`  {: id="${utils.NewNodeID()}"}`);
         tmp.push(`  {: id="${utils.NewNodeID()}"}`);
