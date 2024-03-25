@@ -6,10 +6,6 @@
 
 # 基于`摘抄`的渐进阅读（摘抄模式）
 
-> **提示：** 基本可用，还在开发中……应该有bug……后续可能会有较大改动……
-
-> **提示：** 闪卡复习界面如何接入还在考虑中……
-
 ## 使用方法
 
 **默认快捷键：`Alt+Z`。** 这是一个菜单，里面有多个功能。
@@ -246,17 +242,13 @@
 
 ### Daily Card`Alt+S`或者``` Ctrl+` ```
 
-右键菜单或者快捷键 ``` Ctrl+` or Alt+S ``` 可以制卡，并且把卡片归档到 Daily Card 文件夹下。结果类似 Daily Note。
+右键菜单或者快捷键 ``` Ctrl+` 引用原文 or Alt+S 不引用原文 ``` 可以制卡，并且把卡片归档到 Daily Card 文件夹下。结果类似 Daily Note。
 
 <img src="assets/dailyCardMenu.png" alt="drawing" width="300"/>
 
-将创建目录结构如下：
+将创建目录结构如下，并制卡：
 
 ![Alt text](assets/dailyCardTree.png)
-
-文件内容：
-
-<img src="assets/dailyCardContent.png" alt="drawing" width="300"/>
 
 ### 写作式闪卡``` Alt+` ```
 
@@ -380,6 +372,7 @@
 * 添加新的渐进阅读模式：摘抄模式。
 * 提高制卡体验。
 * 摘抄模式：点击完成后，修改文件名。
+* 添加新功能：`新`写作式闪卡。
 
 ## 2024-03-20
 
