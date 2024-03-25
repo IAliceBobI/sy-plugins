@@ -20,7 +20,7 @@ async function newDigestDoc(docID: string, anchorID: string, bookID: string, box
 export async function cleanDigest(digestID: string) {
     let { bookID } = await getBookID(digestID);
     if (!bookID) bookID = digestID;
-    const rows = await siyuan.sqlAttr(`select block_id from attributes where name="${PDIGEST_CTIME}" and value like "🔨#${bookID}#%"`);
+    const rows = await siyuan.sqlAttr(`select block_id from attributes where name="${PDIGEST_CTIME}" and value like "🔨#${bookID}#% limit 1000000"`);
     for (const row of rows) {
         await siyuan.removeDocByID(row.block_id);
     }
@@ -32,7 +32,7 @@ async function setDigestCard(bookID: string, digestID: string) {
                 SELECT hpath,content
                 FROM blocks
                 WHERE type='d'
-                AND id ='${bookID}' limit 1
+                AND id ='${bookID}'
             ) b ON a.hpath = b.hpath || '/digest-' || b.content
         WHERE a.type='d' limit 1`);
     if (row?.id) {
@@ -43,6 +43,32 @@ async function setDigestCard(bookID: string, digestID: string) {
     await siyuan.reviewRiffCardByBlockID(digestID, 2);
     const due = timeUtil.getYYYYMMDDHHmmssPlus0(timeUtil.nowts());
     await siyuan.batchSetRiffCardsDueTimeByBlockID([{ id: digestID, due }]);
+}
+
+export async function getDigestLnk(digestID: string) {
+    let { bookID } = await getBookID(digestID);
+    if (!bookID) bookID = digestID;
+    const rows = await siyuan.sql(`select ial from blocks where type='d' and id in 
+        (select block_id from attributes where name="${PDIGEST_CTIME}" and value like "${bookID}#%" limit 1000000)`);
+    const [attrMap, parents] = rows.map(r => parseIAL(r.ial)).reduce(([a, p], attr) => {
+        a.set(attr.id, attr);
+        p.add(attr["custom-pdigest-parent-id"]);
+        return [a, p];
+    }, [new Map<string, AttrType>(), new Set<string>()]);
+
+    const leaves = [...attrMap.keys()].reduce((l, id) => {
+        if (!parents.has(id)) l.push(id);
+        return l;
+    }, [] as string[]).sort((a, b) => -attrMap.get(a)["custom-pdigest-ctime"].localeCompare(attrMap.get(b)["custom-pdigest-ctime"]));
+
+
+}
+
+function parseIAL(ial: string) {
+    const attrs = ial.matchAll(/([^\s]+)="([^\s]+)"/g);
+    const obj = {} as AttrType;
+    for (const attr of attrs) obj[attr[1]] = attr[2];
+    return obj;
 }
 
 export async function finishDigest(docName: string, lastID: string, digestID: string, ctime: string, plugin: Plugin) {

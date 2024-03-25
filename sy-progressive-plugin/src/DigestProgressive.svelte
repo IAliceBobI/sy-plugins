@@ -2,7 +2,12 @@
     import { Dialog, IProtyle } from "siyuan";
     import { onDestroy, onMount } from "svelte";
     import { events } from "../../sy-tomato-plugin/src/libs/Events";
-    import { cleanDigest, digest, finishDigest } from "./digestUtils";
+    import {
+        cleanDigest,
+        digest,
+        finishDigest,
+        getDigestLnk,
+    } from "./digestUtils";
     import { cleanText, siyuan } from "../../sy-tomato-plugin/src/libs/utils";
     import { digestProgressiveBox } from "./DigestProgressiveBox";
     import {
@@ -18,19 +23,15 @@
     let docID: string;
     let docName: string;
     let anchorID: string;
-    let selectedText: string;
-    let selectedIds: string[] = [];
     let boxID: string;
     let allText: string;
     let ctime: string;
 
     onMount(async () => {
         const s = await events.selectedDivs(protyle);
-        selectedIds = s.ids;
         element = s.element;
         docID = s.docID;
         docName = s.docName;
-        selectedText = s.rangeText;
         anchorID = s.ids[s.ids.length - 1];
         selected = s.selected;
         boxID = s.boxID;
@@ -121,8 +122,9 @@
                     <button
                         title="摘抄轨迹链"
                         class="b3-button"
-                        on:click={() => {
-                            siyuan.pushMsg("开发中...");
+                        on:click={async () => {
+                            await getDigestLnk(docID);
+                            destroy();
                         }}>🌲</button
                     >
                 </td>
