@@ -1,6 +1,6 @@
 import { Lute, openTab, Plugin } from "siyuan";
 import { DATA_NODE_ID, DATA_NODE_INDEX, IN_BOOK_INDEX, PARAGRAPH_INDEX, PDIGEST_CTIME, PROG_ORIGIN_TEXT, RefIDKey, TEMP_CONTENT } from "../../sy-tomato-plugin/src/libs/gconst";
-import { cleanDiv, siyuan, timeUtil } from "../../sy-tomato-plugin/src/libs/utils";
+import { cleanDiv, getContenteditableElement, set_href, siyuan, timeUtil } from "../../sy-tomato-plugin/src/libs/utils";
 import { getHPathByDocID } from "./helper";
 import { getBookID } from "../../sy-tomato-plugin/src/libs/progressive";
 
@@ -82,11 +82,11 @@ async function tryOpen(rows: Attributes[], plugin: Plugin) {
 }
 
 export async function digest(anchorID: string, docID: string, boxID: string, allText: string, selected: HTMLElement[], lute: Lute, plugin: Plugin) {
+    if (selected == null || selected.length == 0) return;
     const md = [];
     let idx: string;
     let i = 0;
     for (const div of selected) {
-
         let inBookIdx = div.getAttribute(IN_BOOK_INDEX);
         if (!inBookIdx) inBookIdx = div.getAttribute(DATA_NODE_INDEX);
 
@@ -96,13 +96,7 @@ export async function digest(anchorID: string, docID: string, boxID: string, all
         if (!idx) idx = inBookIdx;
 
         const cloned = div.cloneNode(true) as HTMLDivElement;
-
-        {
-            div.style.backgroundColor = "var(--b3-font-background11)";
-            const attrs = { "style": "background-color: var(--b3-font-background11);" } as AttrType;
-            siyuan.setBlockAttrs(div.getAttribute(DATA_NODE_ID), attrs);
-        }
-
+        changeBG(div);
         await cleanDiv(cloned, true, true, false);
         cloned.setAttribute(RefIDKey, originID);
         cloned.setAttribute(IN_BOOK_INDEX, inBookIdx);
@@ -132,4 +126,22 @@ export async function digest(anchorID: string, docID: string, boxID: string, all
         },
     });
     await setDigestCard(bookID, digestID);
+    addPlusLnk(selected, digestID, lute);
 }
+
+async function addPlusLnk(selected: HTMLElement[], digestID: string, lute: Lute) {
+    const div = selected[selected.length - 1];
+    const edit = getContenteditableElement(div);
+    if (edit) {
+        const span = edit.appendChild(document.createElement("span")) as HTMLElement;
+        set_href(span, digestID, "+");
+        return siyuan.safeUpdateBlock(div.getAttribute(DATA_NODE_ID), lute.BlockDOM2Md(div.outerHTML));
+    }
+}
+
+async function changeBG(div: HTMLElement) {
+    div.style.backgroundColor = "var(--b3-font-background11)";
+    const attrs = { "style": "background-color: var(--b3-font-background11);" } as AttrType;
+    return siyuan.setBlockAttrs(div.getAttribute(DATA_NODE_ID), attrs);
+}
+
