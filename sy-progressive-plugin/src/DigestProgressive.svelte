@@ -78,13 +78,30 @@
                                 boxID,
                                 allText,
                                 selected,
-                                digestProgressiveBox.lute,
-                                digestProgressiveBox.plugin,
                             );
                             destroy();
                         }}>➕🍕</button
                     >
                 </td>
+                <td>
+                    <button
+                        title="摘抄并断句"
+                        class="b3-button"
+                        on:click={async () => {
+                            await digest(
+                                anchorID,
+                                docID,
+                                boxID,
+                                allText,
+                                selected,
+                                true,
+                            );
+                            destroy();
+                        }}>➕🍕✂</button
+                    >
+                </td>
+            </tr>
+            <tr>
                 <td>
                     <button
                         title="🍕🦈完成：转移闪卡到其他摘抄"
@@ -107,9 +124,15 @@
                         }}>🔨</button
                     >
                 </td>
-            </tr>
-            <tr>
                 <td>
+                    <button
+                        title="清理已经完成的摘抄"
+                        class="b3-button"
+                        on:click={async () => {
+                            await cleanDigest(docID);
+                            destroy();
+                        }}>🗑️</button
+                    >
                     <button
                         title="摘抄轨迹链"
                         class="b3-button"
@@ -121,16 +144,6 @@
                             );
                             destroy();
                         }}>🌲</button
-                    >
-                </td>
-                <td>
-                    <button
-                        title="清理已经完成的摘抄"
-                        class="b3-button"
-                        on:click={async () => {
-                            await cleanDigest(docID);
-                            destroy();
-                        }}>🗑️</button
                     >
                 </td>
             </tr>

@@ -3,6 +3,8 @@ import { DATA_NODE_ID, DATA_NODE_INDEX, IN_BOOK_INDEX, PARAGRAPH_INDEX, PDIGEST_
 import { cleanDiv, get_siyuan_lnk_md, getContenteditableElement, NewNodeID, set_href, siyuan, timeUtil } from "../../sy-tomato-plugin/src/libs/utils";
 import { getHPathByDocID, getTraceDoc } from "./helper";
 import { getBookID } from "../../sy-tomato-plugin/src/libs/progressive";
+import { digestProgressiveBox } from "./DigestProgressiveBox";
+import { spliyBy } from "./SplitSentence";
 
 async function newDigestDoc(docID: string, anchorID: string, bookID: string, boxID: string, idx: string, name: string, md: string) {
     const hpath = await getHPathByDocID(bookID, "digest");
@@ -20,7 +22,7 @@ async function newDigestDoc(docID: string, anchorID: string, bookID: string, box
 export async function cleanDigest(digestID: string) {
     let { bookID } = await getBookID(digestID);
     if (!bookID) bookID = digestID;
-    const rows = await siyuan.sqlAttr(`select block_id from attributes where name="${PDIGEST_CTIME}" and value like "🔨#${bookID}#% limit 1000000"`);
+    const rows = await siyuan.sqlAttr(`select block_id from attributes where name="${PDIGEST_CTIME}" and value like "🔨#${bookID}#%" limit 1000000`);
     for (const row of rows) {
         await siyuan.removeDocByID(row.block_id);
     }
@@ -153,7 +155,7 @@ async function tryOpen(rows: Attributes[], plugin: Plugin) {
     return false;
 }
 
-export async function digest(anchorID: string, docID: string, boxID: string, allText: string, selected: HTMLElement[], lute: Lute, plugin: Plugin) {
+export async function digest(anchorID: string, docID: string, boxID: string, allText: string, selected: HTMLElement[], split = false) {
     if (selected == null || selected.length == 0) return;
     const md = [];
     let idx: string;
@@ -174,7 +176,20 @@ export async function digest(anchorID: string, docID: string, boxID: string, all
         cloned.setAttribute(IN_BOOK_INDEX, inBookIdx);
         cloned.setAttribute(PARAGRAPH_INDEX, String(i));
         cloned.setAttribute(PROG_ORIGIN_TEXT, "1");
-        md.push(lute.BlockDOM2Md(cloned.outerHTML));
+        cloned.style.backgroundColor = "";
+
+        const m = digestProgressiveBox.lute.BlockDOM2Md(cloned.outerHTML);
+        if (split) {
+            const parts = m.trim().split("\n");
+            const attrLine = parts.pop();
+            let ps = [cloned.textContent];
+            for (const s of "\n。！!？?；;:：") ps = spliyBy(ps, s);
+            ps = spliyBy(ps, ". ");
+            ps = spliyBy(ps, "……");
+            ps.forEach(p => md.push(`${p}\n${attrLine}`));
+        } else {
+            md.push(m);
+        }
         i++;
     }
     if (!idx) idx = "0";
@@ -190,7 +205,7 @@ export async function digest(anchorID: string, docID: string, boxID: string, all
         md.join("\n"),
     );
     await openTab({
-        app: plugin.app,
+        app: digestProgressiveBox.plugin.app,
         doc: {
             id: digestID,
             zoomIn: false,
@@ -198,7 +213,7 @@ export async function digest(anchorID: string, docID: string, boxID: string, all
         },
     });
     await setDigestCard(bookID, digestID);
-    addPlusLnk(selected, digestID, lute);
+    addPlusLnk(selected, digestID, digestProgressiveBox.lute);
 }
 
 async function addPlusLnk(selected: HTMLElement[], digestID: string, lute: Lute) {

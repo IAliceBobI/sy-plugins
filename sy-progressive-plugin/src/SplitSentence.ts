@@ -151,7 +151,7 @@ function movePunctuations(a: string, b: string) {
     return [a, b];
 }
 
-function spliyBy(content: string[], s: string) {
+export function spliyBy(content: string[], s: string) {
     const sentences: string[] = [];
     for (const c of content.filter(i => i.length > 0)) {
         const parts = c.split(new RegExp("\\" + s, "g"));
