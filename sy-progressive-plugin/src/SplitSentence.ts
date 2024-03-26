@@ -61,7 +61,7 @@ export class SplitSentence {
                 });
             } else {
                 let ps = [row.content];
-                if (bookInfo.addIndex2paragraph && !ps[0].startsWith("[")) {
+                if (bookInfo?.addIndex2paragraph && !ps[0].startsWith("[")) {
                     ps[0] = `[${i}]` + ps[0];
                 }
                 for (const s of "\n。！!？?；;:：") ps = spliyBy(ps, s);
