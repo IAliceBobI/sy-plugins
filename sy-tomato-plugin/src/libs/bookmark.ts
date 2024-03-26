@@ -36,7 +36,7 @@ export async function rmTodoBookmark(docID: string) {
 export async function addTodoBookmark(ids: string[]) {
     for (const id of ids) {
         const attr = await siyuan.getBlockAttrs(id);
-        if (attr.bookmark)
+        if (attr.bookmark == "🚩")
             await siyuan.setBlockAttrs(id, { bookmark: "" } as AttrType);
         else
             await siyuan.setBlockAttrs(id, { bookmark: "🚩" } as AttrType);
