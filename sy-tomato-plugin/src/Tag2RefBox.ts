@@ -44,13 +44,13 @@ class Tag2RefBox {
                     const nextDocID = protyle?.block?.rootID;
                     const element = protyle?.wysiwyg?.element;
                     if (lock && element && nextDocID && notebookId) {
-                        await this.findAllTagLock(notebookId, element);
+                        // await this.findAllTagLock(notebookId, element);
                         if (this.docID != nextDocID) {
                             this.docID = nextDocID;
                             this.observer?.disconnect();
                             this.observer = new MutationObserver((mutationsList) => {
                                 mutationsList
-                                    .map(i => i.previousSibling)
+                                    .map(i => [...i.addedNodes]).flat()
                                     .forEach((e: HTMLElement) => this.findAllTagLock(notebookId, e));
                             });
                             this.observer.observe(element, { childList: true });
