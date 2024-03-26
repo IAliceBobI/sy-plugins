@@ -1,6 +1,6 @@
 import { IProtyle, Lute, Plugin } from "siyuan";
 import { EventType, events } from "./libs/Events";
-import { BLOCK_REF, DATA_ID, DATA_SUBTYPE, DATA_TYPE, REF_HIERARCHY } from "./libs/gconst";
+import { BLOCK_REF, DATA_ID, DATA_NODE_ID, DATA_SUBTYPE, DATA_TYPE, REF_HIERARCHY } from "./libs/gconst";
 import { NewLute, getID, getSyElement, siyuan } from "./libs/utils";
 import { createRefDoc } from "./libs/docUtils";
 
@@ -50,10 +50,10 @@ class Tag2RefBox {
                             this.observer?.disconnect();
                             this.observer = new MutationObserver((mutationsList) => {
                                 mutationsList
-                                    .map(i => [...i.addedNodes]).flat()
+                                    .map(i => [...i.addedNodes.values()]).flat()
                                     .forEach((e: HTMLElement) => this.findAllTagLock(notebookId, e));
                             });
-                            this.observer.observe(element, { childList: true });
+                            this.observer.observe(element, { childList: true, subtree: true });
                         }
                     }
                 });
@@ -62,7 +62,7 @@ class Tag2RefBox {
     }
 
     private async findAllTagLock(notebookId: string, element: HTMLElement) {
-        return navigator.locks.request("Tomato-Tag2RefBox-findAllTagLock", { ifAvailable: true }, async (lock) => {
+        return navigator.locks.request("Tomato-Tag2RefBox-findAllTagLock", { mode: "exclusive" }, async (lock) => {
             if (lock && element) {
                 await this.findAllTag(notebookId, element);
             }
@@ -70,6 +70,8 @@ class Tag2RefBox {
     }
 
     private async findAllTag(notebookId: string, element: HTMLElement) {
+        if (!element.getAttribute) return;
+        if (!element.querySelectorAll) return;
         const elements = Array.from(element.querySelectorAll(`span[${DATA_TYPE}="tag"]`))
             .filter(e => e.childElementCount == 0)
             .map((e: HTMLElement) => { return { e, text: e.textContent || e.innerText }; })
