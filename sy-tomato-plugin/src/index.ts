@@ -76,7 +76,7 @@ export default class ThePlugin extends Plugin {
         this.addSettingItem("hotMenuBoxCheckbox", "* 快捷菜单", false, "静态反链、文心一言4、文档复制、合并文档。如果段落块以`;;`开头，会被当做注释。");
         if (this.settingCfg.hotMenuBoxCheckbox ?? false) await hotMenuBox.onload(this);
 
-        this.addSettingItem("tag2RefBoxCheckbox", "* 自动将标签转为引用（引用也继承标签的层级关系）", false, "开启会将当前编辑区内的标签转为引用！tag开头、@开头的标签不会被转。");
+        this.addSettingItem("tag2RefBoxCheckbox", "* 自动将标签转为引用（引用也继承标签的层级关系）", false, "tag开头、@开头的标签不会被转。");
         if (this.settingCfg.tag2RefBoxCheckbox ?? false) await tag2RefBox.onload(this);
 
         this.addSettingItem("listBoxCheckbox", "* 列表工具", false, "取消文档中所有任务的勾选, 插入单项列表");
