@@ -38,7 +38,7 @@ export async function addTodoBookmark(ids: string[]) {
         const attr = await siyuan.getBlockAttrs(id);
         if (attr.bookmark == "🚩")
             await siyuan.setBlockAttrs(id, { bookmark: "" } as AttrType);
-        else
+        else if (!attr.bookmark)
             await siyuan.setBlockAttrs(id, { bookmark: "🚩" } as AttrType);
     }
 }
