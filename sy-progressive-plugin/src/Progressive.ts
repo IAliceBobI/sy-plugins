@@ -178,6 +178,27 @@ class Progressive {
         });
     }
 
+    blockIconEvent(detail: any) {
+        if (!this.plugin) return;
+        const menu = detail.menu;
+        menu.addItem({
+            iconHTML: "➕📗",
+            label: this.plugin.i18n.addProgressiveReading,
+            accelerator: "",
+            click: async () => {
+                await this.addProgressiveReadingWithLock();
+            }
+        });
+        menu.addItem({
+            iconHTML: "🎯📖",
+            label: this.plugin.i18n.readThisPiece,
+            accelerator: "",
+            click: async () => {
+                await this.readThisPiece();
+            }
+        });
+    }
+
     private addMenu(rect?: DOMRect) {
         const menu = new Menu("progressiveMenu");
         menu.addItem({

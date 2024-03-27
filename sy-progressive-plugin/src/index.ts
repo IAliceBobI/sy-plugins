@@ -15,6 +15,7 @@ export default class ThePlugin extends Plugin {
     private blockIconEventBindThis = this.blockIconEvent.bind(this);
 
     private blockIconEvent({ detail }: any) {
+        prog.blockIconEvent(detail);
         flashBox.blockIconEvent(detail);
         pieceMovingBox.blockIconEvent(detail);
         pieceSummaryBox.blockIconEvent(detail);
