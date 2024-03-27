@@ -1,6 +1,6 @@
 import { Lute, openTab, Plugin } from "siyuan";
 import { DATA_NODE_ID, DATA_NODE_INDEX, IN_BOOK_INDEX, PARAGRAPH_INDEX, PDIGEST_CTIME, PROG_ORIGIN_TEXT, RefIDKey, TEMP_CONTENT } from "../../sy-tomato-plugin/src/libs/gconst";
-import { cleanDiv, get_siyuan_lnk_md, getContenteditableElement, NewNodeID, set_href, siyuan, timeUtil } from "../../sy-tomato-plugin/src/libs/utils";
+import { cleanDiv, get_siyuan_lnk_md, getContenteditableElement, NewNodeID, replaceAll, set_href, siyuan, timeUtil } from "../../sy-tomato-plugin/src/libs/utils";
 import { getHPathByDocID, getTraceDoc } from "./helper";
 import { getBookID } from "../../sy-tomato-plugin/src/libs/progressive";
 import { digestProgressiveBox } from "./DigestProgressiveBox";
@@ -186,7 +186,9 @@ export async function digest(anchorID: string, docID: string, boxID: string, all
             for (const s of "\n。！!？?；;:：") ps = spliyBy(ps, s);
             ps = spliyBy(ps, ". ");
             ps = spliyBy(ps, "……");
-            ps.forEach(p => md.push(`${p}\n${attrLine}`));
+            ps.map(p => replaceAll(p, "\u200b", ""))
+                .filter(p => p.trim() != "*")
+                .forEach(p => md.push(`${p}\n${attrLine}`));
         } else {
             md.push(m);
         }
