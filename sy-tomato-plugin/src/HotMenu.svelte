@@ -217,7 +217,7 @@
 
     async function copyText() {
         const text = getAllText();
-        await navigator.clipboard.writeText(text.trim());
+        await navigator.clipboard.writeText(quotationMark(text.trim()));
         destroy();
     }
 
