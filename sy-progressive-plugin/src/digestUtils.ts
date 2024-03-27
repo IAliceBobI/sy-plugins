@@ -170,7 +170,7 @@ export async function digest(anchorID: string, docID: string, boxID: string, all
         if (!idx) idx = inBookIdx;
 
         const cloned = div.cloneNode(true) as HTMLDivElement;
-        changeBG(div);
+        if (digestProgressiveBox.settings.markOriginText) changeBG(div);
         await cleanDiv(cloned, true, true, false);
         cloned.setAttribute(RefIDKey, originID);
         cloned.setAttribute(IN_BOOK_INDEX, inBookIdx);
@@ -213,7 +213,7 @@ export async function digest(anchorID: string, docID: string, boxID: string, all
         },
     });
     await setDigestCard(bookID, digestID);
-    addPlusLnk(selected, digestID, digestProgressiveBox.lute);
+    if (digestProgressiveBox.settings.markOriginText) addPlusLnk(selected, digestID, digestProgressiveBox.lute);
 }
 
 async function addPlusLnk(selected: HTMLElement[], digestID: string, lute: Lute) {

@@ -1,6 +1,7 @@
 // https://app.quicktype.io/?l=ts
 
 type SettingCfgType = {
+    markOriginText: boolean;
     hideBtnsInFlashCard: boolean;
     cardUnderPiece: boolean;
     openCardsOnOpenPiece: boolean,

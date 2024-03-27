@@ -233,12 +233,14 @@ class FlashBox {
         await siyuan.addRiffCards([cardID]);
         await siyuan.pushMsg("⚡🗃" + markdown.split("(")[0], 1234);
 
-        const { div } = await utils.getBlockDiv(lastSelectedID);
-        const edit = utils.getContenteditableElement(div);
-        if (edit) {
-            const span = edit.appendChild(document.createElement("span")) as HTMLElement;
-            set_href(span, cardID, "&");
-            await siyuan.safeUpdateBlock(lastSelectedID, this.lute.BlockDOM2Md(div.outerHTML));
+        if (this.settings.markOriginText) {
+            const { div } = await utils.getBlockDiv(lastSelectedID);
+            const edit = utils.getContenteditableElement(div);
+            if (edit) {
+                const span = edit.appendChild(document.createElement("span")) as HTMLElement;
+                set_href(span, cardID, "&");
+                await siyuan.safeUpdateBlock(lastSelectedID, this.lute.BlockDOM2Md(div.outerHTML));
+            }
         }
         if (t == CardType.E) {
             await siyuan.insertBlockAfter(`{{ select * from blocks where id="${cardID}" }}`, lastSelectedID);
@@ -284,12 +286,12 @@ class FlashBox {
         for (const div of multiLine) {
             div.classList.remove(gconst.PROTYLE_WYSIWYG_SELECT);
             const [id, elem, hasRef] = await this.cloneDiv(div as any, setRef);
-            (div as HTMLElement).style.backgroundColor = "var(--b3-font-background7)";
+            if (this.settings.markOriginText) (div as HTMLElement).style.backgroundColor = "var(--b3-font-background7)";
             if (hasRef) setRef = false;
             ids.push(id);
             divs.push(elem);
         }
-        changeBGofseletedElement(ids);
+        if (this.settings.markOriginText) changeBGofseletedElement(ids);
         return { divs, ids };
     }
 
@@ -321,7 +323,7 @@ class FlashBox {
         } else {
             const [id, div] = await this.cloneDiv(dom as HTMLDivElement, !noRef);
             tmpDiv = div;
-            changeBGofseletedElement([id]);
+            if (this.settings.markOriginText) changeBGofseletedElement([id]);
         }
         await this.insertCard(protyle, [tmpDiv], cardType, blockID, path);
     }

@@ -38,6 +38,7 @@ export default class ThePlugin extends Plugin {
 
         if (!this.settingCfg) this.settingCfg = {} as SettingCfgType;
 
+        if (this.settingCfg.markOriginText == undefined) this.settingCfg.markOriginText = false;
         if (this.settingCfg.hideBtnsInFlashCard == undefined) this.settingCfg.hideBtnsInFlashCard = false;
         if (this.settingCfg.openCardsOnOpenPiece == undefined) this.settingCfg.openCardsOnOpenPiece = false;
         if (this.settingCfg.cardUnderPiece == undefined) this.settingCfg.cardUnderPiece = false;
@@ -70,6 +71,7 @@ export default class ThePlugin extends Plugin {
         this.addSettingItem("hideBtnsInFlashCard", "* 在闪卡内复习整个分片时，隐藏分片下方按钮", false, "");
         this.addSettingItem("openCardsOnOpenPiece", "* 打开分片的同时打开cards文档", false, "'cards-'前缀文件: 每本书用于保存闪卡的文件");
         this.addSettingItem("cardUnderPiece", "* 分片内制卡，放于分片的子文档内", false, "");
+        this.addSettingItem("markOriginText", "* 制卡、摘抄在原文处做标记", false, "");
 
         this.addSettingItem("btnViewContents", "* 打开目录", true, "🗂");
         this.addSettingItem("btnPrevious", "* 上一个分片", true, "⬅");
