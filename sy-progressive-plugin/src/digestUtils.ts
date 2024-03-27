@@ -182,7 +182,7 @@ export async function digest(anchorID: string, docID: string, boxID: string, all
         if (split) {
             const parts = m.trim().split("\n");
             const attrLine = parts.pop();
-            let ps = [cloned.textContent];
+            let ps = [cloned.textContent.replace(/(@\*)/g, "")];
             for (const s of "\n。！!？?；;:：") ps = spliyBy(ps, s);
             ps = spliyBy(ps, ". ");
             ps = spliyBy(ps, "……");
