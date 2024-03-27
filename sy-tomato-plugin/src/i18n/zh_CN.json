@@ -53,5 +53,6 @@
   "baiduAI": "选中内容发给文心一言4",
   "addTODOBookmark": "添加一个🚩书签",
   "deleteAllTODOBookmarks": "删除所有🚩书签",
+  "txt2ref": "空格隔开的所有内容都转为引用（忽略##后的内容)",
   "gotoBookmark": "跳到当前文档的书签位置"
 }

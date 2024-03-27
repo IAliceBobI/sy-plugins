@@ -8,6 +8,7 @@ import { STORAGE_SETTINGS } from "./constants";
 import { EventType, events } from "./libs/Events";
 import { DATA_NODE_ID, TOMATO_LINE_THROUGH } from "./libs/gconst";
 import { addTodoBookmark, rmTodoBookmark } from "./libs/bookmark";
+import { item2ref } from "./libs/docUtils";
 
 class HotMenuBox {
     public plugin: Plugin;
@@ -78,6 +79,15 @@ class HotMenuBox {
             editorCallback: async (protyle: IProtyle) => {
                 const { docID } = await events.selectedDivs(protyle);
                 await rmTodoBookmark(docID);
+            },
+        });
+        this.plugin.addCommand({
+            langKey: "txt2ref",
+            hotkey: "F3",
+            editorCallback: async (protyle: IProtyle) => {
+                const boxID = protyle.notebookId;
+                const { selected } = await events.selectedDivs(protyle);
+                await item2ref(boxID, selected, false);
             },
         });
         this.plugin.eventBus.on("open-menu-content", async ({ detail }) => {
