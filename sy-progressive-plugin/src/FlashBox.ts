@@ -205,8 +205,13 @@ class FlashBox {
             const attr = {};
             attr[`custom-dailycard-${v}`] = v;
             const targetDocID = await utils.siyuanCache.createDocWithMdIfNotExists(5000, boxID, path, "", attr);
-            await siyuan.insertBlockAsChildOf(`\n{: id="${utils.NewNodeID()}"}\n${markdown}`, targetDocID);
-            openTab({ app: this.plugin.app, doc: { id: targetDocID }, position: "right" });
+            await siyuan.appendBlock(`\n{: id="${utils.NewNodeID()}"}\n${markdown}`, targetDocID);
+            openTab({
+                app: this.plugin.app, doc: {
+                    id: cardID, zoomIn: false,
+                    action: ["cb-get-hl", "cb-get-context", "cb-get-focus", "cb-get-all", "cb-get-scroll"],
+                }, position: "right"
+            });
         } else {
             let hpath = "";
             if (bookID && !this.settings.cardUnderPiece) {
@@ -217,8 +222,13 @@ class FlashBox {
             }
             if (!hpath) return;
             const targetDocID = await getCardsDoc(bookID, boxID, hpath);
-            await siyuan.insertBlockAsChildOf(`{: id="${utils.NewNodeID()}"}\n${markdown}`, targetDocID);
-            openTab({ app: this.plugin.app, doc: { id: targetDocID }, position: "right" });
+            await siyuan.appendBlock(`{: id="${utils.NewNodeID()}"}\n${markdown}`, targetDocID);
+            openTab({
+                app: this.plugin.app, doc: {
+                    id: cardID, zoomIn: false,
+                    action: ["cb-get-hl", "cb-get-context", "cb-get-focus", "cb-get-all", "cb-get-scroll"],
+                }, position: "right"
+            });
         }
         await siyuan.addRiffCards([cardID]);
         await siyuan.pushMsg("⚡🗃" + markdown.split("(")[0], 1234);
