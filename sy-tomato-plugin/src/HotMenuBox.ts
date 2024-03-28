@@ -86,8 +86,8 @@ class HotMenuBox {
             hotkey: "F3",
             editorCallback: async (protyle: IProtyle) => {
                 const boxID = protyle.notebookId;
-                const { selected } = await events.selectedDivs(protyle);
-                await item2ref(boxID, selected, false);
+                const { selected, rangeText } = await events.selectedDivs(protyle);
+                await item2ref(boxID, selected, rangeText, false);
             },
         });
         this.plugin.eventBus.on("open-menu-content", async ({ detail }) => {

@@ -85,7 +85,7 @@ export async function createRefDoc(notebookId: string, name: string, add2card = 
     return id;
 }
 
-export async function item2ref(boxID: string, elements: HTMLElement[], add2card = false) {
+export async function item2ref(boxID: string, elements: HTMLElement[], rangeText: string, add2card = false) {
     const ops = [];
     for (const e of elements) {
         const id = e?.getAttribute(DATA_NODE_ID);
@@ -95,29 +95,49 @@ export async function item2ref(boxID: string, elements: HTMLElement[], add2card 
         let i = 0;
         for (const t of nodes) {
             if (t.nodeType != 3) continue;  // text node
-            const parts = t.textContent.split(/##/g, 2);
-            let inserted = false;
-            for (const item of parts[0].split(/[ 　]/g)) {
-                if (!item) continue;
-                const span = document.createElement("span") as HTMLElement;
-                span.setAttribute(DATA_TYPE, BLOCK_REF);
-                span.setAttribute(DATA_SUBTYPE, "d");
-                const newDocID = await createRefDoc(boxID, item, add2card);
-                span.setAttribute(DATA_ID, newDocID);
-                span.textContent = item;
-                if (i++ > 0) t.parentElement.insertBefore(document.createTextNode(" "), t);
-                t.parentElement.insertBefore(span, t);
-                inserted = true;
-            }
-            if (inserted) {
-                if (parts.length > 1) {
-                    let txt = parts.slice(1).join("").trim();
-                    if (txt) {
-                        txt = "## " + txt;
-                        t.parentElement.insertBefore(document.createTextNode(txt), t);
+            if (rangeText) {
+                const parts = t.textContent.split(new RegExp(rangeText, "g"));
+                for (let i = 0; i < parts.length; i++) {
+                    if (i == parts.length - 1) {
+                        t.parentElement.insertBefore(document.createTextNode(parts[i]), t);
+                        break;
                     }
+
+                    const span = document.createElement("span") as HTMLElement;
+                    span.setAttribute(DATA_TYPE, BLOCK_REF);
+                    span.setAttribute(DATA_SUBTYPE, "d");
+                    const newDocID = await createRefDoc(boxID, rangeText, add2card);
+                    span.setAttribute(DATA_ID, newDocID);
+                    span.textContent = rangeText;
+                    t.parentElement.insertBefore(document.createTextNode(parts[i]), t);
+                    t.parentElement.insertBefore(span, t);
                 }
                 t.parentNode.removeChild(t);
+            } else {
+                const parts = t.textContent.split(/##/g, 2);
+                let inserted = false;
+                for (const item of parts[0].split(/[ 　]/g)) {
+                    if (!item) continue;
+                    const span = document.createElement("span") as HTMLElement;
+                    span.setAttribute(DATA_TYPE, BLOCK_REF);
+                    span.setAttribute(DATA_SUBTYPE, "d");
+                    const newDocID = await createRefDoc(boxID, item, add2card);
+                    span.setAttribute(DATA_ID, newDocID);
+                    span.textContent = item;
+                    if (i++ > 0) t.parentElement.insertBefore(document.createTextNode(" "), t);
+                    t.parentElement.insertBefore(span, t);
+                    inserted = true;
+                }
+                if (inserted) {
+                    if (parts.length > 1) {
+                        let txt = parts.slice(1).join("").trim();
+                        if (txt) {
+                            txt = "## " + txt;
+                            t.parentElement.insertBefore(document.createTextNode(txt), t);
+                        }
+                    }
+                    t.parentNode.removeChild(t);
+                }
             }
         }
         ops.push(...siyuan.transUpdateBlocks([{ id, domStr: e.outerHTML }]));

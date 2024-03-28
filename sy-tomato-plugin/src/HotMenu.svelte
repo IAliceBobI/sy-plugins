@@ -661,7 +661,12 @@ ${text}
                         class="b3-button"
                         on:click={async () => {
                             const boxID = protyle.notebookId;
-                            await item2ref(boxID, selected, false);
+                            await item2ref(
+                                boxID,
+                                selected,
+                                selectedText,
+                                false,
+                            );
                             destroy();
                         }}>✨</button
                     >
@@ -671,7 +676,12 @@ ${text}
                         class="b3-button"
                         on:click={async () => {
                             const boxID = protyle.notebookId;
-                            await item2ref(boxID, selected, false);
+                            await item2ref(
+                                boxID,
+                                selected,
+                                selectedText,
+                                false,
+                            );
                             setTimeout(async () => {
                                 for (const div of selected)
                                     await linkBox.addLink(div, docID, docName);
