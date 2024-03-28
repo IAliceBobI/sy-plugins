@@ -213,6 +213,7 @@ export async function digest(anchorID: string, docID: string, boxID: string, all
             zoomIn: false,
             action: ["cb-get-hl", "cb-get-context"],
         },
+        position: "right",
     });
     await setDigestCard(bookID, digestID);
     if (digestProgressiveBox.settings.markOriginText) addPlusLnk(selected, digestID, digestProgressiveBox.lute);
