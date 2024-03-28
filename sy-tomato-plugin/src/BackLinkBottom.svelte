@@ -210,7 +210,7 @@
         });
     }
 
-    function refConceptClick(event: Event, txt: string) {
+    function refConceptClick(event: Event, txt: string, id: string) {
         if (event instanceof PointerEvent) {
             if (event.ctrlKey || event.altKey || event.shiftKey) {
                 //
@@ -224,11 +224,20 @@
                     searchText = "!" + txt;
                 }
             } else if (event.altKey) {
-                if (searchText) {
-                    searchText += "|" + txt;
-                } else {
-                    searchText = txt;
-                }
+                // if (searchText) {
+                //     searchText += "|" + txt;
+                // } else {
+                //     searchText = txt;
+                // }
+                openTab({
+                    app: maker.plugin.app,
+                    doc: {
+                        id,
+                        zoomIn: false,
+                        action: ["cb-get-hl", "cb-get-context"],
+                    },
+                });
+                return;
             } else if (event.ctrlKey) {
                 if (searchText) {
                     searchText += "  " + txt;
@@ -291,10 +300,10 @@
     {#each linkItems as { text, id, count, attrs } (id)}
         <label {...attrs} class="b3-label b3-label__text b3-label--noborder">
             <button
-                title="点击(单选), ctrl点击(并且), shift点击(排除), alt点击(或者)"
+                title="点击(单选), ctrl点击(并且), shift点击(排除), alt点击(打开链接)"
                 {...attrs}
                 class="bk_label b3-label__text"
-                on:click={(event) => refConceptClick(event, text)}
+                on:click={(event) => refConceptClick(event, text, id)}
                 >{text}</button
             >
             <span class="bk_ref_count">{count}</span>
