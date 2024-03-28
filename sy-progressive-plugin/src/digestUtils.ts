@@ -42,9 +42,11 @@ async function setDigestCard(bookID: string, digestID: string) {
         await siyuan.removeRiffCards(cards.map(card => card.id));
     }
     await siyuan.addRiffCards([digestID]);
-    await siyuan.reviewRiffCardByBlockID(digestID, 2);
-    const due = timeUtil.getYYYYMMDDHHmmssPlus0(timeUtil.nowts());
-    await siyuan.batchSetRiffCardsDueTimeByBlockID([{ id: digestID, due }]);
+    setTimeout(async () => {
+        await siyuan.reviewRiffCardByBlockID(digestID, 2);
+        const due = timeUtil.getYYYYMMDDHHmmssPlus0(timeUtil.nowts());
+        await siyuan.batchSetRiffCardsDueTimeByBlockID([{ id: digestID, due }]);
+    }, 3000);
 }
 
 export async function getDigestLnk(digestID: string, boxID: string, plugin: Plugin) {
