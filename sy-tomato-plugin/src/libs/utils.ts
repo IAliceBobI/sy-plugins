@@ -886,7 +886,7 @@ export const siyuan = {
     async getTreeRiffCards(id: string, page: number): Promise<GetCardRet> {
         return siyuan.call("/api/riff/getTreeRiffCards", { id, page });
     },
-    async addRiffCards(blockIDs: Array<string>, deckID = "20230218211946-2kw8jgx") {
+    async addRiffCards(blockIDs: Array<string>, deckID = "20230218211946-2kw8jgx"): Promise<AddRiffCards> {
         return siyuan.call("/api/riff/addRiffCards", { blockIDs, deckID });
     },
     async skipReviewRiffCard(cardID: string, deckID = "20230218211946-2kw8jgx") {

@@ -291,3 +291,12 @@ type RetListDocsByPathFile = {
     dueFlashcardCount: number;
     flashcardCount: number;
 }
+
+type AddRiffCards = {
+    created: string;
+    id: string;
+    name: string;
+    size: number;
+    updated: string;
+}
+
