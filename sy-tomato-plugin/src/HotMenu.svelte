@@ -657,7 +657,7 @@ ${text}
                 </td>
                 <td
                     ><button
-                        title="空格隔开的所有内容都转为引用（忽略##后的内容)"
+                        title="F3: 空格隔开的所有内容都转为引用（忽略##后的内容)"
                         class="b3-button"
                         on:click={async () => {
                             const boxID = protyle.notebookId;
